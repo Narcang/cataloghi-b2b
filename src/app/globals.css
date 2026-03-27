@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -125,5 +126,449 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+/* ============================================================
+   LADIVA DESIGN SYSTEM
+   ============================================================ */
+
+:root {
+  --ladiva-navy: #0f1623;
+  --ladiva-navy-mid: #1a2540;
+  --ladiva-navy-light: #243253;
+  --ladiva-gold: #c9a96e;
+  --ladiva-gold-light: #e2c99a;
+  --ladiva-cream: #f5f0e8;
+  --ladiva-text: #d4cfc6;
+  --ladiva-muted: #8892a4;
+  --ladiva-border: rgba(201, 169, 110, 0.2);
+  --ladiva-font-display: 'Georgia', 'Times New Roman', serif;
+  --section-padding: 6rem 1.5rem;
+}
+
+/* ROOT WRAPPER */
+.ladiva-root {
+  min-height: 100vh;
+  background-color: var(--ladiva-navy);
+  color: var(--ladiva-text);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* ---- HEADER ---- */
+.ladiva-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(15, 22, 35, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--ladiva-border);
+}
+.ladiva-header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0.85rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.ladiva-logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.ladiva-nav-desktop {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+@media (max-width: 768px) {
+  .ladiva-nav-desktop { display: none; }
+}
+
+/* Dropdown */
+.ladiva-dropdown { position: relative; }
+.ladiva-dropdown-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: none;
+  border: 1px solid var(--ladiva-border);
+  color: var(--ladiva-text);
+  padding: 0.45rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: all 0.2s;
+}
+.ladiva-dropdown-trigger:hover {
+  border-color: var(--ladiva-gold);
+  color: var(--ladiva-gold-light);
+}
+.ladiva-chevron {
+  transition: transform 0.25s ease;
+}
+.ladiva-chevron.open { transform: rotate(180deg); }
+.ladiva-dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.6rem);
+  min-width: 210px;
+  background: var(--ladiva-navy-mid);
+  border: 1px solid var(--ladiva-border);
+  border-radius: 0.75rem;
+  padding: 0.5rem;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  animation: fadeSlideIn 0.18s ease;
+}
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.ladiva-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--ladiva-text);
+  text-decoration: none;
+  transition: all 0.15s;
+}
+.ladiva-dropdown-item:hover {
+  background: var(--ladiva-navy-light);
+  color: var(--ladiva-gold-light);
+}
+.ladiva-dropdown-item.accent {
+  color: var(--ladiva-gold);
+  font-weight: 500;
+}
+.ladiva-dropdown-item.accent:hover {
+  background: rgba(201, 169, 110, 0.12);
+}
+.ladiva-dropdown-divider {
+  height: 1px;
+  background: var(--ladiva-border);
+  margin: 0.4rem 0;
+}
+
+/* Hamburger (mobile) */
+.ladiva-hamburger {
+  display: none;
+  background: none;
+  border: 1px solid var(--ladiva-border);
+  border-radius: 0.5rem;
+  color: var(--ladiva-text);
+  padding: 0.4rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.ladiva-hamburger:hover { border-color: var(--ladiva-gold); color: var(--ladiva-gold); }
+@media (max-width: 768px) { .ladiva-hamburger { display: flex; } }
+
+.ladiva-mobile-menu {
+  background: var(--ladiva-navy-mid);
+  border-top: 1px solid var(--ladiva-border);
+  padding: 0.75rem 1rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.ladiva-mobile-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  color: var(--ladiva-text);
+  text-decoration: none;
+  transition: all 0.15s;
+}
+.ladiva-mobile-item:hover { background: var(--ladiva-navy-light); color: var(--ladiva-gold-light); }
+.ladiva-mobile-item.accent { color: var(--ladiva-gold); }
+
+/* ---- HERO ---- */
+.ladiva-hero {
+  position: relative;
+  min-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: 
+    linear-gradient(
+      160deg,
+      rgba(15, 22, 35, 0.7) 0%,
+      rgba(26, 37, 64, 0.5) 50%,
+      rgba(15, 22, 35, 0.85) 100%
+    ),
+    url('/hero-bg.jpg') center/cover no-repeat;
+  background-color: var(--ladiva-navy-mid);
+  padding: 6rem 1.5rem;
+  overflow: hidden;
+}
+/* Decorative geometric overlay */
+.ladiva-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 60px,
+      rgba(201, 169, 110, 0.03) 60px,
+      rgba(201, 169, 110, 0.03) 61px
+    );
+  pointer-events: none;
+}
+.ladiva-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(201,169,110,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+.ladiva-hero-content {
+  position: relative;
+  text-align: center;
+  max-width: 760px;
+}
+.ladiva-hero-eyebrow {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--ladiva-gold);
+  margin-bottom: 1.25rem;
+}
+.ladiva-hero-title {
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: clamp(3rem, 8vw, 6.5rem);
+  font-weight: 500;
+  line-height: 1.05;
+  color: #fff;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.01em;
+}
+.ladiva-hero-subtitle {
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  color: var(--ladiva-text);
+  font-weight: 300;
+  line-height: 1.7;
+  margin-bottom: 2.5rem;
+  max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.ladiva-hero-btn {
+  display: inline-block;
+  padding: 0.85rem 2.2rem;
+  border: 1px solid var(--ladiva-gold);
+  color: var(--ladiva-gold-light);
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: all 0.25s;
+}
+.ladiva-hero-btn:hover {
+  background: var(--ladiva-gold);
+  color: var(--ladiva-navy);
+}
+
+/* ---- SECTIONS ---- */
+.ladiva-section {
+  padding: var(--section-padding);
+  background: var(--ladiva-navy);
+}
+.ladiva-section.alt {
+  background: var(--ladiva-navy-mid);
+}
+.ladiva-section-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+}
+.ladiva-label {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ladiva-gold);
+  margin-bottom: 0.75rem;
+}
+.ladiva-section-title {
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 500;
+  color: #fff;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.01em;
+}
+.ladiva-section-subtitle {
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ladiva-muted);
+  margin-bottom: 2.5rem;
+}
+.ladiva-prose {
+  margin-top: 2rem;
+  text-align: left;
+  max-width: 780px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.ladiva-prose p {
+  font-size: 1rem;
+  line-height: 1.85;
+  color: var(--ladiva-text);
+  margin-bottom: 1.25rem;
+}
+
+/* Decorative divider after title */
+.ladiva-section-title::after {
+  content: '';
+  display: block;
+  width: 3rem;
+  height: 1px;
+  background: var(--ladiva-gold);
+  margin: 1.25rem auto 0;
+}
+
+/* ---- COLLECTIONS GRID ---- */
+.ladiva-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2.5rem;
+  text-align: center;
+}
+.ladiva-card-collection {
+  background: var(--ladiva-navy-mid);
+  border: 1px solid var(--ladiva-border);
+  border-radius: 1rem;
+  padding: 2rem 1.5rem;
+  transition: all 0.25s;
+}
+.ladiva-card-collection:hover {
+  border-color: var(--ladiva-gold);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+}
+.ladiva-card-icon {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.5rem;
+  font-weight: 500;
+  color: var(--ladiva-gold);
+  margin-bottom: 1rem;
+  line-height: 1;
+}
+.ladiva-card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 0.75rem;
+}
+.ladiva-card-text {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--ladiva-muted);
+}
+.ladiva-gres-note {
+  margin-top: 2.5rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--ladiva-border);
+  border-radius: 0.75rem;
+  background: rgba(201, 169, 110, 0.05);
+}
+.ladiva-gres-note p {
+  font-size: 0.9rem;
+  color: var(--ladiva-muted);
+  line-height: 1.7;
+  font-style: italic;
+}
+
+/* ---- CONTACT SECTION ---- */
+.ladiva-contact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2.5rem;
+}
+.ladiva-contact-card {
+  background: var(--ladiva-navy);
+  border: 1px solid var(--ladiva-border);
+  border-radius: 1rem;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  transition: all 0.25s;
+}
+.ladiva-contact-card:hover {
+  border-color: var(--ladiva-gold);
+  transform: translateY(-3px);
+}
+.ladiva-contact-icon {
+  color: var(--ladiva-gold);
+  margin: 0 auto 1rem;
+  display: block;
+}
+.ladiva-contact-card h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+.ladiva-contact-card p {
+  font-size: 0.875rem;
+  color: var(--ladiva-muted);
+  line-height: 1.6;
+}
+.ladiva-map-placeholder {
+  margin-top: 2.5rem;
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid var(--ladiva-border);
+}
+
+/* ---- FOOTER ---- */
+.ladiva-footer {
+  background: var(--ladiva-navy);
+  border-top: 1px solid var(--ladiva-border);
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: center;
+}
+.ladiva-footer p {
+  font-size: 0.85rem;
+  color: var(--ladiva-muted);
+}
+.ladiva-footer-link {
+  font-size: 0.875rem;
+  color: var(--ladiva-gold);
+  text-decoration: none;
+  transition: color 0.2s;
+  letter-spacing: 0.04em;
+}
+.ladiva-footer-link:hover { color: var(--ladiva-gold-light); }
+
+@media (min-width: 640px) {
+  .ladiva-footer {
+    flex-direction: row;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
   }
 }
