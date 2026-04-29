@@ -34,22 +34,22 @@ export default async function LoginPage(props: { searchParams: Promise<{ message
               <Input id="password" name="password" type="password" required />
             </div>
 
-            <div className="text-sm text-zinc-700 text-center">
-              <Link href="/recupero-password" className="underline hover:no-underline">
-                Hai dimenticato la password?
-              </Link>
-            </div>
-
             {searchParams?.message && (
               <div className="text-sm text-red-500 font-medium mt-2 text-center">
                 {searchParams.message}
               </div>
             )}
           </CardContent>
-          <CardFooter>
+          <CardFooter className="flex flex-col gap-2">
             <Button className="w-full bg-[#060d41] text-white hover:bg-[#0a155a]" type="submit">
               Accedi al Portale
             </Button>
+            <Link
+              href="/recupero-password"
+              className="w-full h-8 inline-flex items-center justify-center rounded-lg border border-[#060d41] text-sm font-medium text-[#060d41] hover:bg-[#060d41]/5 transition-colors"
+            >
+              Recupera password
+            </Link>
           </CardFooter>
         </form>
       </Card>
