@@ -18,6 +18,7 @@ export default function ResetPasswordPage() {
   const [sessionError, setSessionError] = useState<string | null>(null)
 
   const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [isUpdating, setIsUpdating] = useState(false)
   const [updateError, setUpdateError] = useState<string | null>(null)
 
@@ -90,6 +91,19 @@ export default function ResetPasswordPage() {
     e.preventDefault()
     if (!newPassword) return
 
+    if (status !== 'ready') {
+      setUpdateError("Per aggiornare la password, apri il link di recupero ricevuto via email.")
+      return
+    }
+    if (newPassword !== confirmPassword) {
+      setUpdateError('Le password non coincidono. Controlla e riprova.')
+      return
+    }
+    if (newPassword.length < 6) {
+      setUpdateError('La password deve contenere almeno 6 caratteri.')
+      return
+    }
+
     setIsUpdating(true)
     setUpdateError(null)
 
@@ -134,7 +148,7 @@ export default function ResetPasswordPage() {
 
           {status === 'loading' && <div className="text-sm text-zinc-600 text-center">Caricamento...</div>}
 
-          {status === 'ready' && (
+          {status !== 'loading' && (
             <form onSubmit={onSubmit} className="grid gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="newPassword">Nuova password</Label>
@@ -149,13 +163,32 @@ export default function ResetPasswordPage() {
                 />
               </div>
 
+              <div className="grid gap-2">
+                <Label htmlFor="confirmPassword">Conferma password</Label>
+                <Input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  minLength={6}
+                  required
+                />
+              </div>
+
+              {status !== 'ready' && (
+                <div className="text-xs text-zinc-600">
+                  Inserisci la nuova password e usa il link corretto ricevuto via email per completare il recupero.
+                </div>
+              )}
+
               {updateError && <div className="text-sm text-red-500 font-medium">{updateError}</div>}
 
               <CardFooter className="p-0">
                 <Button
                   className="w-full bg-[#060d41] text-white hover:bg-[#0a155a]"
                   type="submit"
-                  disabled={isUpdating}
+                  disabled={isUpdating || status !== 'ready'}
                 >
                   {isUpdating ? 'Aggiornamento...' : 'Aggiorna password'}
                 </Button>
