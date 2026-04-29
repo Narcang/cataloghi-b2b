@@ -31,10 +31,19 @@ export default function ResetPasswordPage() {
       const currentUrl = new URL(window.location.href)
       const query = currentUrl.searchParams
       const hash = new URLSearchParams(currentUrl.hash.startsWith('#') ? currentUrl.hash.slice(1) : '')
+      const type = query.get('type') ?? hash.get('type')
+      const tokenHash = query.get('token_hash') ?? hash.get('token_hash')
 
-      const code = query.get('code')
-      if (code) {
-        const { error } = await supabase.auth.exchangeCodeForSession(code)
+      const accessToken = query.get('access_token') ?? hash.get('access_token')
+      const refreshToken = query.get('refresh_token') ?? hash.get('refresh_token')
+
+      // Flusso classico: Supabase invia access_token + refresh_token.
+      if (accessToken && refreshToken) {
+        const { error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        })
+
         if (cancelled) return
         if (error) {
           setStatus('error')
@@ -47,29 +56,27 @@ export default function ResetPasswordPage() {
         return
       }
 
-      const accessToken = query.get('access_token') ?? hash.get('access_token')
-      const refreshToken = query.get('refresh_token') ?? hash.get('refresh_token')
+      // Flusso alternativo: Supabase invia token_hash + type=recovery.
+      if (tokenHash && type === 'recovery') {
+        const { error } = await supabase.auth.verifyOtp({
+          token_hash: tokenHash,
+          type: 'recovery',
+        })
 
-      if (!accessToken || !refreshToken) {
         if (cancelled) return
-        setStatus('invalid')
+        if (error) {
+          setStatus('error')
+          setSessionError(error.message)
+          return
+        }
+
+        setStatus('ready')
+        window.history.replaceState({}, '', '/reset-password')
         return
       }
-
-      const { error } = await supabase.auth.setSession({
-        access_token: accessToken,
-        refresh_token: refreshToken,
-      })
 
       if (cancelled) return
-      if (error) {
-        setStatus('error')
-        setSessionError(error.message)
-        return
-      }
-
-      setStatus('ready')
-      window.history.replaceState({}, '', '/reset-password')
+      setStatus('invalid')
     }
 
     void bootstrapRecoverySession()
