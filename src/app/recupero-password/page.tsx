@@ -1,17 +1,38 @@
+ 'use client'
+
 import Link from 'next/link'
-import { recuperoPassword } from './actions'
+import { FormEvent, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { createClient } from '@/utils/supabase/client'
 
-export default async function RecuperoPasswordPage(props: { searchParams: Promise<{ message?: string }> }) {
-  const searchParams = await props.searchParams
+export default function RecuperoPasswordPage() {
+  const supabase = useMemo(() => createClient(), [])
+  const [email, setEmail] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [message, setMessage] = useState<string | null>(null)
+
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    const trimmedEmail = email.trim()
+    if (!trimmedEmail) return
+
+    setIsSubmitting(true)
+    setMessage(null)
+
+    const redirectTo = `${window.location.origin}/reset-password`
+    await supabase.auth.resetPasswordForEmail(trimmedEmail, { redirectTo })
+
+    setIsSubmitting(false)
+    setMessage(`Ti abbiamo inviato un'email di recupero password all'indirizzo ${trimmedEmail}.`)
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4 bg-[#fafafa]">
       <Card className="w-full max-w-sm border border-black bg-white shadow-sm">
-        <form action={recuperoPassword}>
+        <form onSubmit={onSubmit}>
           <CardHeader>
             <CardTitle className="text-2xl text-zinc-900">Recupero password</CardTitle>
             <CardDescription className="text-zinc-600">
@@ -27,20 +48,26 @@ export default async function RecuperoPasswordPage(props: { searchParams: Promis
                 name="email"
                 type="email"
                 placeholder="nome.cognome@azienda.it"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
 
-            {searchParams?.message && (
+            {message && (
               <div className="text-sm text-zinc-700 font-medium mt-2 text-center">
-                {searchParams.message}
+                {message}
               </div>
             )}
           </CardContent>
 
           <CardFooter className="flex flex-col gap-2">
-            <Button className="w-full bg-[#060d41] text-white hover:bg-[#0a155a]" type="submit">
-              Invia link per recupero
+            <Button
+              className="w-full bg-[#060d41] text-white hover:bg-[#0a155a]"
+              type="submit"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Invio in corso...' : 'Invia link per recupero'}
             </Button>
 
             <Link href="/login" className="text-sm text-zinc-700 hover:underline text-center">

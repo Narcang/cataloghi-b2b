@@ -32,11 +32,28 @@ export default function ResetPasswordPage() {
       const currentUrl = new URL(window.location.href)
       const query = currentUrl.searchParams
       const hash = new URLSearchParams(currentUrl.hash.startsWith('#') ? currentUrl.hash.slice(1) : '')
+      const code = query.get('code')
       const type = query.get('type') ?? hash.get('type')
       const tokenHash = query.get('token_hash') ?? hash.get('token_hash')
 
       const accessToken = query.get('access_token') ?? hash.get('access_token')
       const refreshToken = query.get('refresh_token') ?? hash.get('refresh_token')
+
+      // Flusso PKCE: il code verifier viene salvato nel browser
+      // quando la richiesta di reset parte lato client.
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code)
+        if (cancelled) return
+        if (error) {
+          setStatus('error')
+          setSessionError(error.message)
+          return
+        }
+
+        setStatus('ready')
+        window.history.replaceState({}, '', '/reset-password')
+        return
+      }
 
       // Flusso classico: Supabase invia access_token + refresh_token.
       if (accessToken && refreshToken) {
@@ -77,7 +94,15 @@ export default function ResetPasswordPage() {
       }
 
       if (cancelled) return
-      setStatus('invalid')
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (cancelled) return
+      if (user) {
+        setStatus('ready')
+      } else {
+        setStatus('invalid')
+      }
     }
 
     void bootstrapRecoverySession()
