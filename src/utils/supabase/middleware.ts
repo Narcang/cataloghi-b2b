@@ -27,11 +27,21 @@ export async function updateSession(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Pagine pubbliche accessibili senza login
-  const publicPaths = ['/', '/login', '/auth']
-  const isPublic = publicPaths.some(p =>
-    request.nextUrl.pathname === p || request.nextUrl.pathname.startsWith(p + '/')
-  )
+  // Pagine pubbliche (free / ospite senza password): home, dove siamo, login, auth, dashboard ridotta, PDF cataloghi attivi
+  const publicPaths = [
+    '/',
+    '/dove-siamo',
+    '/login',
+    '/auth',
+    '/recupero-password',
+    '/reset-password',
+    '/dashboard',
+    '/cataloghi',
+  ]
+  const isPublic = publicPaths.some((p) => {
+    const path = request.nextUrl.pathname
+    return path === p || path.startsWith(`${p}/`)
+  })
 
   // Se l'utente non è loggato e vuole accedere a una pagina protetta, rimanda al login
   if (!user && !isPublic) {
