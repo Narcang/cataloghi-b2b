@@ -11,11 +11,12 @@ export async function POST(req: NextRequest) {
   } = await supabase.auth.getUser()
 
   if (user) {
-    await supabase.auth.signOut()
+    await supabase.auth.signOut({ scope: 'global' })
   }
 
   revalidatePath('/', 'layout')
-  return NextResponse.redirect(new URL('/login', req.url), {
+  // Dopo logout l'utente torna alla vista pubblica (come ospite / free), non al login
+  return NextResponse.redirect(new URL('/dashboard', req.url), {
     status: 302,
   })
 }

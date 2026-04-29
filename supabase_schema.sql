@@ -9,7 +9,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- 2. Tabella Profili
 CREATE TABLE public.profili (
   id UUID REFERENCES auth.users NOT NULL PRIMARY KEY,
-  ruolo TEXT NOT NULL CHECK (ruolo IN ('admin', 'agente', 'fornitore')),
+  ruolo TEXT NOT NULL CHECK (ruolo IN ('admin', 'agente', 'fornitore', 'distributore', 'free')),
   nome_completo TEXT,
   telefono TEXT,
   email TEXT,
@@ -25,8 +25,10 @@ ALTER TABLE public.profili ENABLE ROW LEVEL SECURITY;
 CREATE TABLE public.cataloghi (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   titolo TEXT NOT NULL,
+  categoria TEXT NOT NULL CHECK (categoria IN ('Family 15', 'Family 20', 'Family Gres', 'Capsule Collection', 'Bricks', 'Metal')),
   url_file TEXT NOT NULL,
-  area_geografica_target TEXT,
+  url_immagine TEXT,
+  area_geografica_target TEXT[] NOT NULL DEFAULT '{}',
   stato_pubblicazione TEXT DEFAULT 'bozza' CHECK (stato_pubblicazione IN ('bozza', 'attivo')),
   creato_il TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
@@ -66,13 +68,15 @@ CREATE POLICY "Admin ha accesso totale ai cataloghi" ON public.cataloghi
     EXISTS (SELECT 1 FROM public.profili WHERE id = auth.uid() AND ruolo = 'admin') 
   );
   
--- 2) Agente vede SOLO cataloghi 'attivi' ED esattamente della sua area geografica target
-CREATE POLICY "Gli agenti vedono solo i cataloghi attivi della loro area" ON public.cataloghi
+-- 2) Agenti, Distributori e Free vedono SOLO cataloghi 'attivi' ED esattamente della loro area geografica target
+CREATE POLICY "RLS Cataloghi per Agenti, Distributori e Free" ON public.cataloghi
   FOR SELECT USING (
     stato_pubblicazione = 'attivo' AND 
     EXISTS (
       SELECT 1 FROM public.profili 
-      WHERE id = auth.uid() AND ruolo = 'agente' AND area_geografica = cataloghi.area_geografica_target
+      WHERE id = auth.uid() 
+      AND ruolo IN ('agente', 'distributore', 'free')
+      AND area_geografica = ANY(cataloghi.area_geografica_target)
     )
   );
 

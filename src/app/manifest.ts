@@ -1,20 +1,48 @@
 import { MetadataRoute } from 'next'
 
+const siteBase = process.env.NEXT_PUBLIC_APP_URL
+
 export default function manifest(): MetadataRoute.Manifest {
+  const startUrl = '/'
+
   return {
-    name: 'Cataloghi B2B Hub',
-    short_name: 'Cataloghi B2B',
-    description: 'Applicazione ottimizzata per tablet di consultazione cataloghi B2B per la Rete Vendita',
-    start_url: '/',
+    // Id stabile quando c’è il dominio (aggiornamenti PWA)
+    ...(siteBase ? { id: new URL(startUrl, siteBase).href } : {}),
+    name: 'Ladiva Ceramica — Catalogo',
+    short_name: 'Ladiva',
+    description:
+      'Cataloghi ceramica Ladiva: consultazione da telefono e tablet per la rete vendita. Apri a schermo intero dopo installazione.',
+    lang: 'it',
+    start_url: startUrl,
+    scope: '/',
+    /**
+     * standalone: niente barra indirizzi, come un’app nativa
+     * (a differenza di “browser” che mantiene il chrome del browser)
+     */
     display: 'standalone',
+    display_override: ['standalone', 'minimal-ui', 'browser'],
     background_color: '#ffffff',
-    theme_color: '#000000',
-    orientation: 'portrait-primary',
+    theme_color: '#060d41',
+    orientation: 'any',
+    categories: ['business', 'design'],
     icons: [
       {
-        src: '/favicon.ico',
-        sizes: 'any',
-        type: 'image/x-icon',
+        src: '/icon',
+        sizes: '512x512',
+        type: 'image/png',
+        purpose: 'any',
+      },
+      {
+        src: '/icon',
+        sizes: '512x512',
+        type: 'image/png',
+        purpose: 'maskable',
+      },
+      {
+        src: '/apple-icon',
+        sizes: '180x180',
+        type: 'image/png',
+        purpose: 'any',
       },
     ],
   }
