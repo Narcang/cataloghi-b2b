@@ -14,11 +14,7 @@ export default function ResetPasswordPage() {
   const router = useRouter()
 
   const supabase = useMemo(() => createClient(), [])
-
-  const [accessToken, setAccessToken] = useState<string | null>(null)
-  const [refreshToken, setRefreshToken] = useState<string | null>(null)
-
-  const [isSettingSession, setIsSettingSession] = useState(true)
+  const [status, setStatus] = useState<'loading' | 'ready' | 'invalid' | 'error'>('loading')
   const [sessionError, setSessionError] = useState<string | null>(null)
 
   const [newPassword, setNewPassword] = useState('')
@@ -26,45 +22,62 @@ export default function ResetPasswordPage() {
   const [updateError, setUpdateError] = useState<string | null>(null)
 
   useEffect(() => {
-    // Leggiamo i token dalla query string lato client.
-    // (Evita l’uso di `useSearchParams()` che in Next 16 richiede Suspense.)
-    const params = new URLSearchParams(window.location.search)
-    setAccessToken(params.get('access_token'))
-    setRefreshToken(params.get('refresh_token'))
-  }, [])
-
-  useEffect(() => {
-    if (!accessToken || !refreshToken) {
-      setIsSettingSession(false)
-      setSessionError(null)
-      return
-    }
-
-    const accessTokenNonNull = accessToken
-    const refreshTokenNonNull = refreshToken
-
     let cancelled = false
 
-    async function run() {
-      setIsSettingSession(true)
+    async function bootstrapRecoverySession() {
+      setStatus('loading')
       setSessionError(null)
 
+      const currentUrl = new URL(window.location.href)
+      const query = currentUrl.searchParams
+      const hash = new URLSearchParams(currentUrl.hash.startsWith('#') ? currentUrl.hash.slice(1) : '')
+
+      const code = query.get('code')
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code)
+        if (cancelled) return
+        if (error) {
+          setStatus('error')
+          setSessionError(error.message)
+          return
+        }
+
+        setStatus('ready')
+        window.history.replaceState({}, '', '/reset-password')
+        return
+      }
+
+      const accessToken = query.get('access_token') ?? hash.get('access_token')
+      const refreshToken = query.get('refresh_token') ?? hash.get('refresh_token')
+
+      if (!accessToken || !refreshToken) {
+        if (cancelled) return
+        setStatus('invalid')
+        return
+      }
+
       const { error } = await supabase.auth.setSession({
-        access_token: accessTokenNonNull,
-        refresh_token: refreshTokenNonNull,
+        access_token: accessToken,
+        refresh_token: refreshToken,
       })
 
       if (cancelled) return
-      setIsSettingSession(false)
-      setSessionError(error?.message ?? null)
+      if (error) {
+        setStatus('error')
+        setSessionError(error.message)
+        return
+      }
+
+      setStatus('ready')
+      window.history.replaceState({}, '', '/reset-password')
     }
 
-    void run()
+    void bootstrapRecoverySession()
 
     return () => {
       cancelled = true
     }
-  }, [accessToken, refreshToken, supabase])
+  }, [supabase])
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
@@ -87,8 +100,6 @@ export default function ResetPasswordPage() {
     router.push('/login?message=Password aggiornata con successo. Accedi al portale.')
   }
 
-  const hasTokens = Boolean(accessToken && refreshToken)
-
   return (
     <div className="flex min-h-screen items-center justify-center p-4 bg-[#fafafa]">
       <Card className="w-full max-w-sm border border-black bg-white shadow-sm">
@@ -100,7 +111,7 @@ export default function ResetPasswordPage() {
         </CardHeader>
 
         <CardContent className="grid gap-4">
-          {!hasTokens && (
+          {status === 'invalid' && (
             <div className="text-sm text-zinc-700 text-center">
               Link di recupero non valido o mancante.{' '}
               <Link href="/recupero-password" className="underline">
@@ -110,13 +121,13 @@ export default function ResetPasswordPage() {
             </div>
           )}
 
-          {hasTokens && sessionError && (
+          {status === 'error' && sessionError && (
             <div className="text-sm text-red-500 font-medium text-center">{sessionError}</div>
           )}
 
-          {hasTokens && isSettingSession && <div className="text-sm text-zinc-600 text-center">Caricamento...</div>}
+          {status === 'loading' && <div className="text-sm text-zinc-600 text-center">Caricamento...</div>}
 
-          {hasTokens && !isSettingSession && !sessionError && (
+          {status === 'ready' && (
             <form onSubmit={onSubmit} className="grid gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="newPassword">Nuova password</Label>

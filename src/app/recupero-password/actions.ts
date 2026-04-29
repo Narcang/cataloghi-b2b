@@ -15,11 +15,10 @@ export async function recuperoPassword(formData: FormData) {
   const supabase = await createClient()
 
   // Cast veloce: in prod userei Zod per validare input.
-  const email = formData.get('email') as string | null
-
-  // Non riveliamo se l’email esiste o meno (evita enumeration).
-  const message =
-    'Controlla la tua email: se l’account esiste, riceverai un link per reimpostare la password.'
+  const email = (formData.get('email') as string | null)?.trim() ?? ''
+  const message = email
+    ? `Ti abbiamo inviato un'email di recupero password all'indirizzo ${email}.`
+    : "Ti abbiamo inviato un'email di recupero password al tuo indirizzo email."
 
   if (!email) {
     redirect(`/recupero-password?message=${encodeURIComponent(message)}`)
