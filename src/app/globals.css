@@ -168,6 +168,42 @@
   color: var(--ladiva-home-ink);
 }
 
+/* Dashboard cataloghi - variante scura richiesta */
+.ladiva-root.ladiva-root-app-dark {
+  background-color: #000;
+  color: #fafafa;
+}
+
+.ladiva-root-app-dark .ladiva-label,
+.ladiva-root-app-dark h1,
+.ladiva-root-app-dark h2,
+.ladiva-root-app-dark h3,
+.ladiva-root-app-dark p,
+.ladiva-root-app-dark span,
+.ladiva-root-app-dark label {
+  color: #fafafa !important;
+}
+
+.ladiva-root-app-dark .border-black,
+.ladiva-root-app-dark .border-black\/20,
+.ladiva-root-app-dark .border-black\/25,
+.ladiva-root-app-dark .border-black\/50 {
+  border-color: rgba(255, 255, 255, 0.22) !important;
+}
+
+.ladiva-root-app-dark .bg-white,
+.ladiva-root-app-dark .bg-zinc-50,
+.ladiva-root-app-dark .bg-zinc-100 {
+  background-color: #111 !important;
+}
+
+.ladiva-root-app-dark .text-zinc-900,
+.ladiva-root-app-dark .text-zinc-800,
+.ladiva-root-app-dark .text-zinc-700,
+.ladiva-root-app-dark .text-zinc-600 {
+  color: #fafafa !important;
+}
+
 /* Titoli categorie catalogo home — Misu non in bundle; Bodoni Moda come serif temporanea */
 .ladiva-catalog-caption {
   font-family: var(--font-ladiva-catalog-caption), 'Cormorant Garamond', Georgia, 'Times New Roman', serif;

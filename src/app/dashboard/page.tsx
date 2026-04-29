@@ -210,7 +210,7 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
   const contattiDiretti = [...contattiAziendali, ...contattiDiRete]
 
   return (
-    <div className="ladiva-root ladiva-root-app-light min-h-screen flex flex-col">
+    <div className="ladiva-root ladiva-root-app-dark min-h-screen flex flex-col">
       <Header />
       <DashboardHashScroll />
 
