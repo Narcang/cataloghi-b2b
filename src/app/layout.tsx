@@ -1,23 +1,27 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Bodoni_Moda } from "next/font/google";
+import localFont from "next/font/local";
 import PwaInstallBanner from "@/components/PwaInstallBanner";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-/** Sostituto temporaneo per Misu (titoli catalogo home): serif alta moda */
-const ladivaCatalogCaption = Bodoni_Moda({
-  variable: "--font-ladiva-catalog-caption",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
+const miso = localFont({
+  src: [
+    {
+      path: "../../public/fonts/miso-light.otf",
+      weight: "300",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/miso.otf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/miso-bold.otf",
+      weight: "700",
+      style: "normal",
+    },
+  ],
+  variable: "--font-sans",
   display: "swap",
 });
 
@@ -52,9 +56,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="it">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} ${ladivaCatalogCaption.variable} antialiased`}
-      >
+      <body className={`${miso.variable} antialiased`}>
         {children}
         <PwaInstallBanner />
       </body>
