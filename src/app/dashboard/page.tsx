@@ -402,8 +402,8 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
         {/* SEZIONE CATALOGHI */}
         <section id="cataloghi">
           <div className="flex items-center justify-between mb-8 border-b border-black pb-4">
-            <h2 className="text-2xl font-serif tracking-tight text-zinc-900 flex items-center gap-3">
-              <FileText className="text-[#060d41]" /> I Tuoi Cataloghi
+            <h2 className="text-3xl md:text-4xl font-sans tracking-tight text-zinc-100 flex items-center gap-3">
+              <FileText className="text-black" /> I Tuoi Cataloghi
             </h2>
           </div>
           
@@ -595,8 +595,8 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
         {isManager && (
           <section id="operatori-admin">
             <div className="flex items-center justify-between mb-8 border-b border-black pb-4">
-              <h2 className="text-2xl font-serif tracking-tight text-zinc-900 flex items-center gap-3">
-                <Users className="text-[#060d41]" /> Operatori Abilitati (Agenti e Distributori)
+              <h2 className="text-3xl md:text-4xl font-sans tracking-tight text-zinc-100 flex items-center gap-3">
+                <Users className="text-black" /> Operatori Abilitati (Agenti e Distributori)
               </h2>
             </div>
 
@@ -649,8 +649,8 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
         {isPartner && (
           <section id="agenti-zona">
             <div className="flex items-center justify-between mb-8 border-b border-black pb-4">
-              <h2 className="text-2xl font-serif tracking-tight text-zinc-900 flex items-center gap-3">
-                <Users className="text-[#060d41]" /> Agenti nella Tua Area ({profilo?.area_geografica})
+              <h2 className="text-3xl md:text-4xl font-sans tracking-tight text-zinc-100 flex items-center gap-3">
+                <Users className="text-black" /> Agenti nella Tua Area ({profilo?.area_geografica})
               </h2>
             </div>
             

@@ -319,6 +319,12 @@
   color: #222;
 }
 
+/* In dashboard dark, keep white-strip footer text black */
+.ladiva-root-app-dark .ladiva-footer.ladiva-footer-home-strip p,
+.ladiva-root-app-dark .ladiva-footer.ladiva-footer-home-strip .ladiva-footer-link {
+  color: #000 !important;
+}
+
 /* Home: contatti + mappa + footer allineati al catalogo (max 1200px, padding 1.5rem come header) */
 .ladiva-section.ladiva-section-catalog-wide {
   padding-left: 0;
