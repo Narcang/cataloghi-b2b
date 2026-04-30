@@ -420,13 +420,13 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
                     className="scroll-mt-32 space-y-4"
                   >
                     <div className="flex items-center gap-3">
-                      <h3 className="text-2xl md:text-3xl text-zinc-100 font-semibold tracking-wide">{categoria}</h3>
+                      <h3 className="text-3xl md:text-4xl text-zinc-100 font-semibold tracking-wide">{categoria}</h3>
                       <span className="text-xs rounded-full border border-black px-2 py-0.5 text-zinc-600">
                         {items.length} catalogh{items.length === 1 ? 'o' : 'i'}
                       </span>
                     </div>
                     {items.length === 0 ? (
-                      <p className="text-sm text-zinc-600 py-2">
+                      <p className="text-lg text-zinc-500 py-2">
                         Nessun catalogo in questa categoria.
                       </p>
                     ) : (
@@ -705,7 +705,7 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
               </h2>
             </div>
             <div className="border border-black rounded-2xl bg-white p-6">
-              <p className="text-sm text-zinc-600">
+              <p className="text-lg text-zinc-500">
                 Sezione scontistiche agente attiva. In questa fase i valori commerciali vengono gestiti dal Manager: contatta il tuo referente per il listino aggiornato.
               </p>
             </div>
@@ -733,7 +733,7 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center p-10 text-center border rounded-2xl border-black bg-white">
-                <p className="text-sm text-zinc-600">Nessun partner geolocalizzato trovato per la tua area.</p>
+                <p className="text-lg text-zinc-500">Nessun partner geolocalizzato trovato per la tua area.</p>
               </div>
             )}
           </section>
@@ -788,7 +788,7 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center p-10 text-center border rounded-2xl border-black bg-white">
-                <p className="text-sm text-zinc-600">
+                <p className="text-lg text-zinc-500">
                   Non hai ancora nessun contatto diretto assegnato in rubrica.
                 </p>
               </div>
