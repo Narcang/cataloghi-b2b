@@ -61,7 +61,7 @@ export default function Header() {
       <div className="ladiva-header-inner">
         {/* Logo */}
         <Link href="/" className="ladiva-logo">
-          <Image src="/logo.png" alt="Ladiva Ceramica" width={140} height={50} style={{ objectFit: 'contain', filter: 'invert(1) brightness(2)' }} />
+          <Image src="/logo.png" alt="Ladiva Ceramica" width={140} height={50} style={{ objectFit: 'contain', filter: 'brightness(0)' }} />
         </Link>
 
         {/* Desktop Nav */}
