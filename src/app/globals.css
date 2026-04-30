@@ -301,22 +301,22 @@
 
 /* Striscia copyright home */
 .ladiva-footer.ladiva-footer-home-strip {
-  background: var(--ladiva-home-ink);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: #fff;
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
 }
 
 .ladiva-footer.ladiva-footer-home-strip p {
-  color: var(--ladiva-home-surface);
+  color: #000;
 }
 
 .ladiva-footer.ladiva-footer-home-strip .ladiva-footer-link {
-  color: var(--ladiva-home-surface);
+  color: #000;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
 .ladiva-footer.ladiva-footer-home-strip .ladiva-footer-link:hover {
-  color: #fff;
+  color: #222;
 }
 
 /* Home: contatti + mappa + footer allineati al catalogo (max 1200px, padding 1.5rem come header) */

@@ -420,7 +420,7 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
                     className="scroll-mt-32 space-y-4"
                   >
                     <div className="flex items-center gap-3">
-                      <h3 className="text-xl text-zinc-900 font-semibold tracking-wide">{categoria}</h3>
+                      <h3 className="text-2xl md:text-3xl text-zinc-100 font-semibold tracking-wide">{categoria}</h3>
                       <span className="text-xs rounded-full border border-black px-2 py-0.5 text-zinc-600">
                         {items.length} catalogh{items.length === 1 ? 'o' : 'i'}
                       </span>
@@ -433,8 +433,8 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                       {items.map((catalogo) => (
                         <div key={catalogo.id} className="space-y-3">
-                  <Link prefetch={false} href={`/cataloghi/${catalogo.id}`} className="group block focus:outline-none focus:ring-2 focus:ring-[#060d41] rounded-2xl">
-                    <div className="bg-white border border-black rounded-2xl overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-[#060d41] hover:shadow-[0_12px_40px_rgba(6,13,65,0.1)] flex flex-col h-full">
+                  <Link prefetch={false} href={`/cataloghi/${catalogo.id}`} className="group block focus:outline-none focus:ring-2 focus:ring-[#060d41] rounded-none">
+                    <div className="bg-white border border-black rounded-none overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-[#060d41] hover:shadow-[0_12px_40px_rgba(6,13,65,0.1)] flex flex-col h-full">
                       
                       {/* Anteprima copertina: formato A4 verticale (ISO 210×297) */}
                       <div className="relative w-full aspect-[210/297] bg-zinc-100 overflow-hidden">
@@ -456,7 +456,7 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
                       
                       {/* Dati Catalogo */}
                       <div className="p-5 flex-1 flex flex-col">
-                        <h3 className="text-xl text-zinc-900 font-medium uppercase tracking-wide leading-tight mb-1">
+                        <h3 className="text-2xl text-zinc-900 font-medium uppercase tracking-wide leading-tight mb-1">
                           {catalogo.titolo}
                         </h3>
                         <div className="mb-2">
@@ -468,12 +468,12 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
                           </span>
                         </div>
                         {/* Sottotitolo finto o basato su un campo DB (al momento usiamo l'area geografica o un placeholder stile screenshot) */}
-                        <p className="text-zinc-600 text-sm mb-4">
+                        <p className="text-zinc-600 text-base mb-4">
                           {(catalogo.categoria as string | null) || 'Senza categoria'} / {Array.isArray(catalogo.area_geografica_target) ? catalogo.area_geografica_target.join(', ') : catalogo.area_geografica_target || 'Globale'}
                         </p>
                         
                         <div className="mt-auto pt-4 border-t border-black/50">
-                          <span className="text-xs text-[#060d41] font-medium tracking-wider uppercase group-hover:opacity-100 transition-opacity">Sfoglia Catalogo →</span>
+                          <span className="text-sm text-[#060d41] font-medium tracking-wider uppercase group-hover:opacity-100 transition-opacity">Sfoglia Catalogo →</span>
                         </div>
                       </div>
 
@@ -700,8 +700,8 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
         {isAgente && (
           <section id="scontistiche">
             <div className="flex items-center justify-between mb-8 border-b border-black pb-4">
-              <h2 className="text-2xl font-serif tracking-tight text-zinc-900 flex items-center gap-3">
-                <FileText className="text-[#060d41]" /> Scontistiche
+              <h2 className="text-3xl md:text-4xl tracking-tight text-zinc-100 flex items-center gap-3 font-sans">
+                <FileText className="text-white" /> Scontistiche
               </h2>
             </div>
             <div className="border border-black rounded-2xl bg-white p-6">
@@ -715,8 +715,8 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
         {isAgente && (
           <section id="partner-zona">
             <div className="flex items-center justify-between mb-8 border-b border-black pb-4">
-              <h2 className="text-2xl font-serif tracking-tight text-zinc-900 flex items-center gap-3">
-                <Users className="text-[#060d41]" /> Partner nella Tua Area ({profilo?.area_geografica})
+              <h2 className="text-3xl md:text-4xl tracking-tight text-zinc-100 flex items-center gap-3 font-sans">
+                <Users className="text-white" /> Partner nella Tua Area ({profilo?.area_geografica})
               </h2>
             </div>
             {partnerZona.length > 0 ? (
@@ -742,8 +742,8 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
         {(isFree || ruoloCorrente !== 'free') && (
           <section id="contatti">
             <div className="flex items-center justify-between mb-8 border-b border-black pb-4">
-              <h2 className="text-2xl font-serif tracking-tight text-zinc-900 flex items-center gap-3">
-                <Phone className="text-[#060d41]" /> I Tuoi Contatti Diretti
+              <h2 className="text-3xl md:text-4xl tracking-tight text-zinc-100 flex items-center gap-3 font-sans">
+                <Phone className="text-white" /> I Tuoi Contatti Diretti
               </h2>
             </div>
             
@@ -768,7 +768,7 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
                       ) : fornitore.email ? (
                         <a
                           href={`mailto:${fornitore.email.trim()}`}
-                          className="flex-1 flex justify-center items-center gap-2 bg-[#060d41] text-white hover:bg-[#0a155a] py-2.5 px-4 rounded-lg text-sm font-semibold transition-colors"
+                          className="flex-1 flex justify-center items-center gap-2 border border-black bg-white text-black hover:bg-zinc-100 py-2.5 px-4 rounded-lg text-sm font-semibold transition-colors"
                         >
                           <Mail size={16} /> Scrivi
                         </a>
