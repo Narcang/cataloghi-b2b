@@ -473,7 +473,7 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
                         </p>
                         
                         <div className="mt-auto pt-4 border-t border-black/50">
-                          <span className="text-sm text-[#060d41] font-medium tracking-wider uppercase group-hover:opacity-100 transition-opacity">Sfoglia Catalogo →</span>
+                          <span className="text-sm text-white font-medium tracking-wider uppercase group-hover:opacity-100 transition-opacity">Sfoglia Catalogo →</span>
                         </div>
                       </div>
 
