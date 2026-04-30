@@ -403,7 +403,7 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
         <section id="cataloghi">
           <div className="flex items-center justify-between mb-8 border-b border-black pb-4">
             <h2 className="text-3xl md:text-4xl font-sans tracking-tight text-zinc-100 flex items-center gap-3">
-              <FileText className="text-black" /> I Tuoi Cataloghi
+              <FileText className="text-white" /> I Tuoi Cataloghi
             </h2>
           </div>
           
