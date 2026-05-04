@@ -30,6 +30,11 @@ export const metadata: Metadata = {
   description:
     "Ladiva Ceramica produce piastrelle artigianali italiane con decorazioni a rilievo, nate dalla tradizione di Carpineti (RE). Scopri le nostre collezioni.",
   applicationName: "Ladiva",
+  icons: {
+    icon: [{ url: "/icon.png", type: "image/png", sizes: "512x512" }],
+    shortcut: ["/icon.png"],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+  },
   appleWebApp: {
     capable: true,
     title: "Ladiva",
