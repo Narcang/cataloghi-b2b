@@ -305,7 +305,15 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
           ) : (
             <div className="space-y-10">
               {CATALOG_CATEGORIES.map((categoria) => {
-                const items = (cataloghi ?? []).filter((catalogo) => catalogo.categoria === categoria)
+                const items = (cataloghi ?? [])
+                  .filter((catalogo) => catalogo.categoria === categoria)
+                  .sort((a, b) => {
+                    const byTitle = (a.titolo ?? '').localeCompare(b.titolo ?? '', 'it', {
+                      sensitivity: 'base',
+                    })
+                    if (byTitle !== 0) return byTitle
+                    return a.id.localeCompare(b.id)
+                  })
                 return (
                   <section
                     key={categoria}
