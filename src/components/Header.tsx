@@ -64,70 +64,73 @@ export default function Header() {
           <Image src="/logo.png" alt="Ladiva Ceramica" width={140} height={50} style={{ objectFit: 'contain', filter: 'brightness(0)' }} />
         </Link>
 
-        {/* Desktop Nav */}
-        <nav className="ladiva-nav-desktop">
-          <div className="ladiva-dropdown" ref={dropdownRef}>
-            <button
-              className="ladiva-dropdown-trigger"
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-              aria-expanded={dropdownOpen}
-            >
-              Menu <ChevronDown size={16} className={`ladiva-chevron ${dropdownOpen ? 'open' : ''}`} />
-            </button>
-
-            {dropdownOpen && (
-              <div className="ladiva-dropdown-menu">
-                {menuItems.map((item) => (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    className="ladiva-dropdown-item"
-                    onClick={() => setDropdownOpen(false)}
-                  >
-                    <item.icon size={16} />
-                    {item.label}
-                  </Link>
-                ))}
-                <div className="ladiva-dropdown-divider" />
-                
-                {user ? (
-                  <>
-                    <Link href="/dashboard" className="ladiva-dropdown-item" onClick={() => setDropdownOpen(false)}>
-                      <LayoutDashboard size={16} />
-                      La tua Dashboard
-                    </Link>
-                    <form action="/auth/signout" method="post" className="m-0 p-0 block">
-                      <button type="submit" className="ladiva-dropdown-item w-full text-left text-[#060d41]">
-                        <LogOut size={16} />
-                        Esci dal Portale
-                      </button>
-                    </form>
-                  </>
-                ) : (
-                  <>
-                    <Link href="/login" className="ladiva-dropdown-item accent" onClick={() => setDropdownOpen(false)}>
-                      <LogIn size={16} />
-                      Accedi al Portale
-                    </Link>
-                    <Link href="/recupero-password" className="ladiva-dropdown-item" onClick={() => setDropdownOpen(false)}>
-                      <KeyRound size={16} />
-                      Recupera password
-                    </Link>
-                  </>
-                )}
-              </div>
+        <div className="ladiva-header-actions">
+          <div className="ladiva-header-auth">
+            {user ? (
+              <>
+                <Link href="/dashboard" className="ladiva-header-auth-link ladiva-header-auth-link--primary">
+                  <LayoutDashboard size={16} aria-hidden />
+                  Area Riservata
+                </Link>
+                <form action="/auth/signout" method="post" className="m-0 inline p-0">
+                  <button type="submit" className="ladiva-header-auth-signout">
+                    <LogOut size={16} aria-hidden />
+                    Esci
+                  </button>
+                </form>
+              </>
+            ) : (
+              <>
+                <Link href="/login" className="ladiva-header-auth-link ladiva-header-auth-link--primary">
+                  <LogIn size={16} aria-hidden />
+                  Accedi al Portale
+                </Link>
+                <Link href="/recupero-password" className="ladiva-header-auth-link ladiva-header-auth-link--muted">
+                  <KeyRound size={16} aria-hidden />
+                  Recupera password
+                </Link>
+              </>
             )}
           </div>
-        </nav>
 
-        {/* Mobile Hamburger */}
-        <button
-          className="ladiva-hamburger"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label="Toggle menu"
-        >
-          {mobileOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+          {/* Desktop Nav */}
+          <nav className="ladiva-nav-desktop">
+            <div className="ladiva-dropdown" ref={dropdownRef}>
+              <button
+                className="ladiva-dropdown-trigger"
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                aria-expanded={dropdownOpen}
+              >
+                Menu <ChevronDown size={16} className={`ladiva-chevron ${dropdownOpen ? 'open' : ''}`} />
+              </button>
+
+              {dropdownOpen && (
+                <div className="ladiva-dropdown-menu">
+                  {menuItems.map((item) => (
+                    <Link
+                      key={item.label}
+                      href={item.href}
+                      className="ladiva-dropdown-item"
+                      onClick={() => setDropdownOpen(false)}
+                    >
+                      <item.icon size={16} />
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          </nav>
+
+          {/* Mobile Hamburger */}
+          <button
+            className="ladiva-hamburger"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label="Toggle menu"
+          >
+            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Menu */}
@@ -144,33 +147,6 @@ export default function Header() {
               {item.label}
             </Link>
           ))}
-          <div className="ladiva-dropdown-divider" />
-          
-          {user ? (
-            <>
-              <Link href="/dashboard" className="ladiva-mobile-item" onClick={() => setMobileOpen(false)}>
-                <LayoutDashboard size={18} />
-                La tua Dashboard
-              </Link>
-              <form action="/auth/signout" method="post" className="m-0 p-0 block">
-                <button type="submit" className="ladiva-mobile-item w-full text-left text-[#060d41]">
-                  <LogOut size={18} />
-                  Esci dal Portale
-                </button>
-              </form>
-            </>
-          ) : (
-            <>
-              <Link href="/login" className="ladiva-mobile-item accent" onClick={() => setMobileOpen(false)}>
-                <LogIn size={18} />
-                Accedi al Portale
-              </Link>
-              <Link href="/recupero-password" className="ladiva-mobile-item" onClick={() => setMobileOpen(false)}>
-                <KeyRound size={18} />
-                Recupera password
-              </Link>
-            </>
-          )}
         </div>
       )}
     </header>
