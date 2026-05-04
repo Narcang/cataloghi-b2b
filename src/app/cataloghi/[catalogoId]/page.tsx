@@ -70,15 +70,15 @@ export default async function CatalogoDetail({ params }: { params: Promise<{ cat
 
   return (
     <div className="flex flex-col h-screen bg-white text-zinc-900">
-      <header className="flex items-center p-3 bg-[#060d41] border-b border-black/20 shadow-md z-10 text-[#fafafa]">
+      <header className="flex items-center p-3 bg-white border-b border-zinc-200 shadow-sm z-10 text-zinc-900">
         <Link href="/dashboard">
-          <Button variant="ghost" size="icon" className="mr-3 text-[#fafafa] hover:text-white hover:bg-white/10">
-            <ArrowLeft className="h-5 w-5 text-[#fafafa]" />
+          <Button variant="ghost" size="icon" className="mr-3 text-zinc-900 hover:text-zinc-950 hover:bg-zinc-100">
+            <ArrowLeft className="h-5 w-5 text-zinc-900" />
           </Button>
         </Link>
         <div className="flex-1 truncate">
-          <h1 className="text-base font-semibold truncate text-white">{catalogo.titolo}</h1>
-          <p className="text-xs text-white/70">Area: {catalogo.area_geografica_target}</p>
+          <h1 className="text-base font-semibold truncate text-zinc-900">{catalogo.titolo}</h1>
+          <p className="text-xs text-zinc-600">Area: {catalogo.area_geografica_target}</p>
         </div>
       </header>
       
