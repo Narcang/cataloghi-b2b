@@ -6,6 +6,7 @@ import { Phone, MessageCircle, FileText, Users, Mail } from 'lucide-react'
 import Header from '@/components/Header'
 import DashboardHashScroll from '@/components/DashboardHashScroll'
 import { CATALOG_CATEGORIES, categoryToDomId } from '@/lib/catalogCategories'
+import CreateCatalogForm from '@/components/admin/CreateCatalogForm'
 
 type Operatore = {
   id: string
@@ -254,115 +255,7 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
               </p>
             </div>
 
-            <form
-              action="/api/admin/cataloghi/create"
-              method="POST"
-              encType="multipart/form-data"
-              className="grid grid-cols-1 md:grid-cols-2 gap-4"
-            >
-              <div className="space-y-2">
-                <label htmlFor="titolo" className="block text-xs text-zinc-600 font-medium uppercase tracking-wide">
-                  Titolo Catalogo
-                </label>
-                <input
-                  id="titolo"
-                  name="titolo"
-                  type="text"
-                  required
-                  className="w-full h-10 rounded-md border border-black bg-zinc-50 px-3 text-sm text-zinc-900"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label htmlFor="categoria" className="block text-xs text-zinc-600 font-medium uppercase tracking-wide">
-                  Categoria
-                </label>
-                <select
-                  id="categoria"
-                  name="categoria"
-                  required
-                  defaultValue=""
-                  className="w-full h-10 rounded-md border border-black bg-zinc-50 px-3 text-sm text-zinc-900"
-                >
-                  <option value="" disabled>
-                    Seleziona categoria
-                  </option>
-                  {CATALOG_CATEGORIES.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label htmlFor="area_geografica_target" className="block text-xs text-zinc-600 font-medium uppercase tracking-wide">
-                  Area Geografica
-                </label>
-                <input
-                  id="area_geografica_target"
-                  name="area_geografica_target"
-                  type="text"
-                  required
-                  placeholder="Es. Emilia Romagna"
-                  className="w-full h-10 rounded-md border border-black bg-zinc-50 px-3 text-sm text-zinc-900 placeholder:text-zinc-400"
-                />
-                <p className="text-xs text-zinc-600">
-                  Puoi inserire piu aree separate da virgola (es. Liguria, Lazio oppure Italia, Francia).
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <label htmlFor="stato_pubblicazione" className="block text-xs text-zinc-600 font-medium uppercase tracking-wide">
-                  Stato
-                </label>
-                <select
-                  id="stato_pubblicazione"
-                  name="stato_pubblicazione"
-                  defaultValue="bozza"
-                  className="w-full h-10 rounded-md border border-black bg-zinc-50 px-3 text-sm text-zinc-900"
-                >
-                  <option value="bozza">Bozza</option>
-                  <option value="attivo">Attivo</option>
-                </select>
-              </div>
-
-              <div className="space-y-2 md:col-span-2">
-                <label htmlFor="file_pdf" className="block text-xs text-zinc-600 font-medium uppercase tracking-wide">
-                  File PDF
-                </label>
-                <input
-                  id="file_pdf"
-                  name="file_pdf"
-                  type="file"
-                  accept="application/pdf,.pdf"
-                  required
-                  className="ladiva-file-input w-full rounded-md border border-black bg-zinc-50 px-3 py-2 text-sm text-zinc-900 file:mr-3 file:rounded-md file:border-0 file:bg-[#060d41] file:px-3 file:py-1.5 file:text-white file:font-semibold hover:file:bg-[#0a155a]"
-                />
-              </div>
-
-              <div className="space-y-2 md:col-span-2">
-                <label htmlFor="file_copertina_nuovo" className="block text-xs text-zinc-600 font-medium uppercase tracking-wide">
-                  Copertina (immagine A4 verticale, opzionale) — 210×297 mm
-                </label>
-                <input
-                  id="file_copertina_nuovo"
-                  name="file_copertina"
-                  type="file"
-                  accept="image/*"
-                  className="ladiva-file-input w-full rounded-md border border-black bg-zinc-50 px-3 py-2 text-sm text-zinc-900 file:mr-3 file:rounded-md file:border-0 file:bg-[#060d41] file:px-3 file:py-1.5 file:text-white file:font-semibold hover:file:bg-[#0a155a]"
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <button
-                  type="submit"
-                  className="h-10 rounded-md bg-[#060d41] text-white px-5 text-sm font-semibold hover:bg-[#0a155a] transition-colors"
-                >
-                  Crea Catalogo
-                </button>
-              </div>
-            </form>
+            <CreateCatalogForm categories={CATALOG_CATEGORIES} />
           </section>
         )}
 
