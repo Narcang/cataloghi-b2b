@@ -5,9 +5,14 @@ const supabaseHostname = process.env.NEXT_PUBLIC_SUPABASE_URL
   : undefined
 
 const nextConfig: NextConfig = {
-  // Molti browser richiedono ancora /favicon.ico; senza file fisico serviamo il PNG dell’app.
-  async rewrites() {
-    return [{ source: "/favicon.ico", destination: "/icon.png" }]
+  // /favicon.ico è servito da public/favicon.ico (stesso asset di icon.png); header per ridurre cache stale in edge.
+  async headers() {
+    return [
+      {
+        source: "/favicon.ico",
+        headers: [{ key: "Cache-Control", value: "public, max-age=3600, must-revalidate" }],
+      },
+    ]
   },
   experimental: {
     serverActions: {
