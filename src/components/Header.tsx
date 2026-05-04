@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ChevronDown, Menu, X, BookOpen, Phone, MapPin, LogIn, LogOut, LayoutDashboard, KeyRound } from 'lucide-react'
+import { ChevronDown, Menu, X, BookOpen, Phone, MapPin, LogIn, LogOut, LayoutDashboard } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import { User } from '@supabase/supabase-js'
 
@@ -117,16 +117,10 @@ export default function Header() {
                 ) : null}
               </div>
             ) : (
-              <>
-                <Link href="/login" className="ladiva-header-auth-link ladiva-header-auth-link--primary">
-                  <LogIn size={16} aria-hidden />
-                  Accedi al Portale
-                </Link>
-                <Link href="/recupero-password" className="ladiva-header-auth-link ladiva-header-auth-link--muted">
-                  <KeyRound size={16} aria-hidden />
-                  Recupera password
-                </Link>
-              </>
+              <Link href="/login" className="ladiva-header-auth-link ladiva-header-auth-link--primary">
+                <LogIn size={16} aria-hidden />
+                Accedi al Portale
+              </Link>
             )}
           </div>
 
