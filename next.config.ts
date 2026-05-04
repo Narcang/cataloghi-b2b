@@ -1,16 +1,18 @@
 import type { NextConfig } from "next";
+import { SITE_ICON_SEARCH } from "./src/lib/siteIconVersion";
 
 const supabaseHostname = process.env.NEXT_PUBLIC_SUPABASE_URL
   ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
   : undefined
 
 const nextConfig: NextConfig = {
-  // /favicon.ico è servito da public/favicon.ico (stesso asset di icon.png); header per ridurre cache stale in edge.
-  async headers() {
+  // I browser chiedono /favicon.ico senza query: redirect a /icon.png?v=… (vedi src/lib/siteIconVersion.ts).
+  async redirects() {
     return [
       {
         source: "/favicon.ico",
-        headers: [{ key: "Cache-Control", value: "public, max-age=3600, must-revalidate" }],
+        destination: `/icon.png?${SITE_ICON_SEARCH}`,
+        permanent: false,
       },
     ]
   },

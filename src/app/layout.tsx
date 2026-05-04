@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import PwaInstallBanner from "@/components/PwaInstallBanner";
+import { SITE_ICON_SEARCH } from "@/lib/siteIconVersion";
 import "./globals.css";
 
 const miso = localFont({
@@ -31,9 +32,9 @@ export const metadata: Metadata = {
     "Ladiva Ceramica produce piastrelle artigianali italiane con decorazioni a rilievo, nate dalla tradizione di Carpineti (RE). Scopri le nostre collezioni.",
   applicationName: "Ladiva",
   icons: {
-    icon: [{ url: "/icon.png", type: "image/png", sizes: "512x512" }],
-    shortcut: ["/icon.png"],
-    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+    icon: [{ url: `/icon.png?${SITE_ICON_SEARCH}`, type: "image/png", sizes: "512x512" }],
+    shortcut: [`/icon.png?${SITE_ICON_SEARCH}`],
+    apple: [{ url: `/apple-icon.png?${SITE_ICON_SEARCH}`, sizes: "180x180", type: "image/png" }],
   },
   appleWebApp: {
     capable: true,

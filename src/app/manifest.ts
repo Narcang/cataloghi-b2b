@@ -1,6 +1,10 @@
 import { MetadataRoute } from 'next'
+import { SITE_ICON_SEARCH } from '@/lib/siteIconVersion'
 
 const siteBase = process.env.NEXT_PUBLIC_APP_URL
+
+const iconPng = `/icon.png?${SITE_ICON_SEARCH}`
+const applePng = `/apple-icon.png?${SITE_ICON_SEARCH}`
 
 export default function manifest(): MetadataRoute.Manifest {
   const startUrl = '/'
@@ -27,19 +31,19 @@ export default function manifest(): MetadataRoute.Manifest {
     categories: ['business', 'design'],
     icons: [
       {
-        src: '/icon.png',
+        src: iconPng,
         sizes: '512x512',
         type: 'image/png',
         purpose: 'any',
       },
       {
-        src: '/icon.png',
+        src: iconPng,
         sizes: '512x512',
         type: 'image/png',
         purpose: 'maskable',
       },
       {
-        src: '/apple-icon.png',
+        src: applePng,
         sizes: '180x180',
         type: 'image/png',
         purpose: 'any',
