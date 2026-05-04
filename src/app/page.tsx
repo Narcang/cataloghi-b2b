@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import Header from '@/components/Header'
-import { CATALOG_CATEGORIES, CATEGORY_TILE_IMAGE, categoryToDomId } from '@/lib/catalogCategories'
+import { CATALOG_CATEGORIES, CATEGORY_TILE_IMAGE, categoryToSlug } from '@/lib/catalogCategories'
 
 export default function LandingPage() {
   return (
@@ -15,7 +15,7 @@ export default function LandingPage() {
           {CATALOG_CATEGORIES.map((cat) => (
             <li key={cat}>
               <Link
-                href={`/dashboard#${categoryToDomId(cat)}`}
+                href={`/cataloghi/categoria/${categoryToSlug(cat)}`}
                 className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#060d41] focus-visible:ring-offset-2 rounded-sm"
               >
                 <div className="relative aspect-square overflow-hidden bg-neutral-100 shadow-sm">
