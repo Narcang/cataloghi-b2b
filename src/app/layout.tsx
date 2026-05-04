@@ -31,11 +31,6 @@ export const metadata: Metadata = {
   description:
     "Ladiva Ceramica produce piastrelle artigianali italiane con decorazioni a rilievo, nate dalla tradizione di Carpineti (RE). Scopri le nostre collezioni.",
   applicationName: "Ladiva",
-  icons: {
-    icon: [{ url: `/icon.png?${SITE_ICON_SEARCH}`, type: "image/png", sizes: "512x512" }],
-    shortcut: [`/icon.png?${SITE_ICON_SEARCH}`],
-    apple: [{ url: `/apple-icon.png?${SITE_ICON_SEARCH}`, sizes: "180x180", type: "image/png" }],
-  },
   appleWebApp: {
     capable: true,
     title: "Ladiva",
@@ -60,8 +55,18 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const iconHref = `/icon.png?${SITE_ICON_SEARCH}`
+  const appleHref = `/apple-icon.png?${SITE_ICON_SEARCH}`
+
   return (
     <html lang="it">
+      <head>
+        {/* Link espliciti: app/icon.png faceva iniettare anche /icon.png senza query (cache / favicon sbagliata). */}
+        <link rel="icon" href={iconHref} type="image/png" sizes="32x32" />
+        <link rel="icon" href={iconHref} type="image/png" sizes="512x512" />
+        <link rel="shortcut icon" href={iconHref} type="image/png" />
+        <link rel="apple-touch-icon" href={appleHref} sizes="180x180" />
+      </head>
       <body className={`${miso.variable} antialiased`}>
         {children}
         <PwaInstallBanner />
