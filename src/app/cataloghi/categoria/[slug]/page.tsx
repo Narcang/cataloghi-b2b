@@ -36,7 +36,7 @@ export default async function CataloghiPerCategoriaPage({ params }: { params: Pr
 
   if (error) {
     return (
-      <div className="flex min-h-screen flex-col bg-black text-zinc-100">
+      <div className="ladiva-categoria-vetrina flex min-h-screen flex-col bg-black text-zinc-100 antialiased">
         <Header />
         <main className="mx-auto w-full max-w-[1200px] flex-1 px-6 py-10">
           <p className="text-red-400">Errore nel caricamento dei cataloghi: {error.message}</p>
@@ -52,7 +52,7 @@ export default async function CataloghiPerCategoriaPage({ params }: { params: Pr
   })
 
   return (
-    <div className="flex min-h-screen flex-col bg-black text-zinc-100">
+    <div className="ladiva-categoria-vetrina flex min-h-screen flex-col bg-black text-zinc-100 antialiased">
       <Header />
 
       <main className="mx-auto w-full max-w-[1200px] flex-1 px-6 py-8 md:py-12">

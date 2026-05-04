@@ -237,6 +237,11 @@
   color: #fff;
 }
 
+/* Vetrina /cataloghi/categoria/[slug]: testi in Miso (--font-sans da layout) */
+.ladiva-categoria-vetrina {
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
 /* Blocco inferiore home: sfondo grigio chiaro (non blu navy) */
 .ladiva-root.ladiva-root--auto.ladiva-root-home-lower {
   background-color: var(--ladiva-home-surface);
