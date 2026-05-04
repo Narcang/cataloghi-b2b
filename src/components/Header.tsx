@@ -27,15 +27,21 @@ const menuItems = [
 
 export default function Header() {
   const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [user, setUser] = useState<User | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const accountMenuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     // Gestione click esterno
     function handleClickOutside(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+      const target = e.target as Node
+      if (dropdownRef.current && !dropdownRef.current.contains(target)) {
         setDropdownOpen(false)
+      }
+      if (accountMenuRef.current && !accountMenuRef.current.contains(target)) {
+        setAccountMenuOpen(false)
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
@@ -67,18 +73,49 @@ export default function Header() {
         <div className="ladiva-header-actions">
           <div className="ladiva-header-auth">
             {user ? (
-              <>
-                <Link href="/dashboard" className="ladiva-header-auth-link ladiva-header-auth-link--primary">
-                  <LayoutDashboard size={16} aria-hidden />
-                  Area Riservata
-                </Link>
-                <form action="/auth/signout" method="post" className="m-0 inline p-0">
-                  <button type="submit" className="ladiva-header-auth-signout">
-                    <LogOut size={16} aria-hidden />
-                    Esci
+              <div className="ladiva-account-menu" ref={accountMenuRef}>
+                <div className="ladiva-account-trigger-row">
+                  <Link
+                    href="/dashboard"
+                    className="ladiva-account-link-main"
+                    onClick={() => {
+                      setAccountMenuOpen(false)
+                      setDropdownOpen(false)
+                    }}
+                  >
+                    <LayoutDashboard size={16} aria-hidden />
+                    Area Riservata
+                  </Link>
+                  <button
+                    type="button"
+                    className="ladiva-account-chevron-btn"
+                    onClick={() => {
+                      setAccountMenuOpen(!accountMenuOpen)
+                      setDropdownOpen(false)
+                    }}
+                    aria-expanded={accountMenuOpen}
+                    aria-haspopup="menu"
+                    aria-controls="ladiva-account-menu-panel"
+                    aria-label="Apri menu per uscire"
+                  >
+                    <ChevronDown size={16} className={`ladiva-chevron ${accountMenuOpen ? 'open' : ''}`} />
                   </button>
-                </form>
-              </>
+                </div>
+                {accountMenuOpen ? (
+                  <div
+                    id="ladiva-account-menu-panel"
+                    className="ladiva-dropdown-menu ladiva-account-dropdown-panel"
+                    role="menu"
+                  >
+                    <form action="/auth/signout" method="post" className="m-0 block w-full p-0">
+                      <button type="submit" className="ladiva-dropdown-item w-full text-left text-[#060d41]" role="menuitem">
+                        <LogOut size={16} aria-hidden />
+                        Esci
+                      </button>
+                    </form>
+                  </div>
+                ) : null}
+              </div>
             ) : (
               <>
                 <Link href="/login" className="ladiva-header-auth-link ladiva-header-auth-link--primary">
@@ -98,7 +135,10 @@ export default function Header() {
             <div className="ladiva-dropdown" ref={dropdownRef}>
               <button
                 className="ladiva-dropdown-trigger"
-                onClick={() => setDropdownOpen(!dropdownOpen)}
+                onClick={() => {
+                  setDropdownOpen(!dropdownOpen)
+                  setAccountMenuOpen(false)
+                }}
                 aria-expanded={dropdownOpen}
               >
                 Menu <ChevronDown size={16} className={`ladiva-chevron ${dropdownOpen ? 'open' : ''}`} />

@@ -452,25 +452,58 @@
   text-decoration: underline;
   color: #000;
 }
-.ladiva-header-auth-signout {
+
+/* Area Riservata (link dashboard) + chevron → menu con Esci */
+.ladiva-account-menu {
+  position: relative;
+}
+.ladiva-account-trigger-row {
+  display: inline-flex;
+  align-items: stretch;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  background: #fff;
+  transition: border-color 0.2s;
+}
+.ladiva-account-trigger-row:hover {
+  border-color: #000;
+}
+.ladiva-account-link-main {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  cursor: pointer;
+  padding: 0.45rem 0.75rem;
   font-size: 0.875rem;
   font-weight: 500;
-  font-family: inherit;
-  border: 1px solid rgba(0, 0, 0, 0.35);
-  background: #fff;
+  letter-spacing: 0.04em;
   color: #000;
-  border-radius: 0.5rem;
-  padding: 0.4rem 0.75rem;
-  transition: background 0.15s, border-color 0.15s;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
 }
-.ladiva-header-auth-signout:hover {
-  border-color: #000;
+.ladiva-account-link-main:hover {
   background: rgba(6, 13, 65, 0.06);
   color: var(--ladiva-home-ink);
+}
+.ladiva-account-chevron-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.55rem;
+  border: none;
+  border-left: 1px solid rgba(0, 0, 0, 0.18);
+  background: transparent;
+  cursor: pointer;
+  color: #000;
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s;
+}
+.ladiva-account-chevron-btn:hover {
+  background: rgba(6, 13, 65, 0.06);
+  color: var(--ladiva-home-ink);
+}
+.ladiva-account-dropdown-panel {
+  min-width: 11rem;
 }
 
 .ladiva-nav-desktop {
