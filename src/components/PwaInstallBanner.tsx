@@ -68,7 +68,6 @@ export default function PwaInstallBanner() {
   if (!ready) return null
   if (isStandalone()) return null
   if (dismissed) return null
-  if (!deferred && !ios) return null
   if (ios) {
     return (
       <div
@@ -95,23 +94,25 @@ export default function PwaInstallBanner() {
     )
   }
 
-  if (!deferred) return null
-
   return (
     <div
       className="fixed bottom-0 left-0 right-0 z-[200] border-t border-white/10 bg-[#060d41] text-white p-3 shadow-[0_-4px_24px_rgba(0,0,0,0.2)]"
       style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom, 0px))' }}
     >
       <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-1">
-        <p className="text-sm">Installa l&apos;app su questo dispositivo: icona in home e apertura a schermo pieno.</p>
+        <p className="text-sm">
+          Installa l&apos;app su questo dispositivo: icona in home e apertura a schermo pieno.
+          {!deferred ? ' Se non compare il popup, usa il menu del browser e scegli "Installa app".' : ''}
+        </p>
         <div className="flex items-center gap-2 shrink-0">
           <button
             type="button"
             onClick={install}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-[#060d41] hover:bg-white/90"
+            disabled={!deferred}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-[#060d41] hover:bg-white/90 disabled:cursor-not-allowed disabled:bg-white/60"
           >
             <Download size={16} />
-            Installa
+            {deferred ? 'Installa' : 'Apri menu browser'}
           </button>
           <button
             type="button"
