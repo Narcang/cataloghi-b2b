@@ -3,7 +3,8 @@ import { SITE_ICON_SEARCH } from '@/lib/siteIconVersion'
 
 const siteBase = process.env.NEXT_PUBLIC_APP_URL
 
-const iconPng = `/icon.png?${SITE_ICON_SEARCH}`
+const icon192 = `/icon-192.png?${SITE_ICON_SEARCH}`
+const icon512 = `/icon-512.png?${SITE_ICON_SEARCH}`
 const applePng = `/apple-icon.png?${SITE_ICON_SEARCH}`
 
 export default function manifest(): MetadataRoute.Manifest {
@@ -31,13 +32,19 @@ export default function manifest(): MetadataRoute.Manifest {
     categories: ['business', 'design'],
     icons: [
       {
-        src: iconPng,
+        src: icon192,
+        sizes: '192x192',
+        type: 'image/png',
+        purpose: 'any',
+      },
+      {
+        src: icon512,
         sizes: '512x512',
         type: 'image/png',
         purpose: 'any',
       },
       {
-        src: iconPng,
+        src: icon512,
         sizes: '512x512',
         type: 'image/png',
         purpose: 'maskable',
