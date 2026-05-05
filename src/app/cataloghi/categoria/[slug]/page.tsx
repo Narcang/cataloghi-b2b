@@ -100,7 +100,7 @@ export default async function CataloghiPerCategoriaPage({ params }: { params: Pr
                         </div>
                       )}
                     </div>
-                    <div className="flex flex-1 items-center justify-center p-5">
+                    <div className="flex flex-1 items-center justify-center bg-zinc-100 p-5">
                       <h2 className="text-center text-xl font-medium uppercase leading-tight tracking-wide text-zinc-900 md:text-2xl">
                         {catalogo.titolo}
                       </h2>
