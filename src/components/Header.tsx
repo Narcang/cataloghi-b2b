@@ -195,7 +195,7 @@ export default function Header() {
             ) : (
               <Link href="/login" className="ladiva-header-auth-link ladiva-header-auth-link--primary">
                 <LogIn size={16} aria-hidden />
-                Accedi al Portale
+                Accedi
               </Link>
             )}
           </div>

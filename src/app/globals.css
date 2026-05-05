@@ -602,6 +602,26 @@
 }
 .ladiva-hamburger:hover { border-color: #000; color: #000; }
 @media (max-width: 768px) { .ladiva-hamburger { display: flex; } }
+@media (max-width: 768px) {
+  .ladiva-header-actions {
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+    align-items: center;
+  }
+  .ladiva-header-auth-link {
+    min-height: 40px;
+    padding: 0.35rem 0.7rem;
+    white-space: nowrap;
+  }
+  .ladiva-hamburger {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+}
 
 .ladiva-mobile-menu {
   background: #fff;
