@@ -58,11 +58,21 @@ export default function PwaInstallBanner() {
   }, [])
 
   const install = useCallback(async () => {
-    if (!deferred) return
-    await deferred.prompt()
-    await deferred.userChoice
-    setDeferred(null)
-    dismiss()
+    if (deferred) {
+      await deferred.prompt()
+      await deferred.userChoice
+      setDeferred(null)
+      dismiss()
+      return
+    }
+
+    const ua = window.navigator.userAgent
+    const isEdge = ua.includes('Edg/')
+    const isChrome = ua.includes('Chrome/') && !isEdge
+    const browserLabel = isEdge ? 'Edge' : isChrome ? 'Chrome' : 'il browser'
+    window.alert(
+      `Per installare da ${browserLabel}: apri il menu del browser (⋮) e scegli "Installa app" o "Aggiungi alla schermata Home".`
+    )
   }, [deferred, dismiss])
 
   if (!ready) return null
@@ -100,19 +110,15 @@ export default function PwaInstallBanner() {
       style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom, 0px))' }}
     >
       <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-1">
-        <p className="text-sm">
-          Installa l&apos;app su questo dispositivo: icona in home e apertura a schermo pieno.
-          {!deferred ? ' Se non compare il popup, usa il menu del browser e scegli "Installa app".' : ''}
-        </p>
+        <p className="text-sm">Installa l&apos;app su questo dispositivo.</p>
         <div className="flex items-center gap-2 shrink-0">
           <button
             type="button"
             onClick={install}
-            disabled={!deferred}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-[#060d41] hover:bg-white/90 disabled:cursor-not-allowed disabled:bg-white/60"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-[#060d41] hover:bg-white/90"
           >
             <Download size={16} />
-            {deferred ? 'Installa' : 'Apri menu browser'}
+            Installa
           </button>
           <button
             type="button"
