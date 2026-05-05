@@ -23,7 +23,15 @@ export default function PwaInstallBanner() {
 
   useEffect(() => {
     setReady(true)
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {
+        // ignore registration failures
+      })
+    }
+
     if (isStandalone()) return
+
     if (localStorage.getItem('ladiva_pwa_install_dismiss') === '1') {
       setDismissed(true)
     }
