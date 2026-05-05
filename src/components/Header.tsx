@@ -3,9 +3,14 @@
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ChevronDown, Menu, X, BookOpen, Phone, MapPin, LogIn, LogOut, LayoutDashboard } from 'lucide-react'
+import { ChevronDown, Menu, X, BookOpen, Phone, MapPin, LogIn, LogOut, LayoutDashboard, Download } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import { User } from '@supabase/supabase-js'
+
+type BeforeInstallPrompt = Event & {
+  prompt: () => Promise<void>
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
+}
 
 const menuItems = [
   {
@@ -30,6 +35,7 @@ export default function Header() {
   const [accountMenuOpen, setAccountMenuOpen] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [user, setUser] = useState<User | null>(null)
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPrompt | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const accountMenuRef = useRef<HTMLDivElement>(null)
 
@@ -56,11 +62,41 @@ export default function Header() {
       setUser(session?.user ?? null)
     })
 
+    const onBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault()
+      setInstallPrompt(event as BeforeInstallPrompt)
+    }
+    window.addEventListener('beforeinstallprompt', onBeforeInstallPrompt)
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
+      window.removeEventListener('beforeinstallprompt', onBeforeInstallPrompt)
       subscription.unsubscribe()
     }
   }, [])
+
+  const handleInstallApp = async () => {
+    if (installPrompt) {
+      await installPrompt.prompt()
+      await installPrompt.userChoice
+      setInstallPrompt(null)
+      setDropdownOpen(false)
+      setMobileOpen(false)
+      return
+    }
+
+    const ua = window.navigator.userAgent
+    const isIOS =
+      /iPad|iPhone|iPod/.test(ua) || (ua.includes('Mac') && 'ontouchend' in document)
+
+    if (isIOS) {
+      window.alert('Per installare: tocca Condividi e poi "Aggiungi alla schermata Home".')
+    } else {
+      window.alert('Per installare: apri il menu del browser (⋮) e scegli "Installa app".')
+    }
+    setDropdownOpen(false)
+    setMobileOpen(false)
+  }
 
   return (
     <header className="ladiva-header">
@@ -98,6 +134,14 @@ export default function Header() {
                       {item.label}
                     </Link>
                   ))}
+                  <button
+                    type="button"
+                    className="ladiva-dropdown-item w-full text-left"
+                    onClick={handleInstallApp}
+                  >
+                    <Download size={16} />
+                    Installa app
+                  </button>
                 </div>
               )}
             </div>
@@ -181,6 +225,14 @@ export default function Header() {
               {item.label}
             </Link>
           ))}
+          <button
+            type="button"
+            className="ladiva-mobile-item w-full text-left"
+            onClick={handleInstallApp}
+          >
+            <Download size={18} />
+            Installa app
+          </button>
         </div>
       )}
     </header>
