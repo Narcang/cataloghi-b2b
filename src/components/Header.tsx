@@ -71,6 +71,38 @@ export default function Header() {
         </Link>
 
         <div className="ladiva-header-actions">
+          {/* Desktop Nav */}
+          <nav className="ladiva-nav-desktop">
+            <div className="ladiva-dropdown" ref={dropdownRef}>
+              <button
+                className="ladiva-dropdown-trigger"
+                onClick={() => {
+                  setDropdownOpen(!dropdownOpen)
+                  setAccountMenuOpen(false)
+                }}
+                aria-expanded={dropdownOpen}
+              >
+                Menu <ChevronDown size={16} className={`ladiva-chevron ${dropdownOpen ? 'open' : ''}`} />
+              </button>
+
+              {dropdownOpen && (
+                <div className="ladiva-dropdown-menu">
+                  {menuItems.map((item) => (
+                    <Link
+                      key={item.label}
+                      href={item.href}
+                      className="ladiva-dropdown-item"
+                      onClick={() => setDropdownOpen(false)}
+                    >
+                      <item.icon size={16} />
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          </nav>
+
           <div className="ladiva-header-auth">
             {user ? (
               <div className="ladiva-account-menu" ref={accountMenuRef}>
@@ -123,38 +155,6 @@ export default function Header() {
               </Link>
             )}
           </div>
-
-          {/* Desktop Nav */}
-          <nav className="ladiva-nav-desktop">
-            <div className="ladiva-dropdown" ref={dropdownRef}>
-              <button
-                className="ladiva-dropdown-trigger"
-                onClick={() => {
-                  setDropdownOpen(!dropdownOpen)
-                  setAccountMenuOpen(false)
-                }}
-                aria-expanded={dropdownOpen}
-              >
-                Menu <ChevronDown size={16} className={`ladiva-chevron ${dropdownOpen ? 'open' : ''}`} />
-              </button>
-
-              {dropdownOpen && (
-                <div className="ladiva-dropdown-menu">
-                  {menuItems.map((item) => (
-                    <Link
-                      key={item.label}
-                      href={item.href}
-                      className="ladiva-dropdown-item"
-                      onClick={() => setDropdownOpen(false)}
-                    >
-                      <item.icon size={16} />
-                      {item.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-          </nav>
 
           {/* Mobile Hamburger */}
           <button
