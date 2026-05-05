@@ -100,20 +100,10 @@ export default async function CataloghiPerCategoriaPage({ params }: { params: Pr
                         </div>
                       )}
                     </div>
-                    <div className="flex flex-1 flex-col p-5">
-                      <h2 className="mb-2 text-xl font-medium uppercase leading-tight tracking-wide text-zinc-900 md:text-2xl">
+                    <div className="flex flex-1 items-center justify-center p-5">
+                      <h2 className="text-center text-xl font-medium uppercase leading-tight tracking-wide text-zinc-900 md:text-2xl">
                         {catalogo.titolo}
                       </h2>
-                      <p className="mb-4 text-base text-zinc-600">
-                        {Array.isArray(catalogo.area_geografica_target)
-                          ? catalogo.area_geografica_target.join(', ')
-                          : catalogo.area_geografica_target || '—'}
-                      </p>
-                      <div className="mt-auto border-t border-black/10 pt-4">
-                        <span className="text-sm font-medium uppercase tracking-wider text-[#060d41] group-hover:text-[#0a155a]">
-                          Sfoglia catalogo →
-                        </span>
-                      </div>
                     </div>
                   </div>
                 </Link>
