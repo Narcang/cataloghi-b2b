@@ -3,7 +3,11 @@ import Link from 'next/link'
 import Header from '@/components/Header'
 import { CATALOG_CATEGORIES, CATEGORY_TILE_IMAGE, categoryToSlug } from '@/lib/catalogCategories'
 
+const HIDDEN_HOME_CATEGORIES = new Set(['Family Gres', 'Bricks', 'Metal'])
+
 export default function LandingPage() {
+  const homepageCategories = CATALOG_CATEGORIES.filter((cat) => !HIDDEN_HOME_CATEGORIES.has(cat))
+
   return (
     <div className="min-h-screen flex flex-col bg-white text-neutral-900">
       <Header />
@@ -12,7 +16,7 @@ export default function LandingPage() {
       <main className="w-full max-w-[1200px] mx-auto px-6 py-10 md:py-14 shrink-0">
         <h1 className="sr-only">Catalogo Ladiva Ceramica</h1>
         <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 md:gap-x-10 gap-y-14 list-none p-0 m-0">
-          {CATALOG_CATEGORIES.map((cat) => (
+          {homepageCategories.map((cat) => (
             <li key={cat}>
               <Link
                 href={`/cataloghi/categoria/${categoryToSlug(cat)}`}
