@@ -1,59 +1,29 @@
 import { MetadataRoute } from 'next'
 import { SITE_ICON_SEARCH } from '@/lib/siteIconVersion'
 
-const siteBase = process.env.NEXT_PUBLIC_APP_URL
-
 const icon192 = `/icon-192.png?${SITE_ICON_SEARCH}`
 const icon512 = `/icon-512.png?${SITE_ICON_SEARCH}`
-const applePng = `/apple-icon.png?${SITE_ICON_SEARCH}`
 
 export default function manifest(): MetadataRoute.Manifest {
-  const startUrl = '/'
-
   return {
-    // Id stabile quando c’è il dominio (aggiornamenti PWA)
-    ...(siteBase ? { id: new URL(startUrl, siteBase).href } : {}),
-    name: 'Ladiva Ceramica — Catalogo',
+    name: 'Ladiva Ceramica - Catalogo',
     short_name: 'Ladiva',
-    description:
-      'Cataloghi ceramica Ladiva: consultazione da telefono e tablet per la rete vendita. Apri a schermo intero dopo installazione.',
-    lang: 'it',
-    start_url: startUrl,
+    description: 'Cataloghi ceramica Ladiva',
+    start_url: '/',
     scope: '/',
-    /**
-     * standalone: niente barra indirizzi, come un’app nativa
-     * (a differenza di “browser” che mantiene il chrome del browser)
-     */
     display: 'standalone',
-    display_override: ['standalone', 'minimal-ui', 'browser'],
     background_color: '#ffffff',
     theme_color: '#060d41',
-    orientation: 'any',
-    categories: ['business', 'design'],
     icons: [
       {
         src: icon192,
         sizes: '192x192',
         type: 'image/png',
-        purpose: 'any',
       },
       {
         src: icon512,
         sizes: '512x512',
         type: 'image/png',
-        purpose: 'any',
-      },
-      {
-        src: icon512,
-        sizes: '512x512',
-        type: 'image/png',
-        purpose: 'maskable',
-      },
-      {
-        src: applePng,
-        sizes: '180x180',
-        type: 'image/png',
-        purpose: 'any',
       },
     ],
   }
