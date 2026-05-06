@@ -20,6 +20,15 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## PWA install (no store)
+
+The app is configured to be installable as a web app:
+
+- Android/Desktop (Chrome/Edge): users can confirm the browser install prompt.
+- iOS (Safari): users add the app from `Condividi -> Aggiungi alla schermata Home`.
+- The in-app install banner is rendered by `src/components/PwaInstallBanner.tsx`.
+- If dismissed, the banner is hidden for 7 days, then shown again.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

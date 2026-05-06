@@ -8,11 +8,26 @@ type BeforeInstallPrompt = Event & {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
 }
 
+const DISMISS_KEY = 'ladiva_pwa_install_dismiss_at'
+const DISMISS_TTL_MS = 7 * 24 * 60 * 60 * 1000
+
 function isStandalone(): boolean {
   if (typeof window === 'undefined') return true
   const md = window.matchMedia('(display-mode: standalone)')
   if (md.matches) return true
   return (window.navigator as Navigator & { standalone?: boolean }).standalone === true
+}
+
+function isDismissedRecently(): boolean {
+  try {
+    const raw = localStorage.getItem(DISMISS_KEY)
+    if (!raw) return false
+    const ts = Number(raw)
+    if (!Number.isFinite(ts)) return false
+    return Date.now() - ts < DISMISS_TTL_MS
+  } catch {
+    return false
+  }
 }
 
 export default function PwaInstallBanner() {
@@ -22,6 +37,7 @@ export default function PwaInstallBanner() {
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setReady(true)
 
     if ('serviceWorker' in navigator) {
@@ -32,7 +48,7 @@ export default function PwaInstallBanner() {
 
     if (isStandalone()) return
 
-    if (localStorage.getItem('ladiva_pwa_install_dismiss') === '1') {
+    if (isDismissedRecently()) {
       setDismissed(true)
     }
     const ua = window.navigator.userAgent
@@ -51,7 +67,7 @@ export default function PwaInstallBanner() {
   const dismiss = useCallback(() => {
     setDismissed(true)
     try {
-      localStorage.setItem('ladiva_pwa_install_dismiss', '1')
+      localStorage.setItem(DISMISS_KEY, String(Date.now()))
     } catch {
       // ignore
     }
