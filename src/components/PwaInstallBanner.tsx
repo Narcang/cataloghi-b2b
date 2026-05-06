@@ -8,8 +8,11 @@ type BeforeInstallPrompt = Event & {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
 }
 
-const DISMISS_KEY = 'ladiva_pwa_install_dismiss_at'
-const DISMISS_TTL_MS = 7 * 24 * 60 * 60 * 1000
+declare global {
+  interface Window {
+    deferredPrompt?: BeforeInstallPrompt | null
+  }
+}
 
 function isStandalone(): boolean {
   if (typeof window === 'undefined') return true
@@ -18,28 +21,12 @@ function isStandalone(): boolean {
   return (window.navigator as Navigator & { standalone?: boolean }).standalone === true
 }
 
-function isDismissedRecently(): boolean {
-  try {
-    const raw = localStorage.getItem(DISMISS_KEY)
-    if (!raw) return false
-    const ts = Number(raw)
-    if (!Number.isFinite(ts)) return false
-    return Date.now() - ts < DISMISS_TTL_MS
-  } catch {
-    return false
-  }
-}
-
 export default function PwaInstallBanner() {
-  const [deferred, setDeferred] = useState<BeforeInstallPrompt | null>(null)
-  const [dismissed, setDismissed] = useState(false)
+  const [installAvailable, setInstallAvailable] = useState(false)
   const [ios, setIos] = useState(false)
-  const [ready, setReady] = useState(false)
+  const [iosDismissed, setIosDismissed] = useState(false)
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setReady(true)
-
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js').catch(() => {
         // ignore registration failures
@@ -48,9 +35,6 @@ export default function PwaInstallBanner() {
 
     if (isStandalone()) return
 
-    if (isDismissedRecently()) {
-      setDismissed(true)
-    }
     const ua = window.navigator.userAgent
     const i =
       /iPad|iPhone|iPod/.test(ua) || (ua.includes('Mac') && 'ontouchend' in document)
@@ -58,46 +42,32 @@ export default function PwaInstallBanner() {
 
     const onBip = (e: Event) => {
       e.preventDefault()
-      setDeferred(e as BeforeInstallPrompt)
+      window.deferredPrompt = e as BeforeInstallPrompt
+      setInstallAvailable(true)
     }
     window.addEventListener('beforeinstallprompt', onBip)
     return () => window.removeEventListener('beforeinstallprompt', onBip)
   }, [])
 
-  const dismiss = useCallback(() => {
-    setDismissed(true)
-    try {
-      localStorage.setItem(DISMISS_KEY, String(Date.now()))
-    } catch {
-      // ignore
+  const install = useCallback(async () => {
+    const promptEvent = window.deferredPrompt
+    if (!promptEvent) return
+    await promptEvent.prompt()
+    const { outcome } = await promptEvent.userChoice
+    if (outcome === 'accepted') {
+      console.log('PWA installazione accettata')
+    } else {
+      console.log('PWA installazione rifiutata')
     }
+    window.deferredPrompt = null
+    setInstallAvailable(false)
   }, [])
 
-  const install = useCallback(async () => {
-    if (deferred) {
-      await deferred.prompt()
-      await deferred.userChoice
-      setDeferred(null)
-      dismiss()
-      return
-    }
-
-    const ua = window.navigator.userAgent
-    const isEdge = ua.includes('Edg/')
-    const isChrome = ua.includes('Chrome/') && !isEdge
-    const browserLabel = isEdge ? 'Edge' : isChrome ? 'Chrome' : 'il browser'
-    window.alert(
-      `Per installare da ${browserLabel}: apri il menu del browser (⋮) e scegli "Installa app" o "Aggiungi alla schermata Home".`
-    )
-  }, [deferred, dismiss])
-
-  if (!ready) return null
   if (isStandalone()) return null
-  if (dismissed) return null
-  if (ios) {
+  if (ios && !iosDismissed) {
     return (
       <div
-        className="fixed bottom-0 left-0 right-0 z-[200] border-t border-white/10 bg-[#060d41] text-white/95 p-3 shadow-[0_-4px_24px_rgba(0,0,0,0.2)]"
+        className="fixed bottom-0 left-0 right-0 z-[200] border-t border-white/10 bg-[#060d41] text-white/95 p-3"
         style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom, 0px))' }}
         role="complementary"
         aria-label="Aggiunta alla schermata Home"
@@ -109,7 +79,7 @@ export default function PwaInstallBanner() {
           </p>
           <button
             type="button"
-            onClick={dismiss}
+            onClick={() => setIosDismissed(true)}
             className="shrink-0 p-1 rounded-md hover:bg-white/10"
             aria-label="Chiudi"
           >
@@ -119,14 +89,15 @@ export default function PwaInstallBanner() {
       </div>
     )
   }
+  if (!installAvailable) return null
 
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 z-[200] border-t border-white/10 bg-[#060d41] text-white p-3 shadow-[0_-4px_24px_rgba(0,0,0,0.2)]"
+      className="fixed bottom-0 left-0 right-0 z-[200] border-t border-white/10 bg-[#060d41] text-white p-3"
       style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom, 0px))' }}
     >
       <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-1">
-        <p className="text-sm">Installa l&apos;app su questo dispositivo.</p>
+        <p className="text-sm">Installa l&apos;app su questo dispositivo</p>
         <div className="flex items-center gap-2 shrink-0">
           <button
             type="button"
@@ -134,15 +105,7 @@ export default function PwaInstallBanner() {
             className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-[#060d41] hover:bg-white/90"
           >
             <Download size={16} />
-            Installa
-          </button>
-          <button
-            type="button"
-            onClick={dismiss}
-            className="p-2 rounded-lg hover:bg-white/10"
-            aria-label="Non ora"
-          >
-            <X size={20} />
+            Installa App
           </button>
         </div>
       </div>
