@@ -5,6 +5,7 @@ export const CATALOG_CATEGORIES = [
   'Capsule Collection',
   'Bricks',
   'Metal',
+  'Studio',
   'Partner',
   'Agenti',
 ] as const
@@ -17,9 +18,34 @@ export const AGENTI_CATALOG_CATEGORY = 'Agenti' satisfies CatalogCategory
 /** Categoria riservata: visibile in dashboard solo dopo login (non agli ospiti). */
 export const PARTNER_CATALOG_CATEGORY = 'Partner' satisfies CatalogCategory
 
+/** Linea dedicata agli studi / progettazione (login obbligatorio per ospiti). */
+export const STUDIO_CATALOG_CATEGORY = 'Studio' satisfies CatalogCategory
+
+/**
+ * Categorie "di base" per il profilo con ruolo `studio` (oltre alla linea {@link STUDIO_CATALOG_CATEGORY}).
+ * Non include Bricks, Metal, Partner, Agenti.
+ */
+export const STUDIO_ROLE_BASE_CATEGORIES = [
+  'Family 15',
+  'Family 20',
+  'Family Gres',
+  'Capsule Collection',
+] as const satisfies readonly CatalogCategory[]
+
+const STUDIO_ROLE_ALLOWED = new Set<CatalogCategory>([
+  ...STUDIO_ROLE_BASE_CATEGORIES,
+  STUDIO_CATALOG_CATEGORY,
+])
+
+export function isCatalogCategoryAllowedForStudioRole(categoria: string | null | undefined): boolean {
+  if (!categoria) return false
+  return STUDIO_ROLE_ALLOWED.has(categoria as CatalogCategory)
+}
+
 const LOGIN_ONLY_CATALOG_CATEGORIES = new Set<CatalogCategory>([
   PARTNER_CATALOG_CATEGORY,
   AGENTI_CATALOG_CATEGORY,
+  STUDIO_CATALOG_CATEGORY,
 ])
 
 export function isLoginOnlyCatalogCategory(categoria: string | null | undefined): boolean {
@@ -29,9 +55,10 @@ export function isLoginOnlyCatalogCategory(categoria: string | null | undefined)
 
 /**
  * Sezioni cataloghi in dashboard:
- * - Ospite (non autenticato): niente categorie Partner / Agenti.
- * - Partner (distributore): tutte tranne la categoria "Agenti".
- * - Altri ruoli autenticati: tutte le categorie.
+ * - Ospite: niente Partner / Agenti / Studio (serve login).
+ * - Ruolo `studio`: solo Family 15/20/Gres, Capsule Collection e linea Studio.
+ * - Partner (distributore): tutte tranne Agenti.
+ * - Altri utenti autenticati: tutte le categorie (inclusa Studio).
  */
 export function categoriesVisibleOnDashboard(
   ruoloProfilo: string | null | undefined,
@@ -39,6 +66,9 @@ export function categoriesVisibleOnDashboard(
 ): CatalogCategory[] {
   if (!isAuthenticated) {
     return CATALOG_CATEGORIES.filter((c) => !LOGIN_ONLY_CATALOG_CATEGORIES.has(c))
+  }
+  if (ruoloProfilo === 'studio') {
+    return CATALOG_CATEGORIES.filter((c) => STUDIO_ROLE_ALLOWED.has(c))
   }
   if (ruoloProfilo === 'distributore') {
     return CATALOG_CATEGORIES.filter((c) => c !== AGENTI_CATALOG_CATEGORY)
@@ -71,6 +101,7 @@ export const CATEGORY_TILE_IMAGE: Record<CatalogCategory, string> = {
   'Capsule Collection': '/catalog/capsule-collection.png',
   Bricks: '/catalog/bricks.png',
   Metal: '/catalog/metal.png',
+  Studio: '/catalog/capsule-collection.png',
   Partner: '/catalog/capsule-collection.png',
   Agenti: '/catalog/family-gres.png',
 }

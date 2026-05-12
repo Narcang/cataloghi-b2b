@@ -9,7 +9,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- 2. Tabella Profili
 CREATE TABLE public.profili (
   id UUID REFERENCES auth.users NOT NULL PRIMARY KEY,
-  ruolo TEXT NOT NULL CHECK (ruolo IN ('admin', 'agente', 'fornitore', 'distributore', 'free')),
+  ruolo TEXT NOT NULL CHECK (ruolo IN ('admin', 'agente', 'fornitore', 'distributore', 'free', 'studio')),
   nome_completo TEXT,
   telefono TEXT,
   email TEXT,
@@ -25,7 +25,7 @@ ALTER TABLE public.profili ENABLE ROW LEVEL SECURITY;
 CREATE TABLE public.cataloghi (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   titolo TEXT NOT NULL,
-  categoria TEXT NOT NULL CHECK (categoria IN ('Family 15', 'Family 20', 'Family Gres', 'Capsule Collection', 'Bricks', 'Metal', 'Partner', 'Agenti')),
+  categoria TEXT NOT NULL CHECK (categoria IN ('Family 15', 'Family 20', 'Family Gres', 'Capsule Collection', 'Bricks', 'Metal', 'Studio', 'Partner', 'Agenti')),
   url_file TEXT NOT NULL,
   url_immagine TEXT,
   area_geografica_target TEXT[] NOT NULL DEFAULT '{}',

@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import CatalogPdfViewer from '@/components/CatalogPdfViewer'
-import { AGENTI_CATALOG_CATEGORY, isLoginOnlyCatalogCategory } from '@/lib/catalogCategories'
+import { AGENTI_CATALOG_CATEGORY, isCatalogCategoryAllowedForStudioRole, isLoginOnlyCatalogCategory } from '@/lib/catalogCategories'
 
 export default async function CatalogoDetail({ params }: { params: Promise<{ catalogoId: string }> }) {
   const { catalogoId } = await params
@@ -35,7 +35,7 @@ export default async function CatalogoDetail({ params }: { params: Promise<{ cat
       <div className="flex flex-col items-center justify-center min-h-screen p-8 text-center bg-[#fafafa]">
         <h1 className="text-3xl font-bold text-red-600 mb-4">Accesso riservato</h1>
         <p className="text-zinc-600 max-w-md">
-          I cataloghi Partner e Agenti sono disponibili dopo l&apos;accesso al portale B2B.
+          Questo catalogo richiede l&apos;accesso al portale (linee riservate, inclusa la linea Studio).
         </p>
         <Link href="/login">
           <Button className="mt-8 bg-[#060d41] text-white hover:bg-[#0a155a]" variant="default">
@@ -78,6 +78,38 @@ export default async function CatalogoDetail({ params }: { params: Promise<{ cat
           </Link>
         </div>
       )
+    }
+    if (ruolo === 'studio') {
+      if (!isCatalogCategoryAllowedForStudioRole(catalogo.categoria)) {
+        return (
+          <div className="flex flex-col items-center justify-center min-h-screen p-8 text-center bg-[#fafafa]">
+            <h1 className="text-3xl font-bold text-red-600 mb-4">Accesso non consentito</h1>
+            <p className="text-zinc-600 max-w-md">
+              Il tuo profilo Studio può consultare solo le linee Family, Capsule Collection e la categoria Studio.
+            </p>
+            <Link href="/dashboard">
+              <Button className="mt-8 bg-[#060d41] text-white hover:bg-[#0a155a]" variant="default">
+                Torna ai cataloghi
+              </Button>
+            </Link>
+          </div>
+        )
+      }
+      if (catalogoNonPubblico) {
+        return (
+          <div className="flex flex-col items-center justify-center min-h-screen p-8 text-center bg-[#fafafa]">
+            <h1 className="text-3xl font-bold text-red-600 mb-4">Catalogo non disponibile</h1>
+            <p className="text-zinc-600 max-w-md">
+              Con un accesso Studio puoi aprire solo cataloghi pubblicati (stato attivo).
+            </p>
+            <Link href="/dashboard">
+              <Button className="mt-8 bg-[#060d41] text-white hover:bg-[#0a155a]" variant="default">
+                Torna ai cataloghi
+              </Button>
+            </Link>
+          </div>
+        )
+      }
     }
     if (ruolo === 'free' && catalogoNonPubblico) {
       return (

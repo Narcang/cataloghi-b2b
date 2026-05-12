@@ -10,6 +10,7 @@ import {
   CATALOG_CATEGORIES,
   categoriesVisibleOnDashboard,
   categoryToDomId,
+  isCatalogCategoryAllowedForStudioRole,
   isLoginOnlyCatalogCategory,
 } from '@/lib/catalogCategories'
 import CreateCatalogForm from '@/components/admin/CreateCatalogForm'
@@ -58,6 +59,7 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
   const isManager = ruoloCorrente === 'admin'
   const isPartner = ruoloCorrente === 'distributore'
   const isAgente = ruoloCorrente === 'agente'
+  const isStudio = ruoloCorrente === 'studio'
   const isFree = !user || ruoloCorrente === 'free'
 
   // Recupera i cataloghi (RLS attivo)
@@ -70,8 +72,8 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
     cataloghiQuery = cataloghiQuery.contains('area_geografica_target', [areaFilter])
   }
 
-  // Ospite senza login o profilo ruolo "free": solo cataloghi pubblicati (no bozze)
-  if (!user || ruoloCorrente === 'free') {
+  // Ospite, free o studio: solo cataloghi pubblicati (no bozze)
+  if (!user || ruoloCorrente === 'free' || ruoloCorrente === 'studio') {
     cataloghiQuery = cataloghiQuery.eq('stato_pubblicazione', 'attivo')
   }
 
@@ -80,6 +82,7 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
   const cataloghiPerVista = (cataloghi ?? []).filter((c) => {
     if (!user && isLoginOnlyCatalogCategory(c.categoria as string | null)) return false
     if (isPartner && c.categoria === AGENTI_CATALOG_CATEGORY) return false
+    if (isStudio && !isCatalogCategoryAllowedForStudioRole(c.categoria as string | null)) return false
     return true
   })
 
@@ -132,7 +135,7 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
 
   // Recupera fornitori associati a questo agente (se non è un profilo free)
   let fornitori: Fornitore[] = []
-  if (user && ruoloCorrente !== 'free') {
+  if (user && ruoloCorrente !== 'free' && ruoloCorrente !== 'studio') {
     const { data: fornitoriRaw } = await supabase
       .from('connessioni_agente_fornitore')
       .select(`
@@ -248,7 +251,8 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
                 {isManager ? <span className="ml-3 inline-flex items-center rounded-full border border-black/25 px-2.5 py-0.5 text-xs font-semibold bg-[#060d41]/10 text-[#060d41]">Manager</span> : null}
                 {isPartner ? <span className="ml-3 inline-flex items-center rounded-full border border-black/20 px-2.5 py-0.5 text-xs font-semibold bg-blue-50 text-[#060d41]">Partner</span> : null}
                 {isAgente ? <span className="ml-3 inline-flex items-center rounded-full border border-black/20 px-2.5 py-0.5 text-xs font-semibold bg-emerald-50 text-[#060d41]">Agente</span> : null}
-                {isFree && !isManager && !isPartner && !isAgente ? <span className="ml-3 inline-flex items-center rounded-full border border-black/20 px-2.5 py-0.5 text-xs font-semibold bg-zinc-100 text-zinc-800">Free</span> : null}
+                {isStudio ? <span className="ml-3 inline-flex items-center rounded-full border border-black/20 px-2.5 py-0.5 text-xs font-semibold bg-violet-50 text-[#060d41]">Studio</span> : null}
+                {isFree && !isManager && !isPartner && !isAgente && !isStudio ? <span className="ml-3 inline-flex items-center rounded-full border border-black/20 px-2.5 py-0.5 text-xs font-semibold bg-zinc-100 text-zinc-800">Free</span> : null}
               </>
             ) : null}
           </p>
