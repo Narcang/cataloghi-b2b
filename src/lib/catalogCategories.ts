@@ -14,11 +14,32 @@ export type CatalogCategory = (typeof CATALOG_CATEGORIES)[number]
 /** Categoria riservata agli agenti (ruolo): i partner/distributori non la vedono in dashboard né in SELECT (RLS). */
 export const AGENTI_CATALOG_CATEGORY = 'Agenti' satisfies CatalogCategory
 
+/** Categoria riservata: visibile in dashboard solo dopo login (non agli ospiti). */
+export const PARTNER_CATALOG_CATEGORY = 'Partner' satisfies CatalogCategory
+
+const LOGIN_ONLY_CATALOG_CATEGORIES = new Set<CatalogCategory>([
+  PARTNER_CATALOG_CATEGORY,
+  AGENTI_CATALOG_CATEGORY,
+])
+
+export function isLoginOnlyCatalogCategory(categoria: string | null | undefined): boolean {
+  if (!categoria) return false
+  return LOGIN_ONLY_CATALOG_CATEGORIES.has(categoria as CatalogCategory)
+}
+
 /**
- * Sezioni cataloghi in dashboard: admin, agenti e free vedono tutte le categorie;
- * i partner (distributore) vedono tutto tranne la categoria "Agenti".
+ * Sezioni cataloghi in dashboard:
+ * - Ospite (non autenticato): niente categorie Partner / Agenti.
+ * - Partner (distributore): tutte tranne la categoria "Agenti".
+ * - Altri ruoli autenticati: tutte le categorie.
  */
-export function categoriesVisibleOnDashboard(ruoloProfilo: string | null | undefined): CatalogCategory[] {
+export function categoriesVisibleOnDashboard(
+  ruoloProfilo: string | null | undefined,
+  isAuthenticated: boolean,
+): CatalogCategory[] {
+  if (!isAuthenticated) {
+    return CATALOG_CATEGORIES.filter((c) => !LOGIN_ONLY_CATALOG_CATEGORIES.has(c))
+  }
   if (ruoloProfilo === 'distributore') {
     return CATALOG_CATEGORIES.filter((c) => c !== AGENTI_CATALOG_CATEGORY)
   }

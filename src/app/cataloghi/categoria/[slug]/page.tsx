@@ -1,10 +1,10 @@
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { FileText, ArrowLeft } from 'lucide-react'
 import Header from '@/components/Header'
 import { createClient } from '@/utils/supabase/server'
-import { categoryFromSlug } from '@/lib/catalogCategories'
+import { categoryFromSlug, isLoginOnlyCatalogCategory } from '@/lib/catalogCategories'
 
 /** Elenco cataloghi pubblici: sempre dati aggiornati da Supabase. */
 export const dynamic = 'force-dynamic'
@@ -27,6 +27,13 @@ export default async function CataloghiPerCategoriaPage({ params }: { params: Pr
   if (!categoria) notFound()
 
   const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user && isLoginOnlyCatalogCategory(categoria)) {
+    redirect('/login')
+  }
 
   const { data: rows, error } = await supabase
     .from('cataloghi')

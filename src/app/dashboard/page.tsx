@@ -10,6 +10,7 @@ import {
   CATALOG_CATEGORIES,
   categoriesVisibleOnDashboard,
   categoryToDomId,
+  isLoginOnlyCatalogCategory,
 } from '@/lib/catalogCategories'
 import CreateCatalogForm from '@/components/admin/CreateCatalogForm'
 
@@ -76,10 +77,11 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
 
   const { data: cataloghi, error: cataloghiError } = await cataloghiQuery
 
-  const cataloghiPerVista =
-    isPartner
-      ? (cataloghi ?? []).filter((c) => c.categoria !== AGENTI_CATALOG_CATEGORY)
-      : (cataloghi ?? [])
+  const cataloghiPerVista = (cataloghi ?? []).filter((c) => {
+    if (!user && isLoginOnlyCatalogCategory(c.categoria as string | null)) return false
+    if (isPartner && c.categoria === AGENTI_CATALOG_CATEGORY) return false
+    return true
+  })
 
   // Per admin: recupera elenco aree disponibili per filtro dashboard
   let areeDisponibili: string[] = []
@@ -220,7 +222,7 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
   const contattiDiRete = isFree ? contattiDirettiPubblici : fornitori
   const contattiDiretti = [...contattiAziendali, ...contattiDiRete]
 
-  const categorieDashboard = categoriesVisibleOnDashboard(ruoloCorrente)
+  const categorieDashboard = categoriesVisibleOnDashboard(ruoloCorrente, Boolean(user))
 
   return (
     <div className="ladiva-root ladiva-root-app-dark min-h-screen flex flex-col">
