@@ -49,6 +49,12 @@ export default async function LoginPage(props: { searchParams: Promise<{ message
                 Accedi al Portale
               </Button>
               <Link
+                href="/registrazione"
+                className="w-full h-9 inline-flex items-center justify-center rounded-lg border border-zinc-300 text-sm font-medium text-zinc-800 hover:bg-zinc-50 transition-colors"
+              >
+                Richiedi registrazione portale
+              </Link>
+              <Link
                 href="/recupero-password"
                 className="w-full h-8 inline-flex items-center justify-center rounded-lg border border-[#060d41] text-sm font-medium text-[#060d41] hover:bg-[#060d41]/5 transition-colors"
               >

@@ -32,6 +32,7 @@ export async function updateSession(request: NextRequest) {
     '/',
     '/dove-siamo',
     '/login',
+    '/registrazione',
     '/auth',
     '/recupero-password',
     '/reset-password',
@@ -52,6 +53,12 @@ export async function updateSession(request: NextRequest) {
 
   // Se è già loggato e va al login, rimanda alla dashboard
   if (user && request.nextUrl.pathname.startsWith('/login')) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/dashboard'
+    return NextResponse.redirect(url)
+  }
+
+  if (user && request.nextUrl.pathname.startsWith('/registrazione')) {
     const url = request.nextUrl.clone()
     url.pathname = '/dashboard'
     return NextResponse.redirect(url)

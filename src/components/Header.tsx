@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ChevronDown, Menu, X, BookOpen, Phone, MapPin, LogIn, LogOut, LayoutDashboard, Download } from 'lucide-react'
+import { ChevronDown, Menu, X, BookOpen, Phone, MapPin, LogIn, LogOut, LayoutDashboard, Download, UserPlus } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import { User } from '@supabase/supabase-js'
 
@@ -27,6 +27,11 @@ const menuItems = [
     label: 'Dove Siamo',
     href: '/dove-siamo',
     icon: MapPin,
+  },
+  {
+    label: 'Registrazione',
+    href: '/registrazione',
+    icon: UserPlus,
   },
 ]
 
@@ -193,10 +198,16 @@ export default function Header() {
                 ) : null}
               </div>
             ) : (
-              <Link href="/login" className="ladiva-header-auth-link ladiva-header-auth-link--primary">
-                <LogIn size={16} aria-hidden />
-                Accedi
-              </Link>
+              <div className="flex items-center gap-2 flex-wrap justify-end">
+                <Link href="/registrazione" className="ladiva-header-auth-link ladiva-header-auth-link--muted text-sm">
+                  <UserPlus size={16} aria-hidden />
+                  Registrati
+                </Link>
+                <Link href="/login" className="ladiva-header-auth-link ladiva-header-auth-link--primary">
+                  <LogIn size={16} aria-hidden />
+                  Accedi
+                </Link>
+              </div>
             )}
           </div>
 

@@ -13,7 +13,9 @@ CREATE TABLE public.profili (
   nome_completo TEXT,
   telefono TEXT,
   email TEXT,
+  societa TEXT,
   area_geografica TEXT,
+  registrazione_approvata BOOLEAN NOT NULL DEFAULT true,
   creato_il TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
@@ -89,10 +91,28 @@ CREATE POLICY "RLS Cataloghi per Agenti, Distributori e Free" ON public.catalogh
 -- Questa funzione viene lanciata in automatico quando crei un nuovo utente in Supabase (Auth).
 CREATE OR REPLACE FUNCTION public.handle_new_user() 
 RETURNS TRIGGER AS $$
+DECLARE
+  is_self boolean := (new.raw_user_meta_data->>'registration_flow') = 'portale_self';
+  nome text := coalesce(nullif(trim(new.raw_user_meta_data->>'nome'), ''), '');
+  cognome text := coalesce(nullif(trim(new.raw_user_meta_data->>'cognome'), ''), '');
+  societa text := nullif(trim(new.raw_user_meta_data->>'societa'), '');
+  telef text := nullif(trim(new.raw_user_meta_data->>'telefono'), '');
+  full_name text;
 BEGIN
-  INSERT INTO public.profili (id, ruolo, email, nome_completo)
-  -- Per default assegniamo ruolo 'agente', l'admin potrà cambiarlo a mano dal DB.
-  VALUES (new.id, 'agente', new.email, new.raw_user_meta_data->>'nome_completo');
+  IF is_self THEN
+    full_name := trim(both ' ' from (nome || ' ' || cognome));
+    IF full_name = '' THEN
+      full_name := coalesce(
+        nullif(trim(new.raw_user_meta_data->>'nome_completo'), ''),
+        split_part(new.email, '@', 1)
+      );
+    END IF;
+    INSERT INTO public.profili (id, ruolo, email, nome_completo, telefono, societa, registrazione_approvata)
+    VALUES (new.id, 'free', new.email, full_name, telef, societa, false);
+  ELSE
+    INSERT INTO public.profili (id, ruolo, email, nome_completo, registrazione_approvata)
+    VALUES (new.id, 'agente', new.email, new.raw_user_meta_data->>'nome_completo', true);
+  END IF;
   RETURN new;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

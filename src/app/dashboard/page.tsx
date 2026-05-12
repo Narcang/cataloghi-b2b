@@ -50,7 +50,7 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
   const profilo = user
     ? (await supabase
       .from('profili')
-      .select('id, nome_completo, ruolo, area_geografica')
+      .select('id, nome_completo, ruolo, area_geografica, societa, registrazione_approvata')
       .eq('id', user.id)
       .single()).data
     : null
@@ -227,6 +227,9 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
 
   const categorieDashboard = categoriesVisibleOnDashboard(ruoloCorrente, Boolean(user))
 
+  const inAttesaApprovazione = Boolean(user && profilo && profilo.registrazione_approvata === false)
+  const showFullDashboard = !inAttesaApprovazione
+
   return (
     <div className="ladiva-root ladiva-root-app-dark min-h-screen flex flex-col">
       <Header />
@@ -252,7 +255,14 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
                 {isPartner ? <span className="ml-3 inline-flex items-center rounded-full border border-black/20 px-2.5 py-0.5 text-xs font-semibold bg-blue-50 text-[#060d41]">Partner</span> : null}
                 {isAgente ? <span className="ml-3 inline-flex items-center rounded-full border border-black/20 px-2.5 py-0.5 text-xs font-semibold bg-emerald-50 text-[#060d41]">Agente</span> : null}
                 {isStudio ? <span className="ml-3 inline-flex items-center rounded-full border border-black/20 px-2.5 py-0.5 text-xs font-semibold bg-violet-50 text-[#060d41]">Studio</span> : null}
-                {isFree && !isManager && !isPartner && !isAgente && !isStudio ? <span className="ml-3 inline-flex items-center rounded-full border border-black/20 px-2.5 py-0.5 text-xs font-semibold bg-zinc-100 text-zinc-800">Free</span> : null}
+                {user && profilo?.registrazione_approvata === false ? (
+                  <span className="ml-3 inline-flex items-center rounded-full border border-amber-300 px-2.5 py-0.5 text-xs font-semibold bg-amber-50 text-amber-900">
+                    In attesa di approvazione
+                  </span>
+                ) : null}
+                {isFree && !isManager && !isPartner && !isAgente && !isStudio && profilo?.registrazione_approvata !== false ? (
+                  <span className="ml-3 inline-flex items-center rounded-full border border-black/20 px-2.5 py-0.5 text-xs font-semibold bg-zinc-100 text-zinc-800">Free</span>
+                ) : null}
               </>
             ) : null}
           </p>
@@ -264,7 +274,7 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
           </div>
         ) : null}
 
-        {isManager && (
+        {showFullDashboard && isManager && (
           <section id="crea-catalogo" className="border border-black rounded-2xl bg-white p-6 space-y-5">
             <div>
               <h2 className="text-xl text-zinc-900 font-medium">Nuovo Catalogo</h2>
@@ -277,7 +287,7 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
           </section>
         )}
 
-        {isManager && (
+        {showFullDashboard && isManager && (
           <section id="filtro-admin" className="border border-black rounded-2xl bg-white p-5">
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
               <div>
@@ -318,7 +328,13 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
             </h2>
           </div>
           
-          {cataloghiError ? (
+          {inAttesaApprovazione ? (
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-6 text-zinc-900">
+              <p className="text-lg text-zinc-800">
+                I cataloghi riservati saranno disponibili dopo l&apos;approvazione dell&apos;account da parte di Ladiva.
+              </p>
+            </div>
+          ) : cataloghiError ? (
             <div className="text-red-700 p-4 border border-red-300 bg-red-50 rounded-xl">Errore nel caricamento: {cataloghiError.message}</div>
           ) : (
             <div className="space-y-10">
@@ -511,7 +527,7 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
           )}
         </section>
 
-        {isManager && (
+        {showFullDashboard && isManager && (
           <section id="operatori-admin">
             <div className="flex items-center justify-between mb-8 border-b border-black pb-4">
               <h2 className="text-3xl md:text-4xl font-sans tracking-tight text-zinc-100 flex items-center gap-3">
