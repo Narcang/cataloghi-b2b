@@ -51,6 +51,9 @@ export async function POST(request: NextRequest) {
     return jsonResponse(false, 'Non puoi modificare il tuo stesso profilo da questo modulo', 400)
   }
 
+  const svc = createServiceRoleSupabase()
+  const dbForWrite = svc ?? supabase
+
   const patch: Record<string, unknown> = {}
 
   if (body.nome_completo !== undefined) {
@@ -84,7 +87,7 @@ export async function POST(request: NextRequest) {
     return jsonResponse(false, 'Nessun campo da aggiornare', 400)
   }
 
-  const { data: updatedRows, error } = await supabase
+  const { data: updatedRows, error } = await dbForWrite
     .from('profili')
     .update(patch)
     .eq('id', profiloId)
@@ -96,15 +99,13 @@ export async function POST(request: NextRequest) {
   }
 
   if (!updatedRows || updatedRows.length === 0) {
-    return jsonResponse(
-      false,
-      'Nessuna riga aggiornata: verifica che il profilo esista e che le policy RLS consentano la modifica.',
-      409
-    )
+    const hint = svc
+      ? 'Nessuna riga aggiornata: verifica che l’ID profilo esista.'
+      : 'Nessuna riga aggiornata: aggiungi SUPABASE_SERVICE_ROLE_KEY su Vercel oppure esegui su Supabase lo script supabase_alter_profili_rls_admin_fix.sql (RLS admin su profili).'
+    return jsonResponse(false, hint, 409)
   }
 
   if (patch.registrazione_approvata === true) {
-    const svc = createServiceRoleSupabase()
     if (svc) {
       const { error: authErr } = await svc.auth.admin.updateUserById(profiloId, { email_confirm: true })
       if (authErr) {

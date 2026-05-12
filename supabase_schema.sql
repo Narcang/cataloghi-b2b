@@ -75,6 +75,26 @@ CREATE POLICY "connessioni_utente_operatore_admin_delete" ON public.connessioni_
 -- ROW LEVEL SECURITY (RLS) POLICIES
 -- ==========================================
 
+-- Evita subquery EXISTS su profili dentro le policy sulla stessa tabella (UPDATE/RETURNING).
+CREATE OR REPLACE FUNCTION public.current_user_is_admin()
+RETURNS boolean
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+STABLE
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.profili p
+    WHERE p.id = auth.uid()
+      AND p.ruolo = 'admin'
+  );
+$$;
+
+REVOKE ALL ON FUNCTION public.current_user_is_admin() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.current_user_is_admin() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.current_user_is_admin() TO service_role;
+
 -- POLICY PROFILI
 -- Per ora, per facilitare il frontend, ogni utente loggato può leggere i profili.
 CREATE POLICY "I profili sono visibili agli utenti loggati" ON public.profili
@@ -82,9 +102,10 @@ CREATE POLICY "I profili sono visibili agli utenti loggati" ON public.profili
   
 -- L'admin può modificare tutti i profili
 CREATE POLICY "Admin gestisce tutti i profili" ON public.profili
-  FOR ALL USING ( 
-    EXISTS (SELECT 1 FROM public.profili WHERE id = auth.uid() AND ruolo = 'admin') 
-  );
+  FOR ALL
+  TO authenticated
+  USING (public.current_user_is_admin())
+  WITH CHECK (public.current_user_is_admin());
 
 -- POLICY CATALOGHI
 -- 1) Admin ha accesso totale ai cataloghi
