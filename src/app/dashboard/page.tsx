@@ -14,6 +14,7 @@ import {
   isLoginOnlyCatalogCategory,
 } from '@/lib/catalogCategories'
 import CreateCatalogForm from '@/components/admin/CreateCatalogForm'
+import AdminProfiliPanel, { type ProfiloGestioneRow } from '@/components/admin/AdminProfiliPanel'
 
 type Operatore = {
   id: string
@@ -116,9 +117,16 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
     ).sort((a, b) => a.localeCompare(b))
   }
 
-  // Per admin: operatori (agenti/distributori) eventualmente filtrati per area
+  // Per admin: operatori, utenti in attesa, elenco profili, collegamenti operatore–utente
   let operatoriAdmin: Operatore[] = []
+  let profiliRegistrazionePendente: ProfiloGestioneRow[] = []
+  let profiliGestioneAdmin: ProfiloGestioneRow[] = []
+  let connessioniUtenteOperatoreRows: { utente_id: string; operatore_id: string }[] = []
+
   if (isManager) {
+    const profiloSel =
+      'id, nome_completo, email, telefono, societa, area_geografica, ruolo, registrazione_approvata, creato_il'
+
     let operatoriQuery = supabase
       .from('profili')
       .select('id, nome_completo, email, telefono, ruolo, area_geografica')
@@ -129,8 +137,36 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
       operatoriQuery = operatoriQuery.eq('area_geografica', areaFilter)
     }
 
-    const { data: operatoriData } = await operatoriQuery
-    operatoriAdmin = (operatoriData || []) as Operatore[]
+    let listaQuery = supabase
+      .from('profili')
+      .select(profiloSel)
+      .or('registrazione_approvata.eq.true,registrazione_approvata.is.null')
+      .order('creato_il', { ascending: false })
+      .limit(150)
+
+    if (areaFilter !== 'all') {
+      listaQuery = listaQuery.eq('area_geografica', areaFilter)
+    }
+
+    const pendQuery = supabase
+      .from('profili')
+      .select(profiloSel)
+      .eq('registrazione_approvata', false)
+      .order('creato_il', { ascending: false })
+
+    const linksQuery = supabase.from('connessioni_utente_operatore').select('utente_id, operatore_id').limit(2000)
+
+    const [opRes, pendRes, listaRes, linksRes] = await Promise.all([
+      operatoriQuery,
+      pendQuery,
+      listaQuery,
+      linksQuery,
+    ])
+
+    operatoriAdmin = (opRes.data || []) as Operatore[]
+    profiliRegistrazionePendente = (pendRes.data || []) as ProfiloGestioneRow[]
+    profiliGestioneAdmin = (listaRes.data || []) as ProfiloGestioneRow[]
+    connessioniUtenteOperatoreRows = (linksRes.data || []) as { utente_id: string; operatore_id: string }[]
   }
 
   // Recupera fornitori associati a questo agente (se non è un profilo free)
@@ -158,6 +194,27 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
     fornitori = fornitoriEstratti.filter(
       (fornitore): fornitore is Fornitore => Boolean(fornitore)
     )
+  }
+
+  let operatoriAssegnatiUtente: Fornitore[] = []
+  if (user && profilo?.registrazione_approvata !== false && !isAgente) {
+    const { data: opLinkRows } = await supabase.from('connessioni_utente_operatore').select(`
+        operatore:profili!operatore_id (
+          id,
+          nome_completo,
+          telefono,
+          email
+        )
+      `).eq('utente_id', user.id)
+
+    const estratti =
+      opLinkRows?.flatMap((row) => {
+        const op = row.operatore
+        if (!op) return []
+        return Array.isArray(op) ? op : [op]
+      }) || []
+
+    operatoriAssegnatiUtente = estratti.filter((o): o is Fornitore => Boolean(o))
   }
 
   // Recupera agenti della stessa zona se l'utente è un distributore
@@ -222,7 +279,13 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
         telefono: row.telefono,
       }))
 
-  const contattiDiRete = isFree ? contattiDirettiPubblici : fornitori
+  const contattiDiRete = isAgente
+    ? fornitori
+    : operatoriAssegnatiUtente.length > 0
+      ? operatoriAssegnatiUtente
+      : isFree
+        ? contattiDirettiPubblici
+        : fornitori
   const contattiDiretti = [...contattiAziendali, ...contattiDiRete]
 
   const categorieDashboard = categoriesVisibleOnDashboard(ruoloCorrente, Boolean(user))
@@ -319,6 +382,16 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
             </div>
           </section>
         )}
+
+        {showFullDashboard && isManager && user ? (
+          <AdminProfiliPanel
+            currentUserId={user.id}
+            profiliPendenti={profiliRegistrazionePendente}
+            profiliLista={profiliGestioneAdmin}
+            operatoriDisponibili={operatoriAdmin}
+            links={connessioniUtenteOperatoreRows}
+          />
+        ) : null}
 
         {/* SEZIONE CATALOGHI */}
         <section id="cataloghi">

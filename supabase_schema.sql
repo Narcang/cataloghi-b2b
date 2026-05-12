@@ -47,6 +47,29 @@ CREATE TABLE public.connessioni_agente_fornitore (
 
 ALTER TABLE public.connessioni_agente_fornitore ENABLE ROW LEVEL SECURITY;
 
+CREATE TABLE public.connessioni_utente_operatore (
+  utente_id UUID NOT NULL REFERENCES public.profili (id) ON DELETE CASCADE,
+  operatore_id UUID NOT NULL REFERENCES public.profili (id) ON DELETE CASCADE,
+  creato_il TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  PRIMARY KEY (utente_id, operatore_id),
+  CONSTRAINT connessioni_u_o_distinct CHECK (utente_id <> operatore_id)
+);
+
+ALTER TABLE public.connessioni_utente_operatore ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "connessioni_utente_operatore_select" ON public.connessioni_utente_operatore FOR SELECT TO authenticated USING (
+  EXISTS (SELECT 1 FROM public.profili p WHERE p.id = auth.uid() AND p.ruolo = 'admin')
+  OR utente_id = auth.uid()
+  OR operatore_id = auth.uid()
+);
+
+CREATE POLICY "connessioni_utente_operatore_admin_insert" ON public.connessioni_utente_operatore FOR INSERT TO authenticated
+WITH CHECK (EXISTS (SELECT 1 FROM public.profili p WHERE p.id = auth.uid() AND p.ruolo = 'admin'));
+
+CREATE POLICY "connessioni_utente_operatore_admin_delete" ON public.connessioni_utente_operatore FOR DELETE TO authenticated USING (
+  EXISTS (SELECT 1 FROM public.profili p WHERE p.id = auth.uid() AND p.ruolo = 'admin')
+);
+
 
 -- ==========================================
 -- ROW LEVEL SECURITY (RLS) POLICIES
