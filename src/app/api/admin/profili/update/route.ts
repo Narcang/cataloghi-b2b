@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
+import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
 
 const RUOLI_OK = new Set(['admin', 'agente', 'fornitore', 'distributore', 'free', 'studio'])
 
@@ -75,20 +76,47 @@ export async function POST(request: NextRequest) {
     }
     patch.ruolo = r
   }
-  if (body.registrazione_approvata !== undefined && body.registrazione_approvata !== null) {
-    patch.registrazione_approvata = Boolean(body.registrazione_approvata)
+  if (typeof body.registrazione_approvata === 'boolean') {
+    patch.registrazione_approvata = body.registrazione_approvata
   }
 
   if (Object.keys(patch).length === 0) {
     return jsonResponse(false, 'Nessun campo da aggiornare', 400)
   }
 
-  const { error } = await supabase.from('profili').update(patch).eq('id', profiloId)
+  const { data: updatedRows, error } = await supabase
+    .from('profili')
+    .update(patch)
+    .eq('id', profiloId)
+    .select('id')
 
   if (error) {
     console.error('admin profili update', error)
     return jsonResponse(false, error.message.includes('check') ? 'Dati non validi (vincoli DB)' : error.message, 500)
   }
 
-  return jsonResponse(true, 'Profilo aggiornato', 200)
+  if (!updatedRows || updatedRows.length === 0) {
+    return jsonResponse(
+      false,
+      'Nessuna riga aggiornata: verifica che il profilo esista e che le policy RLS consentano la modifica.',
+      409
+    )
+  }
+
+  if (patch.registrazione_approvata === true) {
+    const svc = createServiceRoleSupabase()
+    if (svc) {
+      const { error: authErr } = await svc.auth.admin.updateUserById(profiloId, { email_confirm: true })
+      if (authErr) {
+        console.error('admin profili update: auth.admin.updateUserById', authErr)
+      }
+    }
+  }
+
+  const abilitato = patch.registrazione_approvata === true
+  return jsonResponse(
+    true,
+    abilitato ? 'Utente abilitato: registrazione approvata e accesso ai cataloghi attivo.' : 'Profilo aggiornato.',
+    200
+  )
 }

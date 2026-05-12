@@ -99,7 +99,9 @@ export default function AdminProfiliPanel({
     const societa = String(fd.get('societa') ?? '').trim() || null
     const area_geografica = String(fd.get('area_geografica') ?? '').trim() || null
     const ruolo = String(fd.get('ruolo') ?? '').trim()
-    const registrazione_approvata = fd.get('registrazione_approvata') === 'on'
+    const rawApprovazione = fd.get('registrazione_approvata')
+    const registrazione_approvata =
+      rawApprovazione === 'on' || rawApprovazione === 'true' || rawApprovazione === '1'
     return {
       profilo_id: profiloId,
       nome_completo,
@@ -214,7 +216,7 @@ export default function AdminProfiliPanel({
                     </select>
                   </label>
                   <label className="md:col-span-2 flex items-center gap-2 text-sm text-zinc-800">
-                    <input type="checkbox" name="registrazione_approvata" defaultChecked={false} className="rounded border-black" />
+                    <input type="checkbox" name="registrazione_approvata" value="on" defaultChecked={false} className="rounded border-black" />
                     Approva registrazione (accesso ai cataloghi secondo ruolo e area)
                   </label>
                   <div className="md:col-span-2">
@@ -333,6 +335,7 @@ export default function AdminProfiliPanel({
                             <input
                               type="checkbox"
                               name="registrazione_approvata"
+                              value="on"
                               defaultChecked={p.registrazione_approvata !== false}
                               className="rounded border-black"
                             />
