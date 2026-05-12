@@ -3,7 +3,7 @@ import Link from 'next/link'
 import Header from '@/components/Header'
 import { CATALOG_CATEGORIES, CATEGORY_TILE_IMAGE, categoryToSlug } from '@/lib/catalogCategories'
 
-const HIDDEN_HOME_CATEGORIES = new Set(['Family Gres', 'Bricks', 'Metal'])
+const HIDDEN_HOME_CATEGORIES = new Set(['Family Gres', 'Bricks', 'Metal', 'Partner', 'Agenti'])
 
 export default function LandingPage() {
   const homepageCategories = CATALOG_CATEGORIES.filter((cat) => !HIDDEN_HOME_CATEGORIES.has(cat))

@@ -5,7 +5,12 @@ import Image from 'next/image'
 import { Phone, MessageCircle, FileText, Users, Mail } from 'lucide-react'
 import Header from '@/components/Header'
 import DashboardHashScroll from '@/components/DashboardHashScroll'
-import { CATALOG_CATEGORIES, categoryToDomId } from '@/lib/catalogCategories'
+import {
+  AGENTI_CATALOG_CATEGORY,
+  CATALOG_CATEGORIES,
+  categoriesVisibleOnDashboard,
+  categoryToDomId,
+} from '@/lib/catalogCategories'
 import CreateCatalogForm from '@/components/admin/CreateCatalogForm'
 
 type Operatore = {
@@ -70,6 +75,11 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
   }
 
   const { data: cataloghi, error: cataloghiError } = await cataloghiQuery
+
+  const cataloghiPerVista =
+    isPartner
+      ? (cataloghi ?? []).filter((c) => c.categoria !== AGENTI_CATALOG_CATEGORY)
+      : (cataloghi ?? [])
 
   // Per admin: recupera elenco aree disponibili per filtro dashboard
   let areeDisponibili: string[] = []
@@ -210,6 +220,8 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
   const contattiDiRete = isFree ? contattiDirettiPubblici : fornitori
   const contattiDiretti = [...contattiAziendali, ...contattiDiRete]
 
+  const categorieDashboard = categoriesVisibleOnDashboard(ruoloCorrente)
+
   return (
     <div className="ladiva-root ladiva-root-app-dark min-h-screen flex flex-col">
       <Header />
@@ -304,8 +316,8 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
             <div className="text-red-700 p-4 border border-red-300 bg-red-50 rounded-xl">Errore nel caricamento: {cataloghiError.message}</div>
           ) : (
             <div className="space-y-10">
-              {CATALOG_CATEGORIES.map((categoria) => {
-                const items = (cataloghi ?? [])
+              {categorieDashboard.map((categoria) => {
+                const items = cataloghiPerVista
                   .filter((catalogo) => catalogo.categoria === categoria)
                   .sort((a, b) => {
                     const byTitle = (a.titolo ?? '').localeCompare(b.titolo ?? '', 'it', {

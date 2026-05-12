@@ -5,9 +5,25 @@ export const CATALOG_CATEGORIES = [
   'Capsule Collection',
   'Bricks',
   'Metal',
+  'Partner',
+  'Agenti',
 ] as const
 
 export type CatalogCategory = (typeof CATALOG_CATEGORIES)[number]
+
+/** Categoria riservata agli agenti (ruolo): i partner/distributori non la vedono in dashboard né in SELECT (RLS). */
+export const AGENTI_CATALOG_CATEGORY = 'Agenti' satisfies CatalogCategory
+
+/**
+ * Sezioni cataloghi in dashboard: admin, agenti e free vedono tutte le categorie;
+ * i partner (distributore) vedono tutto tranne la categoria "Agenti".
+ */
+export function categoriesVisibleOnDashboard(ruoloProfilo: string | null | undefined): CatalogCategory[] {
+  if (ruoloProfilo === 'distributore') {
+    return CATALOG_CATEGORIES.filter((c) => c !== AGENTI_CATALOG_CATEGORY)
+  }
+  return [...CATALOG_CATEGORIES]
+}
 
 /** ID elemento DOM per ancore tipo /dashboard#catalog-cat-family-20 */
 export function categoryToDomId(categoria: string): string {
@@ -34,4 +50,6 @@ export const CATEGORY_TILE_IMAGE: Record<CatalogCategory, string> = {
   'Capsule Collection': '/catalog/capsule-collection.png',
   Bricks: '/catalog/bricks.png',
   Metal: '/catalog/metal.png',
+  Partner: '/catalog/capsule-collection.png',
+  Agenti: '/catalog/family-gres.png',
 }

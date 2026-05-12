@@ -25,7 +25,7 @@ ALTER TABLE public.profili ENABLE ROW LEVEL SECURITY;
 CREATE TABLE public.cataloghi (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   titolo TEXT NOT NULL,
-  categoria TEXT NOT NULL CHECK (categoria IN ('Family 15', 'Family 20', 'Family Gres', 'Capsule Collection', 'Bricks', 'Metal')),
+  categoria TEXT NOT NULL CHECK (categoria IN ('Family 15', 'Family 20', 'Family Gres', 'Capsule Collection', 'Bricks', 'Metal', 'Partner', 'Agenti')),
   url_file TEXT NOT NULL,
   url_immagine TEXT,
   area_geografica_target TEXT[] NOT NULL DEFAULT '{}',
