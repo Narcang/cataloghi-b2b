@@ -198,16 +198,10 @@ export default function Header() {
                 ) : null}
               </div>
             ) : (
-              <div className="flex items-center gap-2 flex-wrap justify-end">
-                <Link href="/registrazione" className="ladiva-header-auth-link ladiva-header-auth-link--muted text-sm">
-                  <UserPlus size={16} aria-hidden />
-                  Registrati
-                </Link>
-                <Link href="/login" className="ladiva-header-auth-link ladiva-header-auth-link--primary">
-                  <LogIn size={16} aria-hidden />
-                  Accedi
-                </Link>
-              </div>
+              <Link href="/login" className="ladiva-header-auth-link ladiva-header-auth-link--primary">
+                <LogIn size={16} aria-hidden />
+                Accedi
+              </Link>
             )}
           </div>
 
