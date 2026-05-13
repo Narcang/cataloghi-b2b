@@ -11,8 +11,7 @@ type Body = {
 }
 
 /**
- * Elimina profilo pubblico e account Auth (richiede service role).
- * Ordine: prima `profili` (FK verso auth), poi `auth.admin.deleteUser`.
+ * Elimina riga `profili` con sessione admin (RLS), poi account Auth con service role se disponibile.
  */
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
@@ -56,24 +55,31 @@ export async function POST(request: NextRequest) {
     return jsonResponse(false, 'Non è consentito eliminare un account amministratore', 400)
   }
 
-  const svc = createServiceRoleSupabase()
-  if (!svc) {
-    return jsonResponse(
-      false,
-      'Eliminazione account richiede SUPABASE_SERVICE_ROLE_KEY configurata sul server (es. Vercel).',
-      503
-    )
-  }
-
-  const { data: deletedRows, error: delProfErr } = await svc.from('profili').delete().eq('id', profiloId).select('id')
+  // DELETE su `profili`: usa la sessione admin (RLS "Admin gestisce tutti i profili"), non il service role.
+  // Su molti progetti il service_role non ha GRANT DELETE su `profili` → "permission denied for table profili".
+  const { data: deletedRows, error: delProfErr } = await supabase.from('profili').delete().eq('id', profiloId).select('id')
 
   if (delProfErr) {
     console.error('admin profili delete: profili', delProfErr)
-    return jsonResponse(false, delProfErr.message, 500)
+    let msg = delProfErr.message
+    if (msg.includes('permission denied') && msg.includes('profili')) {
+      msg +=
+        ' Esegui nel SQL Editor di Supabase lo script supabase_alter_profili_grant_delete.sql (GRANT DELETE).'
+    }
+    return jsonResponse(false, msg, 500)
   }
 
   if (!deletedRows?.length) {
     return jsonResponse(false, 'Impossibile eliminare il profilo (nessuna riga aggiornata).', 409)
+  }
+
+  const svc = createServiceRoleSupabase()
+  if (!svc) {
+    return jsonResponse(
+      true,
+      'Profilo eliminato. Per rimuovere anche l’account da Authentication configura SUPABASE_SERVICE_ROLE_KEY sul server, oppure elimina l’utente da Supabase → Authentication.',
+      200
+    )
   }
 
   const { error: authErr } = await svc.auth.admin.deleteUser(profiloId)
