@@ -21,7 +21,7 @@ type Operatore = {
   nome_completo: string | null
   email: string | null
   telefono: string | null
-  ruolo: 'agente' | 'distributore'
+  ruolo: 'agente' | 'distributore' | 'studio'
   area_geografica: string | null
 }
 
@@ -30,6 +30,17 @@ type Fornitore = {
   nome_completo: string | null
   email: string | null
   telefono: string | null
+}
+
+function mergeContattiById(first: Fornitore[], second: Fornitore[]): Fornitore[] {
+  const seen = new Set<string>()
+  const out: Fornitore[] = []
+  for (const x of [...first, ...second]) {
+    if (seen.has(x.id)) continue
+    seen.add(x.id)
+    out.push(x)
+  }
+  return out
 }
 
 type Partner = {
@@ -130,7 +141,7 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
     let operatoriQuery = supabase
       .from('profili')
       .select('id, nome_completo, email, telefono, ruolo, area_geografica')
-      .in('ruolo', ['agente', 'distributore'])
+      .in('ruolo', ['agente', 'distributore', 'studio'])
       .order('nome_completo', { ascending: true })
 
     if (areaFilter !== 'all') {
@@ -197,7 +208,7 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
   }
 
   let operatoriAssegnatiUtente: Fornitore[] = []
-  if (user && profilo?.registrazione_approvata !== false && !isAgente) {
+  if (user && profilo?.registrazione_approvata !== false) {
     const { data: opLinkRows } = await supabase.from('connessioni_utente_operatore').select(`
         operatore:profili!operatore_id (
           id,
@@ -280,7 +291,7 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
       }))
 
   const contattiDiRete = isAgente
-    ? fornitori
+    ? mergeContattiById(fornitori, operatoriAssegnatiUtente)
     : operatoriAssegnatiUtente.length > 0
       ? operatoriAssegnatiUtente
       : isFree

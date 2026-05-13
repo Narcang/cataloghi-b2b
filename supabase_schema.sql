@@ -54,6 +54,8 @@ CREATE TABLE public.connessioni_utente_operatore (
   PRIMARY KEY (utente_id, operatore_id),
   CONSTRAINT connessioni_u_o_distinct CHECK (utente_id <> operatore_id)
 );
+-- utente_id vede operatore_id in rubrica (nome, email, telefono profilo).
+-- Tra agente / partner (distributore) / studio l'app mantiene anche la riga inversa.
 
 ALTER TABLE public.connessioni_utente_operatore ENABLE ROW LEVEL SECURITY;
 

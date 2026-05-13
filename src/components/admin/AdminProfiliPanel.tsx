@@ -121,8 +121,8 @@ export default function AdminProfiliPanel({
         <div>
           <h2 className="text-2xl font-medium text-zinc-900">Gestione utenti</h2>
           <p className="text-sm text-zinc-600 mt-1">
-            Approva le registrazioni, aggiorna i dati anagrafici e associa gli operatori abilitati (agenti e partner)
-            visibili nella rubrica contatti di ciascun utente.
+            Approva le registrazioni, aggiorna i dati anagrafici e associa i contatti (agenti, partner e studio)
+            visibili nella rubrica: email e telefono del profilo compaiono per chi è collegato, in entrambe le direzioni tra questi ruoli.
           </p>
         </div>
       </div>
@@ -239,8 +239,8 @@ export default function AdminProfiliPanel({
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-zinc-900">Utenti e operatori associati</h3>
         <p className="text-sm text-zinc-600">
-          Elenco filtrato come il Filtro Manager (area). Per ogni profilo puoi modificare i dati e spuntare gli operatori
-          abilitati alla rubrica contatti del portale.
+          Elenco filtrato come il Filtro Manager (area). Per ogni profilo puoi modificare i dati e spuntare i contatti
+          in rubrica: tra agente, partner e studio la connessione è reciproca (entrambi vedono nome, email e telefono se presenti).
         </p>
         <ul className="space-y-3 list-none p-0 m-0">
           {profiliLista.map((p) => {
@@ -352,12 +352,18 @@ export default function AdminProfiliPanel({
                         </form>
 
                         <div>
-                          <p className="text-xs font-medium uppercase text-zinc-600 mb-2">Operatori abilitati (rubrica)</p>
+                          <p className="text-xs font-medium uppercase text-zinc-600 mb-2">
+                            Contatti in rubrica (agenti, partner, studio)
+                          </p>
                           <div className="flex flex-wrap gap-3 max-h-48 overflow-y-auto border border-black/15 rounded-lg p-3 bg-zinc-50">
-                            {operatoriDisponibili.length === 0 ? (
-                              <span className="text-sm text-zinc-500">Nessun agente/partner nel filtro area corrente.</span>
+                            {operatoriDisponibili.filter((op) => op.id !== p.id).length === 0 ? (
+                              <span className="text-sm text-zinc-500">
+                                Nessun altro agente, partner o studio nel filtro area corrente.
+                              </span>
                             ) : (
-                              operatoriDisponibili.map((op) => (
+                              operatoriDisponibili
+                                .filter((op) => op.id !== p.id)
+                                .map((op) => (
                                 <label key={op.id} className="flex items-center gap-2 text-sm text-zinc-800 min-w-[200px]">
                                   <input
                                     type="checkbox"

@@ -1,4 +1,4 @@
--- Collega utenti (profili) agli operatori abilitati (agenti / partner distributori).
+-- Collega profili in rubrica: agenti, partner (distributori) e studio.
 -- Esegui nel SQL Editor di Supabase.
 
 CREATE TABLE IF NOT EXISTS public.connessioni_utente_operatore (
@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS public.connessioni_utente_operatore (
 ALTER TABLE public.connessioni_utente_operatore ENABLE ROW LEVEL SECURITY;
 
 COMMENT ON TABLE public.connessioni_utente_operatore IS
-  'Operatori (agente/distributore) associati a un profilo utente; visibili nella rubrica contatti del portale.';
+  'Contatti in rubrica: utente_id vede operatore_id (nome, email, telefono). Colonna operatore_id: profili agente, partner (distributore) o studio. Tra questi tre ruoli l''applicazione crea anche la riga inversa per reciprocità.';
 
 -- Lettura: admin, il profilo utente, o l''operatore collegato
 DROP POLICY IF EXISTS "connessioni_utente_operatore_select" ON public.connessioni_utente_operatore;

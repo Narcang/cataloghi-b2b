@@ -5,6 +5,13 @@ function jsonResponse(ok: boolean, message: string, status: number) {
   return NextResponse.json({ ok, message }, { status })
 }
 
+/** Ruoli che possono comparire nella rubrica e ricevere il collegamento reciproco. */
+const RUBRICA_ROLES = new Set(['agente', 'distributore', 'studio'])
+
+function isRubricaRuolo(ruolo: string | null | undefined): boolean {
+  return Boolean(ruolo && RUBRICA_ROLES.has(ruolo))
+}
+
 type Body = {
   action?: 'add' | 'remove'
   utente_id?: string
@@ -58,23 +65,36 @@ export async function POST(request: NextRequest) {
 
   const { data: operatore } = await supabase.from('profili').select('id, ruolo').eq('id', operatoreId).maybeSingle()
 
-  if (!operatore || (operatore.ruolo !== 'agente' && operatore.ruolo !== 'distributore')) {
-    return jsonResponse(false, 'L’operatore deve essere un agente o un partner (distributore)', 400)
+  if (!operatore || !isRubricaRuolo(operatore.ruolo)) {
+    return jsonResponse(false, 'Il contatto deve essere un agente, un partner (distributore) o uno studio', 400)
   }
 
   if (action === 'add') {
-    const { error } = await supabase.from('connessioni_utente_operatore').insert({
+    const { error: insErr } = await supabase.from('connessioni_utente_operatore').insert({
       utente_id: utenteId,
       operatore_id: operatoreId,
     })
-    if (error) {
-      if (error.code === '23505') {
-        return jsonResponse(true, 'Associazione già presente', 200)
-      }
-      console.error('operatore-link add', error)
-      return jsonResponse(false, error.message, 500)
+    const forwardNew = !insErr
+    if (insErr && insErr.code !== '23505') {
+      console.error('operatore-link add', insErr)
+      return jsonResponse(false, insErr.message, 500)
     }
-    return jsonResponse(true, 'Operatore associato', 200)
+
+    if (isRubricaRuolo(utente.ruolo) && isRubricaRuolo(operatore.ruolo)) {
+      const { error: revErr } = await supabase.from('connessioni_utente_operatore').insert({
+        utente_id: operatoreId,
+        operatore_id: utenteId,
+      })
+      if (revErr && revErr.code !== '23505') {
+        console.error('operatore-link add reciprocal', revErr)
+        if (forwardNew) {
+          await supabase.from('connessioni_utente_operatore').delete().eq('utente_id', utenteId).eq('operatore_id', operatoreId)
+        }
+        return jsonResponse(false, revErr.message, 500)
+      }
+    }
+
+    return jsonResponse(true, insErr?.code === '23505' ? 'Associazione già presente' : 'Contatto associato', 200)
   }
 
   const { error: delErr } = await supabase
@@ -86,6 +106,18 @@ export async function POST(request: NextRequest) {
   if (delErr) {
     console.error('operatore-link remove', delErr)
     return jsonResponse(false, delErr.message, 500)
+  }
+
+  if (isRubricaRuolo(utente.ruolo) && isRubricaRuolo(operatore.ruolo)) {
+    const { error: delRev } = await supabase
+      .from('connessioni_utente_operatore')
+      .delete()
+      .eq('utente_id', operatoreId)
+      .eq('operatore_id', utenteId)
+    if (delRev) {
+      console.error('operatore-link remove reciprocal', delRev)
+      return jsonResponse(false, delRev.message, 500)
+    }
   }
 
   return jsonResponse(true, 'Associazione rimossa', 200)
