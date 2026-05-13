@@ -202,6 +202,47 @@
   color: #fafafa !important;
 }
 
+/* Dashboard dark: testi leggermente più grandi (area riservata / manager) */
+.ladiva-root-app-dark .text-xs {
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+}
+.ladiva-root-app-dark .text-sm {
+  font-size: 0.9375rem;
+  line-height: 1.375rem;
+}
+.ladiva-root-app-dark .text-base {
+  font-size: 1.0625rem;
+  line-height: 1.625rem;
+}
+.ladiva-root-app-dark .text-lg {
+  font-size: 1.1875rem;
+  line-height: 1.8125rem;
+}
+.ladiva-root-app-dark .text-xl {
+  font-size: 1.3125rem;
+  line-height: 1.8125rem;
+}
+.ladiva-root-app-dark .text-2xl {
+  font-size: 1.625rem;
+  line-height: 2.125rem;
+}
+.ladiva-root-app-dark .text-3xl {
+  font-size: 2rem;
+  line-height: 2.375rem;
+}
+.ladiva-root-app-dark .text-4xl {
+  font-size: 2.375rem;
+  line-height: 2.625rem;
+}
+
+@media (min-width: 768px) {
+  .ladiva-root-app-dark .md\:text-4xl {
+    font-size: 2.375rem;
+    line-height: 2.625rem;
+  }
+}
+
 /* Titoli categorie catalogo home — Misu non in bundle; Bodoni Moda come serif temporanea */
 .ladiva-catalog-caption {
   font-family: var(--font-sans), system-ui, sans-serif;
