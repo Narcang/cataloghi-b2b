@@ -5,7 +5,19 @@ import { CATALOG_CATEGORIES, CATEGORY_TILE_IMAGE, categoryToSlug } from '@/lib/c
 
 const HIDDEN_HOME_CATEGORIES = new Set(['Family Gres', 'Bricks', 'Metal', 'Studio', 'Partner', 'Agenti'])
 
-export default function LandingPage() {
+function decodeFlashMessage(raw: string): string {
+  try {
+    return decodeURIComponent(raw)
+  } catch {
+    return raw
+  }
+}
+
+export default async function LandingPage(props: { searchParams?: Promise<{ message?: string }> }) {
+  const searchParams = props.searchParams ? await props.searchParams : {}
+  const flashRaw = searchParams?.message?.trim()
+  const flashMessage = flashRaw ? decodeFlashMessage(flashRaw) : null
+
   const homepageCategories = CATALOG_CATEGORIES.filter((cat) => !HIDDEN_HOME_CATEGORIES.has(cat))
 
   return (
@@ -14,6 +26,14 @@ export default function LandingPage() {
 
       {/* Allineato a .ladiva-header-inner: max-width 1200px, padding orizzontale 1.5rem (logo / menu) */}
       <main className="w-full max-w-[1200px] mx-auto px-6 py-10 md:py-14 shrink-0">
+        {flashMessage ? (
+          <div
+            role="status"
+            className="mb-8 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-center text-sm font-medium text-emerald-900"
+          >
+            {flashMessage}
+          </div>
+        ) : null}
         <h1 className="sr-only">Catalogo Ladiva Ceramica</h1>
         <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 md:gap-x-10 gap-y-14 list-none p-0 m-0">
           {homepageCategories.map((cat) => (

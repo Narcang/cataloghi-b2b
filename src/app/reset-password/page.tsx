@@ -35,6 +35,7 @@ export default function ResetPasswordPage() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [isUpdating, setIsUpdating] = useState(false)
   const [updateError, setUpdateError] = useState<string | null>(null)
+  const [passwordSaved, setPasswordSaved] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -201,7 +202,10 @@ export default function ResetPasswordPage() {
       return
     }
 
-    router.push('/login?message=Password aggiornata con successo. Accedi al portale.')
+    setPasswordSaved(true)
+    window.setTimeout(() => {
+      router.replace(`/?message=${encodeURIComponent('Password aggiornata con successo.')}`)
+    }, 2200)
   }
 
   return (
@@ -231,7 +235,14 @@ export default function ResetPasswordPage() {
 
           {status === 'loading' && <div className="text-sm text-zinc-600 text-center">Caricamento...</div>}
 
-          {status !== 'loading' && (
+          {status !== 'loading' && passwordSaved && (
+            <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-6 text-center text-sm text-emerald-900">
+              <p className="font-semibold text-base">Password aggiornata con successo.</p>
+              <p className="mt-2 text-emerald-800/90">Stai per essere reindirizzato alla homepage…</p>
+            </div>
+          )}
+
+          {status !== 'loading' && !passwordSaved && (
             <form onSubmit={onSubmit} className="grid gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="newPassword">Nuova password</Label>
@@ -281,9 +292,11 @@ export default function ResetPasswordPage() {
         </CardContent>
 
         <CardFooter className="flex flex-col gap-2">
-          <Link href="/login" className="text-sm text-zinc-700 hover:underline text-center">
-            Torna al login
-          </Link>
+          {!passwordSaved && (
+            <Link href="/login" className="text-sm text-zinc-700 hover:underline text-center">
+              Torna al login
+            </Link>
+          )}
         </CardFooter>
       </Card>
     </div>
