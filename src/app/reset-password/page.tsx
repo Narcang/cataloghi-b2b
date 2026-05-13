@@ -3,17 +3,31 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-
-import { createClient } from '@/utils/supabase/client'
+import { createBrowserClient } from '@supabase/ssr'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
+function createRecoverySupabaseClient() {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      /** Evita race con exchange manuale (es. React Strict Mode / doppio mount). */
+      isSingleton: false,
+      auth: {
+        detectSessionInUrl: false,
+        flowType: 'pkce',
+      },
+    }
+  )
+}
+
 export default function ResetPasswordPage() {
   const router = useRouter()
 
-  const supabase = useMemo(() => createClient(), [])
+  const supabase = useMemo(() => createRecoverySupabaseClient(), [])
   const [status, setStatus] = useState<'loading' | 'ready' | 'invalid' | 'error'>('loading')
   const [sessionError, setSessionError] = useState<string | null>(null)
 
@@ -39,10 +53,54 @@ export default function ResetPasswordPage() {
       const accessToken = query.get('access_token') ?? hash.get('access_token')
       const refreshToken = query.get('refresh_token') ?? hash.get('refresh_token')
 
-      // Flusso PKCE: il code verifier viene salvato nel browser
-      // quando la richiesta di reset parte lato client.
+      const { data: existingSession } = await supabase.auth.getSession()
+      if (cancelled) return
+      if (existingSession.session?.user) {
+        setStatus('ready')
+        if (query.toString() || (currentUrl.hash && currentUrl.hash !== '#')) {
+          window.history.replaceState({}, '', '/reset-password')
+        }
+        return
+      }
+
+      // Flusso PKCE: il verifier è nei cookie (stesso browser del “Recupero password”).
+      // Evita doppio exchange in parallelo (React Strict Mode / doppio effect).
       if (code) {
+        const dedupeKey = `sb_recovery_pkce_${code}`
+        if (typeof sessionStorage !== 'undefined') {
+          if (sessionStorage.getItem(dedupeKey) === 'done') {
+            const { data: afterMark } = await supabase.auth.getSession()
+            if (cancelled) return
+            if (afterMark.session?.user) {
+              setStatus('ready')
+              window.history.replaceState({}, '', '/reset-password')
+              return
+            }
+          }
+          if (sessionStorage.getItem(dedupeKey) === 'pending') {
+            for (let i = 0; i < 40; i++) {
+              await new Promise((r) => setTimeout(r, 50))
+              if (sessionStorage.getItem(dedupeKey) === 'done') break
+            }
+            const { data: waited } = await supabase.auth.getSession()
+            if (cancelled) return
+            if (waited.session?.user) {
+              setStatus('ready')
+              window.history.replaceState({}, '', '/reset-password')
+              return
+            }
+          }
+          sessionStorage.setItem(dedupeKey, 'pending')
+        }
+
         const { error } = await supabase.auth.exchangeCodeForSession(code)
+        if (typeof sessionStorage !== 'undefined') {
+          if (error) {
+            sessionStorage.removeItem(dedupeKey)
+          } else {
+            sessionStorage.setItem(dedupeKey, 'done')
+          }
+        }
         if (cancelled) return
         if (error) {
           setStatus('error')
