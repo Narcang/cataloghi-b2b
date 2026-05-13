@@ -45,6 +45,7 @@ export default function AdminProfiliPanel({
   const router = useRouter()
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const linksByUtente = useMemo(() => {
     const m = new Map<string, Set<string>>()
@@ -72,6 +73,37 @@ export default function AdminProfiliPanel({
     setMessage(data.message ?? 'Salvato')
     router.refresh()
     return true
+  }
+
+  async function postDelete(profiloId: string) {
+    setError(null)
+    setMessage(null)
+    if (
+      !window.confirm(
+        'Eliminare definitivamente questo utente? Verranno rimossi profilo, accesso al portale e collegamenti in rubrica. L’operazione non è annullabile.'
+      )
+    ) {
+      return false
+    }
+    setDeletingId(profiloId)
+    try {
+      const res = await fetch('/api/admin/profili/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ profilo_id: profiloId }),
+      })
+      const data = (await res.json().catch(() => null)) as { ok?: boolean; message?: string } | null
+      if (!res.ok || !data?.ok) {
+        setError(data?.message ?? 'Eliminazione non riuscita')
+        return false
+      }
+      setMessage(data.message ?? 'Utente eliminato')
+      router.refresh()
+      return true
+    } finally {
+      setDeletingId(null)
+    }
   }
 
   async function postLink(action: 'add' | 'remove', utente_id: string, operatore_id: string) {
@@ -121,7 +153,7 @@ export default function AdminProfiliPanel({
         <div>
           <h2 className="text-2xl font-medium text-zinc-900">Gestione utenti</h2>
           <p className="text-sm text-zinc-600 mt-1">
-            Approva le registrazioni, aggiorna i dati anagrafici e associa i contatti (agenti, partner e studio)
+            Approva le registrazioni, aggiorna i dati o elimina account, associa i contatti (agenti, partner e studio)
             visibili nella rubrica: email e telefono del profilo compaiono per chi è collegato, in entrambe le direzioni tra questi ruoli.
           </p>
         </div>
@@ -219,13 +251,24 @@ export default function AdminProfiliPanel({
                     <input type="checkbox" name="registrazione_approvata" value="on" defaultChecked={false} className="rounded border-black" />
                     Approva registrazione (accesso ai cataloghi secondo ruolo e area)
                   </label>
-                  <div className="md:col-span-2">
+                  <div className="md:col-span-2 flex flex-wrap items-center gap-3">
                     <button
                       type="submit"
-                      className="h-10 rounded-lg bg-[#060d41] text-white px-4 text-sm font-semibold hover:bg-[#0a155a]"
+                      disabled={deletingId === p.id}
+                      className="h-10 rounded-lg bg-[#060d41] text-white px-4 text-sm font-semibold hover:bg-[#0a155a] disabled:opacity-50"
                     >
                       Salva e conferma
                     </button>
+                    {p.ruolo !== 'admin' && p.id !== currentUserId ? (
+                      <button
+                        type="button"
+                        disabled={deletingId === p.id}
+                        onClick={() => void postDelete(p.id)}
+                        className="h-10 rounded-lg border border-red-600 bg-white px-4 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50"
+                      >
+                        {deletingId === p.id ? 'Eliminazione…' : 'Elimina utente'}
+                      </button>
+                    ) : null}
                   </div>
                 </form>
               </li>
@@ -341,13 +384,24 @@ export default function AdminProfiliPanel({
                             />
                             Registrazione approvata
                           </label>
-                          <div className="md:col-span-2">
+                          <div className="md:col-span-2 flex flex-wrap items-center gap-3">
                             <button
                               type="submit"
-                              className="h-9 rounded-md bg-[#060d41] text-white px-3 text-sm font-semibold hover:bg-[#0a155a]"
+                              disabled={deletingId === p.id}
+                              className="h-9 rounded-md bg-[#060d41] text-white px-3 text-sm font-semibold hover:bg-[#0a155a] disabled:opacity-50"
                             >
                               Salva profilo
                             </button>
+                            {p.ruolo !== 'admin' && p.id !== currentUserId ? (
+                              <button
+                                type="button"
+                                disabled={deletingId === p.id}
+                                onClick={() => void postDelete(p.id)}
+                                className="h-9 rounded-md border border-red-600 bg-white px-3 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50"
+                              >
+                                {deletingId === p.id ? 'Eliminazione…' : 'Elimina utente'}
+                              </button>
+                            ) : null}
                           </div>
                         </form>
 
