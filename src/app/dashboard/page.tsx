@@ -820,7 +820,7 @@ export default async function Dashboard(props: {
                       ) : fornitore.email ? (
                         <a
                           href={`mailto:${fornitore.email.trim()}`}
-                          className="flex-1 flex justify-center items-center gap-2 border border-black bg-white text-black hover:bg-zinc-100 py-2.5 px-4 rounded-lg text-sm font-semibold transition-colors"
+                          className="ladiva-dashboard-btn-light flex-1 flex justify-center items-center gap-2 border border-black bg-white text-zinc-900 hover:bg-zinc-100 py-2.5 px-4 rounded-lg text-sm font-semibold transition-colors"
                         >
                           <Mail size={16} /> Scrivi
                         </a>
