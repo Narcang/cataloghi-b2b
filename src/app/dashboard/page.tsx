@@ -32,6 +32,10 @@ type Fornitore = {
   telefono: string | null
 }
 
+function escapeIlikePattern(value: string): string {
+  return value.replace(/[%_\\]/g, '\\$&')
+}
+
 function mergeContattiById(first: Fornitore[], second: Fornitore[]): Fornitore[] {
   const seen = new Set<string>()
   const out: Fornitore[] = []
@@ -50,9 +54,12 @@ type Partner = {
   area_geografica: string | null
 }
 
-export default async function Dashboard(props: { searchParams: Promise<{ area?: string; message?: string }> }) {
+export default async function Dashboard(props: {
+  searchParams: Promise<{ area?: string; nome?: string; message?: string }>
+}) {
   const searchParams = await props.searchParams
   const areaFilter = searchParams?.area ?? 'all'
+  const nomeFilter = (searchParams?.nome ?? '').trim()
   const actionMessage = searchParams?.message ?? ''
   const supabase = await createClient()
 
@@ -82,6 +89,10 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
 
   if (isManager && areaFilter !== 'all') {
     cataloghiQuery = cataloghiQuery.contains('area_geografica_target', [areaFilter])
+  }
+
+  if (isManager && nomeFilter.length > 0) {
+    cataloghiQuery = cataloghiQuery.ilike('titolo', `%${escapeIlikePattern(nomeFilter)}%`)
   }
 
   // Ospite, free o studio: solo cataloghi pubblicati (no bozze)
@@ -148,6 +159,10 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
       operatoriQuery = operatoriQuery.eq('area_geografica', areaFilter)
     }
 
+    if (nomeFilter.length > 0) {
+      operatoriQuery = operatoriQuery.ilike('nome_completo', `%${escapeIlikePattern(nomeFilter)}%`)
+    }
+
     let listaQuery = supabase
       .from('profili')
       .select(profiloSel)
@@ -157,6 +172,10 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
 
     if (areaFilter !== 'all') {
       listaQuery = listaQuery.eq('area_geografica', areaFilter)
+    }
+
+    if (nomeFilter.length > 0) {
+      listaQuery = listaQuery.ilike('nome_completo', `%${escapeIlikePattern(nomeFilter)}%`)
     }
 
     const pendQuery = supabase
@@ -367,10 +386,18 @@ export default async function Dashboard(props: { searchParams: Promise<{ area?: 
               <div>
                 <h2 className="text-xl text-zinc-900 font-medium">Filtro Manager</h2>
                 <p className="text-sm text-zinc-600 mt-1">
-                  Seleziona un&apos;area geografica per vedere cataloghi e operatori abilitati.
+                  Filtra per area geografica e/o per nome (titolo catalogo o nome operatore).
                 </p>
               </div>
-              <form className="flex items-center gap-3" method="get">
+              <form className="flex flex-wrap items-center gap-3" method="get">
+                <input
+                  type="search"
+                  name="nome"
+                  defaultValue={nomeFilter}
+                  placeholder="Es. Anita"
+                  aria-label="Cerca per nome"
+                  className="h-10 min-w-[10rem] flex-1 rounded-lg border border-black bg-zinc-50 px-3 text-sm text-zinc-900 placeholder:text-zinc-500"
+                />
                 <select
                   name="area"
                   defaultValue={areaFilter}
