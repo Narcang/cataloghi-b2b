@@ -182,6 +182,32 @@
   color: #fafafa !important;
 }
 
+/* Link indietro aree riservate (partner / agente): sottolineatura bianca su sfondo nero */
+.ladiva-reserved-back-nav-link {
+  color: #fafafa;
+  text-decoration: none;
+  text-underline-offset: 3px;
+}
+
+.ladiva-reserved-back-nav-link:hover,
+.ladiva-reserved-back-nav-link:focus-visible,
+.ladiva-reserved-back-nav-link:active {
+  color: #fff;
+  text-decoration: underline;
+  text-decoration-color: #fff;
+}
+
+.ladiva-reserved-back-nav-link:visited {
+  color: #fafafa;
+}
+
+.ladiva-reserved-back-nav-link:visited:hover,
+.ladiva-reserved-back-nav-link:visited:focus-visible,
+.ladiva-reserved-back-nav-link:visited:active {
+  color: #fff;
+  text-decoration-color: #fff;
+}
+
 .ladiva-root-app-dark .border-black,
 .ladiva-root-app-dark .border-black\/20,
 .ladiva-root-app-dark .border-black\/25,
