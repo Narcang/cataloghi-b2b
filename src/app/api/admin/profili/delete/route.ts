@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     let msg = delProfErr.message
     if (msg.includes('permission denied') && msg.includes('profili')) {
       msg +=
-        ' Esegui nel SQL Editor di Supabase lo script supabase_alter_profili_grant_delete.sql (GRANT DELETE).'
+        ' Esegui su Supabase: supabase_alter_admin_grants_profili_connessioni.sql (GRANT su profili).'
     }
     return jsonResponse(false, msg, 500)
   }

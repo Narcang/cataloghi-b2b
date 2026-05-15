@@ -52,7 +52,6 @@ export async function POST(request: NextRequest) {
   }
 
   const svc = createServiceRoleSupabase()
-  const dbForWrite = svc ?? supabase
 
   const patch: Record<string, unknown> = {}
 
@@ -87,7 +86,8 @@ export async function POST(request: NextRequest) {
     return jsonResponse(false, 'Nessun campo da aggiornare', 400)
   }
 
-  const { data: updatedRows, error } = await dbForWrite
+  // UPDATE con sessione admin (RLS), non service role: spesso manca GRANT UPDATE al service_role.
+  const { data: updatedRows, error } = await supabase
     .from('profili')
     .update(patch)
     .eq('id', profiloId)
@@ -95,14 +95,20 @@ export async function POST(request: NextRequest) {
 
   if (error) {
     console.error('admin profili update', error)
-    return jsonResponse(false, error.message.includes('check') ? 'Dati non validi (vincoli DB)' : error.message, 500)
+    let msg = error.message.includes('check') ? 'Dati non validi (vincoli DB)' : error.message
+    if (msg.includes('permission denied') && msg.includes('profili')) {
+      msg +=
+        ' Esegui su Supabase: supabase_alter_profili_rls_admin_fix.sql e supabase_alter_admin_grants_profili_connessioni.sql'
+    }
+    return jsonResponse(false, msg, 500)
   }
 
   if (!updatedRows || updatedRows.length === 0) {
-    const hint = svc
-      ? 'Nessuna riga aggiornata: verifica che l’ID profilo esista.'
-      : 'Nessuna riga aggiornata: aggiungi SUPABASE_SERVICE_ROLE_KEY su Vercel oppure esegui su Supabase lo script supabase_alter_profili_rls_admin_fix.sql (RLS admin su profili).'
-    return jsonResponse(false, hint, 409)
+    return jsonResponse(
+      false,
+      'Nessuna riga aggiornata: verifica ID profilo ed esegui su Supabase supabase_alter_profili_rls_admin_fix.sql (policy admin).',
+      409,
+    )
   }
 
   if (patch.registrazione_approvata === true) {

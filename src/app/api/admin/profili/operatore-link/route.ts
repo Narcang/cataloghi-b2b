@@ -77,7 +77,11 @@ export async function POST(request: NextRequest) {
     const forwardNew = !insErr
     if (insErr && insErr.code !== '23505') {
       console.error('operatore-link add', insErr)
-      return jsonResponse(false, insErr.message, 500)
+      let msg = insErr.message
+      if (msg.includes('permission denied')) {
+        msg += ' Esegui su Supabase: supabase_alter_admin_grants_profili_connessioni.sql'
+      }
+      return jsonResponse(false, msg, 500)
     }
 
     if (isRubricaRuolo(utente.ruolo) && isRubricaRuolo(operatore.ruolo)) {
@@ -90,7 +94,11 @@ export async function POST(request: NextRequest) {
         if (forwardNew) {
           await supabase.from('connessioni_utente_operatore').delete().eq('utente_id', utenteId).eq('operatore_id', operatoreId)
         }
-        return jsonResponse(false, revErr.message, 500)
+        let revMsg = revErr.message
+        if (revMsg.includes('permission denied')) {
+          revMsg += ' Esegui su Supabase: supabase_alter_admin_grants_profili_connessioni.sql'
+        }
+        return jsonResponse(false, revMsg, 500)
       }
     }
 
@@ -105,7 +113,11 @@ export async function POST(request: NextRequest) {
 
   if (delErr) {
     console.error('operatore-link remove', delErr)
-    return jsonResponse(false, delErr.message, 500)
+    let msg = delErr.message
+    if (msg.includes('permission denied')) {
+      msg += ' Esegui su Supabase: supabase_alter_admin_grants_profili_connessioni.sql'
+    }
+    return jsonResponse(false, msg, 500)
   }
 
   if (isRubricaRuolo(utente.ruolo) && isRubricaRuolo(operatore.ruolo)) {
