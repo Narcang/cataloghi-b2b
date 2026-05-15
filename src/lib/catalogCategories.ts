@@ -8,12 +8,24 @@ export const CATALOG_CATEGORIES = [
   'Studio',
   'Partner',
   'Agenti',
+  'Scontistiche',
 ] as const
 
 export type CatalogCategory = (typeof CATALOG_CATEGORIES)[number]
 
 /** Categoria riservata agli agenti (ruolo): i partner/distributori non la vedono in dashboard né in SELECT (RLS). */
 export const AGENTI_CATALOG_CATEGORY = 'Agenti' satisfies CatalogCategory
+
+/** Listini sconti / condizioni commerciali riservati agli agenti. */
+export const SCONISTICHE_CATALOG_CATEGORY = 'Scontistiche' satisfies CatalogCategory
+
+/** Categorie nell'area riservata agente (documentazione-agente). */
+export const AGENT_RESERVED_CATEGORIES = [
+  AGENTI_CATALOG_CATEGORY,
+  SCONISTICHE_CATALOG_CATEGORY,
+] as const satisfies readonly CatalogCategory[]
+
+const AGENT_RESERVED_SET = new Set<CatalogCategory>(AGENT_RESERVED_CATEGORIES)
 
 /** Categoria riservata: visibile in dashboard solo dopo login (non agli ospiti). */
 export const PARTNER_CATALOG_CATEGORY = 'Partner' satisfies CatalogCategory
@@ -45,6 +57,7 @@ export function isCatalogCategoryAllowedForStudioRole(categoria: string | null |
 const LOGIN_ONLY_CATALOG_CATEGORIES = new Set<CatalogCategory>([
   PARTNER_CATALOG_CATEGORY,
   AGENTI_CATALOG_CATEGORY,
+  SCONISTICHE_CATALOG_CATEGORY,
   STUDIO_CATALOG_CATEGORY,
 ])
 
@@ -76,11 +89,17 @@ export function partnerListiniDashboardCategories(): CatalogCategory[] {
 }
 
 export function isAgenteReservedCategory(categoria: string | null | undefined): boolean {
-  return categoria === AGENTI_CATALOG_CATEGORY
+  if (!categoria) return false
+  return AGENT_RESERVED_SET.has(categoria as CatalogCategory)
+}
+
+/** Cataloghi visibili solo agli agenti (non ai partner/distributori). */
+export function isAgentOnlyCatalogCategory(categoria: string | null | undefined): boolean {
+  return isAgenteReservedCategory(categoria)
 }
 
 export function agenteReservedDashboardCategories(): CatalogCategory[] {
-  return [AGENTI_CATALOG_CATEGORY]
+  return [...AGENT_RESERVED_CATEGORIES]
 }
 
 /**
@@ -88,7 +107,7 @@ export function agenteReservedDashboardCategories(): CatalogCategory[] {
  * - Ospite: niente Partner / Agenti / Studio (serve login).
  * - Ruolo `studio`: solo Family 15/20/Gres, Capsule Collection e linea Studio.
  * - Partner (distributore): categorie pubbliche; listini Partner/Studio in /dashboard/listini-partner.
- * - Agente: categorie pubbliche; linea Agenti in /dashboard/documentazione-agente.
+ * - Agente: categorie pubbliche; Agenti e Scontistiche in /dashboard/documentazione-agente.
  * - Altri utenti autenticati: tutte le categorie (inclusa Studio).
  */
 export function categoriesVisibleOnDashboard(
@@ -135,4 +154,5 @@ export const CATEGORY_TILE_IMAGE: Record<CatalogCategory, string> = {
   Studio: '/catalog/capsule-collection.png',
   Partner: '/catalog/capsule-collection.png',
   Agenti: '/catalog/family-gres.png',
+  Scontistiche: '/catalog/family-gres.png',
 }

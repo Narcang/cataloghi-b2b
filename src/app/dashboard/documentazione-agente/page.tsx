@@ -1,5 +1,4 @@
 import { redirect } from 'next/navigation'
-import { FileText } from 'lucide-react'
 import Header from '@/components/Header'
 import DashboardReservedBackNav from '@/components/dashboard/DashboardReservedBackNav'
 import DashboardCatalogSections from '@/components/dashboard/DashboardCatalogSections'
@@ -59,17 +58,11 @@ export default async function DocumentazioneAgentePage() {
           </h1>
           <p className="text-zinc-600 max-w-2xl text-lg">
             {profilo.nome_completo ? `Bentornato ${profilo.nome_completo}. ` : ''}
-            Qui trovi la documentazione riservata al tuo profilo agente.
+            Qui trovi documentazione, listini e scontistiche riservati al tuo profilo agente.
           </p>
         </div>
 
         <section id="cataloghi-documentazione-agente">
-          <div className="flex items-center justify-between mb-8 border-b border-black pb-4">
-            <h2 className="text-3xl md:text-4xl font-sans tracking-tight text-zinc-100 flex items-center gap-3">
-              <FileText className="text-white" /> Agenti
-            </h2>
-          </div>
-
           {cataloghiError ? (
             <div className="text-red-700 p-4 border border-red-300 bg-red-50 rounded-xl">
               Errore nel caricamento: {cataloghiError.message}

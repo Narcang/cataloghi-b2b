@@ -3,7 +3,11 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import CatalogPdfViewer from '@/components/CatalogPdfViewer'
-import { AGENTI_CATALOG_CATEGORY, isCatalogCategoryAllowedForStudioRole, isLoginOnlyCatalogCategory } from '@/lib/catalogCategories'
+import {
+  isAgentOnlyCatalogCategory,
+  isCatalogCategoryAllowedForStudioRole,
+  isLoginOnlyCatalogCategory,
+} from '@/lib/catalogCategories'
 
 export default async function CatalogoDetail({ params }: { params: Promise<{ catalogoId: string }> }) {
   const { catalogoId } = await params
@@ -64,12 +68,12 @@ export default async function CatalogoDetail({ params }: { params: Promise<{ cat
   if (user) {
     const { data: profiloCatalogo } = await supabase.from('profili').select('ruolo').eq('id', user.id).maybeSingle()
     const ruolo = profiloCatalogo?.ruolo ?? 'free'
-    if (ruolo === 'distributore' && catalogo.categoria === AGENTI_CATALOG_CATEGORY) {
+    if (ruolo === 'distributore' && isAgentOnlyCatalogCategory(catalogo.categoria)) {
       return (
         <div className="flex flex-col items-center justify-center min-h-screen p-8 text-center bg-[#fafafa]">
           <h1 className="text-3xl font-bold text-red-600 mb-4">Accesso non consentito</h1>
           <p className="text-zinc-600 max-w-md">
-            Questa area cataloghi è riservata agli agenti. Per assistenza contatta il tuo referente Ladiva.
+            Questo catalogo è riservato agli agenti. Per assistenza contatta il tuo referente Ladiva.
           </p>
           <Link href="/dashboard">
             <Button className="mt-8 bg-[#060d41] text-white hover:bg-[#0a155a]" variant="default">

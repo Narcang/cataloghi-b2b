@@ -1,4 +1,4 @@
-import { createClient } from '@/utils/supabase/server'
+﻿import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -6,7 +6,7 @@ import { Phone, MessageCircle, FileText, Users, Mail } from 'lucide-react'
 import Header from '@/components/Header'
 import DashboardHashScroll from '@/components/DashboardHashScroll'
 import {
-  AGENTI_CATALOG_CATEGORY,
+  isAgentOnlyCatalogCategory,
   CATALOG_CATEGORIES,
   categoriesVisibleOnDashboard,
   categoryToDomId,
@@ -106,7 +106,7 @@ export default async function Dashboard(props: {
 
   const cataloghiPerVista = (cataloghi ?? []).filter((c) => {
     if (!user && isLoginOnlyCatalogCategory(c.categoria as string | null)) return false
-    if (isPartner && c.categoria === AGENTI_CATALOG_CATEGORY) return false
+    if (isPartner && isAgentOnlyCatalogCategory(c.categoria as string | null)) return false
     if (isStudio && !isCatalogCategoryAllowedForStudioRole(c.categoria as string | null)) return false
     return true
   })
@@ -141,7 +141,7 @@ export default async function Dashboard(props: {
     ).sort((a, b) => a.localeCompare(b))
   }
 
-  // Per admin: operatori, utenti in attesa, elenco profili, collegamenti operatore–utente
+  // Per admin: operatori, utenti in attesa, elenco profili, collegamenti operatoreâ€“utente
   let operatoriAdmin: Operatore[] = []
   let profiliRegistrazionePendente: ProfiloGestioneRow[] = []
   let profiliGestioneAdmin: ProfiloGestioneRow[] = []
@@ -201,7 +201,7 @@ export default async function Dashboard(props: {
     connessioniUtenteOperatoreRows = (linksRes.data || []) as { utente_id: string; operatore_id: string }[]
   }
 
-  // Recupera fornitori associati a questo agente (se non è un profilo free)
+  // Recupera fornitori associati a questo agente (se non Ã¨ un profilo free)
   let fornitori: Fornitore[] = []
   if (user && ruoloCorrente !== 'free' && ruoloCorrente !== 'studio') {
     const { data: fornitoriRaw } = await supabase
@@ -249,7 +249,7 @@ export default async function Dashboard(props: {
     operatoriAssegnatiUtente = estratti.filter((o): o is Fornitore => Boolean(o))
   }
 
-  // Recupera agenti della stessa zona se l'utente è un distributore
+  // Recupera agenti della stessa zona se l'utente Ã¨ un distributore
   let agentiZona: Pick<Operatore, 'id' | 'nome_completo' | 'email' | 'telefono'>[] = []
   if (isPartner && profilo?.area_geografica) {
     const { data: agentiData } = await supabase
@@ -263,7 +263,7 @@ export default async function Dashboard(props: {
     }
   }
 
-  // Recupera partner della stessa zona se l'utente è un agente
+  // Recupera partner della stessa zona se l'utente Ã¨ un agente
   let partnerZona: Partner[] = []
   if (isAgente && profilo?.area_geografica) {
     const { data: partnerData } = await supabase
@@ -484,7 +484,7 @@ export default async function Dashboard(props: {
                   <Link prefetch={false} href={`/cataloghi/${catalogo.id}`} className="group block focus:outline-none focus:ring-2 focus:ring-[#060d41] rounded-none">
                     <div className="bg-white border border-black rounded-none overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-[#060d41] hover:shadow-[0_12px_40px_rgba(6,13,65,0.1)] flex flex-col h-full">
                       
-                      {/* Anteprima copertina: formato A4 verticale (ISO 210×297) */}
+                      {/* Anteprima copertina: formato A4 verticale (ISO 210Ã—297) */}
                       <div className="relative w-full aspect-[210/297] bg-zinc-100 overflow-hidden">
                         {catalogo.url_immagine ? (
                           <Image
@@ -521,7 +521,7 @@ export default async function Dashboard(props: {
                         </p>
                         
                         <div className="mt-auto pt-4 border-t border-black/50">
-                          <span className="text-sm text-white font-medium tracking-wider uppercase group-hover:opacity-100 transition-opacity">Sfoglia Catalogo →</span>
+                          <span className="text-sm text-white font-medium tracking-wider uppercase group-hover:opacity-100 transition-opacity">Sfoglia Catalogo â†’</span>
                         </div>
                       </div>
 
@@ -563,7 +563,7 @@ export default async function Dashboard(props: {
                       >
                         <input type="hidden" name="catalogo_id" value={catalogo.id} />
                         <label className="block text-xs text-zinc-600 font-medium uppercase tracking-wide">
-                          Aggiorna copertina (A4 verticale, 210×297 mm)
+                          Aggiorna copertina (A4 verticale, 210Ã—297 mm)
                         </label>
                         <input
                           name="file_copertina"
@@ -660,7 +660,7 @@ export default async function Dashboard(props: {
                       <h3 className="text-lg font-medium text-zinc-900 mb-1">{operatore.nome_completo || 'Operatore Senza Nome'}</h3>
                       <p className="text-zinc-600 text-sm">{operatore.email}</p>
                       <p className="text-zinc-600 text-xs mt-2 uppercase tracking-wide">
-                        {operatore.ruolo === 'distributore' ? 'partner' : operatore.ruolo} {operatore.area_geografica ? `• ${operatore.area_geografica}` : ''}
+                        {operatore.ruolo === 'distributore' ? 'partner' : operatore.ruolo} {operatore.area_geografica ? `â€¢ ${operatore.area_geografica}` : ''}
                       </p>
                     </div>
                     <div className="mt-auto flex gap-3 pt-6">
@@ -748,21 +748,6 @@ export default async function Dashboard(props: {
           </section>
         )}
 
-        {/* SEZIONE CONTATTI RAPIDI (FORNITORI / AGENTI) */}
-        {isAgente && (
-          <section id="scontistiche">
-            <div className="flex items-center justify-between mb-8 border-b border-black pb-4">
-              <h2 className="text-3xl md:text-4xl tracking-tight text-zinc-100 flex items-center gap-3 font-sans">
-                <FileText className="text-white" /> Scontistiche
-              </h2>
-            </div>
-            <div className="border border-black rounded-2xl bg-white p-6">
-              <p className="text-lg text-zinc-500">
-                Sezione scontistiche agente attiva. In questa fase i valori commerciali vengono gestiti dal Manager: contatta il tuo referente per il listino aggiornato.
-              </p>
-            </div>
-          </section>
-        )}
 
         {isAgente && (
           <section id="partner-zona">
@@ -854,9 +839,9 @@ export default async function Dashboard(props: {
       <footer className="ladiva-footer ladiva-footer--compact ladiva-footer-home-strip mt-auto">
         <div className="ladiva-home-footer-inner">
           <p className="text-sm max-w-3xl mx-auto text-center">
-            © {new Date().getFullYear()} Ladiva Ceramica · Carpineti (RE), Italia
-            {' · '}
-            <Link href="/" className="ladiva-footer-link whitespace-nowrap">← Torna alla Home Pubblica</Link>
+            Â© {new Date().getFullYear()} Ladiva Ceramica Â· Carpineti (RE), Italia
+            {' Â· '}
+            <Link href="/" className="ladiva-footer-link whitespace-nowrap">â† Torna alla Home Pubblica</Link>
           </p>
         </div>
       </footer>

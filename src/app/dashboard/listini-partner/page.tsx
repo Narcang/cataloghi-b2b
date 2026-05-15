@@ -6,7 +6,7 @@ import DashboardCatalogSections from '@/components/dashboard/DashboardCatalogSec
 import DashboardHashScroll from '@/components/DashboardHashScroll'
 import { createClient } from '@/utils/supabase/server'
 import {
-  AGENTI_CATALOG_CATEGORY,
+  isAgentOnlyCatalogCategory,
   isPartnerListiniCategory,
   partnerListiniDashboardCategories,
 } from '@/lib/catalogCategories'
@@ -43,7 +43,8 @@ export default async function ListiniPartnerPage() {
 
   const cataloghiListini = (cataloghi ?? []).filter(
     (c) =>
-      c.categoria !== AGENTI_CATALOG_CATEGORY && isPartnerListiniCategory(c.categoria as string | null),
+      !isAgentOnlyCatalogCategory(c.categoria as string | null) &&
+      isPartnerListiniCategory(c.categoria as string | null),
   )
 
   const categorie = partnerListiniDashboardCategories()

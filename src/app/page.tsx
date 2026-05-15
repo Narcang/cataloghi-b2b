@@ -3,7 +3,15 @@ import Link from 'next/link'
 import Header from '@/components/Header'
 import { CATALOG_CATEGORIES, CATEGORY_TILE_IMAGE, categoryToSlug } from '@/lib/catalogCategories'
 
-const HIDDEN_HOME_CATEGORIES = new Set(['Family Gres', 'Bricks', 'Metal', 'Studio', 'Partner', 'Agenti'])
+const HIDDEN_HOME_CATEGORIES = new Set([
+  'Family Gres',
+  'Bricks',
+  'Metal',
+  'Studio',
+  'Partner',
+  'Agenti',
+  'Scontistiche',
+])
 
 function decodeFlashMessage(raw: string): string {
   try {
