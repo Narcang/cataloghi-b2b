@@ -1,7 +1,7 @@
-import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { ArrowLeft, FileText } from 'lucide-react'
+import { FileText } from 'lucide-react'
 import Header from '@/components/Header'
+import DashboardReservedBackNav from '@/components/dashboard/DashboardReservedBackNav'
 import DashboardCatalogSections from '@/components/dashboard/DashboardCatalogSections'
 import DashboardHashScroll from '@/components/DashboardHashScroll'
 import { createClient } from '@/utils/supabase/server'
@@ -53,14 +53,7 @@ export default async function DocumentazioneAgentePage() {
 
       <main className="flex-1 max-w-[1200px] w-full mx-auto p-6 md:p-10 space-y-10">
         <div className="mt-4">
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center gap-2 text-sm font-medium text-zinc-600 hover:text-[#060d41] transition-colors mb-6"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Torna alla dashboard
-          </Link>
-          <span className="ladiva-label text-sm">Area riservata Agente</span>
+          <DashboardReservedBackNav areaLabel="area riservata agente" />
           <h1 className="text-3xl md:text-4xl font-semibold text-zinc-900 tracking-tight mt-1 mb-2">
             Documentazione riservata Agente
           </h1>
