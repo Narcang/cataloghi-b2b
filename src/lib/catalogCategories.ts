@@ -53,11 +53,42 @@ export function isLoginOnlyCatalogCategory(categoria: string | null | undefined)
   return LOGIN_ONLY_CATALOG_CATEGORIES.has(categoria as CatalogCategory)
 }
 
+/** Categorie catalogo visibili senza aree riservate (Family, Bricks, Metal, …). */
+export const PUBLIC_CATALOG_CATEGORIES = CATALOG_CATEGORIES.filter(
+  (c) => !LOGIN_ONLY_CATALOG_CATEGORIES.has(c),
+)
+
+/** Listini riservati ai partner (distributore): area dedicata in dashboard. */
+export const PARTNER_LISTINI_CATEGORIES = [
+  PARTNER_CATALOG_CATEGORY,
+  STUDIO_CATALOG_CATEGORY,
+] as const satisfies readonly CatalogCategory[]
+
+const PARTNER_LISTINI_SET = new Set<CatalogCategory>(PARTNER_LISTINI_CATEGORIES)
+
+export function isPartnerListiniCategory(categoria: string | null | undefined): boolean {
+  if (!categoria) return false
+  return PARTNER_LISTINI_SET.has(categoria as CatalogCategory)
+}
+
+export function partnerListiniDashboardCategories(): CatalogCategory[] {
+  return [...PARTNER_LISTINI_CATEGORIES]
+}
+
+export function isAgenteReservedCategory(categoria: string | null | undefined): boolean {
+  return categoria === AGENTI_CATALOG_CATEGORY
+}
+
+export function agenteReservedDashboardCategories(): CatalogCategory[] {
+  return [AGENTI_CATALOG_CATEGORY]
+}
+
 /**
  * Sezioni cataloghi in dashboard:
  * - Ospite: niente Partner / Agenti / Studio (serve login).
  * - Ruolo `studio`: solo Family 15/20/Gres, Capsule Collection e linea Studio.
- * - Partner (distributore): tutte tranne Agenti.
+ * - Partner (distributore): categorie pubbliche; listini Partner/Studio in /dashboard/listini-partner.
+ * - Agente: categorie pubbliche; linea Agenti in /dashboard/documentazione-agente.
  * - Altri utenti autenticati: tutte le categorie (inclusa Studio).
  */
 export function categoriesVisibleOnDashboard(
@@ -65,13 +96,13 @@ export function categoriesVisibleOnDashboard(
   isAuthenticated: boolean,
 ): CatalogCategory[] {
   if (!isAuthenticated) {
-    return CATALOG_CATEGORIES.filter((c) => !LOGIN_ONLY_CATALOG_CATEGORIES.has(c))
+    return [...PUBLIC_CATALOG_CATEGORIES]
   }
   if (ruoloProfilo === 'studio') {
     return CATALOG_CATEGORIES.filter((c) => STUDIO_ROLE_ALLOWED.has(c))
   }
-  if (ruoloProfilo === 'distributore') {
-    return CATALOG_CATEGORIES.filter((c) => c !== AGENTI_CATALOG_CATEGORY)
+  if (ruoloProfilo === 'distributore' || ruoloProfilo === 'agente') {
+    return [...PUBLIC_CATALOG_CATEGORIES]
   }
   return [...CATALOG_CATEGORIES]
 }

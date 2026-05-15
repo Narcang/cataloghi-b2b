@@ -1,0 +1,93 @@
+import Link from 'next/link'
+import { redirect } from 'next/navigation'
+import { ArrowLeft, FileText } from 'lucide-react'
+import Header from '@/components/Header'
+import DashboardCatalogSections from '@/components/dashboard/DashboardCatalogSections'
+import DashboardHashScroll from '@/components/DashboardHashScroll'
+import { createClient } from '@/utils/supabase/server'
+import {
+  AGENTI_CATALOG_CATEGORY,
+  isPartnerListiniCategory,
+  partnerListiniDashboardCategories,
+} from '@/lib/catalogCategories'
+
+export default async function ListiniPartnerPage() {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    redirect('/login')
+  }
+
+  const { data: profilo } = await supabase
+    .from('profili')
+    .select('nome_completo, ruolo, registrazione_approvata')
+    .eq('id', user.id)
+    .single()
+
+  if (profilo?.ruolo !== 'distributore') {
+    redirect('/dashboard')
+  }
+
+  if (profilo.registrazione_approvata === false) {
+    redirect('/dashboard')
+  }
+
+  const { data: cataloghi, error: cataloghiError } = await supabase
+    .from('cataloghi')
+    .select('id, titolo, categoria, url_immagine, stato_pubblicazione, area_geografica_target')
+    .eq('stato_pubblicazione', 'attivo')
+    .order('creato_il', { ascending: false })
+
+  const cataloghiListini = (cataloghi ?? []).filter(
+    (c) =>
+      c.categoria !== AGENTI_CATALOG_CATEGORY && isPartnerListiniCategory(c.categoria as string | null),
+  )
+
+  const categorie = partnerListiniDashboardCategories()
+
+  return (
+    <div className="ladiva-root ladiva-root-app-dark min-h-screen flex flex-col">
+      <Header />
+      <DashboardHashScroll />
+
+      <main className="flex-1 max-w-[1200px] w-full mx-auto p-6 md:p-10 space-y-10">
+        <div className="mt-4">
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center gap-2 text-sm font-medium text-zinc-600 hover:text-[#060d41] transition-colors mb-6"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Torna alla dashboard
+          </Link>
+          <span className="ladiva-label text-sm">Area riservata Partner</span>
+          <h1 className="text-3xl md:text-4xl font-semibold text-zinc-900 tracking-tight mt-1 mb-2">
+            Listini Partner
+          </h1>
+          <p className="text-zinc-600 max-w-2xl text-lg">
+            {profilo.nome_completo ? `Bentornato ${profilo.nome_completo}. ` : ''}
+            Qui trovi i listini Partner e la linea Studio riservati al tuo profilo.
+          </p>
+        </div>
+
+        <section id="cataloghi-listini-partner">
+          <div className="flex items-center justify-between mb-8 border-b border-black pb-4">
+            <h2 className="text-3xl md:text-4xl font-sans tracking-tight text-zinc-100 flex items-center gap-3">
+              <FileText className="text-white" /> Listini
+            </h2>
+          </div>
+
+          {cataloghiError ? (
+            <div className="text-red-700 p-4 border border-red-300 bg-red-50 rounded-xl">
+              Errore nel caricamento: {cataloghiError.message}
+            </div>
+          ) : (
+            <DashboardCatalogSections categorie={categorie} cataloghi={cataloghiListini} />
+          )}
+        </section>
+      </main>
+    </div>
+  )
+}

@@ -15,6 +15,8 @@ import {
 } from '@/lib/catalogCategories'
 import CreateCatalogForm from '@/components/admin/CreateCatalogForm'
 import AdminProfiliPanel, { type ProfiloGestioneRow } from '@/components/admin/AdminProfiliPanel'
+import AgenteDocumentazionePortal from '@/components/dashboard/AgenteDocumentazionePortal'
+import PartnerListiniPortal from '@/components/dashboard/PartnerListiniPortal'
 
 type Operatore = {
   id: string
@@ -637,6 +639,10 @@ export default async function Dashboard(props: {
             </div>
           )}
         </section>
+
+        {showFullDashboard && isPartner ? <PartnerListiniPortal /> : null}
+
+        {showFullDashboard && isAgente ? <AgenteDocumentazionePortal /> : null}
 
         {showFullDashboard && isManager && (
           <section id="operatori-admin">
