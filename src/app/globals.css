@@ -221,23 +221,28 @@
   background-color: #111 !important;
 }
 
-/* Pulsanti leggibili sulle card contatti (dashboard scura) */
-.ladiva-root-app-dark .ladiva-dashboard-btn-light {
-  background-color: #fff !important;
-  color: #18181b !important;
-  border-color: rgba(255, 255, 255, 0.35) !important;
-}
-
-.ladiva-root-app-dark .ladiva-dashboard-btn-light:hover {
-  background-color: #f4f4f5 !important;
-  color: #18181b !important;
-}
-
 .ladiva-root-app-dark .text-zinc-900,
 .ladiva-root-app-dark .text-zinc-800,
 .ladiva-root-app-dark .text-zinc-700,
 .ladiva-root-app-dark .text-zinc-600 {
   color: #fafafa !important;
+}
+
+/* Pulsanti leggibili sulle card contatti (dashboard scura): dopo override zinc */
+.ladiva-root-app-dark a.ladiva-dashboard-btn-light {
+  background-color: #fff !important;
+  color: #000 !important;
+  border-color: rgba(0, 0, 0, 0.2) !important;
+}
+
+.ladiva-root-app-dark a.ladiva-dashboard-btn-light:hover {
+  background-color: #f4f4f5 !important;
+  color: #000 !important;
+}
+
+.ladiva-root-app-dark a.ladiva-dashboard-btn-light svg {
+  color: #000 !important;
+  stroke: #000 !important;
 }
 
 /* Dashboard dark: testi leggermente più grandi (area riservata / manager) */
