@@ -521,13 +521,9 @@ export default async function Dashboard(props: {
                           </span>
                         </div>
                         {/* Sottotitolo finto o basato su un campo DB (al momento usiamo l'area geografica o un placeholder stile screenshot) */}
-                        <p className="text-zinc-600 text-base mb-4">
+                        <p className="text-zinc-600 text-base">
                           {(catalogo.categoria as string | null) || 'Senza categoria'} / {Array.isArray(catalogo.area_geografica_target) ? catalogo.area_geografica_target.join(', ') : catalogo.area_geografica_target || 'Globale'}
                         </p>
-                        
-                        <div className="mt-auto pt-4 border-t border-black/50">
-                          <span className="text-sm text-white font-medium tracking-wider uppercase group-hover:opacity-100 transition-opacity">Sfoglia Catalogo â†’</span>
-                        </div>
                       </div>
 
                     </div>
