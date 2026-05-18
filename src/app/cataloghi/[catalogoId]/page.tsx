@@ -8,9 +8,20 @@ import {
   isCatalogCategoryAllowedForStudioRole,
   isLoginOnlyCatalogCategory,
 } from '@/lib/catalogCategories'
+import {
+  publicCategoryCatalogReturnTo,
+  safeCatalogReturnTo,
+} from '@/lib/catalogNavigation'
 
-export default async function CatalogoDetail({ params }: { params: Promise<{ catalogoId: string }> }) {
+export default async function CatalogoDetail({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ catalogoId: string }>
+  searchParams?: Promise<{ returnTo?: string }>
+}) {
   const { catalogoId } = await params
+  const resolvedSearchParams = searchParams ? await searchParams : {}
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -135,11 +146,15 @@ export default async function CatalogoDetail({ params }: { params: Promise<{ cat
     .getPublicUrl(catalogo.url_file)
 
   const proxiedPdfUrl = `/api/pdf-proxy?url=${encodeURIComponent(publicUrlData.publicUrl)}`
+  const backHref = safeCatalogReturnTo(
+    resolvedSearchParams.returnTo,
+    publicCategoryCatalogReturnTo(catalogo.categoria as string | null),
+  )
 
   return (
     <div className="flex flex-col h-screen bg-white text-zinc-900">
       <header className="flex items-center p-3 bg-white border-b border-zinc-200 shadow-sm z-10 text-zinc-900">
-        <Link href="/dashboard">
+        <Link href={backHref}>
           <Button variant="ghost" size="icon" className="mr-3 text-zinc-900 hover:text-zinc-950 hover:bg-zinc-100">
             <ArrowLeft className="h-5 w-5 text-zinc-900" />
           </Button>

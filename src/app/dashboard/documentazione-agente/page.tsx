@@ -68,7 +68,11 @@ export default async function DocumentazioneAgentePage() {
               Errore nel caricamento: {cataloghiError.message}
             </div>
           ) : (
-            <DashboardCatalogSections categorie={categorie} cataloghi={cataloghiAgente} />
+            <DashboardCatalogSections
+              categorie={categorie}
+              cataloghi={cataloghiAgente}
+              catalogReturnToBase="/dashboard/documentazione-agente"
+            />
           )}
         </section>
       </main>

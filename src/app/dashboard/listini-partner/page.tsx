@@ -78,7 +78,11 @@ export default async function ListiniPartnerPage() {
               Errore nel caricamento: {cataloghiError.message}
             </div>
           ) : (
-            <DashboardCatalogSections categorie={categorie} cataloghi={cataloghiListini} />
+            <DashboardCatalogSections
+              categorie={categorie}
+              cataloghi={cataloghiListini}
+              catalogReturnToBase="/dashboard/listini-partner"
+            />
           )}
         </section>
       </main>

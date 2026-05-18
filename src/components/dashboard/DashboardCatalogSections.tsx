@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { FileText } from 'lucide-react'
 import { categoryToDomId, type CatalogCategory } from '@/lib/catalogCategories'
+import { catalogPdfHref, reservedAreaCatalogReturnTo } from '@/lib/catalogNavigation'
 
 export type DashboardCatalogo = {
   id: string
@@ -15,11 +16,14 @@ export type DashboardCatalogo = {
 type DashboardCatalogSectionsProps = {
   categorie: readonly CatalogCategory[]
   cataloghi: DashboardCatalogo[]
+  /** Base path area riservata per il back dal PDF (default: /dashboard). */
+  catalogReturnToBase?: string
 }
 
 export default function DashboardCatalogSections({
   categorie,
   cataloghi,
+  catalogReturnToBase = '/dashboard',
 }: DashboardCatalogSectionsProps) {
   return (
     <div className="space-y-10">
@@ -54,7 +58,10 @@ export default function DashboardCatalogSections({
                   <Link
                     key={catalogo.id}
                     prefetch={false}
-                    href={`/cataloghi/${catalogo.id}`}
+                    href={catalogPdfHref(
+                      catalogo.id,
+                      reservedAreaCatalogReturnTo(catalogReturnToBase, catalogo.categoria),
+                    )}
                     className="group block focus:outline-none focus:ring-2 focus:ring-[#060d41] rounded-none"
                   >
                     <div className="bg-white border border-black rounded-none overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-[#060d41] hover:shadow-[0_12px_40px_rgba(6,13,65,0.1)] flex flex-col h-full">

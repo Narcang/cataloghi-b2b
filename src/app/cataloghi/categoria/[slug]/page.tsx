@@ -5,6 +5,7 @@ import { FileText, ArrowLeft } from 'lucide-react'
 import Header from '@/components/Header'
 import { createClient } from '@/utils/supabase/server'
 import { categoryFromSlug, isLoginOnlyCatalogCategory } from '@/lib/catalogCategories'
+import { catalogPdfHref, publicCategoryCatalogReturnTo } from '@/lib/catalogNavigation'
 
 /** Elenco cataloghi pubblici: sempre dati aggiornati da Supabase. */
 export const dynamic = 'force-dynamic'
@@ -87,7 +88,7 @@ export default async function CataloghiPerCategoriaPage({ params }: { params: Pr
               <li key={catalogo.id}>
                 <Link
                   prefetch={false}
-                  href={`/cataloghi/${catalogo.id}`}
+                  href={catalogPdfHref(catalogo.id, publicCategoryCatalogReturnTo(categoria))}
                   className="group block rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                 >
                   <div className="flex h-full flex-col overflow-hidden border border-white/20 bg-white text-zinc-900 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-[#c9a96e] hover:shadow-[0_12px_40px_rgba(201,169,110,0.2)]">

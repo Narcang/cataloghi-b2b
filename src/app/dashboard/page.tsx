@@ -13,6 +13,7 @@ import {
   isCatalogCategoryAllowedForStudioRole,
   isLoginOnlyCatalogCategory,
 } from '@/lib/catalogCategories'
+import { catalogPdfHref, dashboardCatalogReturnTo } from '@/lib/catalogNavigation'
 import CreateCatalogForm from '@/components/admin/CreateCatalogForm'
 import AdminProfiliPanel, { type ProfiloGestioneRow } from '@/components/admin/AdminProfiliPanel'
 import AgenteDocumentazionePortal from '@/components/dashboard/AgenteDocumentazionePortal'
@@ -481,7 +482,11 @@ export default async function Dashboard(props: {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                       {items.map((catalogo) => (
                         <div key={catalogo.id} className="space-y-3">
-                  <Link prefetch={false} href={`/cataloghi/${catalogo.id}`} className="group block focus:outline-none focus:ring-2 focus:ring-[#060d41] rounded-none">
+                  <Link
+                    prefetch={false}
+                    href={catalogPdfHref(catalogo.id, dashboardCatalogReturnTo(catalogo.categoria))}
+                    className="group block focus:outline-none focus:ring-2 focus:ring-[#060d41] rounded-none"
+                  >
                     <div className="bg-white border border-black rounded-none overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-[#060d41] hover:shadow-[0_12px_40px_rgba(6,13,65,0.1)] flex flex-col h-full">
                       
                       {/* Anteprima copertina: formato A4 verticale (ISO 210Ã—297) */}
