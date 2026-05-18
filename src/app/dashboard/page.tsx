@@ -169,6 +169,7 @@ export default async function Dashboard(props: {
     let listaQuery = supabase
       .from('profili')
       .select(profiloSel)
+      .neq('ruolo', 'free')
       .or('registrazione_approvata.eq.true,registrazione_approvata.is.null')
       .order('nome_completo', { ascending: true, nullsFirst: false })
       .limit(150)

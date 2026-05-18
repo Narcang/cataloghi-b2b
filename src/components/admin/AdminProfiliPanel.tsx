@@ -29,12 +29,13 @@ const RUOLI_OPTIONS = ['free', 'studio', 'agente', 'distributore', 'fornitore', 
 
 type RuoloOption = (typeof RUOLI_OPTIONS)[number]
 
-const RUOLI_TAB: { id: RuoloOption; label: string }[] = [
+type RuoloTabId = 'admin' | 'agente' | 'distributore' | 'studio' | 'fornitore'
+
+const RUOLI_TAB: { id: RuoloTabId; label: string }[] = [
   { id: 'admin', label: 'Admin' },
   { id: 'agente', label: 'Agente' },
   { id: 'distributore', label: 'Partner' },
   { id: 'studio', label: 'Studio' },
-  { id: 'free', label: 'Free' },
   { id: 'fornitore', label: 'Fornitore' },
 ]
 
@@ -67,21 +68,25 @@ export default function AdminProfiliPanel({
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
-  const [ruoloAttivo, setRuoloAttivo] = useState<RuoloOption>('admin')
+  const [ruoloAttivo, setRuoloAttivo] = useState<RuoloTabId>('admin')
 
   const profiliPendentiOrdinati = useMemo(() => sortProfiliAlfabetico(profiliPendenti), [profiliPendenti])
 
+  const profiliListaGestione = useMemo(
+    () => profiliLista.filter((p) => p.ruolo !== 'free'),
+    [profiliLista],
+  )
+
   const profiliPerRuolo = useMemo(() => {
-    const map = new Map<RuoloOption, ProfiloGestioneRow[]>()
-    for (const ruolo of RUOLI_OPTIONS) map.set(ruolo, [])
-    for (const profilo of sortProfiliAlfabetico(profiliLista)) {
-      const ruolo = RUOLI_OPTIONS.includes(profilo.ruolo as RuoloOption)
-        ? (profilo.ruolo as RuoloOption)
-        : 'free'
+    const map = new Map<RuoloTabId, ProfiloGestioneRow[]>()
+    for (const tab of RUOLI_TAB) map.set(tab.id, [])
+    for (const profilo of sortProfiliAlfabetico(profiliListaGestione)) {
+      const ruolo = profilo.ruolo as RuoloTabId
+      if (!map.has(ruolo)) continue
       map.get(ruolo)!.push(profilo)
     }
     return map
-  }, [profiliLista])
+  }, [profiliListaGestione])
 
   const profiliRuoloAttivo = profiliPerRuolo.get(ruoloAttivo) ?? []
 
