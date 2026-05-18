@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Users, UserCheck } from 'lucide-react'
 
 export type ProfiloGestioneRow = {
@@ -27,6 +27,27 @@ export type OperatoreAssociazione = {
 
 const RUOLI_OPTIONS = ['free', 'studio', 'agente', 'distributore', 'fornitore', 'admin'] as const
 
+type RuoloOption = (typeof RUOLI_OPTIONS)[number]
+
+const RUOLI_TAB: { id: RuoloOption; label: string }[] = [
+  { id: 'admin', label: 'Admin' },
+  { id: 'agente', label: 'Agente' },
+  { id: 'distributore', label: 'Partner' },
+  { id: 'studio', label: 'Studio' },
+  { id: 'free', label: 'Free' },
+  { id: 'fornitore', label: 'Fornitore' },
+]
+
+function profiloSortKey(p: ProfiloGestioneRow): string {
+  return (p.nome_completo || p.email || p.id).trim().toLocaleLowerCase('it')
+}
+
+function sortProfiliAlfabetico(list: ProfiloGestioneRow[]): ProfiloGestioneRow[] {
+  return [...list].sort((a, b) =>
+    profiloSortKey(a).localeCompare(profiloSortKey(b), 'it', { sensitivity: 'base' }),
+  )
+}
+
 type Props = {
   currentUserId: string
   profiliPendenti: ProfiloGestioneRow[]
@@ -46,6 +67,29 @@ export default function AdminProfiliPanel({
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [ruoloAttivo, setRuoloAttivo] = useState<RuoloOption>('admin')
+
+  const profiliPendentiOrdinati = useMemo(() => sortProfiliAlfabetico(profiliPendenti), [profiliPendenti])
+
+  const profiliPerRuolo = useMemo(() => {
+    const map = new Map<RuoloOption, ProfiloGestioneRow[]>()
+    for (const ruolo of RUOLI_OPTIONS) map.set(ruolo, [])
+    for (const profilo of sortProfiliAlfabetico(profiliLista)) {
+      const ruolo = RUOLI_OPTIONS.includes(profilo.ruolo as RuoloOption)
+        ? (profilo.ruolo as RuoloOption)
+        : 'free'
+      map.get(ruolo)!.push(profilo)
+    }
+    return map
+  }, [profiliLista])
+
+  const profiliRuoloAttivo = profiliPerRuolo.get(ruoloAttivo) ?? []
+
+  useEffect(() => {
+    const firstConUtenti = RUOLI_TAB.find((tab) => (profiliPerRuolo.get(tab.id)?.length ?? 0) > 0)
+    if ((profiliPerRuolo.get(ruoloAttivo)?.length ?? 0) > 0) return
+    if (firstConUtenti) setRuoloAttivo(firstConUtenti.id)
+  }, [profiliPerRuolo, ruoloAttivo])
 
   const linksByUtente = useMemo(() => {
     const m = new Map<string, Set<string>>()
@@ -166,14 +210,14 @@ export default function AdminProfiliPanel({
         <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">{error}</div>
       ) : null}
 
-      {profiliPendenti.length > 0 ? (
+      {profiliPendentiOrdinati.length > 0 ? (
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-zinc-900 flex items-center gap-2">
             <UserCheck size={20} aria-hidden />
-            Registrazioni in attesa ({profiliPendenti.length})
+            Registrazioni in attesa ({profiliPendentiOrdinati.length})
           </h3>
           <ul className="space-y-4 list-none p-0 m-0">
-            {profiliPendenti.map((p) => (
+            {profiliPendentiOrdinati.map((p) => (
               <li key={p.id} className="rounded-xl border border-amber-200 bg-amber-50/60 p-4">
                 <p className="text-sm text-zinc-700 mb-3">
                   <strong>{p.nome_completo || 'Senza nome'}</strong> · {p.email} · {p.societa || '—'} · Tel.{' '}
@@ -282,11 +326,48 @@ export default function AdminProfiliPanel({
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-zinc-900">Utenti e operatori associati</h3>
         <p className="text-sm text-zinc-600">
-          Elenco filtrato come il Filtro Manager (area). Per ogni profilo puoi modificare i dati e spuntare i contatti
-          in rubrica: tra agente, partner e studio la connessione è reciproca (entrambi vedono nome, email e telefono se presenti).
+          Elenco filtrato come il Filtro Manager (area). Scegli un ruolo per vedere solo quegli utenti (ordine
+          alfabetico). Per ogni profilo puoi modificare i dati e spuntare i contatti in rubrica: tra agente, partner e
+          studio la connessione è reciproca (entrambi vedono nome, email e telefono se presenti).
         </p>
-        <ul className="space-y-3 list-none p-0 m-0">
-          {profiliLista.map((p) => {
+
+        <div className="flex flex-wrap gap-2" role="tablist" aria-label="Filtra utenti per ruolo">
+          {RUOLI_TAB.map((tab) => {
+            const count = profiliPerRuolo.get(tab.id)?.length ?? 0
+            const active = ruoloAttivo === tab.id
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() => setRuoloAttivo(tab.id)}
+                className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition-colors ${
+                  active
+                    ? 'border-[#060d41] bg-[#060d41] text-white'
+                    : 'border-black bg-white text-zinc-900 hover:bg-zinc-100'
+                }`}
+              >
+                {tab.label}
+                <span
+                  className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                    active ? 'bg-white/20 text-white' : 'bg-zinc-100 text-zinc-700'
+                  }`}
+                >
+                  {count}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+
+        <ul className="space-y-3 list-none p-0 m-0" role="tabpanel" aria-label={`Utenti ${ruoloAttivo}`}>
+          {profiliRuoloAttivo.length === 0 ? (
+            <li className="rounded-xl border border-dashed border-black/30 bg-zinc-50 px-4 py-6 text-center text-sm text-zinc-600">
+              Nessun utente con questo ruolo nel filtro area corrente.
+            </li>
+          ) : null}
+          {profiliRuoloAttivo.map((p) => {
             const readOnly = p.id === currentUserId || p.ruolo === 'admin'
             const selected = linksByUtente.get(p.id) ?? new Set<string>()
             return (
@@ -447,7 +528,7 @@ export default function AdminProfiliPanel({
               </li>
             )
           })}
-          </ul>
+        </ul>
       </div>
     </section>
   )

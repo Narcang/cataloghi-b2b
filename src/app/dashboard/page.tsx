@@ -170,7 +170,7 @@ export default async function Dashboard(props: {
       .from('profili')
       .select(profiloSel)
       .or('registrazione_approvata.eq.true,registrazione_approvata.is.null')
-      .order('creato_il', { ascending: false })
+      .order('nome_completo', { ascending: true, nullsFirst: false })
       .limit(150)
 
     if (areaFilter !== 'all') {
@@ -185,7 +185,7 @@ export default async function Dashboard(props: {
       .from('profili')
       .select(profiloSel)
       .eq('registrazione_approvata', false)
-      .order('creato_il', { ascending: false })
+      .order('nome_completo', { ascending: true, nullsFirst: false })
 
     const linksQuery = supabase.from('connessioni_utente_operatore').select('utente_id, operatore_id').limit(2000)
 
