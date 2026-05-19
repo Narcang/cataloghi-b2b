@@ -3,7 +3,20 @@
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ChevronDown, Menu, X, BookOpen, Phone, MapPin, LogIn, LogOut, LayoutDashboard, Download, UserPlus } from 'lucide-react'
+import {
+  ChevronDown,
+  Menu,
+  X,
+  BookOpen,
+  Phone,
+  MapPin,
+  LogIn,
+  LogOut,
+  LayoutDashboard,
+  Download,
+  UserPlus,
+  type LucideIcon,
+} from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import { User } from '@supabase/supabase-js'
 
@@ -12,12 +25,15 @@ type BeforeInstallPrompt = Event & {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
 }
 
-const menuItems = [
-  {
-    label: 'Cataloghi',
-    href: '/dashboard#cataloghi',
-    icon: BookOpen,
-  },
+type ProfiloRuolo = 'admin' | 'agente' | 'distributore' | 'studio' | 'free' | 'fornitore'
+
+type MenuItem = {
+  label: string
+  href: string
+  icon: LucideIcon
+}
+
+const menuItemsBase: MenuItem[] = [
   {
     label: 'Contatti Diretti',
     href: '/dashboard#contatti',
@@ -35,11 +51,33 @@ const menuItems = [
   },
 ]
 
+function catalogMenuItemForRole(ruolo: string | null, loggedIn: boolean): MenuItem {
+  if (!loggedIn) {
+    return { label: 'Cataloghi', href: '/dashboard#cataloghi', icon: BookOpen }
+  }
+  switch (ruolo as ProfiloRuolo | null) {
+    case 'admin':
+      return { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }
+    case 'agente':
+      return {
+        label: 'Documentazione Riservata',
+        href: '/dashboard/documentazione-agente',
+        icon: BookOpen,
+      }
+    case 'distributore':
+    case 'studio':
+      return { label: 'Listini', href: '/dashboard/listini-partner', icon: BookOpen }
+    default:
+      return { label: 'Cataloghi', href: '/dashboard#cataloghi', icon: BookOpen }
+  }
+}
+
 export default function Header() {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [accountMenuOpen, setAccountMenuOpen] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [user, setUser] = useState<User | null>(null)
+  const [profiloRuolo, setProfiloRuolo] = useState<string | null>(null)
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPrompt | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const accountMenuRef = useRef<HTMLDivElement>(null)
@@ -59,12 +97,26 @@ export default function Header() {
     
     // Gestione stato autenticazione
     const supabase = createClient()
+
+    async function syncProfiloRuolo(sessionUser: User | null) {
+      if (!sessionUser) {
+        setProfiloRuolo(null)
+        return
+      }
+      const { data } = await supabase.from('profili').select('ruolo').eq('id', sessionUser.id).maybeSingle()
+      setProfiloRuolo(data?.ruolo ?? null)
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
+      const sessionUser = session?.user ?? null
+      setUser(sessionUser)
+      void syncProfiloRuolo(sessionUser)
     })
-    
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
+      const sessionUser = session?.user ?? null
+      setUser(sessionUser)
+      void syncProfiloRuolo(sessionUser)
     })
 
     const onBeforeInstallPrompt = (event: Event) => {
@@ -103,6 +155,9 @@ export default function Header() {
     setMobileOpen(false)
   }
 
+  const catalogMenuItem = catalogMenuItemForRole(profiloRuolo, Boolean(user))
+  const menuItems: MenuItem[] = [catalogMenuItem, ...menuItemsBase]
+
   return (
     <header className="ladiva-header">
       <div className="ladiva-header-inner">
@@ -130,7 +185,7 @@ export default function Header() {
                 <div className="ladiva-dropdown-menu">
                   {menuItems.map((item) => (
                     <Link
-                      key={item.label}
+                      key={item.href}
                       href={item.href}
                       className="ladiva-dropdown-item"
                       onClick={() => setDropdownOpen(false)}
@@ -221,7 +276,7 @@ export default function Header() {
         <div className="ladiva-mobile-menu">
           {menuItems.map((item) => (
             <Link
-              key={item.label}
+              key={item.href}
               href={item.href}
               className="ladiva-mobile-item"
               onClick={() => setMobileOpen(false)}

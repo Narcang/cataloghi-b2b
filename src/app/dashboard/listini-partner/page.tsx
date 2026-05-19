@@ -9,6 +9,8 @@ import {
   isAgentOnlyCatalogCategory,
   isPartnerListiniCategory,
   partnerListiniDashboardCategories,
+  STUDIO_CATALOG_CATEGORY,
+  type CatalogCategory,
 } from '@/lib/catalogCategories'
 
 export default async function ListiniPartnerPage() {
@@ -27,7 +29,9 @@ export default async function ListiniPartnerPage() {
     .eq('id', user.id)
     .single()
 
-  if (profilo?.ruolo !== 'distributore') {
+  const isPartner = profilo?.ruolo === 'distributore'
+  const isStudio = profilo?.ruolo === 'studio'
+  if (!isPartner && !isStudio) {
     redirect('/dashboard')
   }
 
@@ -41,13 +45,16 @@ export default async function ListiniPartnerPage() {
     .eq('stato_pubblicazione', 'attivo')
     .order('creato_il', { ascending: false })
 
-  const cataloghiListini = (cataloghi ?? []).filter(
-    (c) =>
-      !isAgentOnlyCatalogCategory(c.categoria as string | null) &&
-      isPartnerListiniCategory(c.categoria as string | null),
-  )
+  const cataloghiListini = (cataloghi ?? []).filter((c) => {
+    if (isAgentOnlyCatalogCategory(c.categoria as string | null)) return false
+    if (!isPartnerListiniCategory(c.categoria as string | null)) return false
+    if (isStudio) return c.categoria === STUDIO_CATALOG_CATEGORY
+    return true
+  })
 
-  const categorie = partnerListiniDashboardCategories()
+  const categorie: CatalogCategory[] = isStudio
+    ? [STUDIO_CATALOG_CATEGORY]
+    : partnerListiniDashboardCategories()
 
   return (
     <div className="ladiva-root ladiva-root-app-dark min-h-screen flex flex-col">
@@ -56,13 +63,15 @@ export default async function ListiniPartnerPage() {
 
       <main className="flex-1 max-w-[1200px] w-full mx-auto p-6 md:p-10 space-y-10">
         <div className="mt-4">
-          <DashboardReservedBackNav areaLabel="area riservata partner" />
+          <DashboardReservedBackNav areaLabel={isStudio ? 'area riservata studio' : 'area riservata partner'} />
           <h1 className="text-3xl md:text-4xl font-semibold text-zinc-900 tracking-tight mt-1 mb-2">
-            Listini Partner
+            {isStudio ? 'Listini Studio' : 'Listini Partner'}
           </h1>
           <p className="text-zinc-600 max-w-2xl text-lg">
             {profilo.nome_completo ? `Bentornato ${profilo.nome_completo}. ` : ''}
-            Qui trovi i listini Partner e la linea Studio riservati al tuo profilo.
+            {isStudio
+              ? 'Qui trovi i listini della linea Studio riservati al tuo profilo.'
+              : 'Qui trovi i listini Partner e la linea Studio riservati al tuo profilo.'}
           </p>
         </div>
 
