@@ -8,6 +8,12 @@ export function buildPdfStoragePath(userId: string, originalFileName: string): s
   return `${userId}/${Date.now()}-${base}`
 }
 
+export function buildZipStoragePath(userId: string, originalFileName: string): string {
+  const sanitized = sanitizeStorageFileName(originalFileName)
+  const base = sanitized.toLowerCase().endsWith('.zip') ? sanitized : `${sanitized}.zip`
+  return `${userId}/${Date.now()}-${base}`
+}
+
 export function buildCoverStoragePath(userId: string, originalFileName: string): string {
   const sanitized = sanitizeStorageFileName(originalFileName)
   return `covers/${userId}/${Date.now()}-${sanitized}`
@@ -17,6 +23,12 @@ export function isValidUserPdfStoragePath(path: string, userId: string): boolean
   if (path.includes('..') || path.includes('//')) return false
   const escaped = userId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   return new RegExp(`^${escaped}/\\d+-[a-zA-Z0-9._-]+\\.pdf$`, 'i').test(path)
+}
+
+export function isValidUserZipStoragePath(path: string, userId: string): boolean {
+  if (path.includes('..') || path.includes('//')) return false
+  const escaped = userId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  return new RegExp(`^${escaped}/\\d+-[a-zA-Z0-9._-]+\\.zip$`, 'i').test(path)
 }
 
 export function isValidUserCoverStoragePath(path: string, userId: string): boolean {

@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/utils/supabase/server'
-import { CATALOG_CATEGORIES } from '@/lib/catalogCategories'
-import { isValidUserCoverStoragePath, isValidUserPdfStoragePath } from '@/lib/catalogStoragePaths'
-import { MAX_CATALOG_COVER_BYTES, MAX_CATALOG_PDF_BYTES } from '@/lib/catalogUploadLimits'
+import { CATALOG_CATEGORIES, STUDIO_CATALOG_CATEGORY } from '@/lib/catalogCategories'
+import {
+  isValidUserCoverStoragePath,
+  isValidUserPdfStoragePath,
+  isValidUserZipStoragePath,
+} from '@/lib/catalogStoragePaths'
+import { MAX_CATALOG_COVER_BYTES } from '@/lib/catalogUploadLimits'
+import { isZipStoragePath } from '@/lib/catalogFileKind'
 
 function parseAreeTarget(raw: string): string[] {
   return Array.from(
@@ -106,22 +111,38 @@ export async function POST(request: NextRequest) {
   }
 
   if (!filePdfStoragePath) {
-    return jsonResponse(false, 'Percorso file PDF mancante', 400)
+    return jsonResponse(false, 'Percorso file catalogo mancante', 400)
   }
 
-  if (!isValidUserPdfStoragePath(filePdfStoragePath, user.id)) {
-    return jsonResponse(false, 'Percorso PDF non valido o non coerente con l’utente', 400)
+  const isStudioZip = categoria === STUDIO_CATALOG_CATEGORY && isZipStoragePath(filePdfStoragePath)
+
+  if (categoria === STUDIO_CATALOG_CATEGORY) {
+    if (!isZipStoragePath(filePdfStoragePath)) {
+      return jsonResponse(false, 'La categoria Studio richiede un archivio ZIP', 400)
+    }
+    if (!isValidUserZipStoragePath(filePdfStoragePath, user.id)) {
+      return jsonResponse(false, 'Percorso ZIP non valido o non coerente con l’utente', 400)
+    }
+  } else {
+    if (isZipStoragePath(filePdfStoragePath)) {
+      return jsonResponse(false, 'Gli archivi ZIP sono consentiti solo per la categoria Studio', 400)
+    }
+    if (!isValidUserPdfStoragePath(filePdfStoragePath, user.id)) {
+      return jsonResponse(false, 'Percorso PDF non valido o non coerente con l’utente', 400)
+    }
   }
 
   if (fileCopertinaStoragePath && !isValidUserCoverStoragePath(fileCopertinaStoragePath, user.id)) {
     return jsonResponse(false, 'Percorso copertina non valido o non coerente con l’utente', 400)
   }
 
-  const pdfExists = await assertStorageFileExists(supabase, filePdfStoragePath)
-  if (!pdfExists) {
+  const fileExists = await assertStorageFileExists(supabase, filePdfStoragePath)
+  if (!fileExists) {
     return jsonResponse(
       false,
-      'Il PDF non risulta ancora caricato nello storage: riprova dopo l’upload o verifica i permessi del bucket.',
+      isStudioZip
+        ? 'Il file ZIP non risulta ancora caricato nello storage: riprova dopo l’upload o verifica i permessi del bucket.'
+        : 'Il PDF non risulta ancora caricato nello storage: riprova dopo l’upload o verifica i permessi del bucket.',
       400
     )
   }

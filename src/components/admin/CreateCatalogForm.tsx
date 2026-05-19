@@ -3,9 +3,13 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
-import { buildCoverStoragePath, buildPdfStoragePath } from '@/lib/catalogStoragePaths'
-import { MAX_CATALOG_COVER_BYTES, MAX_CATALOG_PDF_BYTES } from '@/lib/catalogUploadLimits'
-import type { CatalogCategory } from '@/lib/catalogCategories'
+import { buildCoverStoragePath, buildPdfStoragePath, buildZipStoragePath } from '@/lib/catalogStoragePaths'
+import {
+  MAX_CATALOG_COVER_BYTES,
+  MAX_CATALOG_PDF_BYTES,
+  MAX_CATALOG_STUDIO_ZIP_BYTES,
+} from '@/lib/catalogUploadLimits'
+import { STUDIO_CATALOG_CATEGORY, type CatalogCategory } from '@/lib/catalogCategories'
 
 type Props = { categories: readonly CatalogCategory[] }
 
@@ -13,6 +17,11 @@ export default function CreateCatalogForm({ categories }: Props) {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [categoriaSelezionata, setCategoriaSelezionata] = useState('')
+
+  const isStudioCategory = categoriaSelezionata === STUDIO_CATALOG_CATEGORY
+  const maxMainFileBytes = isStudioCategory ? MAX_CATALOG_STUDIO_ZIP_BYTES : MAX_CATALOG_PDF_BYTES
+  const maxMainFileMb = maxMainFileBytes / (1024 * 1024)
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -24,10 +33,11 @@ export default function CreateCatalogForm({ categories }: Props) {
     const categoria = String(fd.get('categoria') ?? '').trim()
     const area_geografica_target = String(fd.get('area_geografica_target') ?? '').trim()
     const stato_pubblicazione = String(fd.get('stato_pubblicazione') ?? 'bozza').trim()
-    const pdfInput = form.querySelector<HTMLInputElement>('input[name="file_pdf"]')
+    const mainInput = form.querySelector<HTMLInputElement>('input[name="file_pdf"]')
     const coverInput = form.querySelector<HTMLInputElement>('input[name="file_copertina"]')
-    const pdfFile = pdfInput?.files?.[0]
+    const mainFile = mainInput?.files?.[0]
     const coverFile = coverInput?.files?.[0]
+    const studioZip = categoria === STUDIO_CATALOG_CATEGORY
 
     if (!titolo || !categoria || !area_geografica_target) {
       setError('Titolo, categoria e area sono obbligatori')
@@ -37,19 +47,35 @@ export default function CreateCatalogForm({ categories }: Props) {
       setError('Categoria non valida')
       return
     }
-    if (!pdfFile || pdfFile.size === 0) {
-      setError('Seleziona un file PDF valido')
+    if (!mainFile || mainFile.size === 0) {
+      setError(studioZip ? 'Seleziona un file ZIP valido' : 'Seleziona un file PDF valido')
       return
     }
-    if (pdfFile.size > MAX_CATALOG_PDF_BYTES) {
-      setError(`Il PDF supera il limite di ${MAX_CATALOG_PDF_BYTES / (1024 * 1024)} MB`)
+    if (mainFile.size > maxMainFileBytes) {
+      setError(
+        studioZip
+          ? `Il file ZIP supera il limite di ${maxMainFileMb} MB`
+          : `Il PDF supera il limite di ${maxMainFileMb} MB`,
+      )
       return
     }
-    const isPdf =
-      pdfFile.type === 'application/pdf' || pdfFile.name.toLowerCase().endsWith('.pdf')
-    if (!isPdf) {
-      setError('Il file principale deve essere un PDF')
-      return
+
+    if (studioZip) {
+      const isZip =
+        mainFile.type === 'application/zip' ||
+        mainFile.type === 'application/x-zip-compressed' ||
+        mainFile.name.toLowerCase().endsWith('.zip')
+      if (!isZip) {
+        setError('Per la categoria Studio il file principale deve essere un archivio ZIP')
+        return
+      }
+    } else {
+      const isPdf =
+        mainFile.type === 'application/pdf' || mainFile.name.toLowerCase().endsWith('.pdf')
+      if (!isPdf) {
+        setError('Il file principale deve essere un PDF')
+        return
+      }
     }
 
     if (coverFile && coverFile.size > 0) {
@@ -75,21 +101,24 @@ export default function CreateCatalogForm({ categories }: Props) {
       return
     }
 
-    const pdfPath = buildPdfStoragePath(user.id, pdfFile.name)
+    const mainPath = studioZip
+      ? buildZipStoragePath(user.id, mainFile.name)
+      : buildPdfStoragePath(user.id, mainFile.name)
     let coverPath: string | null = null
     const uploadedPaths: string[] = []
 
     try {
-      const { error: pdfErr } = await supabase.storage
-        .from('cataloghi')
-        .upload(pdfPath, pdfFile, { contentType: 'application/pdf', upsert: false })
+      const { error: mainErr } = await supabase.storage.from('cataloghi').upload(mainPath, mainFile, {
+        contentType: studioZip ? 'application/zip' : 'application/pdf',
+        upsert: false,
+      })
 
-      if (pdfErr) {
-        console.error('PDF upload:', pdfErr)
-        setError(`Errore upload PDF: ${pdfErr.message}`)
+      if (mainErr) {
+        console.error('Catalog file upload:', mainErr)
+        setError(`Errore upload file: ${mainErr.message}`)
         return
       }
-      uploadedPaths.push(pdfPath)
+      uploadedPaths.push(mainPath)
 
       if (coverFile && coverFile.size > 0) {
         coverPath = buildCoverStoragePath(user.id, coverFile.name)
@@ -100,7 +129,7 @@ export default function CreateCatalogForm({ categories }: Props) {
         if (coverErr) {
           console.error('Cover upload:', coverErr)
           setError(`Errore upload copertina: ${coverErr.message}`)
-          await supabase.storage.from('cataloghi').remove([pdfPath])
+          await supabase.storage.from('cataloghi').remove([mainPath])
           return
         }
         uploadedPaths.push(coverPath)
@@ -115,7 +144,7 @@ export default function CreateCatalogForm({ categories }: Props) {
           categoria,
           area_geografica_target,
           stato_pubblicazione,
-          file_pdf_storage_path: pdfPath,
+          file_pdf_storage_path: mainPath,
           file_copertina_storage_path: coverPath,
         }),
       })
@@ -168,6 +197,7 @@ export default function CreateCatalogForm({ categories }: Props) {
           required
           defaultValue=""
           disabled={submitting}
+          onChange={(e) => setCategoriaSelezionata(e.target.value)}
           className="w-full h-10 rounded-md border border-black bg-zinc-50 px-3 text-sm text-zinc-900 disabled:opacity-60"
         >
           <option value="" disabled>
@@ -179,6 +209,11 @@ export default function CreateCatalogForm({ categories }: Props) {
             </option>
           ))}
         </select>
+        {isStudioCategory ? (
+          <p className="text-xs text-zinc-600">
+            Per Studio carica un archivio ZIP (max {maxMainFileMb} MB) scaricabile dagli utenti con profilo Studio.
+          </p>
+        ) : null}
       </div>
 
       <div className="space-y-2">
@@ -223,17 +258,30 @@ export default function CreateCatalogForm({ categories }: Props) {
 
       <div className="space-y-2 md:col-span-2">
         <label htmlFor="file_pdf" className="block text-xs text-zinc-600 font-medium uppercase tracking-wide">
-          File PDF (max {MAX_CATALOG_PDF_BYTES / (1024 * 1024)} MB, caricamento diretto su storage)
+          {isStudioCategory
+            ? `File ZIP Studio (max ${maxMainFileMb} MB, caricamento diretto su storage)`
+            : `File PDF (max ${maxMainFileMb} MB, caricamento diretto su storage)`}
         </label>
         <input
+          key={isStudioCategory ? 'catalog-file-zip' : 'catalog-file-pdf'}
           id="file_pdf"
           name="file_pdf"
           type="file"
-          accept="application/pdf,.pdf"
+          accept={
+            isStudioCategory
+              ? '.zip,application/zip,application/x-zip-compressed,application/octet-stream'
+              : '.pdf,application/pdf'
+          }
           required
           disabled={submitting}
           className="ladiva-file-input w-full rounded-md border border-black bg-zinc-50 px-3 py-2 text-sm text-zinc-900 file:mr-3 file:rounded-md file:border-0 file:bg-[#060d41] file:px-3 file:py-1.5 file:text-white file:font-semibold hover:file:bg-[#0a155a] disabled:opacity-60"
         />
+        {isStudioCategory ? (
+          <p className="text-xs text-zinc-500">
+            Nel dialogo di Windows, se i file ZIP non compaiono, imposta il filtro su &quot;Tutti i file
+            (*.*)&quot;.
+          </p>
+        ) : null}
       </div>
 
       <div className="space-y-2 md:col-span-2">

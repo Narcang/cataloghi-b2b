@@ -3,11 +3,13 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import CatalogPdfViewer from '@/components/CatalogPdfViewer'
+import CatalogStudioDownload from '@/components/CatalogStudioDownload'
 import {
   isAgentOnlyCatalogCategory,
   isCatalogCategoryAllowedForStudioRole,
   isLoginOnlyCatalogCategory,
 } from '@/lib/catalogCategories'
+import { getCatalogDeliveryMode } from '@/lib/catalogFileKind'
 import {
   publicCategoryCatalogReturnTo,
   safeCatalogReturnTo,
@@ -145,6 +147,7 @@ export default async function CatalogoDetail({
     .from('cataloghi')
     .getPublicUrl(catalogo.url_file)
 
+  const deliveryMode = getCatalogDeliveryMode(catalogo.categoria as string | null, catalogo.url_file)
   const proxiedPdfUrl = `/api/pdf-proxy?url=${encodeURIComponent(publicUrlData.publicUrl)}`
   const backHref = safeCatalogReturnTo(
     resolvedSearchParams.returnTo,
@@ -166,7 +169,11 @@ export default async function CatalogoDetail({
       </header>
       
       <main className="flex-1 relative overflow-hidden bg-zinc-100">
-        <CatalogPdfViewer url={proxiedPdfUrl} title={catalogo.titolo} />
+        {deliveryMode === 'zip-download' ? (
+          <CatalogStudioDownload catalogoId={catalogo.id} titolo={catalogo.titolo} />
+        ) : (
+          <CatalogPdfViewer url={proxiedPdfUrl} title={catalogo.titolo} />
+        )}
       </main>
     </div>
   )
