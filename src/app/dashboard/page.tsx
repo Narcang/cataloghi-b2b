@@ -143,7 +143,7 @@ export default async function Dashboard(props: {
     ).sort((a, b) => a.localeCompare(b))
   }
 
-  // Per admin: operatori, utenti in attesa, elenco profili, collegamenti operatoreâ€“utente
+  // Per admin: operatori, utenti in attesa, elenco profili, collegamenti operatore–utente
   let operatoriAdmin: Operatore[] = []
   let profiliRegistrazionePendente: ProfiloGestioneRow[] = []
   let profiliGestioneAdmin: ProfiloGestioneRow[] = []
@@ -204,7 +204,7 @@ export default async function Dashboard(props: {
     connessioniUtenteOperatoreRows = (linksRes.data || []) as { utente_id: string; operatore_id: string }[]
   }
 
-  // Recupera fornitori associati a questo agente (se non Ã¨ un profilo free)
+  // Recupera fornitori associati a questo agente (se non è un profilo free)
   let fornitori: Fornitore[] = []
   if (user && ruoloCorrente !== 'free' && ruoloCorrente !== 'studio') {
     const { data: fornitoriRaw } = await supabase
@@ -252,7 +252,7 @@ export default async function Dashboard(props: {
     operatoriAssegnatiUtente = estratti.filter((o): o is Fornitore => Boolean(o))
   }
 
-  // Recupera agenti della stessa zona se l'utente Ã¨ un distributore
+  // Recupera agenti della stessa zona se l'utente è un distributore
   let agentiZona: Pick<Operatore, 'id' | 'nome_completo' | 'email' | 'telefono'>[] = []
   if (isPartner && profilo?.area_geografica) {
     const { data: agentiData } = await supabase
@@ -266,7 +266,7 @@ export default async function Dashboard(props: {
     }
   }
 
-  // Recupera partner della stessa zona se l'utente Ã¨ un agente
+  // Recupera partner della stessa zona se l'utente è un agente
   let partnerZona: Partner[] = []
   if (isAgente && profilo?.area_geografica) {
     const { data: partnerData } = await supabase
@@ -661,7 +661,7 @@ export default async function Dashboard(props: {
                       <h3 className="text-lg font-medium text-zinc-900 mb-1">{operatore.nome_completo || 'Operatore Senza Nome'}</h3>
                       <p className="text-zinc-600 text-sm">{operatore.email}</p>
                       <p className="text-zinc-600 text-xs mt-2 uppercase tracking-wide">
-                        {operatore.ruolo === 'distributore' ? 'partner' : operatore.ruolo} {operatore.area_geografica ? `â€¢ ${operatore.area_geografica}` : ''}
+                        {operatore.ruolo === 'distributore' ? 'partner' : operatore.ruolo} {operatore.area_geografica ? `• ${operatore.area_geografica}` : ''}
                       </p>
                     </div>
                     <div className="mt-auto flex gap-3 pt-6">
@@ -840,9 +840,9 @@ export default async function Dashboard(props: {
       <footer className="ladiva-footer ladiva-footer--compact ladiva-footer-home-strip mt-auto">
         <div className="ladiva-home-footer-inner">
           <p className="text-sm max-w-3xl mx-auto text-center">
-            Â© {new Date().getFullYear()} Ladiva Ceramica Â· Carpineti (RE), Italia
-            {' Â· '}
-            <Link href="/" className="ladiva-footer-link whitespace-nowrap">â† Torna alla Home Pubblica</Link>
+            © {new Date().getFullYear()} Ladiva Ceramica · Carpineti (RE), Italia
+            {' · '}
+            <Link href="/" className="ladiva-footer-link whitespace-nowrap">← Torna alla Home Pubblica</Link>
           </p>
         </div>
       </footer>
