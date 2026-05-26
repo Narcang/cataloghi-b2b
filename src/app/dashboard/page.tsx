@@ -14,6 +14,7 @@ import {
   isLoginOnlyCatalogCategory,
 } from '@/lib/catalogCategories'
 import { catalogPdfHref, dashboardCatalogReturnTo } from '@/lib/catalogNavigation'
+import { compareCatalogTitoli } from '@/lib/catalogSorting'
 import CreateCatalogForm from '@/components/admin/CreateCatalogForm'
 import AdminProfiliPanel, { type ProfiloGestioneRow } from '@/components/admin/AdminProfiliPanel'
 import AgenteDocumentazionePortal from '@/components/dashboard/AgenteDocumentazionePortal'
@@ -457,9 +458,7 @@ export default async function Dashboard(props: {
                 const items = cataloghiPerVista
                   .filter((catalogo) => catalogo.categoria === categoria)
                   .sort((a, b) => {
-                    const byTitle = (a.titolo ?? '').localeCompare(b.titolo ?? '', 'it', {
-                      sensitivity: 'base',
-                    })
+                    const byTitle = compareCatalogTitoli(a.titolo, b.titolo)
                     if (byTitle !== 0) return byTitle
                     return a.id.localeCompare(b.id)
                   })

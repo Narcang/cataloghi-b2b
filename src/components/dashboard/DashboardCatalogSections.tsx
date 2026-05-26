@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { FileText } from 'lucide-react'
 import { categoryToDomId, type CatalogCategory } from '@/lib/catalogCategories'
 import { catalogPdfHref, reservedAreaCatalogReturnTo } from '@/lib/catalogNavigation'
+import { compareCatalogTitoli } from '@/lib/catalogSorting'
 
 export type DashboardCatalogo = {
   id: string
@@ -31,9 +32,7 @@ export default function DashboardCatalogSections({
         const items = cataloghi
           .filter((catalogo) => catalogo.categoria === categoria)
           .sort((a, b) => {
-            const byTitle = (a.titolo ?? '').localeCompare(b.titolo ?? '', 'it', {
-              sensitivity: 'base',
-            })
+            const byTitle = compareCatalogTitoli(a.titolo, b.titolo)
             if (byTitle !== 0) return byTitle
             return a.id.localeCompare(b.id)
           })

@@ -6,6 +6,7 @@ import Header from '@/components/Header'
 import { createClient } from '@/utils/supabase/server'
 import { categoryFromSlug, isLoginOnlyCatalogCategory } from '@/lib/catalogCategories'
 import { catalogPdfHref, publicCategoryCatalogReturnTo } from '@/lib/catalogNavigation'
+import { compareCatalogTitoli } from '@/lib/catalogSorting'
 
 /** Elenco cataloghi pubblici: sempre dati aggiornati da Supabase. */
 export const dynamic = 'force-dynamic'
@@ -54,7 +55,7 @@ export default async function CataloghiPerCategoriaPage({ params }: { params: Pr
   }
 
   const cataloghi = (rows ?? []).sort((a, b) => {
-    const byTitle = (a.titolo ?? '').localeCompare(b.titolo ?? '', 'it', { sensitivity: 'base' })
+    const byTitle = compareCatalogTitoli(a.titolo, b.titolo)
     if (byTitle !== 0) return byTitle
     return a.id.localeCompare(b.id)
   })
