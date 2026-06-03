@@ -25,14 +25,15 @@ export type OperatoreAssociazione = {
   area_geografica: string | null
 }
 
-const RUOLI_OPTIONS = ['free', 'studio', 'agente', 'distributore', 'fornitore', 'admin'] as const
+const RUOLI_OPTIONS = ['free', 'studio', 'agente', 'distributore', 'fornitore', 'manager', 'admin'] as const
 
 type RuoloOption = (typeof RUOLI_OPTIONS)[number]
 
-type RuoloTabId = 'admin' | 'agente' | 'distributore' | 'studio' | 'fornitore'
+type RuoloTabId = 'admin' | 'manager' | 'agente' | 'distributore' | 'studio' | 'fornitore'
 
 const RUOLI_TAB: { id: RuoloTabId; label: string }[] = [
   { id: 'admin', label: 'Admin' },
+  { id: 'manager', label: 'Manager' },
   { id: 'agente', label: 'Agente' },
   { id: 'distributore', label: 'Partner' },
   { id: 'studio', label: 'Studio' },
@@ -55,6 +56,8 @@ type Props = {
   profiliLista: ProfiloGestioneRow[]
   operatoriDisponibili: OperatoreAssociazione[]
   links: { utente_id: string; operatore_id: string }[]
+  /** Quando true (ruolo manager) il pannello è in sola lettura: nessun edit/delete/approvazione. */
+  readOnly?: boolean
 }
 
 export default function AdminProfiliPanel({
@@ -63,6 +66,7 @@ export default function AdminProfiliPanel({
   profiliLista,
   operatoriDisponibili,
   links,
+  readOnly = false,
 }: Props) {
   const router = useRouter()
   const [message, setMessage] = useState<string | null>(null)
@@ -226,100 +230,102 @@ export default function AdminProfiliPanel({
               <li key={p.id} className="rounded-xl border border-amber-200 bg-amber-50/60 p-4">
                 <p className="text-sm text-zinc-700 mb-3">
                   <strong>{p.nome_completo || 'Senza nome'}</strong> · {p.email} · {p.societa || '—'} · Tel.{' '}
-                  {p.telefono || '—'}
+                  {p.telefono || '—'} · Ruolo: {p.ruolo} · Area: {p.area_geografica || '—'}
                 </p>
-                <form
-                  className="grid grid-cols-1 md:grid-cols-2 gap-3"
-                  onSubmit={async (e) => {
-                    e.preventDefault()
-                    const fd = new FormData(e.currentTarget)
-                    await postUpdate(readForm(fd, p.id))
-                  }}
-                >
-                  <label className="block text-xs font-medium uppercase text-zinc-600">
-                    Nome completo
-                    <input
-                      name="nome_completo"
-                      type="text"
-                      defaultValue={p.nome_completo ?? ''}
-                      className="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
-                    />
-                  </label>
-                  <label className="block text-xs font-medium uppercase text-zinc-600">
-                    Email (profilo)
-                    <input
-                      name="email"
-                      type="email"
-                      defaultValue={p.email ?? ''}
-                      className="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
-                    />
-                  </label>
-                  <label className="block text-xs font-medium uppercase text-zinc-600">
-                    Telefono
-                    <input
-                      name="telefono"
-                      type="tel"
-                      defaultValue={p.telefono ?? ''}
-                      className="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
-                    />
-                  </label>
-                  <label className="block text-xs font-medium uppercase text-zinc-600">
-                    Società
-                    <input
-                      name="societa"
-                      type="text"
-                      defaultValue={p.societa ?? ''}
-                      className="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
-                    />
-                  </label>
-                  <label className="block text-xs font-medium uppercase text-zinc-600">
-                    Area geografica
-                    <input
-                      name="area_geografica"
-                      type="text"
-                      placeholder="Es. MONDO, Emilia Romagna"
-                      defaultValue={p.area_geografica ?? ''}
-                      className="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
-                    />
-                  </label>
-                  <label className="block text-xs font-medium uppercase text-zinc-600">
-                    Ruolo
-                    <select
-                      name="ruolo"
-                      defaultValue={p.ruolo}
-                      className="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
-                    >
-                      {RUOLI_OPTIONS.map((r) => (
-                        <option key={r} value={r}>
-                          {r}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label className="md:col-span-2 flex items-center gap-2 text-sm text-zinc-800">
-                    <input type="checkbox" name="registrazione_approvata" value="on" defaultChecked={false} className="rounded border-black" />
-                    Approva registrazione (accesso ai cataloghi secondo ruolo e area)
-                  </label>
-                  <div className="md:col-span-2 flex flex-wrap items-center gap-3">
-                    <button
-                      type="submit"
-                      disabled={deletingId === p.id}
-                      className="h-10 rounded-lg bg-[#060d41] text-white px-4 text-sm font-semibold hover:bg-[#0a155a] disabled:opacity-50"
-                    >
-                      Salva e conferma
-                    </button>
-                    {p.ruolo !== 'admin' && p.id !== currentUserId ? (
-                      <button
-                        type="button"
-                        disabled={deletingId === p.id}
-                        onClick={() => void postDelete(p.id)}
-                        className="h-10 rounded-lg border border-red-600 bg-white px-4 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50"
+                {!readOnly && (
+                  <form
+                    className="grid grid-cols-1 md:grid-cols-2 gap-3"
+                    onSubmit={async (e) => {
+                      e.preventDefault()
+                      const fd = new FormData(e.currentTarget)
+                      await postUpdate(readForm(fd, p.id))
+                    }}
+                  >
+                    <label className="block text-xs font-medium uppercase text-zinc-600">
+                      Nome completo
+                      <input
+                        name="nome_completo"
+                        type="text"
+                        defaultValue={p.nome_completo ?? ''}
+                        className="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
+                      />
+                    </label>
+                    <label className="block text-xs font-medium uppercase text-zinc-600">
+                      Email (profilo)
+                      <input
+                        name="email"
+                        type="email"
+                        defaultValue={p.email ?? ''}
+                        className="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
+                      />
+                    </label>
+                    <label className="block text-xs font-medium uppercase text-zinc-600">
+                      Telefono
+                      <input
+                        name="telefono"
+                        type="tel"
+                        defaultValue={p.telefono ?? ''}
+                        className="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
+                      />
+                    </label>
+                    <label className="block text-xs font-medium uppercase text-zinc-600">
+                      Società
+                      <input
+                        name="societa"
+                        type="text"
+                        defaultValue={p.societa ?? ''}
+                        className="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
+                      />
+                    </label>
+                    <label className="block text-xs font-medium uppercase text-zinc-600">
+                      Area geografica
+                      <input
+                        name="area_geografica"
+                        type="text"
+                        placeholder="Es. MONDO, Emilia Romagna"
+                        defaultValue={p.area_geografica ?? ''}
+                        className="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
+                      />
+                    </label>
+                    <label className="block text-xs font-medium uppercase text-zinc-600">
+                      Ruolo
+                      <select
+                        name="ruolo"
+                        defaultValue={p.ruolo}
+                        className="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
                       >
-                        {deletingId === p.id ? 'Eliminazione…' : 'Elimina utente'}
+                        {RUOLI_OPTIONS.map((r) => (
+                          <option key={r} value={r}>
+                            {r}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="md:col-span-2 flex items-center gap-2 text-sm text-zinc-800">
+                      <input type="checkbox" name="registrazione_approvata" value="on" defaultChecked={false} className="rounded border-black" />
+                      Approva registrazione (accesso ai cataloghi secondo ruolo e area)
+                    </label>
+                    <div className="md:col-span-2 flex flex-wrap items-center gap-3">
+                      <button
+                        type="submit"
+                        disabled={deletingId === p.id}
+                        className="h-10 rounded-lg bg-[#060d41] text-white px-4 text-sm font-semibold hover:bg-[#0a155a] disabled:opacity-50"
+                      >
+                        Salva e conferma
                       </button>
-                    ) : null}
-                  </div>
-                </form>
+                      {p.ruolo !== 'admin' && p.id !== currentUserId ? (
+                        <button
+                          type="button"
+                          disabled={deletingId === p.id}
+                          onClick={() => void postDelete(p.id)}
+                          className="h-10 rounded-lg border border-red-600 bg-white px-4 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50"
+                        >
+                          {deletingId === p.id ? 'Eliminazione…' : 'Elimina utente'}
+                        </button>
+                      ) : null}
+                    </div>
+                  </form>
+                )}
               </li>
             ))}
           </ul>
@@ -373,7 +379,7 @@ export default function AdminProfiliPanel({
             </li>
           ) : null}
           {profiliRuoloAttivo.map((p) => {
-            const readOnly = p.id === currentUserId || p.ruolo === 'admin'
+            const profiloReadOnly = readOnly || p.id === currentUserId || p.ruolo === 'admin'
             const selected = linksByUtente.get(p.id) ?? new Set<string>()
             return (
               <li key={p.id} className="rounded-xl border border-black bg-zinc-50/80">
@@ -389,8 +395,12 @@ export default function AdminProfiliPanel({
                     <span className="text-xs text-zinc-500">{p.area_geografica || 'Area non definita'}</span>
                   </summary>
                   <div className="border-t border-black/10 px-4 py-4 space-y-4 bg-white">
-                    {readOnly ? (
-                      <p className="text-sm text-zinc-600">Profilo admin o il tuo account: modifica da Supabase se necessario.</p>
+                    {profiloReadOnly ? (
+                      <p className="text-sm text-zinc-600">
+                        {readOnly
+                          ? 'Visualizzazione in sola lettura (ruolo Manager).'
+                          : 'Profilo admin o il tuo account: modifica da Supabase se necessario.'}
+                      </p>
                     ) : (
                       <>
                         <form

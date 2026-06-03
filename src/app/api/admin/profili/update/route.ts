@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
 
-const RUOLI_OK = new Set(['admin', 'agente', 'fornitore', 'distributore', 'free', 'studio'])
+const RUOLI_OK = new Set(['admin', 'manager', 'agente', 'fornitore', 'distributore', 'free', 'studio'])
 
 function jsonResponse(ok: boolean, message: string, status: number) {
   return NextResponse.json({ ok, message }, { status })

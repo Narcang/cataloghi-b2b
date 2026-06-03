@@ -79,7 +79,9 @@ export default async function Dashboard(props: {
     : null
 
   const ruoloCorrente = profilo?.ruolo ?? 'free'
-  const isManager = ruoloCorrente === 'admin'
+  const isAdmin = ruoloCorrente === 'admin'
+  /** isManager è true sia per admin che per manager: entrambi vedono utenti e cataloghi completi. */
+  const isManager = isAdmin || ruoloCorrente === 'manager'
   const isPartner = ruoloCorrente === 'distributore'
   const isAgente = ruoloCorrente === 'agente'
   const isStudio = ruoloCorrente === 'studio'
@@ -349,7 +351,8 @@ export default async function Dashboard(props: {
             }
             {user ? (
               <>
-                {isManager ? <span className="ml-3 inline-flex items-center rounded-full border border-black/25 px-2.5 py-0.5 text-xs font-semibold bg-[#060d41]/10 text-[#060d41]">Manager</span> : null}
+                {isAdmin ? <span className="ml-3 inline-flex items-center rounded-full border border-black/25 px-2.5 py-0.5 text-xs font-semibold bg-[#060d41]/10 text-[#060d41]">Admin</span> : null}
+                {ruoloCorrente === 'manager' ? <span className="ml-3 inline-flex items-center rounded-full border border-black/25 px-2.5 py-0.5 text-xs font-semibold bg-[#060d41]/10 text-[#060d41]">Manager</span> : null}
                 {isPartner ? <span className="ml-3 inline-flex items-center rounded-full border border-black/20 px-2.5 py-0.5 text-xs font-semibold bg-blue-50 text-[#060d41]">Partner</span> : null}
                 {isAgente ? <span className="ml-3 inline-flex items-center rounded-full border border-black/20 px-2.5 py-0.5 text-xs font-semibold bg-emerald-50 text-[#060d41]">Agente</span> : null}
                 {isStudio ? <span className="ml-3 inline-flex items-center rounded-full border border-black/20 px-2.5 py-0.5 text-xs font-semibold bg-violet-50 text-[#060d41]">Studio</span> : null}
@@ -372,7 +375,7 @@ export default async function Dashboard(props: {
           </div>
         ) : null}
 
-        {showFullDashboard && isManager && (
+        {showFullDashboard && isAdmin && (
           <section id="crea-catalogo" className="border border-black rounded-2xl bg-white p-6 space-y-5">
             <div>
               <h2 className="text-xl text-zinc-900 font-medium">Nuovo Catalogo</h2>
@@ -433,6 +436,7 @@ export default async function Dashboard(props: {
             profiliLista={profiliGestioneAdmin}
             operatoriDisponibili={operatoriAdmin}
             links={connessioniUtenteOperatoreRows}
+            readOnly={!isAdmin}
           />
         ) : null}
 
@@ -529,7 +533,7 @@ export default async function Dashboard(props: {
                     </div>
                   </Link>
 
-                  {isManager && (
+                  {isAdmin && (
                     <>
                       <form
                         action="/api/admin/cataloghi/status"
