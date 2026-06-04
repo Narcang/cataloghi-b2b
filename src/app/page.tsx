@@ -75,17 +75,9 @@ export default async function LandingPage(props: { searchParams?: Promise<{ mess
                   />
                 </div>
                 <div className="mt-3 flex w-full justify-end">
-                  <div className="text-right">
-                    <p
-                      className="block uppercase tracking-widest text-xs sm:text-sm opacity-50 leading-none mb-1"
-                      style={{ fontFamily: 'var(--font-sans)' }}
-                    >
-                      Catalogo Tecnico
-                    </p>
-                    <p className="ladiva-catalog-caption ladiva-catalog-caption--home inline-block text-right text-base sm:text-lg md:text-xl lg:text-2xl uppercase leading-snug">
-                      {categoryDisplayName(cat)}
-                    </p>
-                  </div>
+                  <p className="ladiva-catalog-caption ladiva-catalog-caption--home inline-block text-right text-base sm:text-lg md:text-xl lg:text-2xl uppercase leading-snug">
+                    Catalogo Tecnico {categoryDisplayName(cat)}
+                  </p>
                 </div>
               </Link>
             </li>
