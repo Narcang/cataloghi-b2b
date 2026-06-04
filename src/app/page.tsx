@@ -97,7 +97,10 @@ export default async function LandingPage(props: { searchParams?: Promise<{ mess
                     />
                   </div>
                   {/* Testo su sfondo scuro a destra */}
-                  <div className="flex flex-1 flex-col justify-center bg-black px-4 py-3 transition-colors duration-200 group-hover:bg-neutral-900">
+                  <div
+                    className="flex flex-1 flex-col justify-center bg-black px-4 py-3 transition-colors duration-200 group-hover:bg-neutral-900"
+                    style={{ fontFamily: 'var(--font-sans)' }}
+                  >
                     <p className="text-white font-bold uppercase tracking-wider text-sm sm:text-base md:text-lg leading-tight">
                       {cat}
                     </p>
