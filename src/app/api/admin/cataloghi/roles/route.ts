@@ -4,6 +4,7 @@ import { RUOLI_CATALOGO } from '@/lib/catalogRoles'
 
 const RUOLI_VALIDI = new Set<string>(RUOLI_CATALOGO.map((r) => r.value))
 
+
 function redirectWithMessage(request: NextRequest, message: string) {
   const url = new URL(`/dashboard?message=${encodeURIComponent(message)}`, request.url)
   return NextResponse.redirect(url, { status: 303 })

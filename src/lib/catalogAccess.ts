@@ -30,8 +30,8 @@ export function getCatalogAccessDenial(
   const catalogoNonPubblico = catalogo.stato_pubblicazione !== 'attivo'
   const ruolo = options.ruolo ?? 'free'
 
-  // Admin e manager vedono tutto, incluse bozze
-  if (ruolo === 'admin' || ruolo === 'manager') return null
+  // Admin vede tutto, incluse bozze
+  if (ruolo === 'admin') return null
 
   // --- Sistema basato su ruoli_visibili (nuovo) ---
   const rv = catalogo.ruoli_visibili
