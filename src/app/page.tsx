@@ -21,6 +21,12 @@ const HIDDEN_HOME_CATEGORIES = new Set([
 /** Categorie mostrate nel blocco "Catalogo Fotografico" (3 pulsanti sovrapposti). */
 const CATALOGO_FOTO_CATEGORIES: CatalogCategory[] = ['Family 15', 'Family 20', 'Capsule Collection']
 
+/** Etichetta visiva della categoria (es. "Capsule Collection 20" per display, slug rimane invariato). */
+function categoryDisplayName(cat: CatalogCategory): string {
+  if (cat === 'Capsule Collection') return 'Capsule Collection 20'
+  return cat
+}
+
 function decodeFlashMessage(raw: string): string {
   try {
     return decodeURIComponent(raw)
@@ -69,9 +75,17 @@ export default async function LandingPage(props: { searchParams?: Promise<{ mess
                   />
                 </div>
                 <div className="mt-3 flex w-full justify-end">
-                  <p className="ladiva-catalog-caption ladiva-catalog-caption--home inline-block text-right text-base sm:text-lg md:text-xl lg:text-2xl uppercase leading-snug">
-                    {cat}
-                  </p>
+                  <div className="text-right">
+                    <p
+                      className="block uppercase tracking-widest text-xs sm:text-sm opacity-50 leading-none mb-1"
+                      style={{ fontFamily: 'var(--font-sans)' }}
+                    >
+                      Catalogo Tecnico
+                    </p>
+                    <p className="ladiva-catalog-caption ladiva-catalog-caption--home inline-block text-right text-base sm:text-lg md:text-xl lg:text-2xl uppercase leading-snug">
+                      {categoryDisplayName(cat)}
+                    </p>
+                  </div>
                 </div>
               </Link>
             </li>
@@ -101,10 +115,10 @@ export default async function LandingPage(props: { searchParams?: Promise<{ mess
                     className="flex flex-1 flex-col justify-center bg-black px-4 py-3 transition-colors duration-200 group-hover:bg-neutral-900"
                     style={{ fontFamily: 'var(--font-sans)' }}
                   >
-                    <p className="text-white font-bold uppercase tracking-wider text-sm sm:text-base md:text-lg leading-tight">
-                      {cat}
+                    <p className="text-white font-bold uppercase tracking-wider text-base sm:text-lg md:text-xl leading-tight">
+                      {categoryDisplayName(cat)}
                     </p>
-                    <p className="mt-1 text-red-600 font-bold uppercase tracking-widest text-[10px] sm:text-xs md:text-sm leading-snug">
+                    <p className="mt-1 text-red-600 font-bold uppercase tracking-widest text-xs sm:text-sm md:text-base leading-snug">
                       Catalogo Fotografico
                     </p>
                   </div>
