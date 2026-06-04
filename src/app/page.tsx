@@ -1,7 +1,12 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import Header from '@/components/Header'
-import { CATALOG_CATEGORIES, CATEGORY_TILE_IMAGE, categoryToSlug } from '@/lib/catalogCategories'
+import {
+  CATALOG_CATEGORIES,
+  CATEGORY_TILE_IMAGE,
+  categoryToSlug,
+  type CatalogCategory,
+} from '@/lib/catalogCategories'
 
 const HIDDEN_HOME_CATEGORIES = new Set([
   'Family Gres',
@@ -12,6 +17,9 @@ const HIDDEN_HOME_CATEGORIES = new Set([
   'Agenti',
   'Scontistiche',
 ])
+
+/** Categorie mostrate nel blocco "Catalogo Fotografico" (3 pulsanti sovrapposti). */
+const CATALOGO_FOTO_CATEGORIES: CatalogCategory[] = ['Family 15', 'Family 20', 'Capsule Collection']
 
 function decodeFlashMessage(raw: string): string {
   try {
@@ -68,6 +76,39 @@ export default async function LandingPage(props: { searchParams?: Promise<{ mess
               </Link>
             </li>
           ))}
+
+          {/* Blocco 3 pulsanti "Catalogo Fotografico" – occupa lo stesso spazio di un quadrato */}
+          <li>
+            <div className="aspect-square flex flex-col gap-2">
+              {CATALOGO_FOTO_CATEGORIES.map((cat) => (
+                <Link
+                  key={cat}
+                  href={`/cataloghi/categoria/${categoryToSlug(cat)}`}
+                  className="group flex flex-1 min-h-0 overflow-hidden shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[#060d41]"
+                >
+                  {/* Foto a sinistra */}
+                  <div className="relative w-2/5 flex-shrink-0 overflow-hidden">
+                    <Image
+                      src={CATEGORY_TILE_IMAGE[cat]}
+                      alt={cat}
+                      fill
+                      className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                      sizes="(max-width: 640px) 40vw, 20vw"
+                    />
+                  </div>
+                  {/* Testo su sfondo scuro a destra */}
+                  <div className="flex flex-1 flex-col justify-center bg-black px-4 py-3 transition-colors duration-200 group-hover:bg-neutral-900">
+                    <p className="text-white font-bold uppercase tracking-wider text-sm sm:text-base md:text-lg leading-tight">
+                      {cat}
+                    </p>
+                    <p className="mt-1 text-red-600 font-bold uppercase tracking-widest text-[10px] sm:text-xs md:text-sm leading-snug">
+                      Catalogo Fotografico
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </li>
         </ul>
       </main>
 
