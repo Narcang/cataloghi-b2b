@@ -10,6 +10,7 @@ import {
   MAX_CATALOG_STUDIO_ZIP_BYTES,
 } from '@/lib/catalogUploadLimits'
 import { STUDIO_CATALOG_CATEGORY, type CatalogCategory } from '@/lib/catalogCategories'
+import { RUOLI_CATALOGO, RUOLI_CATALOGO_DEFAULT, type RuoloCatalogo } from '@/lib/catalogRoles'
 
 type Props = { categories: readonly CatalogCategory[] }
 
@@ -18,6 +19,7 @@ export default function CreateCatalogForm({ categories }: Props) {
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [categoriaSelezionata, setCategoriaSelezionata] = useState('')
+  const [ruoliSelezionati, setRuoliSelezionati] = useState<RuoloCatalogo[]>(RUOLI_CATALOGO_DEFAULT)
 
   const isStudioCategory = categoriaSelezionata === STUDIO_CATALOG_CATEGORY
   const maxMainFileBytes = isStudioCategory ? MAX_CATALOG_STUDIO_ZIP_BYTES : MAX_CATALOG_PDF_BYTES
@@ -31,7 +33,6 @@ export default function CreateCatalogForm({ categories }: Props) {
     const fd = new FormData(form)
     const titolo = String(fd.get('titolo') ?? '').trim()
     const categoria = String(fd.get('categoria') ?? '').trim()
-    const area_geografica_target = String(fd.get('area_geografica_target') ?? '').trim()
     const stato_pubblicazione = String(fd.get('stato_pubblicazione') ?? 'bozza').trim()
     const mainInput = form.querySelector<HTMLInputElement>('input[name="file_pdf"]')
     const coverInput = form.querySelector<HTMLInputElement>('input[name="file_copertina"]')
@@ -39,8 +40,12 @@ export default function CreateCatalogForm({ categories }: Props) {
     const coverFile = coverInput?.files?.[0]
     const studioZip = categoria === STUDIO_CATALOG_CATEGORY
 
-    if (!titolo || !categoria || !area_geografica_target) {
-      setError('Titolo, categoria e area sono obbligatori')
+    if (!titolo || !categoria) {
+      setError('Titolo e categoria sono obbligatori')
+      return
+    }
+    if (ruoliSelezionati.length === 0) {
+      setError('Seleziona almeno un ruolo che può vedere questo catalogo')
       return
     }
     if (!categories.includes(categoria as CatalogCategory)) {
@@ -142,7 +147,7 @@ export default function CreateCatalogForm({ categories }: Props) {
         body: JSON.stringify({
           titolo,
           categoria,
-          area_geografica_target,
+          ruoli_visibili: ruoliSelezionati,
           stato_pubblicazione,
           file_pdf_storage_path: mainPath,
           file_copertina_storage_path: coverPath,
@@ -216,25 +221,31 @@ export default function CreateCatalogForm({ categories }: Props) {
         ) : null}
       </div>
 
-      <div className="space-y-2">
-        <label
-          htmlFor="area_geografica_target"
-          className="block text-xs text-zinc-600 font-medium uppercase tracking-wide"
-        >
-          Area Geografica
-        </label>
-        <input
-          id="area_geografica_target"
-          name="area_geografica_target"
-          type="text"
-          required
-          placeholder="Es. Emilia Romagna"
-          disabled={submitting}
-          className="w-full h-10 rounded-md border border-black bg-zinc-50 px-3 text-sm text-zinc-900 placeholder:text-zinc-400 disabled:opacity-60"
-        />
-        <p className="text-xs text-zinc-600">
-          Puoi inserire piu aree separate da virgola (es. Liguria, Lazio oppure Italia, Francia).
+      <div className="space-y-2 md:col-span-2">
+        <p className="block text-xs text-zinc-600 font-medium uppercase tracking-wide">
+          Chi può vedere questo catalogo
         </p>
+        <div className="flex flex-wrap gap-x-5 gap-y-2">
+          {RUOLI_CATALOGO.map((r) => (
+            <label key={r.value} className="flex items-center gap-2 text-sm text-zinc-900 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                disabled={submitting}
+                checked={ruoliSelezionati.includes(r.value)}
+                onChange={(e) =>
+                  setRuoliSelezionati((prev) =>
+                    e.target.checked ? [...prev, r.value] : prev.filter((v) => v !== r.value),
+                  )
+                }
+                className="rounded border-black accent-[#060d41]"
+              />
+              {r.label}
+            </label>
+          ))}
+        </div>
+        {ruoliSelezionati.length === 0 ? (
+          <p className="text-xs text-red-600">Seleziona almeno un ruolo.</p>
+        ) : null}
       </div>
 
       <div className="space-y-2">

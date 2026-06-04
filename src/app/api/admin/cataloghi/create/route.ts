@@ -10,17 +10,6 @@ import {
 import { MAX_CATALOG_COVER_BYTES } from '@/lib/catalogUploadLimits'
 import { isZipStoragePath } from '@/lib/catalogFileKind'
 
-function parseAreeTarget(raw: string): string[] {
-  return Array.from(
-    new Set(
-      raw
-        .split(',')
-        .map((value) => value.trim())
-        .filter(Boolean)
-    )
-  )
-}
-
 function jsonResponse(ok: boolean, message: string, status: number) {
   return NextResponse.json({ ok, message }, { status })
 }
@@ -41,7 +30,8 @@ async function assertStorageFileExists(
 type CreateCatalogJsonBody = {
   titolo?: string
   categoria?: string
-  area_geografica_target?: string
+  /** Ruoli che possono vedere il catalogo (es. ['agente', 'distributore']). */
+  ruoli_visibili?: string[]
   stato_pubblicazione?: string
   /** Path oggetto nel bucket `cataloghi` dopo upload client (es. `{userId}/{ts}-file.pdf`). */
   file_pdf_storage_path?: string
@@ -92,8 +82,9 @@ export async function POST(request: NextRequest) {
 
   const titolo = String(body.titolo ?? '').trim()
   const categoria = String(body.categoria ?? '').trim()
-  const areaGeograficaTargetRaw = String(body.area_geografica_target ?? '').trim()
-  const areeTarget = parseAreeTarget(areaGeograficaTargetRaw)
+  const ruoliVisibili = Array.isArray(body.ruoli_visibili)
+    ? body.ruoli_visibili.map((r) => String(r).trim()).filter(Boolean)
+    : []
   const statoPubblicazione = String(body.stato_pubblicazione ?? 'bozza').trim()
   const filePdfStoragePath = String(body.file_pdf_storage_path ?? '').trim()
   const coverPathRaw = body.file_copertina_storage_path
@@ -102,8 +93,11 @@ export async function POST(request: NextRequest) {
       ? null
       : String(coverPathRaw).trim()
 
-  if (!titolo || areeTarget.length === 0 || !categoria) {
-    return jsonResponse(false, 'Titolo, categoria e area sono obbligatori', 400)
+  if (!titolo || !categoria) {
+    return jsonResponse(false, 'Titolo e categoria sono obbligatori', 400)
+  }
+  if (ruoliVisibili.length === 0) {
+    return jsonResponse(false, 'Seleziona almeno un ruolo per la visibilità del catalogo', 400)
   }
 
   if (!CATALOG_CATEGORIES.includes(categoria as (typeof CATALOG_CATEGORIES)[number])) {
@@ -166,7 +160,8 @@ export async function POST(request: NextRequest) {
   const { error: insertError } = await supabase.from('cataloghi').insert({
     titolo,
     categoria,
-    area_geografica_target: areeTarget,
+    ruoli_visibili: ruoliVisibili,
+    area_geografica_target: ['MONDO'],
     stato_pubblicazione: statoValido,
     url_file: filePdfStoragePath,
     url_immagine: urlImmagine,

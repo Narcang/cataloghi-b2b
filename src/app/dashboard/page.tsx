@@ -15,6 +15,7 @@ import {
 } from '@/lib/catalogCategories'
 import { catalogPdfHref, dashboardCatalogReturnTo } from '@/lib/catalogNavigation'
 import { compareCatalogTitoli } from '@/lib/catalogSorting'
+import { RUOLI_CATALOGO } from '@/lib/catalogRoles'
 import CreateCatalogForm from '@/components/admin/CreateCatalogForm'
 import AdminProfiliPanel, { type ProfiloGestioneRow } from '@/components/admin/AdminProfiliPanel'
 import AgenteDocumentazionePortal from '@/components/dashboard/AgenteDocumentazionePortal'
@@ -92,10 +93,6 @@ export default async function Dashboard(props: {
     .from('cataloghi')
     .select('*')
     .order('creato_il', { ascending: false })
-
-  if (isManager && areaFilter !== 'all') {
-    cataloghiQuery = cataloghiQuery.contains('area_geografica_target', [areaFilter])
-  }
 
   if (isManager && nomeFilter.length > 0) {
     cataloghiQuery = cataloghiQuery.ilike('titolo', `%${escapeIlikePattern(nomeFilter)}%`)
@@ -589,30 +586,36 @@ export default async function Dashboard(props: {
                       </form>
 
                       <form
-                        action="/api/admin/cataloghi/areas"
+                        action="/api/admin/cataloghi/roles"
                         method="POST"
                         className="bg-white border border-black rounded-xl p-3 space-y-2"
                       >
                         <input type="hidden" name="catalogo_id" value={catalogo.id} />
-                        <label className="block text-xs text-zinc-600 font-medium uppercase tracking-wide">
-                          Aree Geografiche
-                        </label>
-                        <input
-                          name="aree_geografiche"
-                          type="text"
-                          defaultValue={
-                            Array.isArray(catalogo.area_geografica_target)
-                              ? catalogo.area_geografica_target.join(', ')
-                              : catalogo.area_geografica_target || ''
-                          }
-                          placeholder="Es. Liguria, Lazio oppure Italia, Francia"
-                          className="w-full h-9 rounded-md border border-black bg-zinc-50 px-3 text-sm text-zinc-900 placeholder:text-zinc-600"
-                        />
+                        <p className="block text-xs text-zinc-600 font-medium uppercase tracking-wide">
+                          Chi può vedere questo catalogo
+                        </p>
+                        <div className="flex flex-col gap-1.5">
+                          {RUOLI_CATALOGO.map((r) => {
+                            const rv = (catalogo as { ruoli_visibili?: string[] | null }).ruoli_visibili ?? []
+                            return (
+                              <label key={r.value} className="flex items-center gap-2 text-sm text-zinc-800 cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  name="ruoli_visibili"
+                                  value={r.value}
+                                  defaultChecked={rv.includes(r.value)}
+                                  className="rounded border-black accent-[#060d41]"
+                                />
+                                {r.label}
+                              </label>
+                            )
+                          })}
+                        </div>
                         <button
                           type="submit"
                           className="w-full h-9 rounded-md bg-[#060d41] text-white text-sm font-semibold hover:bg-[#0a155a] transition-colors"
                         >
-                          Salva Aree
+                          Salva Visibilità
                         </button>
                       </form>
 
