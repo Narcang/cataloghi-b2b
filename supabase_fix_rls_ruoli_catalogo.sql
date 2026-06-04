@@ -38,6 +38,9 @@ DROP POLICY IF EXISTS "Manager can select all cataloghi" ON public.cataloghi;
 DROP POLICY IF EXISTS "Cataloghi visibili per ruolo (autenticati)" ON public.cataloghi;
 DROP POLICY IF EXISTS "Cataloghi pubblici (anon)" ON public.cataloghi;
 
+-- Da supabase_alter_free_public_access.sql (policy anon senza filtro ruoli!)
+DROP POLICY IF EXISTS "Cataloghi attivi visibili in pubblico" ON public.cataloghi;
+
 -- Nomi alternativi che potrebbero esistere dallo schema originale
 DROP POLICY IF EXISTS "Anyone can view active cataloghi" ON public.cataloghi;
 DROP POLICY IF EXISTS "Enable read for all" ON public.cataloghi;

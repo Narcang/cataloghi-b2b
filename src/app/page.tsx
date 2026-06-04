@@ -74,9 +74,12 @@ export default async function LandingPage(props: { searchParams?: Promise<{ mess
                     priority={cat === 'Family 15' || cat === 'Family 20'}
                   />
                 </div>
-                <div className="mt-3 flex w-full justify-end">
-                  <p className="ladiva-catalog-caption ladiva-catalog-caption--home inline-block text-right text-base sm:text-lg md:text-xl lg:text-2xl uppercase leading-snug">
-                    Catalogo Tecnico {categoryDisplayName(cat)}
+                <div className="mt-3 flex w-full items-baseline justify-between gap-4">
+                  <p className="ladiva-catalog-caption ladiva-catalog-caption--home inline-block text-left text-base sm:text-lg md:text-xl lg:text-2xl uppercase leading-snug">
+                    {categoryDisplayName(cat)}
+                  </p>
+                  <p className="shrink-0 text-base sm:text-lg md:text-xl lg:text-2xl uppercase leading-snug opacity-75" style={{ fontFamily: 'var(--font-sans)', fontWeight: 500, color: 'var(--ladiva-home-ink)' }}>
+                    Catalogo Tecnico
                   </p>
                 </div>
               </Link>
