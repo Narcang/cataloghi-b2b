@@ -79,7 +79,7 @@ export default async function LandingPage(props: { searchParams?: Promise<{ mess
                     {categoryDisplayName(cat)}
                   </p>
                   <p className="shrink-0 text-base sm:text-lg md:text-xl lg:text-2xl uppercase leading-snug opacity-75" style={{ fontFamily: 'var(--font-sans)', fontWeight: 500, color: 'var(--ladiva-home-ink)' }}>
-                    Catalogo Tecnico
+                    Cataloghi Tecnici
                   </p>
                 </div>
               </Link>
