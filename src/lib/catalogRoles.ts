@@ -4,7 +4,6 @@ export const RUOLI_CATALOGO = [
   { value: 'agente',       label: 'Agente' },
   { value: 'distributore', label: 'Partner' },
   { value: 'studio',       label: 'Studio' },
-  { value: 'fornitore',    label: 'Fornitore' },
   { value: 'manager',      label: 'Manager' },
 ] as const
 
@@ -12,5 +11,5 @@ export type RuoloCatalogo = (typeof RUOLI_CATALOGO)[number]['value']
 
 /** Ruoli di default per un nuovo catalogo (tutti tranne free/pubblico). */
 export const RUOLI_CATALOGO_DEFAULT: RuoloCatalogo[] = [
-  'agente', 'distributore', 'studio', 'fornitore', 'manager',
+  'agente', 'distributore', 'studio', 'manager',
 ]
