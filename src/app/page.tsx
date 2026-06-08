@@ -4,9 +4,11 @@ import Header from '@/components/Header'
 import {
   CATALOG_CATEGORIES,
   CATEGORY_TILE_IMAGE,
+  FOTO_CATEGORY_MAP,
   categoryToSlug,
   type CatalogCategory,
 } from '@/lib/catalogCategories'
+import { createClient } from '@/utils/supabase/server'
 
 const HIDDEN_HOME_CATEGORIES = new Set([
   'Family Gres',
@@ -16,6 +18,9 @@ const HIDDEN_HOME_CATEGORIES = new Set([
   'Partner',
   'Agenti',
   'Scontistiche',
+  'Family 15 Fotografico',
+  'Family 20 Fotografico',
+  'Capsule Collection Fotografico',
 ])
 
 /** Categorie mostrate nel blocco "Catalogo Fotografico" (3 pulsanti sovrapposti). */
@@ -39,6 +44,32 @@ export default async function LandingPage(props: { searchParams?: Promise<{ mess
   const searchParams = props.searchParams ? await props.searchParams : {}
   const flashRaw = searchParams?.message?.trim()
   const flashMessage = flashRaw ? decodeFlashMessage(flashRaw) : null
+
+  // Fetch il singolo catalogo fotografico attivo per ogni categoria
+  const supabase = await createClient()
+  const fotoCategorie = Object.values(FOTO_CATEGORY_MAP) as CatalogCategory[]
+  const { data: fotoCataloghi } = await supabase
+    .from('cataloghi')
+    .select('id, categoria')
+    .in('categoria', fotoCategorie)
+    .eq('stato_pubblicazione', 'attivo')
+    .limit(10)
+
+  // Mappa categoria fotografico → id catalogo (primo attivo trovato)
+  const fotoCatalogoIdMap: Partial<Record<CatalogCategory, string>> = {}
+  for (const row of fotoCataloghi ?? []) {
+    if (!fotoCatalogoIdMap[row.categoria as CatalogCategory]) {
+      fotoCatalogoIdMap[row.categoria as CatalogCategory] = row.id
+    }
+  }
+
+  // Restituisce l'href diretto al PDF se esiste, altrimenti la pagina categoria
+  function fotoHref(baseCat: CatalogCategory): string {
+    const fotoCat = FOTO_CATEGORY_MAP[baseCat]
+    const catalogoId = fotoCat ? fotoCatalogoIdMap[fotoCat] : undefined
+    if (catalogoId) return `/cataloghi/${catalogoId}?returnTo=/`
+    return fotoCat ? `/cataloghi/categoria/${categoryToSlug(fotoCat)}` : '/'
+  }
 
   const homepageCategories = CATALOG_CATEGORIES.filter((cat) => !HIDDEN_HOME_CATEGORIES.has(cat))
 
@@ -92,7 +123,7 @@ export default async function LandingPage(props: { searchParams?: Promise<{ mess
               {CATALOGO_FOTO_CATEGORIES.map((cat) => (
                 <Link
                   key={cat}
-                  href={`/cataloghi/categoria/${categoryToSlug(cat)}`}
+                  href={fotoHref(cat)}
                   className="group flex flex-1 min-h-0 overflow-hidden shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[#060d41]"
                 >
                   {/* Foto a sinistra */}
