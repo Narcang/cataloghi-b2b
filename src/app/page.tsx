@@ -109,7 +109,7 @@ export default async function LandingPage(props: { searchParams?: Promise<{ mess
                   <p className="ladiva-catalog-caption ladiva-catalog-caption--home inline-block text-left text-base sm:text-lg md:text-xl lg:text-2xl uppercase leading-snug">
                     {categoryDisplayName(cat)}
                   </p>
-                  <p className="shrink-0 text-base sm:text-lg md:text-xl lg:text-2xl uppercase leading-snug opacity-75" style={{ fontFamily: 'var(--font-sans)', fontWeight: 500, color: 'var(--ladiva-home-ink)' }}>
+                  <p className="shrink-0 text-base sm:text-lg md:text-xl lg:text-2xl uppercase leading-snug text-red-600" style={{ fontFamily: 'var(--font-sans)', fontWeight: 700 }}>
                     Cataloghi Tecnici
                   </p>
                 </div>
