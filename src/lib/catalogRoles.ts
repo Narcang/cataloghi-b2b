@@ -1,9 +1,9 @@
 /** Ruoli che possono essere assegnati come visibilità di un catalogo. */
 export const RUOLI_CATALOGO = [
   { value: 'free',         label: 'Pubblico (ospiti / Free)' },
-  { value: 'agente',       label: 'Agente' },
-  { value: 'distributore', label: 'Partner' },
   { value: 'studio',       label: 'Studio' },
+  { value: 'distributore', label: 'Partner' },
+  { value: 'agente',       label: 'Agente' },
   { value: 'manager',      label: 'Manager' },
 ] as const
 
