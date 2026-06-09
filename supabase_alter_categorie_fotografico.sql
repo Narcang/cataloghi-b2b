@@ -22,6 +22,8 @@ ALTER TABLE public.cataloghi
       'Scontistiche',
       'Family 15 Fotografico',
       'Family 20 Fotografico',
-      'Capsule Collection Fotografico'
+      'Capsule Collection Fotografico',
+      'Family Gres Fotografico',
+      'Bricks Fotografico'
     )
   );

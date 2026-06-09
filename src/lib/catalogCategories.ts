@@ -12,6 +12,8 @@ export const CATALOG_CATEGORIES = [
   'Family 15 Fotografico',
   'Family 20 Fotografico',
   'Capsule Collection Fotografico',
+  'Family Gres Fotografico',
+  'Bricks Fotografico',
 ] as const
 
 export type CatalogCategory = (typeof CATALOG_CATEGORIES)[number]
@@ -161,6 +163,8 @@ export const CATEGORY_TILE_IMAGE: Record<CatalogCategory, string> = {
   'Family 15 Fotografico': '/catalog/family-15.png',
   'Family 20 Fotografico': '/catalog/family-20.png',
   'Capsule Collection Fotografico': '/catalog/capsule-collection.png',
+  'Family Gres Fotografico': '/catalog/family-gres.png',
+  'Bricks Fotografico': '/catalog/bricks.png',
 }
 
 /** Mappa categoria base → categoria fotografico corrispondente. */
@@ -168,4 +172,6 @@ export const FOTO_CATEGORY_MAP: Partial<Record<CatalogCategory, CatalogCategory>
   'Family 15': 'Family 15 Fotografico',
   'Family 20': 'Family 20 Fotografico',
   'Capsule Collection': 'Capsule Collection Fotografico',
+  'Family Gres': 'Family Gres Fotografico',
+  'Bricks': 'Bricks Fotografico',
 }

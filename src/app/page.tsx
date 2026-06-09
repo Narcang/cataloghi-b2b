@@ -19,6 +19,8 @@ const HIDDEN_HOME_CATEGORIES = new Set([
   'Family 15 Fotografico',
   'Family 20 Fotografico',
   'Capsule Collection Fotografico',
+  'Family Gres Fotografico',
+  'Bricks Fotografico',
 ])
 
 /** Ordine esplicito dei tile nella homepage (6 categorie + blocco fotografico). */
@@ -30,8 +32,8 @@ const HOMEPAGE_CATEGORIES_ORDER: CatalogCategory[] = [
   'Bricks',
 ]
 
-/** Categorie mostrate nel blocco "Catalogo Fotografico" (3 pulsanti sovrapposti). */
-const CATALOGO_FOTO_CATEGORIES: CatalogCategory[] = ['Family 15', 'Family 20', 'Capsule Collection']
+/** Categorie mostrate nel blocco "Catalogo Fotografico" (5 pulsanti sovrapposti). */
+const CATALOGO_FOTO_CATEGORIES: CatalogCategory[] = ['Family 15', 'Family 20', 'Capsule Collection', 'Family Gres', 'Bricks']
 
 /** Etichetta visiva della categoria (es. "Capsule Collection 20" per display, slug rimane invariato). */
 function categoryDisplayName(cat: CatalogCategory): string {
@@ -127,7 +129,7 @@ export default async function LandingPage(props: { searchParams?: Promise<{ mess
 
           {/* Blocco 3 pulsanti "Catalogo Fotografico" – occupa lo stesso spazio di un quadrato */}
           <li>
-            <div className="aspect-square flex flex-col gap-2">
+            <div className="aspect-square flex flex-col gap-1">
               {CATALOGO_FOTO_CATEGORIES.map((cat) => (
                 <Link
                   key={cat}
@@ -149,10 +151,10 @@ export default async function LandingPage(props: { searchParams?: Promise<{ mess
                     className="flex flex-1 flex-col justify-center bg-black px-4 py-3 transition-colors duration-200 group-hover:bg-neutral-900"
                     style={{ fontFamily: 'var(--font-sans)' }}
                   >
-                    <p className="text-white font-bold uppercase tracking-wider text-base sm:text-lg md:text-xl leading-tight">
+                    <p className="text-white font-bold uppercase tracking-wider text-sm sm:text-base md:text-lg leading-tight">
                       {categoryDisplayName(cat)}
                     </p>
-                    <p className="mt-1 text-red-600 font-bold uppercase tracking-widest text-xs sm:text-sm md:text-base leading-snug">
+                    <p className="mt-0.5 text-red-600 font-bold uppercase tracking-widest text-xs md:text-sm leading-snug">
                       Catalogo Fotografico
                     </p>
                   </div>
