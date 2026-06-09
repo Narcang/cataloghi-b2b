@@ -11,8 +11,6 @@ import {
 import { createClient } from '@/utils/supabase/server'
 
 const HIDDEN_HOME_CATEGORIES = new Set([
-  'Family Gres',
-  'Bricks',
   'Metal',
   'Studio',
   'Partner',
@@ -22,6 +20,15 @@ const HIDDEN_HOME_CATEGORIES = new Set([
   'Family 20 Fotografico',
   'Capsule Collection Fotografico',
 ])
+
+/** Ordine esplicito dei tile nella homepage (6 categorie + blocco fotografico). */
+const HOMEPAGE_CATEGORIES_ORDER: CatalogCategory[] = [
+  'Family 15',
+  'Family 20',
+  'Capsule Collection',
+  'Family Gres',
+  'Bricks',
+]
 
 /** Categorie mostrate nel blocco "Catalogo Fotografico" (3 pulsanti sovrapposti). */
 const CATALOGO_FOTO_CATEGORIES: CatalogCategory[] = ['Family 15', 'Family 20', 'Capsule Collection']
@@ -72,7 +79,7 @@ export default async function LandingPage(props: { searchParams?: Promise<{ mess
     return fotoCat ? `/cataloghi/categoria/${categoryToSlug(fotoCat)}` : '/'
   }
 
-  const homepageCategories = CATALOG_CATEGORIES.filter((cat) => !HIDDEN_HOME_CATEGORIES.has(cat))
+  const homepageCategories = HOMEPAGE_CATEGORIES_ORDER
 
   return (
     <div className="min-h-screen flex flex-col bg-white text-neutral-900">
