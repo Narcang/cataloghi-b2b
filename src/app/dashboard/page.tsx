@@ -20,6 +20,7 @@ import CreateCatalogForm from '@/components/admin/CreateCatalogForm'
 import AdminProfiliPanel, { type ProfiloGestioneRow } from '@/components/admin/AdminProfiliPanel'
 import AgenteDocumentazionePortal from '@/components/dashboard/AgenteDocumentazionePortal'
 import PartnerListiniPortal from '@/components/dashboard/PartnerListiniPortal'
+import InvitaUtente from '@/components/InvitaUtente'
 
 type Operatore = {
   id: string
@@ -437,6 +438,16 @@ export default async function Dashboard(props: {
           />
         ) : null}
 
+        {showFullDashboard && isManager && (
+          <section className="border border-black rounded-2xl bg-white p-6">
+            <h2 className="text-xl text-zinc-900 font-medium mb-1">Invita utenti</h2>
+            <p className="text-sm text-zinc-500 mb-4">
+              Genera un link di registrazione per il ruolo scelto. Il nuovo utente sarà collegato al tuo profilo dopo l&apos;approvazione.
+            </p>
+            <InvitaUtente ruoloCorrente={ruoloCorrente} />
+          </section>
+        )}
+
         {/* SEZIONE CATALOGHI */}
         <section id="cataloghi">
           <div className="flex items-center justify-between mb-8 border-b border-black pb-4">
@@ -650,7 +661,27 @@ export default async function Dashboard(props: {
 
         {showFullDashboard && isPartner ? <PartnerListiniPortal /> : null}
 
+        {showFullDashboard && isPartner && (
+          <section className="border border-black rounded-2xl bg-white p-6">
+            <h2 className="text-xl text-zinc-900 font-medium mb-1">Invita utenti</h2>
+            <p className="text-sm text-zinc-500 mb-4">
+              Genera un link di registrazione per Studio. Il nuovo utente sarà collegato al tuo profilo dopo l&apos;approvazione.
+            </p>
+            <InvitaUtente ruoloCorrente={ruoloCorrente} />
+          </section>
+        )}
+
         {showFullDashboard && isAgente ? <AgenteDocumentazionePortal /> : null}
+
+        {showFullDashboard && isAgente && (
+          <section className="border border-black rounded-2xl bg-white p-6">
+            <h2 className="text-xl text-zinc-900 font-medium mb-1">Invita utenti</h2>
+            <p className="text-sm text-zinc-500 mb-4">
+              Genera un link di registrazione per Partner o Studio. Il nuovo utente sarà collegato al tuo profilo dopo l&apos;approvazione.
+            </p>
+            <InvitaUtente ruoloCorrente={ruoloCorrente} />
+          </section>
+        )}
 
         {showFullDashboard && isManager && (
           <section id="operatori-admin">

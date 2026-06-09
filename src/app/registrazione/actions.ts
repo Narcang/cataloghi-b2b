@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
+import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
 
 function sanitize(s: unknown): string {
   return String(s ?? '').trim()
@@ -15,6 +16,7 @@ export async function register(formData: FormData) {
   const email = sanitize(formData.get('email')).toLowerCase()
   const password = String(formData.get('password') ?? '')
   const telefono = sanitize(formData.get('telefono'))
+  const invitoToken = sanitize(formData.get('invito_token'))
 
   if (!nome || !cognome || !societa || !email || !password || !telefono) {
     redirect('/registrazione?message=' + encodeURIComponent('Compila tutti i campi obbligatori.'))
@@ -24,10 +26,30 @@ export async function register(formData: FormData) {
     redirect('/registrazione?message=' + encodeURIComponent('La password deve avere almeno 8 caratteri.'))
   }
 
+  // Valida il token di invito tramite service role (bypassa RLS)
+  let invitoRuolo: string | null = null
+  let invitoDa: string | null = null
+
+  if (invitoToken) {
+    const svc = createServiceRoleSupabase()
+    if (svc) {
+      const { data: invito } = await svc
+        .from('inviti')
+        .select('id, ruolo_invitato, creato_da, usato')
+        .eq('token', invitoToken)
+        .single()
+
+      if (invito && !invito.usato) {
+        invitoRuolo = invito.ruolo_invitato
+        invitoDa = invito.creato_da
+      }
+    }
+  }
+
   const supabase = await createClient()
   const nomeCompleto = `${nome} ${cognome}`.trim()
 
-  const { error } = await supabase.auth.signUp({
+  const { data: signUpData, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -38,6 +60,9 @@ export async function register(formData: FormData) {
         societa,
         telefono,
         nome_completo: nomeCompleto,
+        // Passati al trigger handle_new_user() per impostare ruolo e invitato_da
+        ...(invitoRuolo ? { invito_ruolo: invitoRuolo } : {}),
+        ...(invitoDa ? { invito_da: invitoDa } : {}),
       },
     },
   })
@@ -47,7 +72,20 @@ export async function register(formData: FormData) {
       error.message.includes('already registered') || error.message.includes('already been registered')
         ? 'Questa email è già registrata. Prova ad accedere o recupera la password.'
         : error.message
-    redirect('/registrazione?message=' + encodeURIComponent(msg))
+    const tokenParam = invitoToken ? `&token=${encodeURIComponent(invitoToken)}` : ''
+    redirect('/registrazione?message=' + encodeURIComponent(msg) + tokenParam)
+  }
+
+  // Marca il token come usato se la registrazione è andata a buon fine
+  if (invitoToken && signUpData?.user?.id) {
+    const svc = createServiceRoleSupabase()
+    if (svc) {
+      await svc
+        .from('inviti')
+        .update({ usato: true, usato_da: signUpData.user.id, usato_il: new Date().toISOString() })
+        .eq('token', invitoToken)
+        .eq('usato', false)
+    }
   }
 
   revalidatePath('/', 'layout')

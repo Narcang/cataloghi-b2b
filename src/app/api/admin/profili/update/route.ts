@@ -117,6 +117,40 @@ export async function POST(request: NextRequest) {
       if (authErr) {
         console.error('admin profili update: auth.admin.updateUserById', authErr)
       }
+
+      // Se l'utente è stato invitato, crea la connessione bidirezionale con l'invitante
+      const { data: profiloApprovato } = await svc
+        .from('profili')
+        .select('invitato_da, ruolo')
+        .eq('id', profiloId)
+        .single()
+
+      const invitantId = profiloApprovato?.invitato_da
+      const ruoloNuovoUtente = profiloApprovato?.ruolo
+
+      const RUOLI_CONNESSIONE = new Set(['agente', 'distributore', 'studio'])
+
+      if (invitantId && RUOLI_CONNESSIONE.has(ruoloNuovoUtente)) {
+        const { data: profiloInvitante } = await svc
+          .from('profili')
+          .select('ruolo')
+          .eq('id', invitantId)
+          .single()
+
+        if (profiloInvitante && RUOLI_CONNESSIONE.has(profiloInvitante.ruolo)) {
+          // Connessione bidirezionale: entrambi si vedono in rubrica
+          await svc.from('connessioni_utente_operatore').upsert([
+            { utente_id: invitantId,  operatore_id: profiloId },
+            { utente_id: profiloId,   operatore_id: invitantId },
+          ], { onConflict: 'utente_id,operatore_id', ignoreDuplicates: true })
+        } else {
+          // L'invitante è admin/manager: solo l'utente invitato vede l'invitante in rubrica (se ha ruolo connessione)
+          await svc.from('connessioni_utente_operatore').upsert(
+            { utente_id: invitantId, operatore_id: profiloId },
+            { onConflict: 'utente_id,operatore_id', ignoreDuplicates: true }
+          )
+        }
+      }
     }
   }
 

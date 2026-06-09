@@ -5,13 +5,33 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import Header from '@/components/Header'
+import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
+import { RUOLO_LABEL } from '@/lib/inviteHierarchy'
+
+async function fetchInvito(token: string): Promise<{ ruolo_invitato: string; creato_da: string } | null> {
+  if (!token || token.length < 10) return null
+  const svc = createServiceRoleSupabase()
+  if (!svc) return null
+  const { data } = await svc
+    .from('inviti')
+    .select('ruolo_invitato, creato_da, usato')
+    .eq('token', token)
+    .single()
+  if (!data || data.usato) return null
+  return { ruolo_invitato: data.ruolo_invitato, creato_da: data.creato_da }
+}
 
 export default async function RegistrazionePage(props: {
-  searchParams: Promise<{ message?: string; ok?: string }>
+  searchParams: Promise<{ message?: string; ok?: string; token?: string }>
 }) {
   const searchParams = await props.searchParams
   const ok = searchParams?.ok === '1'
   const message = searchParams?.message ?? ''
+  const tokenRaw = (searchParams?.token ?? '').trim()
+
+  const invito = tokenRaw ? await fetchInvito(tokenRaw) : null
+  const ruoloPreassegnato = invito?.ruolo_invitato ?? null
+  const ruoloLabel = ruoloPreassegnato ? (RUOLO_LABEL[ruoloPreassegnato] ?? ruoloPreassegnato) : null
 
   return (
     <div className="min-h-screen flex flex-col bg-white text-neutral-900">
@@ -20,14 +40,30 @@ export default async function RegistrazionePage(props: {
       <main className="w-full max-w-[1200px] mx-auto px-6 py-10 md:py-14 flex-1 flex items-center justify-center">
         <Card className="w-full max-w-lg border border-black bg-white shadow-sm">
           <form action={register}>
+            {/* Token nascosto */}
+            {tokenRaw && <input type="hidden" name="invito_token" value={tokenRaw} />}
+
             <CardHeader>
               <CardTitle className="text-2xl text-zinc-900">Registrazione portale</CardTitle>
               <CardDescription className="text-zinc-600">
-                Compila il modulo: un amministratore confermerà il tuo account prima dell&apos;accesso completo ai
-                cataloghi riservati.
+                {ruoloLabel
+                  ? `Sei stato invitato come ${ruoloLabel}. Compila il modulo per completare la registrazione.`
+                  : 'Compila il modulo: un amministratore confermerà il tuo account prima dell\'accesso completo ai cataloghi riservati.'}
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4">
+              {ruoloLabel && (
+                <div className="rounded-lg border border-[#060d41]/20 bg-[#060d41]/5 px-3 py-2 text-sm text-[#060d41] font-medium">
+                  Ruolo assegnato: <span className="font-bold">{ruoloLabel}</span>
+                </div>
+              )}
+
+              {tokenRaw && !invito && !ok && (
+                <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                  Il link di invito non è valido o è già stato utilizzato. Puoi comunque registrarti normalmente.
+                </div>
+              )}
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="nome">Nome</Label>
