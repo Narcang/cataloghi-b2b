@@ -62,12 +62,12 @@ function catalogMenuItemForRole(ruolo: string | null, loggedIn: boolean): MenuIt
     case 'agente':
       return {
         label: 'Documentazione Riservata',
-        href: '/dashboard/documentazione-agente',
+        href: '/portale',
         icon: BookOpen,
       }
     case 'distributore':
     case 'studio':
-      return { label: 'Listini', href: '/dashboard/listini-partner', icon: BookOpen }
+      return { label: 'Listini', href: '/portale', icon: BookOpen }
     default:
       return { label: 'Cataloghi', href: '/dashboard#cataloghi', icon: BookOpen }
   }

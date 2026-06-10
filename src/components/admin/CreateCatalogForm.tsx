@@ -9,7 +9,8 @@ import {
   MAX_CATALOG_PDF_BYTES,
   MAX_CATALOG_STUDIO_ZIP_BYTES,
 } from '@/lib/catalogUploadLimits'
-import { STUDIO_CATALOG_CATEGORY, type CatalogCategory } from '@/lib/catalogCategories'
+import { type CatalogCategory } from '@/lib/catalogCategories'
+import { isZipDownloadCategory } from '@/lib/catalogFileKind'
 import { RUOLI_CATALOGO, RUOLI_CATALOGO_DEFAULT, type RuoloCatalogo } from '@/lib/catalogRoles'
 
 type Props = { categories: readonly CatalogCategory[] }
@@ -21,8 +22,8 @@ export default function CreateCatalogForm({ categories }: Props) {
   const [categoriaSelezionata, setCategoriaSelezionata] = useState('')
   const [ruoliSelezionati, setRuoliSelezionati] = useState<RuoloCatalogo[]>(RUOLI_CATALOGO_DEFAULT)
 
-  const isStudioCategory = categoriaSelezionata === STUDIO_CATALOG_CATEGORY
-  const maxMainFileBytes = isStudioCategory ? MAX_CATALOG_STUDIO_ZIP_BYTES : MAX_CATALOG_PDF_BYTES
+  const isZipCategory = isZipDownloadCategory(categoriaSelezionata)
+  const maxMainFileBytes = isZipCategory ? MAX_CATALOG_STUDIO_ZIP_BYTES : MAX_CATALOG_PDF_BYTES
   const maxMainFileMb = maxMainFileBytes / (1024 * 1024)
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -38,7 +39,7 @@ export default function CreateCatalogForm({ categories }: Props) {
     const coverInput = form.querySelector<HTMLInputElement>('input[name="file_copertina"]')
     const mainFile = mainInput?.files?.[0]
     const coverFile = coverInput?.files?.[0]
-    const studioZip = categoria === STUDIO_CATALOG_CATEGORY
+    const studioZip = isZipDownloadCategory(categoria)
 
     if (!titolo || !categoria) {
       setError('Titolo e categoria sono obbligatori')
@@ -71,7 +72,7 @@ export default function CreateCatalogForm({ categories }: Props) {
         mainFile.type === 'application/x-zip-compressed' ||
         mainFile.name.toLowerCase().endsWith('.zip')
       if (!isZip) {
-        setError('Per la categoria Studio il file principale deve essere un archivio ZIP')
+        setError('Per questa categoria il file principale deve essere un archivio ZIP')
         return
       }
     } else {
@@ -214,9 +215,9 @@ export default function CreateCatalogForm({ categories }: Props) {
             </option>
           ))}
         </select>
-        {isStudioCategory ? (
+        {isZipCategory ? (
           <p className="text-xs text-zinc-600">
-            Per Studio carica un archivio ZIP (max {maxMainFileMb} MB) scaricabile dagli utenti con profilo Studio.
+            Carica un archivio ZIP (max {maxMainFileMb} MB) scaricabile dagli utenti autorizzati.
           </p>
         ) : null}
       </div>
@@ -269,17 +270,17 @@ export default function CreateCatalogForm({ categories }: Props) {
 
       <div className="space-y-2 md:col-span-2">
         <label htmlFor="file_pdf" className="block text-xs text-zinc-600 font-medium uppercase tracking-wide">
-          {isStudioCategory
-            ? `File ZIP Studio (max ${maxMainFileMb} MB, caricamento diretto su storage)`
+          {isZipCategory
+            ? `File ZIP (max ${maxMainFileMb} MB, caricamento diretto su storage)`
             : `File PDF (max ${maxMainFileMb} MB, caricamento diretto su storage)`}
         </label>
         <input
-          key={isStudioCategory ? 'catalog-file-zip' : 'catalog-file-pdf'}
+          key={isZipCategory ? 'catalog-file-zip' : 'catalog-file-pdf'}
           id="file_pdf"
           name="file_pdf"
           type="file"
           accept={
-            isStudioCategory
+            isZipCategory
               ? '.zip,application/zip,application/x-zip-compressed,application/octet-stream'
               : '.pdf,application/pdf'
           }
@@ -287,7 +288,7 @@ export default function CreateCatalogForm({ categories }: Props) {
           disabled={submitting}
           className="ladiva-file-input w-full rounded-md border border-black bg-zinc-50 px-3 py-2 text-sm text-zinc-900 file:mr-3 file:rounded-md file:border-0 file:bg-[#060d41] file:px-3 file:py-1.5 file:text-white file:font-semibold hover:file:bg-[#0a155a] disabled:opacity-60"
         />
-        {isStudioCategory ? (
+        {isZipCategory ? (
           <p className="text-xs text-zinc-500">
             Nel dialogo di Windows, se i file ZIP non compaiono, imposta il filtro su &quot;Tutti i file
             (*.*)&quot;.

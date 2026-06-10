@@ -6,9 +6,13 @@ export const CATALOG_CATEGORIES = [
   'Bricks',
   'Metal',
   'Studio',
+  'Studio 2D',
+  'Studio 3D',
   'Partner',
   'Agenti',
   'Scontistiche',
+  'Listini Netti',
+  'Power Point',
   'Family 15 Fotografico',
   'Family 20 Fotografico',
   'Capsule Collection Fotografico',
@@ -64,6 +68,10 @@ const LOGIN_ONLY_CATALOG_CATEGORIES = new Set<CatalogCategory>([
   AGENTI_CATALOG_CATEGORY,
   SCONISTICHE_CATALOG_CATEGORY,
   STUDIO_CATALOG_CATEGORY,
+  'Studio 2D',
+  'Studio 3D',
+  'Listini Netti',
+  'Power Point',
 ])
 
 export function isLoginOnlyCatalogCategory(categoria: string | null | undefined): boolean {
@@ -157,14 +165,49 @@ export const CATEGORY_TILE_IMAGE: Record<CatalogCategory, string> = {
   Bricks: '/catalog/bricks.png',
   Metal: '/catalog/metal.png',
   Studio: '/catalog/capsule-collection.png',
+  'Studio 2D': '/catalog/capsule-collection.png',
+  'Studio 3D': '/catalog/capsule-collection.png',
   Partner: '/catalog/capsule-collection.png',
   Agenti: '/catalog/family-gres.png',
   Scontistiche: '/catalog/family-gres.png',
+  'Listini Netti': '/catalog/family-gres.png',
+  'Power Point': '/catalog/family-gres.png',
   'Family 15 Fotografico': '/catalog/family-15.png',
   'Family 20 Fotografico': '/catalog/family-20.png',
   'Capsule Collection Fotografico': '/catalog/capsule-collection.png',
   'Family Gres Fotografico': '/catalog/family-gres.png',
   'Bricks Fotografico': '/catalog/bricks.png',
+}
+
+/** Configurazione tile del portale per ogni ruolo. */
+export type PortaleTile = {
+  categoria: CatalogCategory
+  label: string
+  descrizione: string
+}
+
+export const PORTALE_TILES_PER_RUOLO: Record<string, PortaleTile[]> = {
+  studio: [
+    { categoria: 'Studio 2D', label: 'File 2D',   descrizione: 'File tecnici 2D scaricabili' },
+    { categoria: 'Studio 3D', label: 'File 3D',   descrizione: 'File tecnici 3D scaricabili' },
+    { categoria: 'Studio',    label: '!File',      descrizione: 'Archivio file disponibili' },
+  ],
+  distributore: [
+    { categoria: 'Studio 2D', label: 'File 2D',   descrizione: 'File tecnici 2D scaricabili' },
+    { categoria: 'Studio 3D', label: 'File 3D',   descrizione: 'File tecnici 3D scaricabili' },
+    { categoria: 'Studio',    label: '!File',      descrizione: 'Archivio file disponibili' },
+    { categoria: 'Partner',   label: 'Listini',   descrizione: 'Listini prezzi' },
+  ],
+  agente: [
+    { categoria: 'Studio 2D',    label: 'File 2D',       descrizione: 'File tecnici 2D scaricabili' },
+    { categoria: 'Studio 3D',    label: 'File 3D',       descrizione: 'File tecnici 3D scaricabili' },
+    { categoria: 'Studio',       label: '!File',          descrizione: 'Archivio file disponibili' },
+    { categoria: 'Partner',      label: 'Listini',       descrizione: 'Listini prezzi' },
+    { categoria: 'Listini Netti',label: 'Listini Netti', descrizione: 'Listini prezzi netti' },
+    { categoria: 'Scontistiche', label: 'Scontistiche',  descrizione: 'Condizioni commerciali' },
+    { categoria: 'Agenti',       label: 'Documentazione',descrizione: 'Documentazione riservata' },
+    { categoria: 'Power Point',  label: 'Power Point',   descrizione: 'Presentazioni PowerPoint' },
+  ],
 }
 
 /** Mappa categoria base → categoria fotografico corrispondente. */

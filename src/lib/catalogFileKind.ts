@@ -2,13 +2,25 @@ import { STUDIO_CATALOG_CATEGORY } from '@/lib/catalogCategories'
 
 export type CatalogDeliveryMode = 'pdf' | 'zip-download'
 
+/** Categorie che supportano il download ZIP (oltre alla categoria Studio base). */
+const ZIP_DOWNLOAD_CATEGORIES = new Set<string>([
+  STUDIO_CATALOG_CATEGORY,
+  'Studio 2D',
+  'Studio 3D',
+])
+
 export function isZipStoragePath(urlFile: string | null | undefined): boolean {
   return Boolean(urlFile?.toLowerCase().endsWith('.zip'))
 }
 
-/** Cataloghi Studio caricati come archivio ZIP (max 15 MB). */
+/** Restituisce true se la categoria prevede upload ZIP (indipendentemente dall'estensione del file). */
+export function isZipDownloadCategory(categoria: string | null | undefined): boolean {
+  return ZIP_DOWNLOAD_CATEGORIES.has(categoria ?? '')
+}
+
+/** Cataloghi caricati come archivio ZIP scaricabile (Studio, Studio 2D, Studio 3D). */
 export function isStudioZipCatalog(categoria: string | null | undefined, urlFile: string | null | undefined): boolean {
-  return categoria === STUDIO_CATALOG_CATEGORY && isZipStoragePath(urlFile)
+  return isZipDownloadCategory(categoria) && isZipStoragePath(urlFile)
 }
 
 export function getCatalogDeliveryMode(
