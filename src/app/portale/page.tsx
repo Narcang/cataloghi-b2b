@@ -9,6 +9,7 @@ import {
   type CatalogCategory,
   type PortaleTile,
 } from '@/lib/catalogCategories'
+import { CATALOG_RETURN_TO_PARAM } from '@/lib/catalogNavigation'
 
 export const dynamic = 'force-dynamic'
 
@@ -95,10 +96,11 @@ export default async function PortalePage() {
           {tiles.map((tile) => {
             const count = countPerCategoria[tile.categoria] ?? 0
             const slug = categoryToSlug(tile.categoria)
+            const categoryHref = `/cataloghi/categoria/${slug}?${CATALOG_RETURN_TO_PARAM}=${encodeURIComponent('/portale')}`
             return (
               <li key={tile.categoria}>
                 <Link
-                  href={`/cataloghi/categoria/${slug}`}
+                  href={categoryHref}
                   className="group flex flex-col h-full min-h-[200px] rounded-2xl overflow-hidden border border-black/10 shadow-sm hover:shadow-md transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-[#060d41]"
                 >
                   {/* Barra colore in cima */}

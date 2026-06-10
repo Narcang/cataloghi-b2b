@@ -5,7 +5,7 @@ import { FileText, ArrowLeft } from 'lucide-react'
 import Header from '@/components/Header'
 import { createClient } from '@/utils/supabase/server'
 import { categoryFromSlug, isLoginOnlyCatalogCategory } from '@/lib/catalogCategories'
-import { catalogPdfHref, publicCategoryCatalogReturnTo } from '@/lib/catalogNavigation'
+import { catalogPdfHref, safeCatalogReturnTo, CATALOG_RETURN_TO_PARAM } from '@/lib/catalogNavigation'
 import { compareCatalogTitoli } from '@/lib/catalogSorting'
 
 /** Elenco cataloghi pubblici: sempre dati aggiornati da Supabase. */
@@ -23,8 +23,26 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   }
 }
 
-export default async function CataloghiPerCategoriaPage({ params }: { params: Promise<{ slug: string }> }) {
+function backLabel(returnTo: string): string {
+  if (returnTo === '/portale') return 'Torna al portale'
+  if (returnTo.startsWith('/dashboard')) return 'Torna alla dashboard'
+  return 'Torna alla homepage'
+}
+
+export default async function CataloghiPerCategoriaPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}) {
   const { slug } = await params
+  const sp = await searchParams
+  const returnTo = safeCatalogReturnTo(
+    typeof sp[CATALOG_RETURN_TO_PARAM] === 'string' ? sp[CATALOG_RETURN_TO_PARAM] : null,
+    '/',
+  )
+
   const categoria = categoryFromSlug(slug)
   if (!categoria) notFound()
 
@@ -60,17 +78,25 @@ export default async function CataloghiPerCategoriaPage({ params }: { params: Pr
     return a.id.localeCompare(b.id)
   })
 
+  // Il returnTo per il PDF viewer punta a questa stessa pagina categoria,
+  // preservando il returnTo originale (es. /portale) in modo che il bottone
+  // indietro del PDF torni qui, e da qui si possa tornare al portale.
+  const categoryPageUrl =
+    returnTo !== '/'
+      ? `/cataloghi/categoria/${slug}?${CATALOG_RETURN_TO_PARAM}=${encodeURIComponent(returnTo)}`
+      : `/cataloghi/categoria/${slug}`
+
   return (
     <div className="ladiva-categoria-vetrina flex min-h-screen flex-col bg-black text-zinc-100 antialiased">
       <Header />
 
       <main className="mx-auto w-full max-w-[1200px] flex-1 px-6 py-8 md:py-12">
         <Link
-          href="/"
+          href={returnTo}
           className="mb-8 inline-flex items-center gap-2 text-sm font-medium text-zinc-200 underline-offset-4 hover:text-white hover:underline"
         >
           <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden />
-          Torna alla homepage
+          {backLabel(returnTo)}
         </Link>
 
         <header className="mb-10 border-b border-white/15 pb-6">
@@ -89,7 +115,7 @@ export default async function CataloghiPerCategoriaPage({ params }: { params: Pr
               <li key={catalogo.id}>
                 <Link
                   prefetch={false}
-                  href={catalogPdfHref(catalogo.id, publicCategoryCatalogReturnTo(categoria))}
+                  href={catalogPdfHref(catalogo.id, categoryPageUrl)}
                   className="group block rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                 >
                   <div className="flex h-full flex-col overflow-hidden border border-white/20 bg-white text-zinc-900 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-[#c9a96e] hover:shadow-[0_12px_40px_rgba(201,169,110,0.2)]">
