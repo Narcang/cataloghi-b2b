@@ -119,7 +119,7 @@ export default async function LandingPage(props: { searchParams?: Promise<{ mess
                   <p className="ladiva-catalog-caption ladiva-catalog-caption--home inline-block text-left text-sm sm:text-base lg:text-lg xl:text-xl uppercase leading-snug">
                     {categoryDisplayName(cat)}
                   </p>
-                  <p className="shrink-0 text-sm sm:text-base lg:text-lg xl:text-xl uppercase leading-snug text-red-600" style={{ fontFamily: 'var(--font-sans)', fontWeight: 700 }}>
+                  <p className="shrink-0 text-sm sm:text-base lg:text-lg xl:text-xl uppercase leading-snug text-red-600" style={{ fontFamily: 'var(--font-sans)', fontWeight: 400 }}>
                     Cataloghi Tecnici
                   </p>
                 </div>
@@ -151,10 +151,10 @@ export default async function LandingPage(props: { searchParams?: Promise<{ mess
                     className="flex flex-1 flex-col justify-center bg-black px-4 py-3 transition-colors duration-200 group-hover:bg-neutral-900"
                     style={{ fontFamily: 'var(--font-sans)' }}
                   >
-                    <p className="text-white font-bold uppercase tracking-wider text-sm sm:text-base md:text-lg leading-tight">
+                    <p className="text-white font-normal uppercase tracking-wider text-sm sm:text-base md:text-lg leading-tight">
                       {categoryDisplayName(cat)}
                     </p>
-                    <p className="mt-0.5 text-red-600 font-bold uppercase tracking-widest text-xs md:text-sm leading-snug">
+                    <p className="mt-0.5 text-red-600 font-normal uppercase tracking-widest text-xs md:text-sm leading-snug">
                       Catalogo Fotografico
                     </p>
                   </div>
