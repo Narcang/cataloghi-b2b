@@ -98,7 +98,7 @@ export default async function LandingPage(props: { searchParams?: Promise<{ mess
           </div>
         ) : null}
         <h1 className="sr-only">Catalogo Ladiva Ceramica</h1>
-        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 md:gap-x-10 gap-y-14 list-none p-0 m-0">
+        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 lg:gap-x-8 gap-y-10 lg:gap-y-12 list-none p-0 m-0">
           {homepageCategories.map((cat) => (
             <li key={cat}>
               <Link
@@ -111,15 +111,15 @@ export default async function LandingPage(props: { searchParams?: Promise<{ mess
                     alt={cat}
                     fill
                     className="object-cover object-top transition-transform duration-300 group-hover:scale-[1.02]"
-                    sizes="(max-width: 640px) 100vw, 50vw"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     priority={cat === 'Family 15' || cat === 'Family 20'}
                   />
                 </div>
-                <div className="mt-3 flex w-full items-baseline justify-between gap-4">
-                  <p className="ladiva-catalog-caption ladiva-catalog-caption--home inline-block text-left text-base sm:text-lg md:text-xl lg:text-2xl uppercase leading-snug">
+                <div className="mt-2 flex w-full items-baseline justify-between gap-2">
+                  <p className="ladiva-catalog-caption ladiva-catalog-caption--home inline-block text-left text-sm sm:text-base lg:text-lg xl:text-xl uppercase leading-snug">
                     {categoryDisplayName(cat)}
                   </p>
-                  <p className="shrink-0 text-base sm:text-lg md:text-xl lg:text-2xl uppercase leading-snug text-red-600" style={{ fontFamily: 'var(--font-sans)', fontWeight: 700 }}>
+                  <p className="shrink-0 text-sm sm:text-base lg:text-lg xl:text-xl uppercase leading-snug text-red-600" style={{ fontFamily: 'var(--font-sans)', fontWeight: 700 }}>
                     Cataloghi Tecnici
                   </p>
                 </div>
