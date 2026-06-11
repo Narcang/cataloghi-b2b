@@ -105,11 +105,12 @@ export default async function RegistrazionePage(props: {
             </CardContent>
             <CardFooter className="flex flex-col gap-3">
               <Button className="w-full bg-[#060d41] text-white hover:bg-[#0a155a]" type="submit">
-                Invia richiesta di registrazione
+                {invito ? 'Registrati' : 'Invia richiesta di registrazione'}
               </Button>
               <p className="text-xs text-zinc-500 text-center">
-                In seguito potremo chiedere ulteriori informazioni: i dati extra saranno gestiti da questo modulo o dal
-                profilo dopo l&apos;approvazione.
+                {invito
+                  ? 'La registrazione sarà confermata automaticamente e potrai accedere subito.'
+                  : "In seguito potremo chiedere ulteriori informazioni: i dati extra saranno gestiti da questo modulo o dal profilo dopo l'approvazione."}
               </p>
               <Link
                 href="/login"
