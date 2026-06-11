@@ -32,7 +32,7 @@ function tileIcon(categoria: CatalogCategory) {
 
 function tileAccentColor(categoria: CatalogCategory): string {
   if (categoria === 'Studio 2D' || categoria === 'Studio 3D' || categoria === 'Studio') return 'bg-[#060d41]'
-  if (categoria === 'Power Point') return 'bg-red-700'
+  if (categoria === 'Power Point') return 'bg-zinc-700'
   if (categoria === 'Partner') return 'bg-slate-700'
   if (categoria === 'Listini Netti') return 'bg-slate-600'
   return 'bg-zinc-700'

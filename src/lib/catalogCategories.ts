@@ -188,20 +188,17 @@ export type PortaleTile = {
 
 export const PORTALE_TILES_PER_RUOLO: Record<string, PortaleTile[]> = {
   studio: [
-    { categoria: 'Studio 2D', label: 'File 2D',   descrizione: 'File tecnici 2D scaricabili' },
-    { categoria: 'Studio 3D', label: 'File 3D',   descrizione: 'File tecnici 3D scaricabili' },
-    { categoria: 'Studio',    label: '!File',      descrizione: 'Archivio file disponibili' },
+    { categoria: 'Studio 2D', label: 'File 2D', descrizione: 'File tecnici 2D scaricabili' },
+    { categoria: 'Studio 3D', label: 'File 3D', descrizione: 'File tecnici 3D scaricabili' },
   ],
   distributore: [
-    { categoria: 'Studio 2D', label: 'File 2D',   descrizione: 'File tecnici 2D scaricabili' },
-    { categoria: 'Studio 3D', label: 'File 3D',   descrizione: 'File tecnici 3D scaricabili' },
-    { categoria: 'Studio',    label: '!File',      descrizione: 'Archivio file disponibili' },
-    { categoria: 'Partner',   label: 'Listini',   descrizione: 'Listini prezzi' },
+    { categoria: 'Studio 2D', label: 'File 2D', descrizione: 'File tecnici 2D scaricabili' },
+    { categoria: 'Studio 3D', label: 'File 3D', descrizione: 'File tecnici 3D scaricabili' },
+    { categoria: 'Partner',   label: 'Listini', descrizione: 'Listini prezzi' },
   ],
   agente: [
     { categoria: 'Studio 2D',    label: 'File 2D',       descrizione: 'File tecnici 2D scaricabili' },
     { categoria: 'Studio 3D',    label: 'File 3D',       descrizione: 'File tecnici 3D scaricabili' },
-    { categoria: 'Studio',       label: '!File',          descrizione: 'Archivio file disponibili' },
     { categoria: 'Partner',      label: 'Listini',       descrizione: 'Listini prezzi' },
     { categoria: 'Listini Netti',label: 'Listini Netti', descrizione: 'Listini prezzi netti' },
     { categoria: 'Scontistiche', label: 'Scontistiche',  descrizione: 'Condizioni commerciali' },
