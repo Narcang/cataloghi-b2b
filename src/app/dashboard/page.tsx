@@ -438,291 +438,52 @@ export default async function Dashboard(props: {
           </section>
         )}
 
-        {showFullDashboard && isAdmin && (
-          <section id="crea-catalogo" className="border border-black rounded-2xl bg-white p-6 space-y-5">
-            <div>
-              <h2 className="text-xl text-zinc-900 font-medium">Nuovo Catalogo</h2>
-              <p className="text-sm text-zinc-600 mt-1">
-                Carica il PDF del catalogo e definisci area geografica e stato di pubblicazione.
-              </p>
-            </div>
-
-            <CreateCatalogForm categories={CATALOG_CATEGORIES_FOR_UPLOAD} />
-          </section>
-        )}
-
+        {/* Tile di navigazione per admin/manager */}
         {showFullDashboard && isManager && (
-          <section id="filtro-admin" className="border border-black rounded-2xl bg-white p-5">
-            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-              <div>
-                <h2 className="text-xl text-zinc-900 font-medium">Filtro Manager</h2>
-                <p className="text-sm text-zinc-600 mt-1">
-                  Filtra per area geografica e/o per nome (titolo catalogo o nome operatore).
-                </p>
-              </div>
-              <form className="flex flex-wrap items-center gap-3" method="get">
-                <input
-                  type="search"
-                  name="nome"
-                  defaultValue={nomeFilter}
-                  placeholder="Es. Anita"
-                  aria-label="Cerca per nome"
-                  className="h-10 min-w-[10rem] flex-1 rounded-lg border border-black bg-zinc-50 px-3 text-sm text-zinc-900 placeholder:text-zinc-500"
-                />
-                <select
-                  name="area"
-                  defaultValue={areaFilter}
-                  className="h-10 rounded-lg border border-black bg-zinc-50 px-3 text-sm text-zinc-900"
-                >
-                  <option value="all">Tutte le aree</option>
-                  {areeDisponibili.map((area) => (
-                    <option key={area} value={area}>
-                      {area}
-                    </option>
-                  ))}
-                </select>
-                <button
-                  type="submit"
-                  className="h-10 rounded-lg bg-[#060d41] text-white px-4 text-sm font-semibold hover:bg-[#0a155a] transition-colors"
-                >
-                  Applica
-                </button>
-              </form>
+          <section>
+            <div className="mb-6 border-b border-black pb-4">
+              <h2 className="text-2xl text-zinc-900 font-semibold tracking-tight">Gestione</h2>
+              <p className="text-sm text-zinc-600 mt-1">Seleziona la sezione che vuoi gestire.</p>
             </div>
-          </section>
-        )}
-
-        {showFullDashboard && isManager && user ? (
-          <AdminProfiliPanel
-            currentUserId={user.id}
-            profiliPendenti={profiliRegistrazionePendente}
-            profiliLista={profiliGestioneAdmin}
-            operatoriDisponibili={operatoriAdmin}
-            links={connessioniUtenteOperatoreRows}
-            readOnly={!isAdmin}
-          />
-        ) : null}
-
-        {showFullDashboard && isManager && (
-          <section className="border border-black rounded-2xl bg-white p-6">
-            <h2 className="text-xl text-zinc-900 font-medium mb-1">Invita utenti</h2>
-            <p className="text-sm text-zinc-500 mb-4">
-              Genera un link di registrazione per il ruolo scelto. Il nuovo utente sarà collegato al tuo profilo dopo l&apos;approvazione.
-            </p>
-            <InvitaUtente ruoloCorrente={ruoloCorrente} />
-          </section>
-        )}
-
-        {/* SEZIONE CATALOGHI */}
-        <section id="cataloghi">
-          <div className="flex items-center justify-between mb-8 border-b border-black pb-4">
-            <h2 className="text-3xl md:text-4xl font-sans tracking-tight text-zinc-100 flex items-center gap-3">
-              <FileText className="text-white" /> I Tuoi Cataloghi
-            </h2>
-          </div>
-          
-          {inAttesaApprovazione ? (
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-6 text-zinc-900">
-              <p className="text-lg text-zinc-800">
-                I cataloghi riservati saranno disponibili dopo l&apos;approvazione dell&apos;account da parte di Ladiva.
-              </p>
-            </div>
-          ) : cataloghiError ? (
-            <div className="text-red-700 p-4 border border-red-300 bg-red-50 rounded-xl">Errore nel caricamento: {cataloghiError.message}</div>
-          ) : (
-            <div className="space-y-10">
-              {categorieDashboard.map((categoria) => {
-                const items = cataloghiPerVista
-                  .filter((catalogo) => catalogo.categoria === categoria)
-                  .sort((a, b) => {
-                    const byTitle = compareCatalogTitoli(a.titolo, b.titolo)
-                    if (byTitle !== 0) return byTitle
-                    return a.id.localeCompare(b.id)
-                  })
-                return (
-                  <section
-                    key={categoria}
-                    id={categoryToDomId(categoria)}
-                    className="scroll-mt-32 space-y-4"
-                  >
-                    <div className="flex items-center gap-3">
-                      <h3 className="text-3xl md:text-4xl text-zinc-100 font-semibold tracking-wide">{categoria}</h3>
-                      <span className="text-xs rounded-full border border-black px-2 py-0.5 text-zinc-600">
-                        {items.length} catalogh{items.length === 1 ? 'o' : 'i'}
-                      </span>
-                    </div>
-                    {items.length === 0 ? (
-                      <p className="text-lg text-zinc-500 py-2">
-                        Nessun catalogo in questa categoria.
-                      </p>
-                    ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                      {items.map((catalogo) => (
-                        <div key={catalogo.id} className="space-y-3">
-                  <Link
-                    prefetch={false}
-                    href={catalogPdfHref(catalogo.id, dashboardCatalogReturnTo(catalogo.categoria))}
-                    className="group block focus:outline-none focus:ring-2 focus:ring-[#060d41] rounded-none"
-                  >
-                    <div className="bg-white border border-black rounded-none overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-[#060d41] hover:shadow-[0_12px_40px_rgba(6,13,65,0.1)] flex flex-col h-full">
-                      
-                      {/* Anteprima copertina: formato A4 verticale (ISO 210Ã—297) */}
-                      <div className="relative w-full aspect-[210/297] bg-zinc-100 overflow-hidden">
-                        {catalogo.url_immagine ? (
-                          <Image
-                            src={catalogo.url_immagine} 
-                            alt={`Copertina ${catalogo.titolo}`}
-                            fill
-                            unoptimized
-                            className="object-contain object-top transition-transform duration-500 group-hover:scale-105"
-                          />
-                        ) : (
-                          <div className="absolute inset-0 flex flex-col items-center justify-center text-zinc-600 bg-zinc-50/50">
-                            <FileText size={48} className="mb-3 text-[#060d41] opacity-40" />
-                            <span className="text-xs font-medium tracking-widest uppercase">Nessuna Immagine</span>
-                          </div>
-                        )}
-                      </div>
-                      
-                      {/* Dati Catalogo */}
-                      <div className="p-5 flex-1 flex flex-col">
-                        <h3 className="text-2xl text-zinc-900 font-medium uppercase tracking-wide leading-tight mb-1">
-                          {catalogo.titolo}
-                        </h3>
-                        <div className="mb-2">
-                          <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${catalogo.stato_pubblicazione === 'attivo'
-                            ? 'bg-emerald-50 text-emerald-900 border-emerald-200'
-                            : 'bg-amber-50 text-amber-900 border-amber-200'
-                            }`}>
-                            {catalogo.stato_pubblicazione === 'attivo' ? 'Pubblicato' : 'Bozza / Nascosto'}
-                          </span>
-                        </div>
-                        {/* Sottotitolo finto o basato su un campo DB (al momento usiamo l'area geografica o un placeholder stile screenshot) */}
-                        <p className="text-zinc-600 text-base">
-                          {(catalogo.categoria as string | null) || 'Senza categoria'} / {Array.isArray(catalogo.area_geografica_target) ? catalogo.area_geografica_target.join(', ') : catalogo.area_geografica_target || 'Globale'}
-                        </p>
-                      </div>
-
-                    </div>
-                  </Link>
-
-                  {isAdmin && (
-                    <>
-                      <form
-                        action="/api/admin/cataloghi/status"
-                        method="POST"
-                        className="bg-white border border-black rounded-xl p-3 space-y-2"
-                      >
-                        <input type="hidden" name="catalogo_id" value={catalogo.id} />
-                        <label className="block text-xs text-zinc-600 font-medium uppercase tracking-wide">
-                          Stato Visibilita
-                        </label>
-                        <select
-                          name="stato_pubblicazione"
-                          defaultValue={catalogo.stato_pubblicazione ?? 'bozza'}
-                          className="w-full h-9 rounded-md border border-black bg-zinc-50 px-3 text-sm text-zinc-900"
-                        >
-                          <option value="bozza">Bozza / Nascosto</option>
-                          <option value="attivo">Pubblicato</option>
-                        </select>
-                        <button
-                          type="submit"
-                          className="w-full h-9 rounded-md bg-[#060d41] text-white text-sm font-semibold hover:bg-[#0a155a] transition-colors"
-                        >
-                          Salva Stato
-                        </button>
-                      </form>
-
-                      <form
-                        action="/api/admin/cataloghi/cover"
-                        method="POST"
-                        encType="multipart/form-data"
-                        className="bg-white border border-black rounded-xl p-3 space-y-2"
-                      >
-                        <input type="hidden" name="catalogo_id" value={catalogo.id} />
-                        <label className="block text-xs text-zinc-600 font-medium uppercase tracking-wide">
-                          Aggiorna copertina (A4 verticale, 210Ã—297 mm)
-                        </label>
-                        <input
-                          name="file_copertina"
-                          type="file"
-                          accept="image/*"
-                          className="ladiva-file-input w-full rounded-md border border-black bg-zinc-50 px-3 py-2 text-sm text-zinc-900 file:mr-3 file:rounded-md file:border-0 file:bg-[#060d41] file:px-3 file:py-1.5 file:text-white file:font-semibold hover:file:bg-[#0a155a]"
-                        />
-                        <label className="flex items-center gap-2 text-xs text-zinc-600">
-                          <input type="checkbox" name="rimuovi_copertina" />
-                          Rimuovi copertina attuale
-                        </label>
-                        <button
-                          type="submit"
-                          className="w-full h-9 rounded-md bg-[#060d41] text-white text-sm font-semibold hover:bg-[#0a155a] transition-colors"
-                        >
-                          Salva Copertina
-                        </button>
-                      </form>
-
-                      <form
-                        action="/api/admin/cataloghi/roles"
-                        method="POST"
-                        className="bg-white border border-black rounded-xl p-3 space-y-2"
-                      >
-                        <input type="hidden" name="catalogo_id" value={catalogo.id} />
-                        <p className="block text-xs text-zinc-600 font-medium uppercase tracking-wide">
-                          Chi può vedere questo catalogo
-                        </p>
-                        <div className="flex flex-col gap-1.5">
-                          {RUOLI_CATALOGO.map((r) => {
-                            const rv = (catalogo as { ruoli_visibili?: string[] | null }).ruoli_visibili ?? []
-                            return (
-                              <label key={r.value} className="flex items-center gap-2 text-sm text-zinc-800 cursor-pointer">
-                                <input
-                                  type="checkbox"
-                                  name="ruoli_visibili"
-                                  value={r.value}
-                                  defaultChecked={rv.includes(r.value)}
-                                  className="rounded border-black accent-[#060d41]"
-                                />
-                                {r.label}
-                              </label>
-                            )
-                          })}
-                        </div>
-                        <button
-                          type="submit"
-                          className="w-full h-9 rounded-md bg-[#060d41] text-white text-sm font-semibold hover:bg-[#0a155a] transition-colors"
-                        >
-                          Salva Visibilità
-                        </button>
-                      </form>
-
-                      <form
-                        action="/api/admin/cataloghi/delete"
-                        method="POST"
-                        className="bg-white border border-red-400 rounded-xl p-3 space-y-2"
-                      >
-                        <input type="hidden" name="catalogo_id" value={catalogo.id} />
-                        <p className="text-xs text-red-700">
-                          Elimina catalogo (azione irreversibile)
-                        </p>
-                        <button
-                          type="submit"
-                          className="w-full h-9 rounded-md bg-red-600 text-white text-sm font-semibold hover:bg-red-500 transition-colors"
-                        >
-                          Elimina Catalogo
-                        </button>
-                      </form>
-                    </>
-                  )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <Link
+                href="/dashboard/gestione-utenti"
+                className="group flex flex-col justify-between rounded-2xl border border-black bg-white p-8 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#060d41]"
+              >
+                <div>
+                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[#060d41] text-white mb-5">
+                    <Users size={24} />
+                  </div>
+                  <h3 className="text-xl font-semibold text-zinc-900 mb-2">Gestione Utenti</h3>
+                  <p className="text-sm text-zinc-500 leading-relaxed">
+                    Approva registrazioni, gestisci profili, invita nuovi utenti e consulta gli operatori abilitati.
+                  </p>
                 </div>
-                      ))}
-                    </div>
-                    )}
-                  </section>
-                )
-              })}
+                <div className="mt-6 flex items-center gap-1 text-xs font-semibold text-[#060d41] uppercase tracking-wide group-hover:gap-2 transition-all">
+                  Apri <span aria-hidden>→</span>
+                </div>
+              </Link>
+
+              <Link
+                href="/dashboard/gestione-cataloghi"
+                className="group flex flex-col justify-between rounded-2xl border border-black bg-white p-8 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#060d41]"
+              >
+                <div>
+                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[#060d41] text-white mb-5">
+                    <FileText size={24} />
+                  </div>
+                  <h3 className="text-xl font-semibold text-zinc-900 mb-2">Gestione Cataloghi</h3>
+                  <p className="text-sm text-zinc-500 leading-relaxed">
+                    Carica nuovi PDF, modifica stato e visibilità, aggiorna copertine ed elimina cataloghi.
+                  </p>
+                </div>
+                <div className="mt-6 flex items-center gap-1 text-xs font-semibold text-[#060d41] uppercase tracking-wide group-hover:gap-2 transition-all">
+                  Apri <span aria-hidden>→</span>
+                </div>
+              </Link>
             </div>
-          )}
-        </section>
+          </section>
+        )}
 
         {showFullDashboard && isPartner ? <PartnerListiniPortal /> : null}
 
