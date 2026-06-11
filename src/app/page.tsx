@@ -62,7 +62,7 @@ export default async function LandingPage(props: { searchParams?: Promise<{ mess
     .select('id, categoria')
     .in('categoria', fotoCategorie)
     .eq('stato_pubblicazione', 'attivo')
-    .order('created_at', { ascending: false })
+    .order('creato_il', { ascending: false })
     .limit(10)
 
   // Mappa categoria fotografico → id catalogo (primo attivo trovato)
