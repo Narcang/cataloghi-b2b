@@ -17,10 +17,10 @@ export default function ReservedCatalogPortal({
   caption,
 }: ReservedCatalogPortalProps) {
   return (
-    <section id={sectionId} className="scroll-mt-32">
+    <div id={sectionId} className="scroll-mt-32">
       <Link
         href={href}
-        className="group flex max-w-md flex-col items-center gap-4 rounded-2xl border border-black bg-white p-6 shadow-lg transition hover:-translate-y-0.5 hover:border-[#060d41] hover:shadow-[0_12px_40px_rgba(6,13,65,0.12)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#060d41]"
+        className="group flex w-full flex-col items-center gap-4 rounded-2xl border border-black bg-white p-6 shadow-lg transition hover:-translate-y-0.5 hover:border-[#060d41] hover:shadow-[0_12px_40px_rgba(6,13,65,0.12)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#060d41]"
       >
         <div className="relative h-40 w-40 sm:h-48 sm:w-48">
           <Image
@@ -35,6 +35,6 @@ export default function ReservedCatalogPortal({
           {caption}
         </span>
       </Link>
-    </section>
+    </div>
   )
 }
