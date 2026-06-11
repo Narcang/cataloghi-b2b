@@ -373,6 +373,70 @@ export default async function Dashboard(props: {
           </div>
         ) : null}
 
+        {/* Invita utenti + Contatti Diretti in cima per ruoli non-admin */}
+        {showFullDashboard && !isManager && (isPartner || isAgente) && (
+          <section className="border border-black rounded-2xl bg-white p-6">
+            <h2 className="text-xl text-zinc-900 font-medium mb-1">Invita utenti</h2>
+            <p className="text-sm text-zinc-500 mb-4">
+              Genera un link di registrazione per il ruolo scelto. Il nuovo utente sarà collegato al tuo profilo dopo l&apos;approvazione.
+            </p>
+            <InvitaUtente ruoloCorrente={ruoloCorrente} />
+          </section>
+        )}
+
+        {showFullDashboard && !isManager && user && !isFree && (
+          <section id="contatti">
+            <div className="flex items-center justify-between mb-8 border-b border-black pb-4">
+              <h2 className="text-3xl md:text-4xl tracking-tight text-zinc-100 flex items-center gap-3 font-sans">
+                <Phone className="text-white" /> I Tuoi Contatti Diretti
+              </h2>
+            </div>
+            {contattiDiretti && contattiDiretti.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {contattiDiretti.map((fornitore) => (
+                  <div key={fornitore.id} className="bg-white border border-black rounded-2xl p-6 pb-8 flex flex-col h-full shadow-lg">
+                    <div className="mb-4">
+                      <h3 className="text-lg font-medium text-zinc-900 mb-1">{fornitore.nome_completo || 'Contatto Senza Nome'}</h3>
+                      <p className="text-zinc-600 text-sm">{fornitore.email}</p>
+                    </div>
+                    <div className="mt-auto flex gap-3 pt-6">
+                      {fornitore.telefono ? (
+                        <>
+                          <a href={`tel:${fornitore.telefono?.trim()}`} className="flex-1 flex justify-center items-center gap-2 bg-[#060d41] text-white hover:bg-[#0a155a] py-2.5 px-4 rounded-lg text-sm font-semibold transition-colors">
+                            <Phone size={16} /> Chiama
+                          </a>
+                          <a href={`https://wa.me/${fornitore.telefono?.replace(/\\D/g,'')}`} target="_blank" rel="noopener noreferrer" className="flex-1 flex justify-center items-center gap-2 border border-black bg-zinc-50 hover:bg-[#25D366]/10 hover:border-[#25D366] hover:text-[#25D366] text-zinc-900 py-2.5 px-4 rounded-lg text-sm font-medium transition-colors">
+                            <MessageCircle size={16} /> WhatsApp
+                          </a>
+                        </>
+                      ) : fornitore.email ? (
+                        <a href={`mailto:${fornitore.email.trim()}`} className="ladiva-dashboard-btn-light flex-1 flex justify-center items-center gap-2 border border-black bg-white text-black hover:bg-zinc-100 py-2.5 px-4 rounded-lg text-sm font-semibold transition-colors">
+                          <Mail size={16} /> Scrivi
+                        </a>
+                      ) : (
+                        <>
+                          <span className="flex-1 flex justify-center items-center gap-2 bg-zinc-100 text-zinc-600 opacity-50 py-2.5 px-4 rounded-lg text-sm font-semibold cursor-not-allowed">
+                            <Phone size={16} /> Chiama
+                          </span>
+                          <span className="flex-1 flex justify-center items-center gap-2 border border-black text-zinc-600 opacity-50 bg-zinc-50 py-2.5 px-4 rounded-lg text-sm font-medium cursor-not-allowed">
+                            <MessageCircle size={16} /> WhatsApp
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center p-10 text-center border rounded-2xl border-black bg-white">
+                <p className="text-lg text-zinc-500">
+                  Non hai ancora nessun contatto diretto assegnato in rubrica.
+                </p>
+              </div>
+            )}
+          </section>
+        )}
+
         {showFullDashboard && isAdmin && (
           <section id="crea-catalogo" className="border border-black rounded-2xl bg-white p-6 space-y-5">
             <div>
@@ -661,27 +725,7 @@ export default async function Dashboard(props: {
 
         {showFullDashboard && isPartner ? <PartnerListiniPortal /> : null}
 
-        {showFullDashboard && isPartner && (
-          <section className="border border-black rounded-2xl bg-white p-6">
-            <h2 className="text-xl text-zinc-900 font-medium mb-1">Invita utenti</h2>
-            <p className="text-sm text-zinc-500 mb-4">
-              Genera un link di registrazione per Studio. Il nuovo utente sarà collegato al tuo profilo dopo l&apos;approvazione.
-            </p>
-            <InvitaUtente ruoloCorrente={ruoloCorrente} />
-          </section>
-        )}
-
         {showFullDashboard && isAgente ? <AgenteDocumentazionePortal /> : null}
-
-        {showFullDashboard && isAgente && (
-          <section className="border border-black rounded-2xl bg-white p-6">
-            <h2 className="text-xl text-zinc-900 font-medium mb-1">Invita utenti</h2>
-            <p className="text-sm text-zinc-500 mb-4">
-              Genera un link di registrazione per Partner o Studio. Il nuovo utente sarà collegato al tuo profilo dopo l&apos;approvazione.
-            </p>
-            <InvitaUtente ruoloCorrente={ruoloCorrente} />
-          </section>
-        )}
 
         {showFullDashboard && isManager && (
           <section id="operatori-admin">
@@ -736,93 +780,14 @@ export default async function Dashboard(props: {
           </section>
         )}
 
-        {/* SEZIONE AGENTI IN ZONA (SOLO DISTRIBUTORE) */}
-        {isPartner && (
-          <section id="agenti-zona">
-            <div className="flex items-center justify-between mb-8 border-b border-black pb-4">
-              <h2 className="text-3xl md:text-4xl font-sans tracking-tight text-zinc-100 flex items-center gap-3">
-                <Users className="text-black" /> Agenti nella Tua Area ({profilo?.area_geografica})
-              </h2>
-            </div>
-            
-            {agentiZona.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {agentiZona.map((agente) => (
-                  <div key={agente.id} className="bg-white border border-black rounded-2xl p-6 pb-8 flex flex-col h-full shadow-lg">
-                    <div className="mb-4">
-                      <h3 className="text-lg font-medium text-zinc-900 mb-1">{agente.nome_completo || 'Agente Senza Nome'}</h3>
-                      <p className="text-zinc-600 text-sm">{agente.email}</p>
-                    </div>
-                    <div className="mt-auto flex gap-3 pt-6">
-                      {agente.telefono ? (
-                        <>
-                          <a href={`tel:${agente.telefono?.trim()}`} className="flex-1 flex justify-center items-center gap-2 bg-[#060d41] text-white hover:bg-[#0a155a] py-2.5 px-4 rounded-lg text-sm font-semibold transition-colors">
-                            <Phone size={16} /> Chiama
-                          </a>
-                          <a href={`https://wa.me/${agente.telefono?.replace(/\\D/g,'')}`} target="_blank" rel="noopener noreferrer" className="flex-1 flex justify-center items-center gap-2 border border-black bg-zinc-50 hover:bg-[#25D366]/10 hover:border-[#25D366] hover:text-[#25D366] text-zinc-900 py-2.5 px-4 rounded-lg text-sm font-medium transition-colors">
-                            <MessageCircle size={16} /> WhatsApp
-                          </a>
-                        </>
-                      ) : (
-                        <>
-                          <span className="flex-1 flex justify-center items-center gap-2 bg-zinc-100 text-zinc-600 opacity-50 py-2.5 px-4 rounded-lg text-sm font-semibold cursor-not-allowed">
-                            <Phone size={16} /> Chiama
-                          </span>
-                          <span className="flex-1 flex justify-center items-center gap-2 border border-black text-zinc-600 opacity-50 bg-zinc-50 py-2.5 px-4 rounded-lg text-sm font-medium cursor-not-allowed">
-                            <MessageCircle size={16} /> WhatsApp
-                          </span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center p-10 text-center border rounded-2xl border-black bg-white">
-                <p className="text-sm text-zinc-600">
-                  Non ci sono agenti registrati per la tua area in questo momento.
-                </p>
-              </div>
-            )}
-          </section>
-        )}
-
-
-        {isAgente && (
-          <section id="partner-zona">
-            <div className="flex items-center justify-between mb-8 border-b border-black pb-4">
-              <h2 className="text-3xl md:text-4xl tracking-tight text-zinc-100 flex items-center gap-3 font-sans">
-                <Users className="text-white" /> Partner nella Tua Area ({profilo?.area_geografica})
-              </h2>
-            </div>
-            {partnerZona.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {partnerZona.map((partner) => (
-                  <div key={partner.id} className="bg-white border border-black rounded-2xl p-6 pb-8 flex flex-col h-full shadow-lg">
-                    <h3 className="text-lg font-medium text-zinc-900 mb-1">{partner.nome_completo || 'Partner Senza Nome'}</h3>
-                    <p className="text-zinc-600 text-sm">{partner.email}</p>
-                    <p className="text-zinc-600 text-xs mt-2 uppercase tracking-wide">
-                      {partner.area_geografica || 'Area non definita'}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center p-10 text-center border rounded-2xl border-black bg-white">
-                <p className="text-lg text-zinc-500">Nessun partner geolocalizzato trovato per la tua area.</p>
-              </div>
-            )}
-          </section>
-        )}
-
-        {(isFree || ruoloCorrente !== 'free') && (
+        {/* Contatti diretti per admin/manager (in fondo, come prima) e per utenti free */}
+        {(isManager || isFree) && (
           <section id="contatti">
             <div className="flex items-center justify-between mb-8 border-b border-black pb-4">
               <h2 className="text-3xl md:text-4xl tracking-tight text-zinc-100 flex items-center gap-3 font-sans">
                 <Phone className="text-white" /> I Tuoi Contatti Diretti
               </h2>
             </div>
-            
             {contattiDiretti && contattiDiretti.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {contattiDiretti.map((fornitore) => (
@@ -842,10 +807,7 @@ export default async function Dashboard(props: {
                           </a>
                         </>
                       ) : fornitore.email ? (
-                        <a
-                          href={`mailto:${fornitore.email.trim()}`}
-                          className="ladiva-dashboard-btn-light flex-1 flex justify-center items-center gap-2 border border-black bg-white text-black hover:bg-zinc-100 py-2.5 px-4 rounded-lg text-sm font-semibold transition-colors"
-                        >
+                        <a href={`mailto:${fornitore.email.trim()}`} className="ladiva-dashboard-btn-light flex-1 flex justify-center items-center gap-2 border border-black bg-white text-black hover:bg-zinc-100 py-2.5 px-4 rounded-lg text-sm font-semibold transition-colors">
                           <Mail size={16} /> Scrivi
                         </a>
                       ) : (
