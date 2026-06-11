@@ -76,16 +76,54 @@ export async function register(formData: FormData) {
     redirect('/registrazione?message=' + encodeURIComponent(msg) + tokenParam)
   }
 
+  const newUserId = signUpData?.user?.id ?? null
+
   // Marca il token come usato se la registrazione è andata a buon fine
-  if (invitoToken && signUpData?.user?.id) {
+  if (invitoToken && newUserId) {
     const svc = createServiceRoleSupabase()
     if (svc) {
       await svc
         .from('inviti')
-        .update({ usato: true, usato_da: signUpData.user.id, usato_il: new Date().toISOString() })
+        .update({ usato: true, usato_da: newUserId, usato_il: new Date().toISOString() })
         .eq('token', invitoToken)
         .eq('usato', false)
+
+      // Approva automaticamente: nessuna attesa di approvazione admin
+      await svc
+        .from('profili')
+        .update({ registrazione_approvata: true })
+        .eq('id', newUserId)
+
+      // Conferma l'email in modo che il login funzioni subito
+      await svc.auth.admin.updateUserById(newUserId, { email_confirm: true })
+
+      // Crea la connessione con l'invitante (stessa logica del route admin/profili/update)
+      if (invitoDa && invitoRuolo) {
+        const RUOLI_CONNESSIONE = new Set(['agente', 'distributore', 'studio'])
+        if (RUOLI_CONNESSIONE.has(invitoRuolo)) {
+          const { data: profiloInvitante } = await svc
+            .from('profili')
+            .select('ruolo')
+            .eq('id', invitoDa)
+            .single()
+
+          if (profiloInvitante && RUOLI_CONNESSIONE.has(profiloInvitante.ruolo)) {
+            await svc.from('connessioni_utente_operatore').upsert([
+              { utente_id: invitoDa,  operatore_id: newUserId },
+              { utente_id: newUserId, operatore_id: invitoDa },
+            ], { onConflict: 'utente_id,operatore_id', ignoreDuplicates: true })
+          } else {
+            await svc.from('connessioni_utente_operatore').upsert(
+              { utente_id: invitoDa, operatore_id: newUserId },
+              { onConflict: 'utente_id,operatore_id', ignoreDuplicates: true }
+            )
+          }
+        }
+      }
     }
+
+    revalidatePath('/', 'layout')
+    redirect('/login?message=' + encodeURIComponent('Registrazione completata. Puoi accedere subito con le tue credenziali.'))
   }
 
   revalidatePath('/', 'layout')
