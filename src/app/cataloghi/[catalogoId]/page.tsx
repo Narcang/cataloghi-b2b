@@ -164,7 +164,6 @@ export default async function CatalogoDetail({
         </Link>
         <div className="flex-1 truncate">
           <h1 className="text-base font-semibold truncate text-zinc-900">{catalogo.titolo}</h1>
-          <p className="text-xs text-zinc-600">Area: {catalogo.area_geografica_target}</p>
         </div>
       </header>
       
