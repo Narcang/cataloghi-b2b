@@ -8,6 +8,7 @@ import DashboardHashScroll from '@/components/DashboardHashScroll'
 import {
   isAgentOnlyCatalogCategory,
   CATALOG_CATEGORIES,
+  CATALOG_CATEGORIES_FOR_UPLOAD,
   categoriesVisibleOnDashboard,
   categoryToDomId,
   isCatalogCategoryAllowedForStudioRole,
@@ -446,7 +447,7 @@ export default async function Dashboard(props: {
               </p>
             </div>
 
-            <CreateCatalogForm categories={CATALOG_CATEGORIES} />
+            <CreateCatalogForm categories={CATALOG_CATEGORIES_FOR_UPLOAD} />
           </section>
         )}
 

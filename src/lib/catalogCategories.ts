@@ -79,9 +79,20 @@ export function isLoginOnlyCatalogCategory(categoria: string | null | undefined)
   return LOGIN_ONLY_CATALOG_CATEGORIES.has(categoria as CatalogCategory)
 }
 
-/** Categorie catalogo visibili senza aree riservate (Family, Bricks, Metal, …). */
+/**
+ * Categorie nascoste dall'interfaccia utente (upload form, liste dashboard).
+ * I file già caricati sotto queste categorie rimangono accessibili via link diretto.
+ */
+export const UI_HIDDEN_CATEGORIES = new Set<CatalogCategory>(['Studio', 'Metal'])
+
+/** Categorie disponibili nel form di caricamento (esclude quelle nascoste dall'UI). */
+export const CATALOG_CATEGORIES_FOR_UPLOAD = CATALOG_CATEGORIES.filter(
+  (c) => !UI_HIDDEN_CATEGORIES.has(c),
+)
+
+/** Categorie catalogo visibili senza aree riservate (Family, Bricks, …). */
 export const PUBLIC_CATALOG_CATEGORIES = CATALOG_CATEGORIES.filter(
-  (c) => !LOGIN_ONLY_CATALOG_CATEGORIES.has(c),
+  (c) => !LOGIN_ONLY_CATALOG_CATEGORIES.has(c) && !UI_HIDDEN_CATEGORIES.has(c),
 )
 
 /** Listini riservati ai partner (distributore): area dedicata in dashboard. */
@@ -131,12 +142,12 @@ export function categoriesVisibleOnDashboard(
     return [...PUBLIC_CATALOG_CATEGORIES]
   }
   if (ruoloProfilo === 'studio') {
-    return CATALOG_CATEGORIES.filter((c) => STUDIO_ROLE_ALLOWED.has(c))
+    return CATALOG_CATEGORIES.filter((c) => STUDIO_ROLE_ALLOWED.has(c) && !UI_HIDDEN_CATEGORIES.has(c))
   }
   if (ruoloProfilo === 'distributore' || ruoloProfilo === 'agente') {
     return [...PUBLIC_CATALOG_CATEGORIES]
   }
-  return [...CATALOG_CATEGORIES]
+  return CATALOG_CATEGORIES.filter((c) => !UI_HIDDEN_CATEGORIES.has(c))
 }
 
 /** ID elemento DOM per ancore tipo /dashboard#catalog-cat-family-20 */
