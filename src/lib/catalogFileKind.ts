@@ -5,8 +5,8 @@ export type CatalogDeliveryMode = 'pdf' | 'zip-download'
 /** Categorie che supportano il download ZIP (oltre alla categoria Studio base). */
 const ZIP_DOWNLOAD_CATEGORIES = new Set<string>([
   STUDIO_CATALOG_CATEGORY,
-  'Studio 2D',
-  'Studio 3D',
+  'File 2D',
+  'File 3D',
 ])
 
 export function isZipStoragePath(urlFile: string | null | undefined): boolean {

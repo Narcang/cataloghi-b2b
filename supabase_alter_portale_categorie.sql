@@ -17,8 +17,8 @@ ALTER TABLE public.cataloghi
       'Bricks',
       'Metal',
       'Studio',
-      'Studio 2D',
-      'Studio 3D',
+      'File 2D',
+      'File 3D',
       'Partner',
       'Agenti',
       'Scontistiche',
@@ -36,7 +36,7 @@ ALTER TABLE public.cataloghi
 -- (precauzione: in genere sono appena create, quindi non ci sono righe da aggiornare)
 UPDATE public.cataloghi
 SET ruoli_visibili = ARRAY['studio', 'distributore', 'agente', 'manager']::text[]
-WHERE categoria IN ('Studio 2D', 'Studio 3D')
+WHERE categoria IN ('File 2D', 'File 3D')
   AND (array_length(ruoli_visibili, 1) IS NULL OR array_length(ruoli_visibili, 1) = 0);
 
 UPDATE public.cataloghi

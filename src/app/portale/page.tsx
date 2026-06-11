@@ -18,7 +18,7 @@ export const metadata = {
 }
 
 function tileIcon(categoria: CatalogCategory) {
-  if (categoria === 'Studio 2D' || categoria === 'Studio 3D' || categoria === 'Studio') {
+  if (categoria === 'File 2D' || categoria === 'File 3D' || categoria === 'Studio') {
     return <Download size={28} strokeWidth={1.5} />
   }
   if (categoria === 'Power Point') {
@@ -31,7 +31,7 @@ function tileIcon(categoria: CatalogCategory) {
 }
 
 function tileAccentColor(categoria: CatalogCategory): string {
-  if (categoria === 'Studio 2D' || categoria === 'Studio 3D' || categoria === 'Studio') return 'bg-[#060d41]'
+  if (categoria === 'File 2D' || categoria === 'File 3D' || categoria === 'Studio') return 'bg-[#060d41]'
   if (categoria === 'Power Point') return 'bg-zinc-700'
   if (categoria === 'Partner') return 'bg-slate-700'
   if (categoria === 'Listini Netti') return 'bg-slate-600'
