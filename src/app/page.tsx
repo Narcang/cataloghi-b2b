@@ -73,12 +73,13 @@ export default async function LandingPage(props: { searchParams?: Promise<{ mess
     }
   }
 
-  // Restituisce l'href diretto al PDF se esiste, altrimenti la pagina categoria
+  // Restituisce l'href diretto al PDF se esiste (accesso RLS verificato lato server),
+  // altrimenti rimanda al login senza mostrare la pagina categoria intermedia.
   function fotoHref(baseCat: CatalogCategory): string {
     const fotoCat = FOTO_CATEGORY_MAP[baseCat]
     const catalogoId = fotoCat ? fotoCatalogoIdMap[fotoCat] : undefined
     if (catalogoId) return `/cataloghi/${catalogoId}?returnTo=/`
-    return fotoCat ? `/cataloghi/categoria/${categoryToSlug(fotoCat)}` : '/'
+    return '/login'
   }
 
   const homepageCategories = HOMEPAGE_CATEGORIES_ORDER
