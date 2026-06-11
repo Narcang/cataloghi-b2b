@@ -15,6 +15,7 @@ import {
   LayoutDashboard,
   Download,
   UserPlus,
+  Users,
   type LucideIcon,
 } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
@@ -244,6 +245,28 @@ export default function Header() {
                     className="ladiva-dropdown-menu ladiva-account-dropdown-panel"
                     role="menu"
                   >
+                    {(profiloRuolo === 'admin' || profiloRuolo === 'manager') && (
+                      <>
+                        <Link
+                          href="/dashboard/gestione-utenti"
+                          className="ladiva-dropdown-item"
+                          role="menuitem"
+                          onClick={() => setAccountMenuOpen(false)}
+                        >
+                          <Users size={16} aria-hidden />
+                          Gestione Utenti
+                        </Link>
+                        <Link
+                          href="/dashboard/gestione-cataloghi"
+                          className="ladiva-dropdown-item"
+                          role="menuitem"
+                          onClick={() => setAccountMenuOpen(false)}
+                        >
+                          <BookOpen size={16} aria-hidden />
+                          Gestione Cataloghi
+                        </Link>
+                      </>
+                    )}
                     <form action="/auth/signout" method="post" className="m-0 block w-full p-0">
                       <button type="submit" className="ladiva-dropdown-item w-full text-left text-[#060d41]" role="menuitem">
                         <LogOut size={16} aria-hidden />

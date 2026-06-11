@@ -459,7 +459,7 @@ export default async function Dashboard(props: {
                     Approva registrazioni, gestisci profili, invita nuovi utenti e consulta gli operatori abilitati.
                   </p>
                 </div>
-                <div className="mt-6 flex items-center gap-1 text-xs font-semibold text-[#060d41] uppercase tracking-wide group-hover:gap-2 transition-all">
+                <div className="mt-6 flex items-center gap-1 text-xs font-semibold text-white uppercase tracking-wide group-hover:gap-2 transition-all">
                   Apri <span aria-hidden>→</span>
                 </div>
               </Link>
@@ -477,7 +477,7 @@ export default async function Dashboard(props: {
                     Carica nuovi PDF, modifica stato e visibilità, aggiorna copertine ed elimina cataloghi.
                   </p>
                 </div>
-                <div className="mt-6 flex items-center gap-1 text-xs font-semibold text-[#060d41] uppercase tracking-wide group-hover:gap-2 transition-all">
+                <div className="mt-6 flex items-center gap-1 text-xs font-semibold text-white uppercase tracking-wide group-hover:gap-2 transition-all">
                   Apri <span aria-hidden>→</span>
                 </div>
               </Link>
