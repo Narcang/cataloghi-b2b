@@ -65,13 +65,13 @@ export default async function ListiniPartnerPage() {
         <div className="mt-4">
           <DashboardReservedBackNav areaLabel={isStudio ? 'area riservata studio' : 'area riservata partner'} />
           <h1 className="text-3xl md:text-4xl font-semibold text-zinc-900 tracking-tight mt-1 mb-2">
-            {isStudio ? 'Listini Studio' : 'Listini Partner'}
+            {isStudio ? 'Listini Studio' : 'Listini'}
           </h1>
           <p className="text-zinc-600 max-w-2xl text-lg">
             {profilo.nome_completo ? `Bentornato ${profilo.nome_completo}. ` : ''}
             {isStudio
               ? 'Qui trovi i listini della linea Studio riservati al tuo profilo.'
-              : 'Qui trovi i listini Partner e la linea Studio riservati al tuo profilo.'}
+              : 'Qui trovi i listini riservati al tuo profilo.'}
           </p>
         </div>
 

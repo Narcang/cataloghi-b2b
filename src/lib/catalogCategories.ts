@@ -8,10 +8,11 @@ export const CATALOG_CATEGORIES = [
   'Studio',
   'File 2D',
   'File 3D',
-  'Partner',
+  'Partner',       // legacy – nascosto UI, mantenuto per compatibilità
+  'Listini',       // sostituisce Partner + Listini Netti
   'Agenti',
   'Scontistiche',
-  'Listini Netti',
+  'Listini Netti', // legacy – nascosto UI, mantenuto per compatibilità
   'Power Point',
   'Family 15 Fotografico',
   'Family 20 Fotografico',
@@ -36,8 +37,11 @@ export const AGENT_RESERVED_CATEGORIES = [
 
 const AGENT_RESERVED_SET = new Set<CatalogCategory>(AGENT_RESERVED_CATEGORIES)
 
-/** Categoria riservata: visibile in dashboard solo dopo login (non agli ospiti). */
+/** @deprecated Usa LISTINI_CATALOG_CATEGORY. Mantenuto per compatibilità con dati legacy. */
 export const PARTNER_CATALOG_CATEGORY = 'Partner' satisfies CatalogCategory
+
+/** Categoria listini unificata (sostituisce Partner + Listini Netti). */
+export const LISTINI_CATALOG_CATEGORY = 'Listini' satisfies CatalogCategory
 
 /** Linea dedicata agli studi / progettazione (login obbligatorio per ospiti). */
 export const STUDIO_CATALOG_CATEGORY = 'Studio' satisfies CatalogCategory
@@ -64,14 +68,16 @@ export function isCatalogCategoryAllowedForStudioRole(categoria: string | null |
 }
 
 const LOGIN_ONLY_CATALOG_CATEGORIES = new Set<CatalogCategory>([
-  PARTNER_CATALOG_CATEGORY,
+  LISTINI_CATALOG_CATEGORY,
   AGENTI_CATALOG_CATEGORY,
   SCONISTICHE_CATALOG_CATEGORY,
   STUDIO_CATALOG_CATEGORY,
   'File 2D',
   'File 3D',
-  'Listini Netti',
   'Power Point',
+  // legacy
+  PARTNER_CATALOG_CATEGORY,
+  'Listini Netti',
 ])
 
 export function isLoginOnlyCatalogCategory(categoria: string | null | undefined): boolean {
@@ -83,7 +89,12 @@ export function isLoginOnlyCatalogCategory(categoria: string | null | undefined)
  * Categorie nascoste dall'interfaccia utente (upload form, liste dashboard).
  * I file già caricati sotto queste categorie rimangono accessibili via link diretto.
  */
-export const UI_HIDDEN_CATEGORIES = new Set<CatalogCategory>(['Studio', 'Metal'])
+export const UI_HIDDEN_CATEGORIES = new Set<CatalogCategory>([
+  'Studio',
+  'Metal',
+  'Partner',       // legacy, sostituito da Listini
+  'Listini Netti', // legacy, sostituito da Listini
+])
 
 /** Categorie disponibili nel form di caricamento (esclude quelle nascoste dall'UI). */
 export const CATALOG_CATEGORIES_FOR_UPLOAD = CATALOG_CATEGORIES.filter(
@@ -97,7 +108,7 @@ export const PUBLIC_CATALOG_CATEGORIES = CATALOG_CATEGORIES.filter(
 
 /** Listini riservati ai partner (distributore): area dedicata in dashboard. */
 export const PARTNER_LISTINI_CATEGORIES = [
-  PARTNER_CATALOG_CATEGORY,
+  LISTINI_CATALOG_CATEGORY,
   STUDIO_CATALOG_CATEGORY,
 ] as const satisfies readonly CatalogCategory[]
 
@@ -179,6 +190,7 @@ export const CATEGORY_TILE_IMAGE: Record<CatalogCategory, string> = {
   'File 2D': '/catalog/capsule-collection.png',
   'File 3D': '/catalog/capsule-collection.png',
   Partner: '/catalog/capsule-collection.png',
+  Listini: '/catalog/family-gres.png',
   Agenti: '/catalog/family-gres.png',
   Scontistiche: '/catalog/family-gres.png',
   'Listini Netti': '/catalog/family-gres.png',
@@ -198,13 +210,12 @@ export type PortaleTile = {
 }
 
 const AGENTE_TILES: PortaleTile[] = [
-  { categoria: 'File 2D',      label: 'File 2D',          descrizione: 'File tecnici 2D scaricabili' },
-  { categoria: 'File 3D',      label: 'File 3D',          descrizione: 'File tecnici 3D scaricabili' },
-  { categoria: 'Partner',      label: 'Listini Pubblici', descrizione: 'Listini prezzi' },
-  { categoria: 'Listini Netti',label: 'Listini Netti',    descrizione: 'Listini prezzi netti' },
-  { categoria: 'Scontistiche', label: 'Scontistiche',     descrizione: 'Condizioni commerciali' },
-  { categoria: 'Agenti',       label: 'Documentazione',   descrizione: 'Documentazione riservata' },
-  { categoria: 'Power Point',  label: 'Power Point',      descrizione: 'Presentazioni PowerPoint' },
+  { categoria: 'File 2D',     label: 'File 2D',        descrizione: 'File tecnici 2D scaricabili' },
+  { categoria: 'File 3D',     label: 'File 3D',        descrizione: 'File tecnici 3D scaricabili' },
+  { categoria: 'Listini',     label: 'Listini',         descrizione: 'Listini prezzi' },
+  { categoria: 'Scontistiche',label: 'Scontistiche',   descrizione: 'Condizioni commerciali' },
+  { categoria: 'Agenti',      label: 'Documentazione', descrizione: 'Documentazione riservata' },
+  { categoria: 'Power Point', label: 'Power Point',    descrizione: 'Presentazioni PowerPoint' },
 ]
 
 export const PORTALE_TILES_PER_RUOLO: Record<string, PortaleTile[]> = {
@@ -213,9 +224,9 @@ export const PORTALE_TILES_PER_RUOLO: Record<string, PortaleTile[]> = {
     { categoria: 'File 3D', label: 'File 3D', descrizione: 'File tecnici 3D scaricabili' },
   ],
   distributore: [
-    { categoria: 'File 2D', label: 'File 2D', descrizione: 'File tecnici 2D scaricabili' },
-    { categoria: 'File 3D', label: 'File 3D', descrizione: 'File tecnici 3D scaricabili' },
-    { categoria: 'Partner', label: 'Listini Pubblici', descrizione: 'Listini prezzi' },
+    { categoria: 'File 2D',  label: 'File 2D',  descrizione: 'File tecnici 2D scaricabili' },
+    { categoria: 'File 3D',  label: 'File 3D',  descrizione: 'File tecnici 3D scaricabili' },
+    { categoria: 'Listini',  label: 'Listini',  descrizione: 'Listini prezzi' },
   ],
   agente: AGENTE_TILES,
   manager: AGENTE_TILES,
