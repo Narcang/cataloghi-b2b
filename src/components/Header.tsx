@@ -158,7 +158,10 @@ export default function Header() {
   }
 
   const catalogMenuItem = catalogMenuItemForRole(profiloRuolo, Boolean(user))
-  const menuItems: MenuItem[] = [catalogMenuItem, ...menuItemsBase]
+  const visibleBaseItems = user
+    ? menuItemsBase.filter((item) => item.href !== '/registrazione')
+    : menuItemsBase
+  const menuItems: MenuItem[] = [catalogMenuItem, ...visibleBaseItems]
 
   return (
     <header className="ladiva-header">
