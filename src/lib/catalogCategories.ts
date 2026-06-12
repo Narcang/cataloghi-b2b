@@ -197,6 +197,16 @@ export type PortaleTile = {
   descrizione: string
 }
 
+const AGENTE_TILES: PortaleTile[] = [
+  { categoria: 'File 2D',      label: 'File 2D',          descrizione: 'File tecnici 2D scaricabili' },
+  { categoria: 'File 3D',      label: 'File 3D',          descrizione: 'File tecnici 3D scaricabili' },
+  { categoria: 'Partner',      label: 'Listini Pubblici', descrizione: 'Listini prezzi' },
+  { categoria: 'Listini Netti',label: 'Listini Netti',    descrizione: 'Listini prezzi netti' },
+  { categoria: 'Scontistiche', label: 'Scontistiche',     descrizione: 'Condizioni commerciali' },
+  { categoria: 'Agenti',       label: 'Documentazione',   descrizione: 'Documentazione riservata' },
+  { categoria: 'Power Point',  label: 'Power Point',      descrizione: 'Presentazioni PowerPoint' },
+]
+
 export const PORTALE_TILES_PER_RUOLO: Record<string, PortaleTile[]> = {
   studio: [
     { categoria: 'File 2D', label: 'File 2D', descrizione: 'File tecnici 2D scaricabili' },
@@ -207,15 +217,9 @@ export const PORTALE_TILES_PER_RUOLO: Record<string, PortaleTile[]> = {
     { categoria: 'File 3D', label: 'File 3D', descrizione: 'File tecnici 3D scaricabili' },
     { categoria: 'Partner', label: 'Listini Pubblici', descrizione: 'Listini prezzi' },
   ],
-  agente: [
-    { categoria: 'File 2D',      label: 'File 2D',             descrizione: 'File tecnici 2D scaricabili' },
-    { categoria: 'File 3D',      label: 'File 3D',             descrizione: 'File tecnici 3D scaricabili' },
-    { categoria: 'Partner',      label: 'Listini Pubblici',    descrizione: 'Listini prezzi' },
-    { categoria: 'Listini Netti',label: 'Listini Netti', descrizione: 'Listini prezzi netti' },
-    { categoria: 'Scontistiche', label: 'Scontistiche',  descrizione: 'Condizioni commerciali' },
-    { categoria: 'Agenti',       label: 'Documentazione',descrizione: 'Documentazione riservata' },
-    { categoria: 'Power Point',  label: 'Power Point',   descrizione: 'Presentazioni PowerPoint' },
-  ],
+  agente: AGENTE_TILES,
+  manager: AGENTE_TILES,
+  admin: AGENTE_TILES,
 }
 
 /** Mappa categoria base → categoria fotografico corrispondente. */

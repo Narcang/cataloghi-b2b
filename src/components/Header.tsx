@@ -59,7 +59,7 @@ function catalogMenuItemForRole(ruolo: string | null, loggedIn: boolean): MenuIt
   switch (ruolo as ProfiloRuolo | null) {
     case 'admin':
     case 'manager':
-      return { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }
+      return { label: 'Dashboard', href: '/portale', icon: LayoutDashboard }
     case 'agente':
       return {
         label: 'Documentazione Riservata',
