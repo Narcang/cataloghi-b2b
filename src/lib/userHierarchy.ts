@@ -68,6 +68,49 @@ export function associatiDirettiSectionLabel(ruolo: string): string | null {
   }
 }
 
+export function associatiAggiungiSectionLabel(ruolo: string): string | null {
+  const childRoles = CHILD_ROLES_BY_PARENT[ruolo]
+  if (!childRoles?.length) return null
+  switch (childRoles[0]) {
+    case 'manager':
+      return 'Associa manager'
+    case 'agente':
+      return 'Associa agente'
+    case 'distributore':
+      return 'Associa partner'
+    case 'studio':
+      return 'Associa studio'
+    default:
+      return 'Associa profilo'
+  }
+}
+
+export function getCandidateAssociatiProfiles(
+  ownerId: string,
+  ownerRuolo: string,
+  profili: ProfiloGerarchiaRow[],
+): ProfiloGerarchiaRow[] {
+  const childRole = CHILD_ROLES_BY_PARENT[ownerRuolo]?.[0]
+  if (!childRole) return []
+
+  return profili
+    .filter(
+      (p) =>
+        p.id !== ownerId &&
+        p.ruolo === childRole &&
+        p.ruolo !== 'free' &&
+        p.registrazione_approvata !== false,
+    )
+    .sort((a, b) =>
+      (a.nome_completo || a.email || a.id)
+        .trim()
+        .toLocaleLowerCase('it')
+        .localeCompare((b.nome_completo || b.email || b.id).trim().toLocaleLowerCase('it'), 'it', {
+          sensitivity: 'base',
+        }),
+    )
+}
+
 function getExpectedChildRoles(
   parent: ProfiloGerarchiaRow | null,
   viewerRole: string,

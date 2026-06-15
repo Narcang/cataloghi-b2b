@@ -5,7 +5,9 @@ import { useEffect, useMemo, useState } from 'react'
 import { Users, UserCheck } from 'lucide-react'
 import AssociatiDirettiCascade from '@/components/admin/AssociatiDirettiCascade'
 import {
+  associatiAggiungiSectionLabel,
   associatiDirettiSectionLabel,
+  getCandidateAssociatiProfiles,
   getChildrenProfiles,
   profiloToGerarchiaRow,
   type ProfiloGerarchiaRow,
@@ -62,6 +64,8 @@ type Props = {
   profiliPendenti: ProfiloGestioneRow[]
   profiliLista: ProfiloGestioneRow[]
   profiliGerarchia: ProfiloGerarchiaRow[]
+  /** Tutti gli utenti approvati (senza filtro area): elenco per associare il ruolo inferiore. */
+  profiliAssociazione: ProfiloGerarchiaRow[]
   links: { utente_id: string; operatore_id: string }[]
   /** Quando true (ruolo manager) il pannello è in sola lettura: nessun edit/delete/approvazione. */
   readOnly?: boolean
@@ -72,6 +76,7 @@ export default function AdminProfiliPanel({
   profiliPendenti,
   profiliLista,
   profiliGerarchia,
+  profiliAssociazione,
   links,
   readOnly = false,
 }: Props) {
@@ -400,6 +405,8 @@ export default function AdminProfiliPanel({
             const profiloReadOnly = readOnly || p.id === currentUserId || p.ruolo === 'admin'
             const directAssociati = getDirectAssociati(p)
             const associatiLabel = associatiDirettiSectionLabel(p.ruolo)
+            const aggiungiLabel = associatiAggiungiSectionLabel(p.ruolo)
+            const candidateAssociati = getCandidateAssociatiProfiles(p.id, p.ruolo, profiliAssociazione)
             return (
               <li key={p.id} className="rounded-xl border border-black bg-zinc-50/80">
                 <details className="group">
@@ -529,6 +536,8 @@ export default function AdminProfiliPanel({
                               <AssociatiDirettiCascade
                                 ownerProfileId={p.id}
                                 roots={directAssociati}
+                                candidates={candidateAssociati}
+                                aggiungiLabel={aggiungiLabel ?? 'Associa profilo'}
                                 profiliGerarchia={profiliGerarchia}
                                 links={links}
                                 linksByUtente={linksByUtente}

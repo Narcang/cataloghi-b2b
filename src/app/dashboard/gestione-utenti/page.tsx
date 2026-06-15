@@ -111,12 +111,22 @@ export default async function GestioneUtentiPage(props: {
     gerarchiaQuery = gerarchiaQuery.ilike('nome_completo', `%${escapeIlikePattern(nomeFilter)}%`)
   }
 
-  const [opRes, pendRes, listaRes, linksRes, gerarchiaRes] = await Promise.all([
+  /** Tutti gli utenti approvati, senza filtro area/nome: usati per associare il ruolo inferiore. */
+  const associazioneQuery = supabase
+    .from('profili')
+    .select('id, nome_completo, email, area_geografica, ruolo, invitato_da, registrazione_approvata')
+    .neq('ruolo', 'free')
+    .or('registrazione_approvata.eq.true,registrazione_approvata.is.null')
+    .order('nome_completo', { ascending: true, nullsFirst: false })
+    .limit(500)
+
+  const [opRes, pendRes, listaRes, linksRes, gerarchiaRes, associazioneRes] = await Promise.all([
     operatoriQuery,
     pendQuery,
     listaQuery,
     linksQuery,
     gerarchiaQuery,
+    associazioneQuery,
   ])
 
   const operatoriAdmin = (opRes.data ?? []) as Operatore[]
@@ -124,6 +134,7 @@ export default async function GestioneUtentiPage(props: {
   const profiliGestioneAdmin = (listaRes.data ?? []) as ProfiloGestioneRow[]
   const connessioniUtenteOperatoreRows = (linksRes.data ?? []) as { utente_id: string; operatore_id: string }[]
   const profiliGerarchia = (gerarchiaRes.data ?? []) as ProfiloGerarchiaRow[]
+  const profiliAssociazione = (associazioneRes.data ?? []) as ProfiloGerarchiaRow[]
 
   return (
     <div className="ladiva-root ladiva-root-app-dark min-h-screen flex flex-col">
@@ -200,6 +211,7 @@ export default async function GestioneUtentiPage(props: {
           profiliPendenti={profiliRegistrazionePendente}
           profiliLista={profiliGestioneAdmin}
           profiliGerarchia={profiliGerarchia}
+          profiliAssociazione={profiliAssociazione}
           links={connessioniUtenteOperatoreRows}
           readOnly={!isAdmin}
         />
