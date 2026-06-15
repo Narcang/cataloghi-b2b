@@ -154,6 +154,21 @@ export function countChildrenProfiles(
   return getChildrenProfiles(profileId, profile, profileId, profile.ruolo, profili, links).length
 }
 
+export function nestedAssociatiLabel(ruolo: string): string | null {
+  const childRoles = CHILD_ROLES_BY_PARENT[ruolo]
+  if (!childRoles?.length) return null
+  switch (childRoles[0]) {
+    case 'agente':
+      return 'Agenti associati'
+    case 'distributore':
+      return 'Partner associati'
+    case 'studio':
+      return 'Studi associati'
+    default:
+      return 'Associati'
+  }
+}
+
 export function livelloGerarchiaLabel(
   parent: ProfiloGerarchiaRow | null,
   viewerRole: string,

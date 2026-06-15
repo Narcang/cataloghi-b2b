@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import { Users, UserCheck } from 'lucide-react'
+import AssociatiDirettiCascade from '@/components/admin/AssociatiDirettiCascade'
 import {
   associatiDirettiSectionLabel,
   getChildrenProfiles,
@@ -397,7 +398,6 @@ export default function AdminProfiliPanel({
           ) : null}
           {profiliRuoloAttivo.map((p) => {
             const profiloReadOnly = readOnly || p.id === currentUserId || p.ruolo === 'admin'
-            const selected = linksByUtente.get(p.id) ?? new Set<string>()
             const directAssociati = getDirectAssociati(p)
             const associatiLabel = associatiDirettiSectionLabel(p.ruolo)
             return (
@@ -525,34 +525,18 @@ export default function AdminProfiliPanel({
                             <p className="text-xs font-medium uppercase text-zinc-600 mb-2">
                               {associatiLabel}
                             </p>
-                            <div className="flex flex-wrap gap-3 max-h-48 overflow-y-auto border border-black/15 rounded-lg p-3 bg-zinc-50">
-                              {directAssociati.length === 0 ? (
-                                <span className="text-sm text-zinc-500">
-                                  Nessun associato diretto a questo profilo.
-                                </span>
-                              ) : (
-                                directAssociati.map((op) => (
-                                  <label key={op.id} className="flex items-center gap-2 text-sm text-zinc-800 min-w-[200px]">
-                                    <input
-                                      type="checkbox"
-                                      checked={selected.has(op.id)}
-                                      disabled={readOnly || p.id === currentUserId || p.ruolo === 'admin'}
-                                      onChange={async (e) => {
-                                        const on = e.target.checked
-                                        const ok = await postLink(on ? 'add' : 'remove', p.id, op.id)
-                                        if (!ok) e.target.checked = !on
-                                      }}
-                                    />
-                                    <span>
-                                      {op.nome_completo || op.email}{' '}
-                                      <span className="text-zinc-500 text-xs">
-                                        ({op.ruolo === 'distributore' ? 'partner' : op.ruolo}
-                                        {op.area_geografica ? ` · ${op.area_geografica}` : ''})
-                                      </span>
-                                    </span>
-                                  </label>
-                                ))
-                              )}
+                            <div className="border border-black/15 rounded-lg p-3 bg-zinc-50">
+                              <AssociatiDirettiCascade
+                                ownerProfileId={p.id}
+                                roots={directAssociati}
+                                profiliGerarchia={profiliGerarchia}
+                                links={links}
+                                linksByUtente={linksByUtente}
+                                readOnly={readOnly || p.id === currentUserId || p.ruolo === 'admin'}
+                                onToggleLink={async (add, utenteId, operatoreId) =>
+                                  postLink(add ? 'add' : 'remove', utenteId, operatoreId)
+                                }
+                              />
                             </div>
                           </div>
                         ) : null}
