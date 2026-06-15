@@ -4,7 +4,9 @@ import Link from 'next/link'
 import { Phone, MessageCircle, Users, ArrowLeft } from 'lucide-react'
 import Header from '@/components/Header'
 import AdminProfiliPanel, { type ProfiloGestioneRow } from '@/components/admin/AdminProfiliPanel'
+import GerarchiaUtentiTree from '@/components/admin/GerarchiaUtentiTree'
 import InvitaUtente from '@/components/InvitaUtente'
+import type { ProfiloGerarchiaRow } from '@/lib/userHierarchy'
 
 export const dynamic = 'force-dynamic'
 
@@ -98,17 +100,30 @@ export default async function GestioneUtentiPage(props: {
     .select('utente_id, operatore_id')
     .limit(2000)
 
-  const [opRes, pendRes, listaRes, linksRes] = await Promise.all([
+  let gerarchiaQuery = supabase
+    .from('profili')
+    .select('id, nome_completo, email, area_geografica, ruolo, invitato_da, registrazione_approvata')
+    .neq('ruolo', 'free')
+    .order('nome_completo', { ascending: true, nullsFirst: false })
+
+  if (areaFilter !== 'all') gerarchiaQuery = gerarchiaQuery.eq('area_geografica', areaFilter)
+  if (nomeFilter.length > 0) {
+    gerarchiaQuery = gerarchiaQuery.ilike('nome_completo', `%${escapeIlikePattern(nomeFilter)}%`)
+  }
+
+  const [opRes, pendRes, listaRes, linksRes, gerarchiaRes] = await Promise.all([
     operatoriQuery,
     pendQuery,
     listaQuery,
     linksQuery,
+    gerarchiaQuery,
   ])
 
   const operatoriAdmin = (opRes.data ?? []) as Operatore[]
   const profiliRegistrazionePendente = (pendRes.data ?? []) as ProfiloGestioneRow[]
   const profiliGestioneAdmin = (listaRes.data ?? []) as ProfiloGestioneRow[]
   const connessioniUtenteOperatoreRows = (linksRes.data ?? []) as { utente_id: string; operatore_id: string }[]
+  const profiliGerarchia = (gerarchiaRes.data ?? []) as ProfiloGerarchiaRow[]
 
   return (
     <div className="ladiva-root ladiva-root-app-dark min-h-screen flex flex-col">
@@ -171,12 +186,20 @@ export default async function GestioneUtentiPage(props: {
           </div>
         </section>
 
+        {/* Struttura organizzativa (matrioska) */}
+        <GerarchiaUtentiTree
+          currentUserId={user.id}
+          viewerRole={ruoloCorrente}
+          profili={profiliGerarchia}
+          links={connessioniUtenteOperatoreRows}
+        />
+
         {/* Gestione profili */}
         <AdminProfiliPanel
           currentUserId={user.id}
           profiliPendenti={profiliRegistrazionePendente}
           profiliLista={profiliGestioneAdmin}
-          operatoriDisponibili={operatoriAdmin}
+          profiliGerarchia={profiliGerarchia}
           links={connessioniUtenteOperatoreRows}
           readOnly={!isAdmin}
         />

@@ -3,6 +3,12 @@
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import { Users, UserCheck } from 'lucide-react'
+import {
+  associatiDirettiSectionLabel,
+  getChildrenProfiles,
+  profiloToGerarchiaRow,
+  type ProfiloGerarchiaRow,
+} from '@/lib/userHierarchy'
 
 export type ProfiloGestioneRow = {
   id: string
@@ -54,7 +60,7 @@ type Props = {
   currentUserId: string
   profiliPendenti: ProfiloGestioneRow[]
   profiliLista: ProfiloGestioneRow[]
-  operatoriDisponibili: OperatoreAssociazione[]
+  profiliGerarchia: ProfiloGerarchiaRow[]
   links: { utente_id: string; operatore_id: string }[]
   /** Quando true (ruolo manager) il pannello è in sola lettura: nessun edit/delete/approvazione. */
   readOnly?: boolean
@@ -64,7 +70,7 @@ export default function AdminProfiliPanel({
   currentUserId,
   profiliPendenti,
   profiliLista,
-  operatoriDisponibili,
+  profiliGerarchia,
   links,
   readOnly = false,
 }: Props) {
@@ -108,6 +114,17 @@ export default function AdminProfiliPanel({
     }
     return m
   }, [links])
+
+  const invitatoDaById = useMemo(() => {
+    const m = new Map<string, string | null>()
+    for (const row of profiliGerarchia) m.set(row.id, row.invitato_da)
+    return m
+  }, [profiliGerarchia])
+
+  function getDirectAssociati(profilo: ProfiloGestioneRow): ProfiloGerarchiaRow[] {
+    const row = profiloToGerarchiaRow(profilo, invitatoDaById.get(profilo.id) ?? null)
+    return getChildrenProfiles(profilo.id, row, profilo.id, profilo.ruolo, profiliGerarchia, links)
+  }
 
   async function postUpdate(body: Record<string, unknown>) {
     setError(null)
@@ -381,6 +398,8 @@ export default function AdminProfiliPanel({
           {profiliRuoloAttivo.map((p) => {
             const profiloReadOnly = readOnly || p.id === currentUserId || p.ruolo === 'admin'
             const selected = linksByUtente.get(p.id) ?? new Set<string>()
+            const directAssociati = getDirectAssociati(p)
+            const associatiLabel = associatiDirettiSectionLabel(p.ruolo)
             return (
               <li key={p.id} className="rounded-xl border border-black bg-zinc-50/80">
                 <details className="group">
@@ -501,41 +520,42 @@ export default function AdminProfiliPanel({
                           </div>
                         </form>
 
-                        <div>
-                          <p className="text-xs font-medium uppercase text-zinc-600 mb-2">
-                            Contatti in rubrica (agenti, partner, studio)
-                          </p>
-                          <div className="flex flex-wrap gap-3 max-h-48 overflow-y-auto border border-black/15 rounded-lg p-3 bg-zinc-50">
-                            {operatoriDisponibili.filter((op) => op.id !== p.id).length === 0 ? (
-                              <span className="text-sm text-zinc-500">
-                                Nessun altro agente, partner o studio nel filtro area corrente.
-                              </span>
-                            ) : (
-                              operatoriDisponibili
-                                .filter((op) => op.id !== p.id)
-                                .map((op) => (
-                                <label key={op.id} className="flex items-center gap-2 text-sm text-zinc-800 min-w-[200px]">
-                                  <input
-                                    type="checkbox"
-                                    checked={selected.has(op.id)}
-                                    onChange={async (e) => {
-                                      const on = e.target.checked
-                                      const ok = await postLink(on ? 'add' : 'remove', p.id, op.id)
-                                      if (!ok) e.target.checked = !on
-                                    }}
-                                  />
-                                  <span>
-                                    {op.nome_completo || op.email}{' '}
-                                    <span className="text-zinc-500 text-xs">
-                                      ({op.ruolo === 'distributore' ? 'partner' : op.ruolo}
-                                      {op.area_geografica ? ` · ${op.area_geografica}` : ''})
+                        {associatiLabel ? (
+                          <div>
+                            <p className="text-xs font-medium uppercase text-zinc-600 mb-2">
+                              {associatiLabel}
+                            </p>
+                            <div className="flex flex-wrap gap-3 max-h-48 overflow-y-auto border border-black/15 rounded-lg p-3 bg-zinc-50">
+                              {directAssociati.length === 0 ? (
+                                <span className="text-sm text-zinc-500">
+                                  Nessun associato diretto a questo profilo.
+                                </span>
+                              ) : (
+                                directAssociati.map((op) => (
+                                  <label key={op.id} className="flex items-center gap-2 text-sm text-zinc-800 min-w-[200px]">
+                                    <input
+                                      type="checkbox"
+                                      checked={selected.has(op.id)}
+                                      disabled={readOnly || p.id === currentUserId || p.ruolo === 'admin'}
+                                      onChange={async (e) => {
+                                        const on = e.target.checked
+                                        const ok = await postLink(on ? 'add' : 'remove', p.id, op.id)
+                                        if (!ok) e.target.checked = !on
+                                      }}
+                                    />
+                                    <span>
+                                      {op.nome_completo || op.email}{' '}
+                                      <span className="text-zinc-500 text-xs">
+                                        ({op.ruolo === 'distributore' ? 'partner' : op.ruolo}
+                                        {op.area_geografica ? ` · ${op.area_geografica}` : ''})
+                                      </span>
                                     </span>
-                                  </span>
-                                </label>
-                              ))
-                            )}
+                                  </label>
+                                ))
+                              )}
+                            </div>
                           </div>
-                        </div>
+                        ) : null}
                       </>
                     )}
                   </div>
