@@ -24,7 +24,16 @@ import PartnerListiniPortal from '@/components/dashboard/PartnerListiniPortal'
 import InvitaUtente from '@/components/InvitaUtente'
 import ContattoDirettoCard from '@/components/dashboard/ContattoDirettoCard'
 
-const ASSISTENZA_CATALOGHI_TELEFONO = '+39 0536 185 6217'
+const ASSISTENZA_LADIVA_TELEFONO = '+39 0536 185 6217'
+const ASSISTENZA_LADIVA_EMAIL = 'info@ladiva-fpd.com'
+
+function isAssistenzaLadivaContatto(row: { etichetta: string; email: string }): boolean {
+  return (
+    row.etichetta === 'Assistenza cataloghi' ||
+    row.etichetta === 'Assistenza Ladiva' ||
+    row.email === ASSISTENZA_LADIVA_EMAIL
+  )
+}
 
 type Operatore = {
   id: string
@@ -312,14 +321,13 @@ export default async function Dashboard(props: {
   const contattiAziendali: Fornitore[] = contattiAziendaliError
     ? []
     : (contattiAziendaliRows || []).map((row) => {
-        const isAssistenza =
-          row.etichetta === 'Assistenza cataloghi' || row.email === 'info@ladiva-fpd.com'
+        const isAssistenza = isAssistenzaLadivaContatto(row)
         const telefono =
           row.telefono?.trim() ||
-          (isAssistenza ? ASSISTENZA_CATALOGHI_TELEFONO : null)
+          (isAssistenza ? ASSISTENZA_LADIVA_TELEFONO : null)
         return {
           id: row.id,
-          nome_completo: row.etichetta,
+          nome_completo: isAssistenza ? 'Assistenza Ladiva' : row.etichetta,
           email: row.email,
           telefono,
         }
@@ -332,7 +340,10 @@ export default async function Dashboard(props: {
       : isFree
         ? contattiDirettiPubblici
         : fornitori
-  const contattiDiretti = [...contattiAziendali, ...contattiDiRete]
+  const contattiDiretti =
+    isFree || isManager
+      ? contattiAziendali
+      : [...contattiAziendali, ...contattiDiRete]
 
   const categorieDashboard = categoriesVisibleOnDashboard(ruoloCorrente, Boolean(user))
 
