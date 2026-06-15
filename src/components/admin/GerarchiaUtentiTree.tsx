@@ -3,9 +3,11 @@
 import { useMemo, useState } from 'react'
 import { ChevronDown, ChevronRight, Users } from 'lucide-react'
 import {
+  canHaveHierarchyChildren,
   countChildrenProfiles,
   getChildrenProfiles,
   livelloGerarchiaLabel,
+  nestedAssociatiLabel,
   ruoloGerarchiaLabel,
   type ProfiloGerarchiaRow,
 } from '@/lib/userHierarchy'
@@ -47,8 +49,9 @@ function HierarchyNode({
     links,
   )
   const childCount = countChildrenProfiles(profile.id, profile, profili, links)
-  const hasChildren = childCount > 0
+  const expandable = canHaveHierarchyChildren(profile.ruolo)
   const expanded = expandedIds.has(profile.id)
+  const nestedLabel = nestedAssociatiLabel(profile.ruolo)
 
   return (
     <li className="list-none">
@@ -56,7 +59,7 @@ function HierarchyNode({
         className="flex items-stretch gap-2"
         style={{ paddingLeft: `${depth * 1.25}rem` }}
       >
-        {hasChildren ? (
+        {expandable ? (
           <button
             type="button"
             onClick={() => onToggle(profile.id)}
@@ -71,11 +74,24 @@ function HierarchyNode({
         )}
 
         <div
-          className={`mb-2 flex-1 rounded-xl border p-4 ${
-            hasChildren
-              ? 'border-black bg-white shadow-sm'
+          className={`mb-2 flex-1 rounded-xl border p-4 transition-colors ${
+            expandable
+              ? 'border-black bg-white shadow-sm cursor-pointer hover:border-[#060d41]'
               : 'border-black/10 bg-zinc-50'
           }`}
+          role={expandable ? 'button' : undefined}
+          tabIndex={expandable ? 0 : undefined}
+          onClick={expandable ? () => onToggle(profile.id) : undefined}
+          onKeyDown={
+            expandable
+              ? (e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    onToggle(profile.id)
+                  }
+                }
+              : undefined
+          }
         >
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
@@ -91,7 +107,7 @@ function HierarchyNode({
               <span className="rounded-full border border-black/10 bg-zinc-100 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-zinc-700">
                 {ruoloGerarchiaLabel(profile.ruolo)}
               </span>
-              {hasChildren ? (
+              {expandable ? (
                 <span className="text-xs font-medium text-[#060d41]">
                   {childCount} associat{childCount === 1 ? 'o' : 'i'}
                 </span>
@@ -101,22 +117,38 @@ function HierarchyNode({
         </div>
       </div>
 
-      {hasChildren && expanded ? (
-        <ul className="m-0 p-0 border-l border-black/10 ml-4">
-          {children.map((child) => (
-            <HierarchyNode
-              key={child.id}
-              profile={child}
-              depth={depth + 1}
-              currentUserId={currentUserId}
-              viewerRole={viewerRole}
-              profili={profili}
-              links={links}
-              expandedIds={expandedIds}
-              onToggle={onToggle}
-            />
-          ))}
-        </ul>
+      {expandable && expanded ? (
+        <div
+          className="border-l-2 border-[#060d41]/20 ml-6 pl-3"
+          style={{ marginLeft: `${depth * 1.25 + 1.5}rem` }}
+        >
+          {nestedLabel ? (
+            <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500 mb-2 mt-1">
+              {nestedLabel}
+            </p>
+          ) : null}
+          {children.length === 0 ? (
+            <p className="text-sm text-zinc-500 mb-3 py-2">
+              Nessun associato a questo livello.
+            </p>
+          ) : (
+            <ul className="m-0 p-0 space-y-1">
+              {children.map((child) => (
+                <HierarchyNode
+                  key={child.id}
+                  profile={child}
+                  depth={depth + 1}
+                  currentUserId={currentUserId}
+                  viewerRole={viewerRole}
+                  profili={profili}
+                  links={links}
+                  expandedIds={expandedIds}
+                  onToggle={onToggle}
+                />
+              ))}
+            </ul>
+          )}
+        </div>
       ) : null}
     </li>
   )
@@ -154,7 +186,7 @@ export default function GerarchiaUtentiTree({
           Struttura Organizzativa
         </h2>
         <p className="text-sm text-zinc-600 mt-1">
-          Espandi ogni profilo per vedere a cascata agenti, partner e studi associati.
+          Clicca su un profilo o usa la freccia per espandere agenti, partner e studi associati.
         </p>
       </div>
 

@@ -24,6 +24,11 @@ export function ruoloGerarchiaLabel(ruolo: string): string {
   return ruolo.charAt(0).toUpperCase() + ruolo.slice(1)
 }
 
+/** Ruoli che possono avere un livello inferiore nell'albero (manager → agente → partner → studio). */
+export function canHaveHierarchyChildren(ruolo: string): boolean {
+  return (CHILD_ROLES_BY_PARENT[ruolo]?.length ?? 0) > 0
+}
+
 export function profiloToGerarchiaRow(
   p: {
     id: string
@@ -96,13 +101,18 @@ function isDirectChild(
   const expectedRoles = CHILD_ROLES_BY_PARENT[parentProfile.ruolo] ?? []
   if (!expectedRoles.includes(child.ruolo)) return false
   if (child.invitato_da === parentId) return true
-  return hasDirectedParentChildLink(
+  if (hasDirectedParentChildLink(
     parentId,
     child.id,
     parentProfile.ruolo,
     child.ruolo,
     links,
-  )
+  )) {
+    return true
+  }
+  // Link inverso: il figlio ha il parent in rubrica (es. agente vede il manager che l'ha invitato)
+  if (links.some((l) => l.utente_id === child.id && l.operatore_id === parentId)) return true
+  return false
 }
 
 function profiloSortKey(p: ProfiloGerarchiaRow): string {
