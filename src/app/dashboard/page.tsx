@@ -2,7 +2,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Phone, MessageCircle, FileText, Users, Mail } from 'lucide-react'
+import { Phone, MessageCircle, FileText, Users } from 'lucide-react'
 import Header from '@/components/Header'
 import DashboardHashScroll from '@/components/DashboardHashScroll'
 import {
@@ -22,6 +22,9 @@ import AdminProfiliPanel, { type ProfiloGestioneRow } from '@/components/admin/A
 import AgenteDocumentazionePortal from '@/components/dashboard/AgenteDocumentazionePortal'
 import PartnerListiniPortal from '@/components/dashboard/PartnerListiniPortal'
 import InvitaUtente from '@/components/InvitaUtente'
+import ContattoDirettoCard from '@/components/dashboard/ContattoDirettoCard'
+
+const ASSISTENZA_CATALOGHI_TELEFONO = '+39 0536 185 6217'
 
 type Operatore = {
   id: string
@@ -308,12 +311,19 @@ export default async function Dashboard(props: {
 
   const contattiAziendali: Fornitore[] = contattiAziendaliError
     ? []
-    : (contattiAziendaliRows || []).map((row) => ({
-        id: row.id,
-        nome_completo: row.etichetta,
-        email: row.email,
-        telefono: row.telefono,
-      }))
+    : (contattiAziendaliRows || []).map((row) => {
+        const isAssistenza =
+          row.etichetta === 'Assistenza cataloghi' || row.email === 'info@ladiva-fpd.com'
+        const telefono =
+          row.telefono?.trim() ||
+          (isAssistenza ? ASSISTENZA_CATALOGHI_TELEFONO : null)
+        return {
+          id: row.id,
+          nome_completo: row.etichetta,
+          email: row.email,
+          telefono,
+        }
+      })
 
   const contattiDiRete = isAgente
     ? mergeContattiById(fornitori, operatoriAssegnatiUtente)
@@ -395,37 +405,12 @@ export default async function Dashboard(props: {
             {contattiDiretti && contattiDiretti.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {contattiDiretti.map((fornitore) => (
-                  <div key={fornitore.id} className="bg-white border border-black rounded-2xl p-6 pb-8 flex flex-col h-full shadow-lg">
-                    <div className="mb-4">
-                      <h3 className="text-lg font-medium text-zinc-900 mb-1">{fornitore.nome_completo || 'Contatto Senza Nome'}</h3>
-                      <p className="text-zinc-600 text-sm">{fornitore.email}</p>
-                    </div>
-                    <div className="mt-auto flex gap-3 pt-6">
-                      {fornitore.telefono ? (
-                        <>
-                          <a href={`tel:${fornitore.telefono?.trim()}`} className="flex-1 flex justify-center items-center gap-2 bg-[#060d41] text-white hover:bg-[#0a155a] py-2.5 px-4 rounded-lg text-sm font-semibold transition-colors">
-                            <Phone size={16} /> Chiama
-                          </a>
-                          <a href={`https://wa.me/${fornitore.telefono?.replace(/\\D/g,'')}`} target="_blank" rel="noopener noreferrer" className="flex-1 flex justify-center items-center gap-2 border border-black bg-zinc-50 hover:bg-[#25D366]/10 hover:border-[#25D366] hover:text-[#25D366] text-zinc-900 py-2.5 px-4 rounded-lg text-sm font-medium transition-colors">
-                            <MessageCircle size={16} /> WhatsApp
-                          </a>
-                        </>
-                      ) : fornitore.email ? (
-                        <a href={`mailto:${fornitore.email.trim()}`} className="ladiva-dashboard-btn-light flex-1 flex justify-center items-center gap-2 border border-black bg-white text-black hover:bg-zinc-100 py-2.5 px-4 rounded-lg text-sm font-semibold transition-colors">
-                          <Mail size={16} /> Scrivi
-                        </a>
-                      ) : (
-                        <>
-                          <span className="flex-1 flex justify-center items-center gap-2 bg-zinc-100 text-zinc-600 opacity-50 py-2.5 px-4 rounded-lg text-sm font-semibold cursor-not-allowed">
-                            <Phone size={16} /> Chiama
-                          </span>
-                          <span className="flex-1 flex justify-center items-center gap-2 border border-black text-zinc-600 opacity-50 bg-zinc-50 py-2.5 px-4 rounded-lg text-sm font-medium cursor-not-allowed">
-                            <MessageCircle size={16} /> WhatsApp
-                          </span>
-                        </>
-                      )}
-                    </div>
-                  </div>
+                  <ContattoDirettoCard
+                    key={fornitore.id}
+                    nome={fornitore.nome_completo}
+                    email={fornitore.email}
+                    telefono={fornitore.telefono}
+                  />
                 ))}
               </div>
             ) : (
@@ -576,37 +561,12 @@ export default async function Dashboard(props: {
             {contattiDiretti && contattiDiretti.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {contattiDiretti.map((fornitore) => (
-                  <div key={fornitore.id} className="bg-white border border-black rounded-2xl p-6 pb-8 flex flex-col h-full shadow-lg">
-                    <div className="mb-4">
-                      <h3 className="text-lg font-medium text-zinc-900 mb-1">{fornitore.nome_completo || 'Contatto Senza Nome'}</h3>
-                      <p className="text-zinc-600 text-sm">{fornitore.email}</p>
-                    </div>
-                    <div className="mt-auto flex gap-3 pt-6">
-                      {fornitore.telefono ? (
-                        <>
-                          <a href={`tel:${fornitore.telefono?.trim()}`} className="flex-1 flex justify-center items-center gap-2 bg-[#060d41] text-white hover:bg-[#0a155a] py-2.5 px-4 rounded-lg text-sm font-semibold transition-colors">
-                            <Phone size={16} /> Chiama
-                          </a>
-                          <a href={`https://wa.me/${fornitore.telefono?.replace(/\\D/g,'')}`} target="_blank" rel="noopener noreferrer" className="flex-1 flex justify-center items-center gap-2 border border-black bg-zinc-50 hover:bg-[#25D366]/10 hover:border-[#25D366] hover:text-[#25D366] text-zinc-900 py-2.5 px-4 rounded-lg text-sm font-medium transition-colors">
-                            <MessageCircle size={16} /> WhatsApp
-                          </a>
-                        </>
-                      ) : fornitore.email ? (
-                        <a href={`mailto:${fornitore.email.trim()}`} className="ladiva-dashboard-btn-light flex-1 flex justify-center items-center gap-2 border border-black bg-white text-black hover:bg-zinc-100 py-2.5 px-4 rounded-lg text-sm font-semibold transition-colors">
-                          <Mail size={16} /> Scrivi
-                        </a>
-                      ) : (
-                        <>
-                          <span className="flex-1 flex justify-center items-center gap-2 bg-zinc-100 text-zinc-600 opacity-50 py-2.5 px-4 rounded-lg text-sm font-semibold cursor-not-allowed">
-                            <Phone size={16} /> Chiama
-                          </span>
-                          <span className="flex-1 flex justify-center items-center gap-2 border border-black text-zinc-600 opacity-50 bg-zinc-50 py-2.5 px-4 rounded-lg text-sm font-medium cursor-not-allowed">
-                            <MessageCircle size={16} /> WhatsApp
-                          </span>
-                        </>
-                      )}
-                    </div>
-                  </div>
+                  <ContattoDirettoCard
+                    key={fornitore.id}
+                    nome={fornitore.nome_completo}
+                    email={fornitore.email}
+                    telefono={fornitore.telefono}
+                  />
                 ))}
               </div>
             ) : (
