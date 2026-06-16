@@ -363,10 +363,11 @@ export default async function Dashboard(props: {
       : isFree
         ? contattiDirettiPubblici
         : fornitori
-  const contattiDiretti =
+  const contattiDiretti = (
     isFree || isManager
       ? contattiAziendali
       : [...contattiAziendali, ...contattiDiRete]
+  ).filter((c) => c.id !== user?.id)
 
   const categorieDashboard = categoriesVisibleOnDashboard(ruoloCorrente, Boolean(user))
 
