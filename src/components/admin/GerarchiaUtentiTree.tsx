@@ -21,6 +21,11 @@ type Props = {
   viewerRole: string
   profili: ProfiloGerarchiaRow[]
   links: { utente_id: string; operatore_id: string }[]
+  /**
+   * Quando impostato, l'albero mostra solo i discendenti di questo profilo
+   * (nessun filtro per ruolo; usato da agente/partner nella propria dashboard).
+   */
+  ownerProfile?: ProfiloGerarchiaRow
 }
 
 type HierarchyNodeProps = {
@@ -163,6 +168,7 @@ export default function GerarchiaUtentiTree({
   viewerRole,
   profili,
   links,
+  ownerProfile,
 }: Props) {
   const [rootRole, setRootRole] = useState<HierarchyRootRole>(() =>
     defaultHierarchyRootRole(viewerRole),
@@ -173,20 +179,33 @@ export default function GerarchiaUtentiTree({
     setExpandedIds(new Set())
   }, [rootRole])
 
+  // Modalità "propria gerarchia": radice = figli diretti dell'utente corrente
+  const ownedRootNodes = useMemo(() => {
+    if (!ownerProfile) return null
+    return getChildrenProfiles(
+      ownerProfile.id,
+      ownerProfile,
+      currentUserId,
+      viewerRole,
+      profili,
+      links,
+    )
+  }, [ownerProfile, currentUserId, viewerRole, profili, links])
+
+  // Modalità admin/manager: radice = tutti i profili del ruolo scelto
   const rootNodes = useMemo(
-    () => getHierarchyRootProfiles(rootRole, profili),
-    [rootRole, profili],
+    () => (ownerProfile ? null : getHierarchyRootProfiles(rootRole, profili)),
+    [ownerProfile, rootRole, profili],
   )
 
   const rootCounts = useMemo(() => {
+    if (ownerProfile) return null
     const counts = new Map<HierarchyRootRole, number>()
     for (const option of HIERARCHY_ROOT_ROLE_OPTIONS) {
       counts.set(option.id, getHierarchyRootProfiles(option.id, profili).length)
     }
     return counts
-  }, [profili])
-
-  const rootLabel = hierarchyRootRoleLabel(rootRole)
+  }, [ownerProfile, profili])
 
   function toggleExpanded(id: string) {
     setExpandedIds((prev) => {
@@ -197,6 +216,54 @@ export default function GerarchiaUtentiTree({
     })
   }
 
+  // --- Modalità propria gerarchia (agente / partner) ---
+  if (ownerProfile) {
+    const childLabel = ownerProfile.ruolo === 'agente' ? 'Partner associati' : 'Studi associati'
+    return (
+      <section id="struttura-organizzativa" className="border border-black rounded-2xl bg-white p-6 space-y-6">
+        <div>
+          <h2 className="text-xl text-zinc-900 font-medium flex items-center gap-2">
+            <Users size={20} className="text-[#060d41]" />
+            I Tuoi Associati
+          </h2>
+          <p className="text-sm text-zinc-600 mt-1">
+            {ownerProfile.ruolo === 'agente'
+              ? 'I partner collegati al tuo profilo e i loro studi associati.'
+              : 'Gli studi collegati al tuo profilo.'}
+          </p>
+        </div>
+
+        <div>
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-500 mb-4">
+            {childLabel}
+          </h3>
+          {(ownedRootNodes ?? []).length === 0 ? (
+            <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-6 text-center text-sm text-zinc-600">
+              Nessun associato collegato al tuo profilo.
+            </div>
+          ) : (
+            <ul className="m-0 p-0 space-y-1">
+              {(ownedRootNodes ?? []).map((node) => (
+                <HierarchyNode
+                  key={node.id}
+                  profile={node}
+                  depth={0}
+                  currentUserId={currentUserId}
+                  viewerRole={viewerRole}
+                  profili={profili}
+                  links={links}
+                  expandedIds={expandedIds}
+                  onToggle={toggleExpanded}
+                />
+              ))}
+            </ul>
+          )}
+        </div>
+      </section>
+    )
+  }
+
+  // --- Modalità admin/manager: filtro per ruolo ---
   return (
     <section id="struttura-organizzativa" className="border border-black rounded-2xl bg-white p-6 space-y-6">
       <div>
@@ -212,7 +279,7 @@ export default function GerarchiaUtentiTree({
       <div className="flex flex-wrap gap-2" role="tablist" aria-label="Filtra struttura per ruolo">
         {HIERARCHY_ROOT_ROLE_OPTIONS.map((option) => {
           const active = rootRole === option.id
-          const count = rootCounts.get(option.id) ?? 0
+          const count = rootCounts?.get(option.id) ?? 0
           return (
             <button
               key={option.id}
@@ -241,16 +308,16 @@ export default function GerarchiaUtentiTree({
 
       <div>
         <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-500 mb-4">
-          {rootLabel}
+          {hierarchyRootRoleLabel(rootRole)}
         </h3>
 
-        {rootNodes.length === 0 ? (
+        {(rootNodes ?? []).length === 0 ? (
           <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-6 text-center text-sm text-zinc-600">
             Nessun utente con ruolo {hierarchyRootRoleLabel(rootRole).toLowerCase()} nel filtro corrente.
           </div>
         ) : (
           <ul className="m-0 p-0 space-y-1">
-            {rootNodes.map((node) => (
+            {(rootNodes ?? []).map((node) => (
               <HierarchyNode
                 key={node.id}
                 profile={node}

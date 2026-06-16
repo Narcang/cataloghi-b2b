@@ -23,6 +23,9 @@ import AgenteDocumentazionePortal from '@/components/dashboard/AgenteDocumentazi
 import PartnerListiniPortal from '@/components/dashboard/PartnerListiniPortal'
 import InvitaUtente from '@/components/InvitaUtente'
 import ContattoDirettoCard from '@/components/dashboard/ContattoDirettoCard'
+import GerarchiaUtentiTree from '@/components/admin/GerarchiaUtentiTree'
+import type { ProfiloGerarchiaRow } from '@/lib/userHierarchy'
+import { profiloToGerarchiaRow } from '@/lib/userHierarchy'
 
 const ASSISTENZA_LADIVA_TELEFONO = '+39 0536 185 6217'
 const ASSISTENZA_LADIVA_EMAIL = 'info@ladiva-fpd.com'
@@ -265,6 +268,26 @@ export default async function Dashboard(props: {
     operatoriAssegnatiUtente = estratti.filter((o): o is Fornitore => Boolean(o))
   }
 
+  // Gerarchia propria per agente/partner
+  let profiliGerarchiaDashboard: ProfiloGerarchiaRow[] = []
+  let linksDashboard: { utente_id: string; operatore_id: string }[] = []
+  if (user && (isAgente || isPartner)) {
+    const [profiliRes, linksRes] = await Promise.all([
+      supabase
+        .from('profili')
+        .select('id, nome_completo, email, area_geografica, ruolo, invitato_da, registrazione_approvata')
+        .neq('ruolo', 'free')
+        .or('registrazione_approvata.eq.true,registrazione_approvata.is.null')
+        .limit(500),
+      supabase
+        .from('connessioni_utente_operatore')
+        .select('utente_id, operatore_id')
+        .limit(2000),
+    ])
+    profiliGerarchiaDashboard = (profiliRes.data ?? []) as ProfiloGerarchiaRow[]
+    linksDashboard = (linksRes.data ?? []) as { utente_id: string; operatore_id: string }[]
+  }
+
   // Recupera agenti della stessa zona se l'utente è un distributore
   let agentiZona: Pick<Operatore, 'id' | 'nome_completo' | 'email' | 'telefono'>[] = []
   if (isPartner && profilo?.area_geografica) {
@@ -404,6 +427,16 @@ export default async function Dashboard(props: {
             </p>
             <InvitaUtente ruoloCorrente={ruoloCorrente} />
           </section>
+        )}
+
+        {showFullDashboard && (isAgente || isPartner) && user && profilo && profiliGerarchiaDashboard.length > 0 && (
+          <GerarchiaUtentiTree
+            currentUserId={user.id}
+            viewerRole={ruoloCorrente}
+            profili={profiliGerarchiaDashboard}
+            links={linksDashboard}
+            ownerProfile={profiloToGerarchiaRow({ ...profilo, email: null }, null)}
+          />
         )}
 
         {showFullDashboard && !isManager && user && !isFree && (
