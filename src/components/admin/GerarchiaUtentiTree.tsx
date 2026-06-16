@@ -1,14 +1,18 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ChevronDown, ChevronRight, Users } from 'lucide-react'
 import {
   canHaveHierarchyChildren,
   countChildrenProfiles,
+  defaultHierarchyRootRole,
   getChildrenProfiles,
-  livelloGerarchiaLabel,
+  getHierarchyRootProfiles,
+  HIERARCHY_ROOT_ROLE_OPTIONS,
+  hierarchyRootRoleLabel,
   nestedAssociatiLabel,
   ruoloGerarchiaLabel,
+  type HierarchyRootRole,
   type ProfiloGerarchiaRow,
 } from '@/lib/userHierarchy'
 
@@ -160,14 +164,29 @@ export default function GerarchiaUtentiTree({
   profili,
   links,
 }: Props) {
+  const [rootRole, setRootRole] = useState<HierarchyRootRole>(() =>
+    defaultHierarchyRootRole(viewerRole),
+  )
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set())
 
+  useEffect(() => {
+    setExpandedIds(new Set())
+  }, [rootRole])
+
   const rootNodes = useMemo(
-    () => getChildrenProfiles(null, null, currentUserId, viewerRole, profili, links),
-    [currentUserId, viewerRole, profili, links],
+    () => getHierarchyRootProfiles(rootRole, profili),
+    [rootRole, profili],
   )
 
-  const rootLabel = livelloGerarchiaLabel(null, viewerRole)
+  const rootCounts = useMemo(() => {
+    const counts = new Map<HierarchyRootRole, number>()
+    for (const option of HIERARCHY_ROOT_ROLE_OPTIONS) {
+      counts.set(option.id, getHierarchyRootProfiles(option.id, profili).length)
+    }
+    return counts
+  }, [profili])
+
+  const rootLabel = hierarchyRootRoleLabel(rootRole)
 
   function toggleExpanded(id: string) {
     setExpandedIds((prev) => {
@@ -186,8 +205,38 @@ export default function GerarchiaUtentiTree({
           Struttura Organizzativa
         </h2>
         <p className="text-sm text-zinc-600 mt-1">
-          Clicca su un profilo o usa la freccia per espandere agenti, partner e studi associati.
+          Scegli il ruolo di partenza e clicca su un profilo per espandere gli associati a cascata.
         </p>
+      </div>
+
+      <div className="flex flex-wrap gap-2" role="tablist" aria-label="Filtra struttura per ruolo">
+        {HIERARCHY_ROOT_ROLE_OPTIONS.map((option) => {
+          const active = rootRole === option.id
+          const count = rootCounts.get(option.id) ?? 0
+          return (
+            <button
+              key={option.id}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              onClick={() => setRootRole(option.id)}
+              className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
+                active
+                  ? 'border-[#060d41] bg-[#060d41] text-white'
+                  : 'border-black/20 bg-zinc-50 text-zinc-800 hover:bg-zinc-100'
+              }`}
+            >
+              {option.label}
+              <span
+                className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                  active ? 'bg-white/20 text-white' : 'bg-zinc-100 text-zinc-700'
+                }`}
+              >
+                {count}
+              </span>
+            </button>
+          )
+        })}
       </div>
 
       <div>
@@ -197,7 +246,7 @@ export default function GerarchiaUtentiTree({
 
         {rootNodes.length === 0 ? (
           <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-6 text-center text-sm text-zinc-600">
-            Nessun utente associato a questo livello.
+            Nessun utente con ruolo {hierarchyRootRoleLabel(rootRole).toLowerCase()} nel filtro corrente.
           </div>
         ) : (
           <ul className="m-0 p-0 space-y-1">

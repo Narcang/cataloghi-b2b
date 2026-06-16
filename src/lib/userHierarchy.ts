@@ -19,6 +19,35 @@ export const CHILD_ROLES_BY_PARENT: Record<string, string[]> = {
   distributore: ['studio'],
 }
 
+/** Ruolo di partenza selezionabile nell'albero Struttura Organizzativa. */
+export type HierarchyRootRole = 'manager' | 'agente' | 'distributore' | 'studio'
+
+export const HIERARCHY_ROOT_ROLE_OPTIONS: { id: HierarchyRootRole; label: string }[] = [
+  { id: 'manager', label: 'Manager' },
+  { id: 'agente', label: 'Agente' },
+  { id: 'distributore', label: 'Partner' },
+  { id: 'studio', label: 'Studio' },
+]
+
+export function defaultHierarchyRootRole(viewerRole: string): HierarchyRootRole {
+  return viewerRole === 'manager' ? 'agente' : 'manager'
+}
+
+export function hierarchyRootRoleLabel(rootRole: HierarchyRootRole): string {
+  switch (rootRole) {
+    case 'manager':
+      return 'Manager'
+    case 'agente':
+      return 'Agenti'
+    case 'distributore':
+      return 'Partner'
+    case 'studio':
+      return 'Studi'
+    default:
+      return ruoloGerarchiaLabel(rootRole)
+  }
+}
+
 export function ruoloGerarchiaLabel(ruolo: string): string {
   if (ruolo === 'distributore') return 'Partner'
   return ruolo.charAt(0).toUpperCase() + ruolo.slice(1)
@@ -164,6 +193,15 @@ function profiloSortKey(p: ProfiloGerarchiaRow): string {
 
 function isProfiloVisibileInGerarchia(p: ProfiloGerarchiaRow): boolean {
   return p.ruolo !== 'free' && p.registrazione_approvata !== false
+}
+
+export function getHierarchyRootProfiles(
+  rootRole: HierarchyRootRole,
+  profili: ProfiloGerarchiaRow[],
+): ProfiloGerarchiaRow[] {
+  return profili
+    .filter((p) => isProfiloVisibileInGerarchia(p) && p.ruolo === rootRole)
+    .sort((a, b) => profiloSortKey(a).localeCompare(profiloSortKey(b), 'it', { sensitivity: 'base' }))
 }
 
 export function getChildrenProfiles(
