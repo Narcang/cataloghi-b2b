@@ -76,6 +76,8 @@ type Partner = {
   area_geografica: string | null
 }
 
+export const dynamic = 'force-dynamic'
+
 export default async function Dashboard(props: {
   searchParams: Promise<{ area?: string; nome?: string; message?: string }>
 }) {
