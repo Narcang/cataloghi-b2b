@@ -94,7 +94,7 @@ export default async function Dashboard(props: {
   const profilo = user
     ? (await supabase
       .from('profili')
-      .select('id, nome_completo, ruolo, area_geografica, societa, registrazione_approvata')
+      .select('id, nome_completo, ruolo, area_geografica, societa, registrazione_approvata, invitato_da')
       .eq('id', user.id)
       .single()).data
     : null
@@ -275,6 +275,19 @@ export default async function Dashboard(props: {
       .map((o) => ({ ...o, ruolo: o.ruolo ?? null })) as Fornitore[]
   }
 
+  // Per studio: carica solo il profilo di chi li ha invitati
+  let invitatoDaContatto: Fornitore | null = null
+  if (isStudio && profilo?.invitato_da) {
+    const { data: inviterData } = await supabase
+      .from('profili')
+      .select('id, nome_completo, email, telefono, ruolo')
+      .eq('id', profilo.invitato_da)
+      .single()
+    if (inviterData) {
+      invitatoDaContatto = { ...inviterData, ruolo: inviterData.ruolo ?? null }
+    }
+  }
+
   // Gerarchia propria per agente/partner
   let profiliGerarchiaDashboard: ProfiloGerarchiaRow[] = []
   let linksDashboard: { utente_id: string; operatore_id: string }[] = []
@@ -365,11 +378,13 @@ export default async function Dashboard(props: {
 
   const contattiDiRete = isAgente
     ? mergeContattiById(fornitori, operatoriAssegnatiUtente)
-    : operatoriAssegnatiUtente.length > 0
-      ? operatoriAssegnatiUtente
-      : isFree
-        ? contattiDirettiPubblici
-        : fornitori
+    : isStudio
+      ? (invitatoDaContatto ? [invitatoDaContatto] : [])
+      : operatoriAssegnatiUtente.length > 0
+        ? operatoriAssegnatiUtente
+        : isFree
+          ? contattiDirettiPubblici
+          : fornitori
   const contattiDiretti = (
     isFree || isManager
       ? contattiAziendali
