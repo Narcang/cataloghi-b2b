@@ -34,11 +34,11 @@ export type OperatoreAssociazione = {
   area_geografica: string | null
 }
 
-const RUOLI_OPTIONS = ['free', 'studio', 'agente', 'distributore', 'fornitore', 'manager', 'admin'] as const
+const RUOLI_OPTIONS = ['free', 'studio', 'agente', 'distributore', 'manager', 'admin'] as const
 
 type RuoloOption = (typeof RUOLI_OPTIONS)[number]
 
-type RuoloTabId = 'admin' | 'manager' | 'agente' | 'distributore' | 'studio' | 'fornitore'
+type RuoloTabId = 'admin' | 'manager' | 'agente' | 'distributore' | 'studio'
 
 const RUOLI_TAB: { id: RuoloTabId; label: string }[] = [
   { id: 'admin', label: 'Admin' },
@@ -46,7 +46,6 @@ const RUOLI_TAB: { id: RuoloTabId; label: string }[] = [
   { id: 'agente', label: 'Agente' },
   { id: 'distributore', label: 'Partner' },
   { id: 'studio', label: 'Studio' },
-  { id: 'fornitore', label: 'Fornitore' },
 ]
 
 function profiloSortKey(p: ProfiloGestioneRow): string {

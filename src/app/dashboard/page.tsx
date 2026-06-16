@@ -275,9 +275,9 @@ export default async function Dashboard(props: {
       .map((o) => ({ ...o, ruolo: o.ruolo ?? null })) as Fornitore[]
   }
 
-  // Per studio: carica solo il profilo di chi li ha invitati
+  // Per studio e partner: carica solo il profilo di chi li ha invitati
   let invitatoDaContatto: Fornitore | null = null
-  if (isStudio && profilo?.invitato_da) {
+  if ((isStudio || isPartner) && profilo?.invitato_da) {
     const { data: inviterData } = await supabase
       .from('profili')
       .select('id, nome_completo, email, telefono, ruolo')
@@ -378,7 +378,7 @@ export default async function Dashboard(props: {
 
   const contattiDiRete = isAgente
     ? mergeContattiById(fornitori, operatoriAssegnatiUtente)
-    : isStudio
+    : (isStudio || isPartner)
       ? (invitatoDaContatto ? [invitatoDaContatto] : [])
       : operatoriAssegnatiUtente.length > 0
         ? operatoriAssegnatiUtente
