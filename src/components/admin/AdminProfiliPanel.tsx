@@ -36,6 +36,14 @@ export type OperatoreAssociazione = {
 
 const RUOLI_OPTIONS = ['free', 'studio', 'agente', 'distributore', 'manager', 'admin'] as const
 
+const RUOLO_LABEL: Record<string, string> = {
+  distributore: 'Partner',
+}
+
+function ruoloLabel(r: string): string {
+  return RUOLO_LABEL[r] ?? r
+}
+
 type RuoloOption = (typeof RUOLI_OPTIONS)[number]
 
 type RuoloTabId = 'admin' | 'manager' | 'agente' | 'distributore' | 'studio'
@@ -318,7 +326,7 @@ export default function AdminProfiliPanel({
                       >
                         {RUOLI_OPTIONS.map((r) => (
                           <option key={r} value={r}>
-                            {r}
+                            {ruoloLabel(r)}
                           </option>
                         ))}
                       </select>
@@ -490,7 +498,7 @@ export default function AdminProfiliPanel({
                             >
                               {RUOLI_OPTIONS.map((r) => (
                                 <option key={r} value={r}>
-                                  {r}
+                                  {ruoloLabel(r)}
                                 </option>
                               ))}
                             </select>
