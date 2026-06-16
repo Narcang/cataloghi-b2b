@@ -1,19 +1,43 @@
 import { Phone, MessageCircle, Mail } from 'lucide-react'
 
+const RUOLO_LABEL: Record<string, string> = {
+  agente: 'Agente',
+  distributore: 'Partner',
+  studio: 'Studio',
+  manager: 'Manager',
+  admin: 'Admin',
+}
+
+const RUOLO_BADGE_CLASS: Record<string, string> = {
+  agente: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+  distributore: 'bg-blue-50 text-blue-800 border-blue-200',
+  studio: 'bg-violet-50 text-violet-800 border-violet-200',
+  manager: 'bg-zinc-100 text-zinc-700 border-zinc-300',
+}
+
 type Props = {
   nome: string | null
   email: string | null
   telefono: string | null
+  ruolo?: string | null
 }
 
-export default function ContattoDirettoCard({ nome, email, telefono }: Props) {
+export default function ContattoDirettoCard({ nome, email, telefono, ruolo }: Props) {
   const tel = telefono?.trim() || null
   const mail = email?.trim() || null
+  const badgeClass = ruolo ? (RUOLO_BADGE_CLASS[ruolo] ?? 'bg-zinc-100 text-zinc-700 border-zinc-300') : null
 
   return (
     <div className="bg-white border border-black rounded-2xl p-6 pb-8 flex flex-col h-full shadow-lg">
       <div className="mb-4 space-y-1">
-        <h3 className="text-lg font-medium text-zinc-900">{nome || 'Contatto Senza Nome'}</h3>
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="text-lg font-medium text-zinc-900">{nome || 'Contatto Senza Nome'}</h3>
+          {ruolo && badgeClass ? (
+            <span className={`shrink-0 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${badgeClass}`}>
+              {RUOLO_LABEL[ruolo] ?? ruolo}
+            </span>
+          ) : null}
+        </div>
         {mail ? <p className="text-zinc-600 text-sm">{mail}</p> : null}
         {tel ? <p className="text-zinc-600 text-sm">{tel}</p> : null}
       </div>

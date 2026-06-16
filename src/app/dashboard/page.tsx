@@ -52,6 +52,7 @@ type Fornitore = {
   nome_completo: string | null
   email: string | null
   telefono: string | null
+  ruolo?: string | null
 }
 
 function escapeIlikePattern(value: string): string {
@@ -232,7 +233,8 @@ export default async function Dashboard(props: {
           id,
           nome_completo,
           telefono,
-          email
+          email,
+          ruolo
         )
       `)
       .eq('agente_id', user.id)
@@ -244,9 +246,9 @@ export default async function Dashboard(props: {
         return Array.isArray(fornitore) ? fornitore : [fornitore]
       }) || []
 
-    fornitori = fornitoriEstratti.filter(
-      (fornitore): fornitore is Fornitore => Boolean(fornitore)
-    )
+    fornitori = fornitoriEstratti
+      .filter(Boolean)
+      .map((f) => ({ ...f, ruolo: f.ruolo ?? null })) as Fornitore[]
   }
 
   let operatoriAssegnatiUtente: Fornitore[] = []
@@ -256,7 +258,8 @@ export default async function Dashboard(props: {
           id,
           nome_completo,
           telefono,
-          email
+          email,
+          ruolo
         )
       `).eq('utente_id', user.id)
 
@@ -267,7 +270,9 @@ export default async function Dashboard(props: {
         return Array.isArray(op) ? op : [op]
       }) || []
 
-    operatoriAssegnatiUtente = estratti.filter((o): o is Fornitore => Boolean(o))
+    operatoriAssegnatiUtente = estratti
+      .filter(Boolean)
+      .map((o) => ({ ...o, ruolo: o.ruolo ?? null })) as Fornitore[]
   }
 
   // Gerarchia propria per agente/partner
@@ -457,6 +462,7 @@ export default async function Dashboard(props: {
                     nome={fornitore.nome_completo}
                     email={fornitore.email}
                     telefono={fornitore.telefono}
+                    ruolo={fornitore.ruolo}
                   />
                 ))}
               </div>
@@ -613,6 +619,7 @@ export default async function Dashboard(props: {
                     nome={fornitore.nome_completo}
                     email={fornitore.email}
                     telefono={fornitore.telefono}
+                    ruolo={fornitore.ruolo}
                   />
                 ))}
               </div>
