@@ -10,6 +10,14 @@ import {
   MAX_CATALOG_STUDIO_ZIP_BYTES,
 } from '@/lib/catalogUploadLimits'
 import { type CatalogCategory } from '@/lib/catalogCategories'
+
+const CATEGORY_DISPLAY_LABEL: Partial<Record<CatalogCategory, string>> = {
+  Scontistiche: 'Merchandising',
+}
+
+function categoryDisplayLabel(cat: CatalogCategory): string {
+  return CATEGORY_DISPLAY_LABEL[cat] ?? cat
+}
 import { isZipDownloadCategory } from '@/lib/catalogFileKind'
 import { RUOLI_CATALOGO, RUOLI_CATALOGO_DEFAULT, type RuoloCatalogo } from '@/lib/catalogRoles'
 
@@ -211,7 +219,7 @@ export default function CreateCatalogForm({ categories }: Props) {
           </option>
           {categories.map((cat) => (
             <option key={cat} value={cat}>
-              {cat}
+              {categoryDisplayLabel(cat)}
             </option>
           ))}
         </select>
