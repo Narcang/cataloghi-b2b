@@ -58,7 +58,7 @@ export default async function DocumentazioneAgentePage() {
           </h1>
           <p className="text-zinc-600 max-w-2xl text-lg">
             {profilo.nome_completo ? `Bentornato ${profilo.nome_completo}. ` : ''}
-            Qui trovi documentazione, listini e scontistiche riservati al tuo profilo agente.
+            Qui trovi documentazione, listini e materiali merchandising riservati al tuo profilo agente.
           </p>
         </div>
 

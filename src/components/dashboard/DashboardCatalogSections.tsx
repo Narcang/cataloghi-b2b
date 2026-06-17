@@ -5,6 +5,14 @@ import { categoryToDomId, type CatalogCategory } from '@/lib/catalogCategories'
 import { catalogPdfHref, reservedAreaCatalogReturnTo } from '@/lib/catalogNavigation'
 import { compareCatalogTitoli } from '@/lib/catalogSorting'
 
+const CATEGORY_DISPLAY_LABEL: Partial<Record<CatalogCategory, string>> = {
+  Scontistiche: 'Merchandising',
+}
+
+function categoryDisplayLabel(cat: CatalogCategory): string {
+  return CATEGORY_DISPLAY_LABEL[cat] ?? cat
+}
+
 export type DashboardCatalogo = {
   id: string
   titolo: string | null
@@ -44,7 +52,7 @@ export default function DashboardCatalogSections({
             className="scroll-mt-32 space-y-4"
           >
             <div className="flex items-center gap-3">
-              <h3 className="text-3xl md:text-4xl text-zinc-100 font-semibold tracking-wide">{categoria}</h3>
+              <h3 className="text-3xl md:text-4xl text-zinc-100 font-semibold tracking-wide">{categoryDisplayLabel(categoria)}</h3>
               <span className="text-xs rounded-full border border-black px-2 py-0.5 text-zinc-600">
                 {items.length} catalogh{items.length === 1 ? 'o' : 'i'}
               </span>

@@ -213,7 +213,7 @@ const AGENTE_TILES: PortaleTile[] = [
   { categoria: 'File 2D',     label: 'File 2D',        descrizione: 'File tecnici 2D scaricabili' },
   { categoria: 'File 3D',     label: 'File 3D',        descrizione: 'File tecnici 3D scaricabili' },
   { categoria: 'Listini',     label: 'Listini',         descrizione: 'Listini prezzi' },
-  { categoria: 'Scontistiche',label: 'Scontistiche',   descrizione: 'Condizioni commerciali' },
+  { categoria: 'Scontistiche',label: 'Merchandising',   descrizione: 'Condizioni commerciali' },
   { categoria: 'Agenti',      label: 'Documentazione', descrizione: 'Documentazione riservata' },
   { categoria: 'Power Point', label: 'Power Point',    descrizione: 'Presentazioni PowerPoint' },
 ]
