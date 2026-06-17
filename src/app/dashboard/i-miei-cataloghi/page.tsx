@@ -10,7 +10,16 @@ import {
   isAgentOnlyCatalogCategory,
   isCatalogCategoryAllowedForStudioRole,
   isLoginOnlyCatalogCategory,
+  type CatalogCategory,
 } from '@/lib/catalogCategories'
+
+const CATEGORY_DISPLAY_LABEL: Partial<Record<CatalogCategory, string>> = {
+  Scontistiche: 'Merchandising',
+}
+
+function categoryDisplayLabel(cat: CatalogCategory): string {
+  return CATEGORY_DISPLAY_LABEL[cat] ?? cat
+}
 import { catalogPdfHref, dashboardCatalogReturnTo } from '@/lib/catalogNavigation'
 import { compareCatalogTitoli } from '@/lib/catalogSorting'
 
@@ -129,7 +138,7 @@ export default async function IMieiCataloghiPage() {
                 >
                   <div className="flex items-center gap-3">
                     <h2 className="text-3xl md:text-4xl text-zinc-100 font-semibold tracking-wide">
-                      {categoria}
+                      {categoryDisplayLabel(categoria)}
                     </h2>
                     <span className="text-xs rounded-full border border-black px-2 py-0.5 text-zinc-500">
                       {items.length} catalogh{items.length === 1 ? 'o' : 'i'}
