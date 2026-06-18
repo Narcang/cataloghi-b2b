@@ -212,7 +212,7 @@ export type PortaleTile = {
 const AGENTE_TILES: PortaleTile[] = [
   { categoria: 'File 2D',     label: 'File 2D',        descrizione: 'File tecnici 2D scaricabili' },
   { categoria: 'File 3D',     label: 'File 3D',        descrizione: 'File tecnici 3D scaricabili' },
-  { categoria: 'Listini',     label: 'Listini',         descrizione: 'Listini prezzi' },
+  { categoria: 'Listini',     label: 'Listini Pubblici', descrizione: 'Listini prezzi' },
   { categoria: 'Scontistiche',label: 'Merchandising',   descrizione: 'Condizioni commerciali' },
   { categoria: 'Agenti',      label: 'Documentazione', descrizione: 'Documentazione riservata' },
   { categoria: 'Power Point', label: 'Power Point',    descrizione: 'Presentazioni PowerPoint' },
@@ -226,7 +226,7 @@ export const PORTALE_TILES_PER_RUOLO: Record<string, PortaleTile[]> = {
   distributore: [
     { categoria: 'File 2D',  label: 'File 2D',  descrizione: 'File tecnici 2D scaricabili' },
     { categoria: 'File 3D',  label: 'File 3D',  descrizione: 'File tecnici 3D scaricabili' },
-    { categoria: 'Listini',  label: 'Listini',  descrizione: 'Listini prezzi' },
+    { categoria: 'Listini',  label: 'Listini Pubblici',  descrizione: 'Listini prezzi' },
   ],
   agente: AGENTE_TILES,
   manager: AGENTE_TILES,
