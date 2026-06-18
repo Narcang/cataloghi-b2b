@@ -417,11 +417,11 @@ export default async function Dashboard(props: {
             }
             {user ? (
               <>
-                {isAdmin ? <span className="ml-3 inline-flex items-center rounded-full border border-black/25 px-2.5 py-0.5 text-xs font-semibold bg-[#060d41]/10 text-[#060d41]">Admin</span> : null}
-                {ruoloCorrente === 'manager' ? <span className="ml-3 inline-flex items-center rounded-full border border-black/25 px-2.5 py-0.5 text-xs font-semibold bg-[#060d41]/10 text-[#060d41]">Manager</span> : null}
-                {isPartner ? <span className="ml-3 inline-flex items-center rounded-full border border-black/20 px-2.5 py-0.5 text-xs font-semibold bg-blue-50 text-[#060d41]">Partner</span> : null}
-                {isAgente ? <span className="ml-3 inline-flex items-center rounded-full border border-black/20 px-2.5 py-0.5 text-xs font-semibold bg-emerald-50 text-[#060d41]">Agente</span> : null}
-                {isStudio ? <span className="ml-3 inline-flex items-center rounded-full border border-black/20 px-2.5 py-0.5 text-xs font-semibold bg-violet-50 text-[#060d41]">Studio</span> : null}
+                {isAdmin ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Admin</span> : null}
+                {ruoloCorrente === 'manager' ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Manager</span> : null}
+                {isPartner ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Partner</span> : null}
+                {isAgente ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Agente</span> : null}
+                {isStudio ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Studio</span> : null}
                 {user && profilo?.registrazione_approvata === false ? (
                   <span className="ml-3 inline-flex items-center rounded-full border border-amber-300 px-2.5 py-0.5 text-xs font-semibold bg-amber-50 text-amber-900">
                     In attesa di approvazione
