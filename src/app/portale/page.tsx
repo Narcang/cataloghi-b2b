@@ -112,10 +112,10 @@ export default async function PortalePage() {
                       <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 text-white ${tileAccentColor(tile.categoria)}`}>
                         {tileIcon(tile.categoria)}
                       </div>
-                      <h2 className="text-xl font-semibold uppercase tracking-wide text-zinc-900">
+                      <h2 className="text-xl font-semibold uppercase tracking-wide text-zinc-900 font-[family-name:var(--font-sans)]">
                         {tile.label}
                       </h2>
-                      <p className="mt-1 text-sm text-zinc-500">
+                      <p className="mt-1 text-sm text-zinc-500 font-[family-name:var(--font-sans)]">
                         {tile.descrizione}
                       </p>
                     </div>
