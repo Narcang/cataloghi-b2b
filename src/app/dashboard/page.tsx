@@ -517,23 +517,25 @@ export default async function Dashboard(props: {
                 </div>
               </Link>
 
-              <Link
-                href="/dashboard/gestione-cataloghi"
-                className="group flex flex-col justify-between rounded-2xl border border-black bg-white p-8 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#060d41]"
-              >
-                <div>
-                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[#060d41] text-white mb-5">
-                    <FileText size={24} />
+              {isAdmin && (
+                <Link
+                  href="/dashboard/gestione-cataloghi"
+                  className="group flex flex-col justify-between rounded-2xl border border-black bg-white p-8 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#060d41]"
+                >
+                  <div>
+                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[#060d41] text-white mb-5">
+                      <FileText size={24} />
+                    </div>
+                    <h3 className="text-xl font-semibold text-zinc-900 mb-2">Gestione Cataloghi</h3>
+                    <p className="text-sm text-zinc-500 leading-relaxed">
+                      Carica nuovi PDF, modifica stato e visibilità, aggiorna copertine ed elimina cataloghi.
+                    </p>
                   </div>
-                  <h3 className="text-xl font-semibold text-zinc-900 mb-2">Gestione Cataloghi</h3>
-                  <p className="text-sm text-zinc-500 leading-relaxed">
-                    Carica nuovi PDF, modifica stato e visibilità, aggiorna copertine ed elimina cataloghi.
-                  </p>
-                </div>
-                <div className="mt-6 flex items-center gap-1 text-xs font-semibold text-white uppercase tracking-wide group-hover:gap-2 transition-all">
-                  Apri <span aria-hidden>→</span>
-                </div>
-              </Link>
+                  <div className="mt-6 flex items-center gap-1 text-xs font-semibold text-white uppercase tracking-wide group-hover:gap-2 transition-all">
+                    Apri <span aria-hidden>→</span>
+                  </div>
+                </Link>
+              )}
             </div>
           </section>
         )}
