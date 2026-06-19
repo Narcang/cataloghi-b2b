@@ -20,12 +20,13 @@ export const CHILD_ROLES_BY_PARENT: Record<string, string[]> = {
 }
 
 /** Ruolo di partenza selezionabile nell'albero Struttura Organizzativa. */
-export type HierarchyRootRole = 'manager' | 'agente' | 'distributore' | 'studio'
+export type HierarchyRootRole = 'manager' | 'agente' | 'distributore' | 'studio' | 'partner_dipendente'
 
 export const HIERARCHY_ROOT_ROLE_OPTIONS: { id: HierarchyRootRole; label: string }[] = [
   { id: 'manager', label: 'Manager' },
   { id: 'agente', label: 'Agente' },
   { id: 'distributore', label: 'Partner' },
+  { id: 'partner_dipendente', label: 'Partner Dip.' },
   { id: 'studio', label: 'Studio' },
 ]
 
@@ -43,6 +44,8 @@ export function hierarchyRootRoleLabel(rootRole: HierarchyRootRole): string {
       return 'Partner'
     case 'studio':
       return 'Studi'
+    case 'partner_dipendente':
+      return 'Partner Dipendenti'
     default:
       return ruoloGerarchiaLabel(rootRole)
   }
