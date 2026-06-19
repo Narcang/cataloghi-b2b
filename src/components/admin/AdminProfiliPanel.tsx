@@ -54,8 +54,8 @@ const RUOLI_TAB: { id: RuoloTabId; label: string }[] = [
   { id: 'manager', label: 'Manager' },
   { id: 'agente', label: 'Agente' },
   { id: 'distributore', label: 'Partner' },
-  { id: 'studio', label: 'Studio' },
   { id: 'partner_dipendente', label: 'Partner Dip.' },
+  { id: 'studio', label: 'Studio' },
 ]
 
 function profiloSortKey(p: ProfiloGestioneRow): string {
