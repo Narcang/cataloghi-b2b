@@ -34,7 +34,7 @@ export type OperatoreAssociazione = {
   area_geografica: string | null
 }
 
-const RUOLI_OPTIONS = ['free', 'studio', 'partner_dipendente', 'agente', 'distributore', 'manager', 'admin'] as const
+const RUOLI_OPTIONS = ['admin', 'manager', 'agente', 'distributore', 'partner_dipendente', 'studio', 'free'] as const
 
 const RUOLO_LABEL: Record<string, string> = {
   distributore:       'Partner',
