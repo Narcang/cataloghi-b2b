@@ -26,7 +26,7 @@ type BeforeInstallPrompt = Event & {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
 }
 
-type ProfiloRuolo = 'admin' | 'manager' | 'agente' | 'distributore' | 'studio' | 'free' | 'fornitore'
+type ProfiloRuolo = 'admin' | 'manager' | 'agente' | 'distributore' | 'studio' | 'partner_dipendente' | 'free' | 'fornitore'
 
 type MenuItem = {
   label: string
@@ -68,6 +68,7 @@ function catalogMenuItemForRole(ruolo: string | null, loggedIn: boolean): MenuIt
       }
     case 'distributore':
     case 'studio':
+    case 'partner_dipendente':
       return { label: 'Listini', href: '/portale', icon: BookOpen }
     default:
       return { label: 'Cataloghi', href: '/dashboard#cataloghi', icon: BookOpen }

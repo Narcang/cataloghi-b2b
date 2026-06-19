@@ -17,6 +17,7 @@ import {
 import { catalogPdfHref, dashboardCatalogReturnTo } from '@/lib/catalogNavigation'
 import { compareCatalogTitoli } from '@/lib/catalogSorting'
 import { RUOLI_CATALOGO } from '@/lib/catalogRoles'
+import { isStudioLike } from '@/lib/catalogAccess'
 import CreateCatalogForm from '@/components/admin/CreateCatalogForm'
 import AdminProfiliPanel, { type ProfiloGestioneRow } from '@/components/admin/AdminProfiliPanel'
 import AgenteDocumentazionePortal from '@/components/dashboard/AgenteDocumentazionePortal'
@@ -106,6 +107,8 @@ export default async function Dashboard(props: {
   const isPartner = ruoloCorrente === 'distributore'
   const isAgente = ruoloCorrente === 'agente'
   const isStudio = ruoloCorrente === 'studio'
+  const isPartnerDipendente = ruoloCorrente === 'partner_dipendente'
+  const isStudioLikeRole = isStudioLike(ruoloCorrente)
   const isFree = !user || ruoloCorrente === 'free'
 
   // Recupera i cataloghi (RLS attivo)
@@ -118,8 +121,8 @@ export default async function Dashboard(props: {
     cataloghiQuery = cataloghiQuery.ilike('titolo', `%${escapeIlikePattern(nomeFilter)}%`)
   }
 
-  // Ospite, free o studio: solo cataloghi pubblicati (no bozze)
-  if (!user || ruoloCorrente === 'free' || ruoloCorrente === 'studio') {
+  // Ospite, free o studio-like: solo cataloghi pubblicati (no bozze)
+  if (!user || ruoloCorrente === 'free' || isStudioLikeRole) {
     cataloghiQuery = cataloghiQuery.eq('stato_pubblicazione', 'attivo')
   }
 
@@ -128,7 +131,7 @@ export default async function Dashboard(props: {
   const cataloghiPerVista = (cataloghi ?? []).filter((c) => {
     if (!user && isLoginOnlyCatalogCategory(c.categoria as string | null)) return false
     if (isPartner && isAgentOnlyCatalogCategory(c.categoria as string | null)) return false
-    if (isStudio && !isCatalogCategoryAllowedForStudioRole(c.categoria as string | null)) return false
+    if (isStudioLikeRole && !isCatalogCategoryAllowedForStudioRole(c.categoria as string | null)) return false
     return true
   })
 
@@ -175,7 +178,7 @@ export default async function Dashboard(props: {
     let operatoriQuery = supabase
       .from('profili')
       .select('id, nome_completo, email, telefono, ruolo, area_geografica')
-      .in('ruolo', ['agente', 'distributore', 'studio'])
+      .in('ruolo', ['agente', 'distributore', 'studio', 'partner_dipendente'])
       .order('nome_completo', { ascending: true })
 
     if (areaFilter !== 'all') {
@@ -225,7 +228,7 @@ export default async function Dashboard(props: {
 
   // Recupera fornitori associati a questo agente (se non è un profilo free)
   let fornitori: Fornitore[] = []
-  if (user && ruoloCorrente !== 'free' && ruoloCorrente !== 'studio') {
+  if (user && ruoloCorrente !== 'free' && !isStudioLikeRole) {
     const { data: fornitoriRaw } = await supabase
       .from('connessioni_agente_fornitore')
       .select(`
@@ -275,9 +278,9 @@ export default async function Dashboard(props: {
       .map((o) => ({ ...o, ruolo: o.ruolo ?? null })) as Fornitore[]
   }
 
-  // Per studio e partner: carica solo il profilo di chi li ha invitati
+  // Per studio, partner_dipendente e partner: carica solo il profilo di chi li ha invitati
   let invitatoDaContatto: Fornitore | null = null
-  if ((isStudio || isPartner) && profilo?.invitato_da) {
+  if ((isStudioLikeRole || isPartner) && profilo?.invitato_da) {
     const { data: inviterData } = await supabase
       .from('profili')
       .select('id, nome_completo, email, telefono, ruolo')
@@ -378,7 +381,7 @@ export default async function Dashboard(props: {
 
   const contattiDiRete = isAgente
     ? mergeContattiById(fornitori, operatoriAssegnatiUtente)
-    : (isStudio || isPartner)
+    : (isStudioLikeRole || isPartner)
       ? (invitatoDaContatto ? [invitatoDaContatto] : [])
       : operatoriAssegnatiUtente.length > 0
         ? operatoriAssegnatiUtente
@@ -422,12 +425,13 @@ export default async function Dashboard(props: {
                 {isPartner ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Partner</span> : null}
                 {isAgente ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Agente</span> : null}
                 {isStudio ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Studio</span> : null}
+                {isPartnerDipendente ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Partner Dip.</span> : null}
                 {user && profilo?.registrazione_approvata === false ? (
                   <span className="ml-3 inline-flex items-center rounded-full border border-amber-300 px-2.5 py-0.5 text-xs font-semibold bg-amber-50 text-amber-900">
                     In attesa di approvazione
                   </span>
                 ) : null}
-                {isFree && !isManager && !isPartner && !isAgente && !isStudio && profilo?.registrazione_approvata !== false ? (
+                {isFree && !isManager && !isPartner && !isAgente && !isStudio && !isPartnerDipendente && profilo?.registrazione_approvata !== false ? (
                   <span className="ml-3 inline-flex items-center rounded-full border border-black/20 px-2.5 py-0.5 text-xs font-semibold bg-zinc-100 text-zinc-800">Free</span>
                 ) : null}
               </>

@@ -72,8 +72,8 @@ export default async function GestioneUtentiPage(props: {
   let operatoriQuery = supabase
     .from('profili')
     .select('id, nome_completo, email, telefono, ruolo, area_geografica')
-    .in('ruolo', ['agente', 'distributore', 'studio'])
-    .order('nome_completo', { ascending: true })
+    .in('ruolo', ['agente', 'distributore', 'studio', 'partner_dipendente'])
+      .order('nome_completo', { ascending: true })
 
   if (areaFilter !== 'all') operatoriQuery = operatoriQuery.eq('area_geografica', areaFilter)
   if (nomeFilter.length > 0) operatoriQuery = operatoriQuery.ilike('nome_completo', `%${escapeIlikePattern(nomeFilter)}%`)

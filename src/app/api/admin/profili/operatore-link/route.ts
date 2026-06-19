@@ -6,7 +6,7 @@ function jsonResponse(ok: boolean, message: string, status: number) {
 }
 
 /** Ruoli che possono comparire nella rubrica e ricevere il collegamento reciproco. */
-const RUBRICA_ROLES = new Set(['agente', 'distributore', 'studio'])
+const RUBRICA_ROLES = new Set(['agente', 'distributore', 'studio', 'partner_dipendente'])
 
 function isRubricaRuolo(ruolo: string | null | undefined): boolean {
   return Boolean(ruolo && RUBRICA_ROLES.has(ruolo))
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
   const { data: operatore } = await supabase.from('profili').select('id, ruolo').eq('id', operatoreId).maybeSingle()
 
   if (!operatore || !isRubricaRuolo(operatore.ruolo)) {
-    return jsonResponse(false, 'Il contatto deve essere un agente, un partner (distributore) o uno studio', 400)
+    return jsonResponse(false, 'Il contatto deve essere un agente, un partner (distributore), uno studio o un partner dipendente', 400)
   }
 
   if (action === 'add') {

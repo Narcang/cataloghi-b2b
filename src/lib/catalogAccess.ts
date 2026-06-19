@@ -4,6 +4,12 @@ import {
   isLoginOnlyCatalogCategory,
 } from '@/lib/catalogCategories'
 
+export const STUDIO_LIKE_ROLES = ['studio', 'partner_dipendente'] as const
+
+export function isStudioLike(ruolo: string | null | undefined): boolean {
+  return ruolo === 'studio' || ruolo === 'partner_dipendente'
+}
+
 type CatalogoRow = {
   categoria: string | null
   stato_pubblicazione: string | null
@@ -58,7 +64,7 @@ export function getCatalogAccessDenial(
   if (options.isAuthenticated && ruolo === 'distributore' && isAgentOnlyCatalogCategory(catalogo.categoria)) {
     return { status: 403, message: 'Accesso non consentito' }
   }
-  if (options.isAuthenticated && ruolo === 'studio') {
+  if (options.isAuthenticated && isStudioLike(ruolo)) {
     if (!isCatalogCategoryAllowedForStudioRole(catalogo.categoria)) {
       return { status: 403, message: 'Accesso non consentito per profilo Studio' }
     }

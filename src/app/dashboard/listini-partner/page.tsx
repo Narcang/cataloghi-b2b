@@ -31,7 +31,9 @@ export default async function ListiniPartnerPage() {
 
   const isPartner = profilo?.ruolo === 'distributore'
   const isStudio = profilo?.ruolo === 'studio'
-  if (!isPartner && !isStudio) {
+  const isPartnerDipendente = profilo?.ruolo === 'partner_dipendente'
+  const isStudioLikeRole = isStudio || isPartnerDipendente
+  if (!isPartner && !isStudioLikeRole) {
     redirect('/dashboard')
   }
 
@@ -48,11 +50,11 @@ export default async function ListiniPartnerPage() {
   const cataloghiListini = (cataloghi ?? []).filter((c) => {
     if (isAgentOnlyCatalogCategory(c.categoria as string | null)) return false
     if (!isPartnerListiniCategory(c.categoria as string | null)) return false
-    if (isStudio) return c.categoria === STUDIO_CATALOG_CATEGORY
+    if (isStudioLikeRole) return c.categoria === STUDIO_CATALOG_CATEGORY
     return true
   })
 
-  const categorie: CatalogCategory[] = isStudio
+  const categorie: CatalogCategory[] = isStudioLikeRole
     ? [STUDIO_CATALOG_CATEGORY]
     : partnerListiniDashboardCategories()
 
@@ -63,13 +65,13 @@ export default async function ListiniPartnerPage() {
 
       <main className="flex-1 max-w-[1200px] w-full mx-auto p-6 md:p-10 space-y-10">
         <div className="mt-4">
-          <DashboardReservedBackNav areaLabel={isStudio ? 'area riservata studio' : 'area riservata partner'} />
+          <DashboardReservedBackNav areaLabel={isStudioLikeRole ? 'area riservata studio' : 'area riservata partner'} />
           <h1 className="text-3xl md:text-4xl font-semibold text-zinc-900 tracking-tight mt-1 mb-2">
-            {isStudio ? 'Listini Studio' : 'Listini'}
+            {isStudioLikeRole ? 'Listini Studio' : 'Listini'}
           </h1>
           <p className="text-zinc-600 max-w-2xl text-lg">
             {profilo.nome_completo ? `Bentornato ${profilo.nome_completo}. ` : ''}
-            {isStudio
+            {isStudioLikeRole
               ? 'Qui trovi i listini della linea Studio riservati al tuo profilo.'
               : 'Qui trovi i listini riservati al tuo profilo.'}
           </p>

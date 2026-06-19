@@ -1,18 +1,20 @@
 import { Phone, MessageCircle, Mail } from 'lucide-react'
 
 const RUOLO_LABEL: Record<string, string> = {
-  agente: 'Agente',
-  distributore: 'Partner',
-  studio: 'Studio',
-  manager: 'Manager',
-  admin: 'Admin',
+  agente:             'Agente',
+  distributore:       'Partner',
+  studio:             'Studio',
+  partner_dipendente: 'Partner Dip.',
+  manager:            'Manager',
+  admin:              'Admin',
 }
 
 const RUOLO_BADGE_CLASS: Record<string, string> = {
-  agente: 'bg-emerald-50 text-emerald-800 border-emerald-200',
-  distributore: 'bg-blue-50 text-blue-800 border-blue-200',
-  studio: 'bg-violet-50 text-violet-800 border-violet-200',
-  manager: 'bg-zinc-100 text-zinc-700 border-zinc-300',
+  agente:             'bg-emerald-50 text-emerald-800 border-emerald-200',
+  distributore:       'bg-blue-50 text-blue-800 border-blue-200',
+  studio:             'bg-violet-50 text-violet-800 border-violet-200',
+  partner_dipendente: 'bg-indigo-50 text-indigo-800 border-indigo-200',
+  manager:            'bg-zinc-100 text-zinc-700 border-zinc-300',
 }
 
 type Props = {

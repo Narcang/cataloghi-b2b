@@ -152,7 +152,7 @@ export function categoriesVisibleOnDashboard(
   if (!isAuthenticated) {
     return [...PUBLIC_CATALOG_CATEGORIES]
   }
-  if (ruoloProfilo === 'studio') {
+  if (ruoloProfilo === 'studio' || ruoloProfilo === 'partner_dipendente') {
     return CATALOG_CATEGORIES.filter((c) => STUDIO_ROLE_ALLOWED.has(c) && !UI_HIDDEN_CATEGORIES.has(c))
   }
   if (ruoloProfilo === 'distributore' || ruoloProfilo === 'agente') {
@@ -218,11 +218,14 @@ const AGENTE_TILES: PortaleTile[] = [
   { categoria: 'Power Point', label: 'Power Point',    descrizione: 'Presentazioni PowerPoint' },
 ]
 
+const STUDIO_TILES: PortaleTile[] = [
+  { categoria: 'File 2D', label: 'File 2D', descrizione: 'File tecnici 2D scaricabili' },
+  { categoria: 'File 3D', label: 'File 3D', descrizione: 'File tecnici 3D scaricabili' },
+]
+
 export const PORTALE_TILES_PER_RUOLO: Record<string, PortaleTile[]> = {
-  studio: [
-    { categoria: 'File 2D', label: 'File 2D', descrizione: 'File tecnici 2D scaricabili' },
-    { categoria: 'File 3D', label: 'File 3D', descrizione: 'File tecnici 3D scaricabili' },
-  ],
+  studio: STUDIO_TILES,
+  partner_dipendente: STUDIO_TILES,
   distributore: [
     { categoria: 'File 2D',  label: 'File 2D',  descrizione: 'File tecnici 2D scaricabili' },
     { categoria: 'File 3D',  label: 'File 3D',  descrizione: 'File tecnici 3D scaricabili' },

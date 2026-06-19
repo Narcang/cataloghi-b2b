@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
 
-const RUOLI_OK = new Set(['admin', 'manager', 'agente', 'fornitore', 'distributore', 'free', 'studio'])
+const RUOLI_OK = new Set(['admin', 'manager', 'agente', 'fornitore', 'distributore', 'free', 'studio', 'partner_dipendente'])
 
 function jsonResponse(ok: boolean, message: string, status: number) {
   return NextResponse.json({ ok, message }, { status })
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
       const invitantId = profiloApprovato?.invitato_da
       const ruoloNuovoUtente = profiloApprovato?.ruolo
 
-      const RUOLI_CONNESSIONE = new Set(['agente', 'distributore', 'studio'])
+      const RUOLI_CONNESSIONE = new Set(['agente', 'distributore', 'studio', 'partner_dipendente'])
 
       if (invitantId && RUOLI_CONNESSIONE.has(ruoloNuovoUtente)) {
         const { data: profiloInvitante } = await svc

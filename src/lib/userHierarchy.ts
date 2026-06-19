@@ -10,13 +10,13 @@ export type ProfiloGerarchiaRow = {
 
 type OperatoreLink = { utente_id: string; operatore_id: string }
 
-const OPERATOR_ROLES = new Set(['agente', 'distributore', 'studio'])
+const OPERATOR_ROLES = new Set(['agente', 'distributore', 'studio', 'partner_dipendente'])
 
 export const CHILD_ROLES_BY_PARENT: Record<string, string[]> = {
   admin: ['manager'],
   manager: ['agente'],
   agente: ['distributore'],
-  distributore: ['studio'],
+  distributore: ['studio', 'partner_dipendente'],
 }
 
 /** Ruolo di partenza selezionabile nell'albero Struttura Organizzativa. */
@@ -50,6 +50,7 @@ export function hierarchyRootRoleLabel(rootRole: HierarchyRootRole): string {
 
 export function ruoloGerarchiaLabel(ruolo: string): string {
   if (ruolo === 'distributore') return 'Partner'
+  if (ruolo === 'partner_dipendente') return 'Partner Dipendenti'
   return ruolo.charAt(0).toUpperCase() + ruolo.slice(1)
 }
 
@@ -91,7 +92,8 @@ export function associatiDirettiSectionLabel(ruolo: string): string | null {
     case 'distributore':
       return 'Associati diretti (partner)'
     case 'studio':
-      return 'Associati diretti (studi)'
+    case 'partner_dipendente':
+      return 'Associati diretti (studi / dipendenti)'
     default:
       return 'Associati diretti'
   }
@@ -108,7 +110,8 @@ export function associatiAggiungiSectionLabel(ruolo: string): string | null {
     case 'distributore':
       return 'Associa partner'
     case 'studio':
-      return 'Associa studio'
+    case 'partner_dipendente':
+      return 'Associa studio / dipendente'
     default:
       return 'Associa profilo'
   }
@@ -119,14 +122,14 @@ export function getCandidateAssociatiProfiles(
   ownerRuolo: string,
   profili: ProfiloGerarchiaRow[],
 ): ProfiloGerarchiaRow[] {
-  const childRole = CHILD_ROLES_BY_PARENT[ownerRuolo]?.[0]
-  if (!childRole) return []
+  const childRoles = CHILD_ROLES_BY_PARENT[ownerRuolo]
+  if (!childRoles?.length) return []
 
   return profili
     .filter(
       (p) =>
         p.id !== ownerId &&
-        p.ruolo === childRole &&
+        childRoles.includes(p.ruolo) &&
         p.ruolo !== 'free' &&
         p.registrazione_approvata !== false,
     )
@@ -254,7 +257,8 @@ export function nestedAssociatiLabel(ruolo: string): string | null {
     case 'distributore':
       return 'Partner associati'
     case 'studio':
-      return 'Studi associati'
+    case 'partner_dipendente':
+      return 'Studi / dipendenti associati'
     default:
       return 'Associati'
   }
@@ -275,7 +279,8 @@ export function livelloGerarchiaLabel(
       case 'distributore':
         return 'Partner associati'
       case 'studio':
-        return 'Studi associati'
+      case 'partner_dipendente':
+        return 'Studi / dipendenti associati'
       default:
         return `${ruoloGerarchiaLabel(roles[0])} associati`
     }

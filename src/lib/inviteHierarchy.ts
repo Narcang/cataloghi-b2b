@@ -1,17 +1,18 @@
 /** Ruoli che ogni ruolo può invitare (gerarchia discendente). */
 export const INVITA_RUOLI_DISPONIBILI: Record<string, string[]> = {
-  admin:        ['manager', 'agente', 'distributore', 'studio'],
-  manager:      ['agente', 'distributore', 'studio'],
-  agente:       ['distributore', 'studio'],
-  distributore: ['studio'],
+  admin:        ['manager', 'agente', 'distributore', 'studio', 'partner_dipendente'],
+  manager:      ['agente', 'distributore', 'studio', 'partner_dipendente'],
+  agente:       ['distributore', 'studio', 'partner_dipendente'],
+  distributore: ['studio', 'partner_dipendente'],
 }
 
 /** Etichette UI per i ruoli invitabili. */
 export const RUOLO_LABEL: Record<string, string> = {
-  manager:      'Manager',
-  agente:       'Agente',
-  distributore: 'Partner',
-  studio:       'Studio',
+  manager:            'Manager',
+  agente:             'Agente',
+  distributore:       'Partner',
+  studio:             'Studio',
+  partner_dipendente: 'Partner Dipendenti',
 }
 
 /** Restituisce i ruoli che `ruolo` può invitare, con etichette. */

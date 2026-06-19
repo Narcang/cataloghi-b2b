@@ -12,6 +12,7 @@ import {
   isLoginOnlyCatalogCategory,
   type CatalogCategory,
 } from '@/lib/catalogCategories'
+import { isStudioLike } from '@/lib/catalogAccess'
 
 const CATEGORY_DISPLAY_LABEL: Partial<Record<CatalogCategory, string>> = {
   Scontistiche: 'Merchandising',
@@ -48,6 +49,7 @@ export default async function IMieiCataloghiPage() {
   const isManager = isAdmin || ruoloCorrente === 'manager'
   const isPartner = ruoloCorrente === 'distributore'
   const isStudio = ruoloCorrente === 'studio'
+  const isStudioLikeRole = isStudioLike(ruoloCorrente)
 
   if (isManager) {
     redirect('/dashboard/gestione-cataloghi')
@@ -79,7 +81,7 @@ export default async function IMieiCataloghiPage() {
   const cataloghiPerVista = cataloghi.filter((c) => {
     if (isLoginOnlyCatalogCategory(c.categoria)) return false
     if (isPartner && isAgentOnlyCatalogCategory(c.categoria)) return false
-    if (isStudio && !isCatalogCategoryAllowedForStudioRole(c.categoria)) return false
+    if (isStudioLikeRole && !isCatalogCategoryAllowedForStudioRole(c.categoria)) return false
     return true
   })
 

@@ -96,7 +96,7 @@ export default async function CatalogoDetail({
         </div>
       )
     }
-    if (ruolo === 'studio') {
+    if (ruolo === 'studio' || ruolo === 'partner_dipendente') {
       if (!isCatalogCategoryAllowedForStudioRole(catalogo.categoria)) {
         return (
           <div className="flex flex-col items-center justify-center min-h-screen p-8 text-center bg-[#fafafa]">
