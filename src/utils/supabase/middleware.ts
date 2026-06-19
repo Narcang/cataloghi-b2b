@@ -38,6 +38,9 @@ export async function updateSession(request: NextRequest) {
     '/reset-password',
     '/dashboard',
     '/cataloghi',
+    '/privacy',
+    '/termini',
+    '/cookie',
   ]
   const isPublic = publicPaths.some((p) => {
     const path = request.nextUrl.pathname
