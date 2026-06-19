@@ -143,12 +143,12 @@ export default async function RegistrazionePage(props: {
 
       <footer className="ladiva-footer ladiva-footer--compact ladiva-footer-home-strip">
         <div className="ladiva-home-footer-inner">
-          <p className="text-xs mb-2 max-w-3xl mx-auto text-center opacity-70">
-            <Link href="/privacy" className="ladiva-footer-link">Privacy Policy</Link>
+          <p className="text-xs mb-2 max-w-3xl mx-auto text-center text-zinc-500">
+            <Link href="/privacy" className="underline hover:text-zinc-800 transition-colors">Privacy Policy</Link>
             {' · '}
-            <Link href="/termini" className="ladiva-footer-link">Termini e Condizioni</Link>
+            <Link href="/termini" className="underline hover:text-zinc-800 transition-colors">Termini e Condizioni</Link>
             {' · '}
-            <Link href="/cookie" className="ladiva-footer-link">Cookie Policy</Link>
+            <Link href="/cookie" className="underline hover:text-zinc-800 transition-colors">Cookie Policy</Link>
           </p>
           <p className="text-sm max-w-3xl mx-auto text-center">
             © {new Date().getFullYear()} Ladiva Ceramica · Carpineti (RE), Italia
