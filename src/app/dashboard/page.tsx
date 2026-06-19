@@ -106,6 +106,7 @@ export default async function Dashboard(props: {
   const isManager = isAdmin || ruoloCorrente === 'manager'
   const isPartner = ruoloCorrente === 'distributore'
   const isAgente = ruoloCorrente === 'agente'
+  const isAgenzia = ruoloCorrente === 'agenzia'
   const isStudio = ruoloCorrente === 'studio'
   const isPartnerDipendente = ruoloCorrente === 'partner_dipendente'
   const isStudioLikeRole = isStudioLike(ruoloCorrente)
@@ -178,7 +179,7 @@ export default async function Dashboard(props: {
     let operatoriQuery = supabase
       .from('profili')
       .select('id, nome_completo, email, telefono, ruolo, area_geografica')
-      .in('ruolo', ['agente', 'distributore', 'studio', 'partner_dipendente'])
+      .in('ruolo', ['agenzia', 'agente', 'distributore', 'studio', 'partner_dipendente'])
       .order('nome_completo', { ascending: true })
 
     if (areaFilter !== 'all') {
@@ -278,9 +279,9 @@ export default async function Dashboard(props: {
       .map((o) => ({ ...o, ruolo: o.ruolo ?? null })) as Fornitore[]
   }
 
-  // Per studio, partner_dipendente e partner: carica solo il profilo di chi li ha invitati
+  // Per studio, partner_dipendente, partner e agenzia: carica solo il profilo di chi li ha invitati
   let invitatoDaContatto: Fornitore | null = null
-  if ((isStudioLikeRole || isPartner) && profilo?.invitato_da) {
+  if ((isStudioLikeRole || isPartner || isAgenzia) && profilo?.invitato_da) {
     const { data: inviterData } = await supabase
       .from('profili')
       .select('id, nome_completo, email, telefono, ruolo')
@@ -291,10 +292,10 @@ export default async function Dashboard(props: {
     }
   }
 
-  // Gerarchia propria per agente/partner
+  // Gerarchia propria per agenzia/agente/partner
   let profiliGerarchiaDashboard: ProfiloGerarchiaRow[] = []
   let linksDashboard: { utente_id: string; operatore_id: string }[] = []
-  if (user && (isAgente || isPartner)) {
+  if (user && (isAgenzia || isAgente || isPartner)) {
     const [profiliRes, linksRes] = await Promise.all([
       supabase
         .from('profili')
@@ -379,7 +380,7 @@ export default async function Dashboard(props: {
         }
       })
 
-  const contattiDiRete = isAgente
+  const contattiDiRete = (isAgente || isAgenzia)
     ? mergeContattiById(fornitori, operatoriAssegnatiUtente)
     : (isStudioLikeRole || isPartner)
       ? (invitatoDaContatto ? [invitatoDaContatto] : [])
@@ -423,6 +424,7 @@ export default async function Dashboard(props: {
                 {isAdmin ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Admin</span> : null}
                 {ruoloCorrente === 'manager' ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Manager</span> : null}
                 {isPartner ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Partner</span> : null}
+                {isAgenzia ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Agenzia</span> : null}
                 {isAgente ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Agente</span> : null}
                 {isStudio ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Studio</span> : null}
                 {isPartnerDipendente ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Partner Dip.</span> : null}
@@ -431,7 +433,7 @@ export default async function Dashboard(props: {
                     In attesa di approvazione
                   </span>
                 ) : null}
-                {isFree && !isManager && !isPartner && !isAgente && !isStudio && !isPartnerDipendente && profilo?.registrazione_approvata !== false ? (
+                {isFree && !isManager && !isPartner && !isAgenzia && !isAgente && !isStudio && !isPartnerDipendente && profilo?.registrazione_approvata !== false ? (
                   <span className="ml-3 inline-flex items-center rounded-full border border-black/20 px-2.5 py-0.5 text-xs font-semibold bg-zinc-100 text-zinc-800">Free</span>
                 ) : null}
               </>
@@ -446,7 +448,7 @@ export default async function Dashboard(props: {
         ) : null}
 
         {/* Invita utenti + Contatti Diretti in cima per ruoli non-admin */}
-        {showFullDashboard && !isManager && (isPartner || isAgente) && (
+        {showFullDashboard && !isManager && (isPartner || isAgenzia || isAgente) && (
           <section className="border border-black rounded-2xl bg-white p-6">
             <h2 className="text-xl text-zinc-900 font-medium mb-1">Invita utenti</h2>
             <p className="text-sm text-zinc-500 mb-4">
@@ -456,7 +458,7 @@ export default async function Dashboard(props: {
           </section>
         )}
 
-        {showFullDashboard && (isAgente || isPartner) && user && profilo && profiliGerarchiaDashboard.length > 0 && (
+        {showFullDashboard && (isAgenzia || isAgente || isPartner) && user && profilo && profiliGerarchiaDashboard.length > 0 && (
           <GerarchiaUtentiTree
             currentUserId={user.id}
             viewerRole={ruoloCorrente}
@@ -549,7 +551,7 @@ export default async function Dashboard(props: {
           <section>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {isPartner && <PartnerListiniPortal />}
-              {isAgente && <AgenteDocumentazionePortal />}
+              {(isAgente || isAgenzia) && <AgenteDocumentazionePortal />}
               <Link
                 href="/dashboard/i-miei-cataloghi"
                 className="group flex flex-col justify-between rounded-2xl border border-black bg-white p-8 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#060d41]"

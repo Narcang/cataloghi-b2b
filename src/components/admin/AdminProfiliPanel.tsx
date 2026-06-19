@@ -34,9 +34,10 @@ export type OperatoreAssociazione = {
   area_geografica: string | null
 }
 
-const RUOLI_OPTIONS = ['admin', 'manager', 'agente', 'distributore', 'partner_dipendente', 'studio', 'free'] as const
+const RUOLI_OPTIONS = ['admin', 'manager', 'agenzia', 'agente', 'distributore', 'partner_dipendente', 'studio', 'free'] as const
 
 const RUOLO_LABEL: Record<string, string> = {
+  agenzia:            'Agenzia',
   distributore:       'Partner',
   partner_dipendente: 'Partner Dipendenti',
 }
@@ -47,11 +48,12 @@ function ruoloLabel(r: string): string {
 
 type RuoloOption = (typeof RUOLI_OPTIONS)[number]
 
-type RuoloTabId = 'admin' | 'manager' | 'agente' | 'distributore' | 'studio' | 'partner_dipendente'
+type RuoloTabId = 'admin' | 'manager' | 'agenzia' | 'agente' | 'distributore' | 'studio' | 'partner_dipendente'
 
 const RUOLI_TAB: { id: RuoloTabId; label: string }[] = [
   { id: 'admin', label: 'Admin' },
   { id: 'manager', label: 'Manager' },
+  { id: 'agenzia', label: 'Agenzia' },
   { id: 'agente', label: 'Agente' },
   { id: 'distributore', label: 'Partner' },
   { id: 'partner_dipendente', label: 'Partner Dip.' },

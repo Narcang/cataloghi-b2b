@@ -6,7 +6,7 @@ function jsonResponse(ok: boolean, message: string, status: number) {
 }
 
 /** Ruoli che possono comparire nella rubrica e ricevere il collegamento reciproco. */
-const RUBRICA_ROLES = new Set(['agente', 'distributore', 'studio', 'partner_dipendente'])
+const RUBRICA_ROLES = new Set(['agenzia', 'agente', 'distributore', 'studio', 'partner_dipendente'])
 
 function isRubricaRuolo(ruolo: string | null | undefined): boolean {
   return Boolean(ruolo && RUBRICA_ROLES.has(ruolo))

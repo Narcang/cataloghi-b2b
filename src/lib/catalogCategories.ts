@@ -155,7 +155,7 @@ export function categoriesVisibleOnDashboard(
   if (ruoloProfilo === 'studio' || ruoloProfilo === 'partner_dipendente') {
     return CATALOG_CATEGORIES.filter((c) => STUDIO_ROLE_ALLOWED.has(c) && !UI_HIDDEN_CATEGORIES.has(c))
   }
-  if (ruoloProfilo === 'distributore' || ruoloProfilo === 'agente') {
+  if (ruoloProfilo === 'distributore' || ruoloProfilo === 'agente' || ruoloProfilo === 'agenzia') {
     return [...PUBLIC_CATALOG_CATEGORIES]
   }
   return CATALOG_CATEGORIES.filter((c) => !UI_HIDDEN_CATEGORIES.has(c))
@@ -232,6 +232,7 @@ export const PORTALE_TILES_PER_RUOLO: Record<string, PortaleTile[]> = {
     { categoria: 'Listini',  label: 'Listini Pubblici',  descrizione: 'Listini prezzi' },
   ],
   agente: AGENTE_TILES,
+  agenzia: AGENTE_TILES,
   manager: AGENTE_TILES,
   admin: AGENTE_TILES,
 }

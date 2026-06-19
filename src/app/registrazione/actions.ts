@@ -105,7 +105,7 @@ export async function register(formData: FormData) {
 
       // Crea la connessione con l'invitante (stessa logica del route admin/profili/update)
       if (invitoDa && invitoRuolo) {
-        const RUOLI_CONNESSIONE = new Set(['agente', 'distributore', 'studio', 'partner_dipendente'])
+        const RUOLI_CONNESSIONE = new Set(['agenzia', 'agente', 'distributore', 'studio', 'partner_dipendente'])
         if (RUOLI_CONNESSIONE.has(invitoRuolo)) {
           const { data: profiloInvitante } = await svc
             .from('profili')

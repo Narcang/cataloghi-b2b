@@ -1,6 +1,7 @@
 import { Phone, MessageCircle, Mail } from 'lucide-react'
 
 const RUOLO_LABEL: Record<string, string> = {
+  agenzia:            'Agenzia',
   agente:             'Agente',
   distributore:       'Partner',
   studio:             'Studio',
@@ -10,6 +11,7 @@ const RUOLO_LABEL: Record<string, string> = {
 }
 
 const RUOLO_BADGE_CLASS: Record<string, string> = {
+  agenzia:            'bg-amber-50 text-amber-800 border-amber-200',
   agente:             'bg-emerald-50 text-emerald-800 border-emerald-200',
   distributore:       'bg-blue-50 text-blue-800 border-blue-200',
   studio:             'bg-violet-50 text-violet-800 border-violet-200',

@@ -10,20 +10,22 @@ export type ProfiloGerarchiaRow = {
 
 type OperatoreLink = { utente_id: string; operatore_id: string }
 
-const OPERATOR_ROLES = new Set(['agente', 'distributore', 'studio', 'partner_dipendente'])
+const OPERATOR_ROLES = new Set(['agenzia', 'agente', 'distributore', 'studio', 'partner_dipendente'])
 
 export const CHILD_ROLES_BY_PARENT: Record<string, string[]> = {
   admin: ['manager'],
-  manager: ['agente'],
+  manager: ['agenzia', 'agente'],
+  agenzia: ['agente'],
   agente: ['distributore'],
   distributore: ['studio', 'partner_dipendente'],
 }
 
 /** Ruolo di partenza selezionabile nell'albero Struttura Organizzativa. */
-export type HierarchyRootRole = 'manager' | 'agente' | 'distributore' | 'studio' | 'partner_dipendente'
+export type HierarchyRootRole = 'manager' | 'agenzia' | 'agente' | 'distributore' | 'studio' | 'partner_dipendente'
 
 export const HIERARCHY_ROOT_ROLE_OPTIONS: { id: HierarchyRootRole; label: string }[] = [
   { id: 'manager', label: 'Manager' },
+  { id: 'agenzia', label: 'Agenzia' },
   { id: 'agente', label: 'Agente' },
   { id: 'distributore', label: 'Partner' },
   { id: 'partner_dipendente', label: 'Partner Dip.' },
@@ -31,13 +33,17 @@ export const HIERARCHY_ROOT_ROLE_OPTIONS: { id: HierarchyRootRole; label: string
 ]
 
 export function defaultHierarchyRootRole(viewerRole: string): HierarchyRootRole {
-  return viewerRole === 'manager' ? 'agente' : 'manager'
+  if (viewerRole === 'manager') return 'agenzia'
+  if (viewerRole === 'agenzia') return 'agente'
+  return 'manager'
 }
 
 export function hierarchyRootRoleLabel(rootRole: HierarchyRootRole): string {
   switch (rootRole) {
     case 'manager':
       return 'Manager'
+    case 'agenzia':
+      return 'Agenzie'
     case 'agente':
       return 'Agenti'
     case 'distributore':
@@ -54,6 +60,7 @@ export function hierarchyRootRoleLabel(rootRole: HierarchyRootRole): string {
 export function ruoloGerarchiaLabel(ruolo: string): string {
   if (ruolo === 'distributore') return 'Partner'
   if (ruolo === 'partner_dipendente') return 'Partner Dipendenti'
+  if (ruolo === 'agenzia') return 'Agenzia'
   return ruolo.charAt(0).toUpperCase() + ruolo.slice(1)
 }
 
@@ -90,6 +97,8 @@ export function associatiDirettiSectionLabel(ruolo: string): string | null {
   switch (childRoles[0]) {
     case 'manager':
       return 'Associati diretti (manager)'
+    case 'agenzia':
+      return 'Associati diretti (agenzie / agenti)'
     case 'agente':
       return 'Associati diretti (agenti)'
     case 'distributore':
@@ -108,6 +117,8 @@ export function associatiAggiungiSectionLabel(ruolo: string): string | null {
   switch (childRoles[0]) {
     case 'manager':
       return 'Associa manager'
+    case 'agenzia':
+      return 'Associa agenzia / agente'
     case 'agente':
       return 'Associa agente'
     case 'distributore':
@@ -230,6 +241,11 @@ export function getChildrenProfiles(
         if (!managerProfile) return false
         return isDirectChild(currentUserId, managerProfile, p, links)
       }
+      if (viewerRole === 'agenzia') {
+        const agenziaProfile = profili.find((prof) => prof.id === currentUserId)
+        if (!agenziaProfile) return false
+        return isDirectChild(currentUserId, agenziaProfile, p, links)
+      }
       return p.ruolo === 'manager'
     }
 
@@ -255,6 +271,8 @@ export function nestedAssociatiLabel(ruolo: string): string | null {
   const childRoles = CHILD_ROLES_BY_PARENT[ruolo]
   if (!childRoles?.length) return null
   switch (childRoles[0]) {
+    case 'agenzia':
+      return 'Agenzie / agenti associati'
     case 'agente':
       return 'Agenti associati'
     case 'distributore':
@@ -277,6 +295,8 @@ export function livelloGerarchiaLabel(
     switch (roles[0]) {
       case 'manager':
         return 'Manager'
+      case 'agenzia':
+        return 'Agenzie associate'
       case 'agente':
         return 'Agenti associati'
       case 'distributore':
