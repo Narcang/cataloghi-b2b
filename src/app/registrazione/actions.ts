@@ -17,6 +17,12 @@ export async function register(formData: FormData) {
   const password = String(formData.get('password') ?? '')
   const telefono = sanitize(formData.get('telefono'))
   const invitoToken = sanitize(formData.get('invito_token'))
+  const consenso = formData.get('consenso')
+
+  if (!consenso) {
+    const q = invitoToken ? `&token=${invitoToken}` : ''
+    redirect('/registrazione?message=' + encodeURIComponent('Devi accettare le policy per procedere.') + q)
+  }
 
   if (!nome || !cognome || !societa || !email || !password || !telefono) {
     redirect('/registrazione?message=' + encodeURIComponent('Compila tutti i campi obbligatori.'))

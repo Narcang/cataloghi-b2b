@@ -102,6 +102,24 @@ export default async function RegistrazionePage(props: {
               {message && !ok ? (
                 <div className="text-sm text-red-600 font-medium">{message}</div>
               ) : null}
+
+              <div className="flex items-start gap-3 pt-1">
+                <input
+                  type="checkbox"
+                  id="consenso"
+                  name="consenso"
+                  required
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-zinc-300 accent-[#060d41]"
+                />
+                <label htmlFor="consenso" className="text-sm text-zinc-600 leading-snug">
+                  Ho letto e accetto la{' '}
+                  <Link href="/privacy" target="_blank" className="underline text-[#060d41] hover:text-[#0a155a]">Privacy Policy</Link>,
+                  i{' '}
+                  <Link href="/termini" target="_blank" className="underline text-[#060d41] hover:text-[#0a155a]">Termini e Condizioni</Link>
+                  {' '}e la{' '}
+                  <Link href="/cookie" target="_blank" className="underline text-[#060d41] hover:text-[#0a155a]">Cookie Policy</Link>.
+                </label>
+              </div>
             </CardContent>
             <CardFooter className="flex flex-col gap-3">
               <Button className="w-full bg-[#060d41] text-white hover:bg-[#0a155a]" type="submit">
@@ -131,6 +149,13 @@ export default async function RegistrazionePage(props: {
             <Link href="/" className="ladiva-footer-link whitespace-nowrap">
               ← Torna alla Home Pubblica
             </Link>
+          </p>
+          <p className="text-xs mt-2 max-w-3xl mx-auto text-center opacity-70">
+            <Link href="/privacy" className="ladiva-footer-link">Privacy Policy</Link>
+            {' · '}
+            <Link href="/termini" className="ladiva-footer-link">Termini e Condizioni</Link>
+            {' · '}
+            <Link href="/cookie" className="ladiva-footer-link">Cookie Policy</Link>
           </p>
         </div>
       </footer>
