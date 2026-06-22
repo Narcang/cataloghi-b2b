@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     return jsonResponse(false, 'Profilo non trovato', 403)
   }
 
-  let body: { ruolo_invitato?: string }
+  let body: { ruolo_invitato?: string; multi_uso?: boolean }
   try {
     body = await request.json()
   } catch {
@@ -42,6 +42,8 @@ export async function POST(request: NextRequest) {
     return jsonResponse(false, `Il ruolo "${ruoloInvitante}" non può invitare "${ruoloInvitato}"`, 403)
   }
 
+  const multiUso = body.multi_uso === true
+
   const svc = createServiceRoleSupabase()
   if (!svc) {
     return jsonResponse(false, 'Configurazione server incompleta', 500)
@@ -55,6 +57,7 @@ export async function POST(request: NextRequest) {
       token,
       creato_da: user.id,
       ruolo_invitato: ruoloInvitato,
+      multi_uso: multiUso,
     })
 
   if (error) {

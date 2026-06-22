@@ -10,6 +10,7 @@ type Props = {
 export default function InvitaUtente({ ruoloCorrente }: Props) {
   const opzioni = ruoliInvitabili(ruoloCorrente)
   const [ruoloSelezionato, setRuoloSelezionato] = useState(opzioni[0]?.value ?? '')
+  const [multiUso, setMultiUso] = useState(false)
   const [loading, setLoading] = useState(false)
   const [link, setLink] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -28,7 +29,7 @@ export default function InvitaUtente({ ruoloCorrente }: Props) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'same-origin',
-        body: JSON.stringify({ ruolo_invitato: ruoloSelezionato }),
+        body: JSON.stringify({ ruolo_invitato: ruoloSelezionato, multi_uso: multiUso }),
       })
       const json = await res.json()
       if (!res.ok || !json.ok) {
@@ -85,6 +86,19 @@ export default function InvitaUtente({ ruoloCorrente }: Props) {
         </button>
       </div>
 
+      <div className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          id="multi-uso"
+          checked={multiUso}
+          onChange={(e) => { setMultiUso(e.target.checked); setLink(null) }}
+          className="h-4 w-4 rounded border-zinc-300 accent-[#060d41]"
+        />
+        <label htmlFor="multi-uso" className="text-xs text-zinc-600">
+          Link permanente — può essere usato da più persone (non si disattiva)
+        </label>
+      </div>
+
       {error && (
         <p className="text-sm text-red-600">{error}</p>
       )}
@@ -107,7 +121,11 @@ export default function InvitaUtente({ ruoloCorrente }: Props) {
               {copiato ? 'Copiato!' : 'Copia'}
             </button>
           </div>
-          <p className="text-xs text-zinc-400">Link monouso: si disattiva dopo la prima registrazione.</p>
+          <p className="text-xs text-zinc-400">
+            {multiUso
+              ? 'Link permanente: può essere usato da più persone.'
+              : 'Link monouso: si disattiva dopo la prima registrazione.'}
+          </p>
         </div>
       )}
     </div>

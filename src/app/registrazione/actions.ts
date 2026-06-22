@@ -35,19 +35,21 @@ export async function register(formData: FormData) {
   // Valida il token di invito tramite service role (bypassa RLS)
   let invitoRuolo: string | null = null
   let invitoDa: string | null = null
+  let invitoMultiUso = false
 
   if (invitoToken) {
     const svc = createServiceRoleSupabase()
     if (svc) {
       const { data: invito } = await svc
         .from('inviti')
-        .select('id, ruolo_invitato, creato_da, usato')
+        .select('id, ruolo_invitato, creato_da, usato, multi_uso')
         .eq('token', invitoToken)
         .single()
 
-      if (invito && !invito.usato) {
+      if (invito && (!invito.usato || invito.multi_uso)) {
         invitoRuolo = invito.ruolo_invitato
         invitoDa = invito.creato_da
+        invitoMultiUso = invito.multi_uso ?? false
       }
     }
   }
@@ -84,15 +86,17 @@ export async function register(formData: FormData) {
 
   const newUserId = signUpData?.user?.id ?? null
 
-  // Marca il token come usato se la registrazione è andata a buon fine
+  // Marca il token come usato se la registrazione è andata a buon fine (solo se monouso)
   if (invitoToken && newUserId) {
     const svc = createServiceRoleSupabase()
     if (svc) {
-      await svc
-        .from('inviti')
-        .update({ usato: true, usato_da: newUserId, usato_il: new Date().toISOString() })
-        .eq('token', invitoToken)
-        .eq('usato', false)
+      if (!invitoMultiUso) {
+        await svc
+          .from('inviti')
+          .update({ usato: true, usato_da: newUserId, usato_il: new Date().toISOString() })
+          .eq('token', invitoToken)
+          .eq('usato', false)
+      }
 
       // Approva automaticamente: nessuna attesa di approvazione admin
       await svc

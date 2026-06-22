@@ -14,10 +14,10 @@ async function fetchInvito(token: string): Promise<{ ruolo_invitato: string; cre
   if (!svc) return null
   const { data } = await svc
     .from('inviti')
-    .select('ruolo_invitato, creato_da, usato')
+    .select('ruolo_invitato, creato_da, usato, multi_uso')
     .eq('token', token)
     .single()
-  if (!data || data.usato) return null
+  if (!data || (data.usato && !data.multi_uso)) return null
   return { ruolo_invitato: data.ruolo_invitato, creato_da: data.creato_da }
 }
 
