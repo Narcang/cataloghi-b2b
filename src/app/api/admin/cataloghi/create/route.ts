@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/utils/supabase/server'
-import { CATALOG_CATEGORIES, STUDIO_CATALOG_CATEGORY } from '@/lib/catalogCategories'
+import { CATALOG_CATEGORIES } from '@/lib/catalogCategories'
 import {
   isValidUserCoverStoragePath,
   isValidUserPdfStoragePath,
   isValidUserZipStoragePath,
 } from '@/lib/catalogStoragePaths'
 import { MAX_CATALOG_COVER_BYTES } from '@/lib/catalogUploadLimits'
-import { isZipStoragePath } from '@/lib/catalogFileKind'
+import { isZipDownloadCategory, isZipStoragePath } from '@/lib/catalogFileKind'
 
 function jsonResponse(ok: boolean, message: string, status: number) {
   return NextResponse.json({ ok, message }, { status })
@@ -108,18 +108,19 @@ export async function POST(request: NextRequest) {
     return jsonResponse(false, 'Percorso file catalogo mancante', 400)
   }
 
-  const isStudioZip = categoria === STUDIO_CATALOG_CATEGORY && isZipStoragePath(filePdfStoragePath)
+  const isZipCat = isZipDownloadCategory(categoria)
+  const isStudioZip = isZipCat && isZipStoragePath(filePdfStoragePath)
 
-  if (categoria === STUDIO_CATALOG_CATEGORY) {
+  if (isZipCat) {
     if (!isZipStoragePath(filePdfStoragePath)) {
-      return jsonResponse(false, 'La categoria Studio richiede un archivio ZIP', 400)
+      return jsonResponse(false, 'Questa categoria richiede un archivio ZIP', 400)
     }
     if (!isValidUserZipStoragePath(filePdfStoragePath, user.id)) {
       return jsonResponse(false, 'Percorso ZIP non valido o non coerente con l’utente', 400)
     }
   } else {
     if (isZipStoragePath(filePdfStoragePath)) {
-      return jsonResponse(false, 'Gli archivi ZIP sono consentiti solo per la categoria Studio', 400)
+      return jsonResponse(false, 'Gli archivi ZIP sono consentiti solo per le categorie File 2D, File 3D e Studio', 400)
     }
     if (!isValidUserPdfStoragePath(filePdfStoragePath, user.id)) {
       return jsonResponse(false, 'Percorso PDF non valido o non coerente con l’utente', 400)
