@@ -54,43 +54,54 @@ export async function register(formData: FormData) {
     }
   }
 
-  const supabase = await createClient()
   const nomeCompleto = `${nome} ${cognome}`.trim()
-
-  const { data: signUpData, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: {
-        registration_flow: 'portale_self',
-        nome,
-        cognome,
-        societa,
-        telefono,
-        nome_completo: nomeCompleto,
-        // Passati al trigger handle_new_user() per impostare ruolo e invitato_da
-        ...(invitoRuolo ? { invito_ruolo: invitoRuolo } : {}),
-        ...(invitoDa ? { invito_da: invitoDa } : {}),
-      },
-    },
-  })
-
-  if (error) {
-    const msg =
-      error.message.includes('already registered') || error.message.includes('already been registered')
-        ? 'Questa email è già registrata. Prova ad accedere o recupera la password.'
-        : error.message
-    const tokenParam = invitoToken ? `&token=${encodeURIComponent(invitoToken)}` : ''
-    redirect('/registrazione?message=' + encodeURIComponent(msg) + tokenParam)
+  const userMetadata = {
+    registration_flow: 'portale_self',
+    nome,
+    cognome,
+    societa,
+    telefono,
+    nome_completo: nomeCompleto,
+    ...(invitoRuolo ? { invito_ruolo: invitoRuolo } : {}),
+    ...(invitoDa ? { invito_da: invitoDa } : {}),
   }
 
-  const newUserId = signUpData?.user?.id ?? null
+  let newUserId: string | null = null
 
-  // Marca il token come usato se la registrazione è andata a buon fine (solo se monouso)
-  if (invitoToken && newUserId) {
+  if (invitoRuolo) {
+    // Flusso con invito valido: usa l'API admin per creare l'utente senza inviare email di conferma
     const svc = createServiceRoleSupabase()
-    if (svc) {
-      if (!invitoMultiUso) {
+    if (!svc) {
+      const q = invitoToken ? `&token=${encodeURIComponent(invitoToken)}` : ''
+      redirect('/registrazione?message=' + encodeURIComponent('Errore di configurazione server.') + q)
+    }
+
+    const { data: adminUserData, error: adminError } = await svc.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: userMetadata,
+    })
+
+    if (adminError) {
+      const msg =
+        adminError.message.includes('already registered') ||
+        adminError.message.includes('already exists') ||
+        adminError.message.includes('already been registered')
+          ? 'Questa email è già registrata. Prova ad accedere o recupera la password.'
+          : adminError.message
+      const q = invitoToken ? `&token=${encodeURIComponent(invitoToken)}` : ''
+      redirect('/registrazione?message=' + encodeURIComponent(msg) + q)
+    }
+
+    newUserId = adminUserData?.user?.id ?? null
+
+    if (newUserId) {
+      // Approva automaticamente (email già confermata dall'admin API)
+      await svc.from('profili').update({ registrazione_approvata: true }).eq('id', newUserId)
+
+      // Marca il token come usato (solo se monouso)
+      if (invitoToken && !invitoMultiUso) {
         await svc
           .from('inviti')
           .update({ usato: true, usato_da: newUserId, usato_il: new Date().toISOString() })
@@ -98,17 +109,8 @@ export async function register(formData: FormData) {
           .eq('usato', false)
       }
 
-      // Approva automaticamente: nessuna attesa di approvazione admin
-      await svc
-        .from('profili')
-        .update({ registrazione_approvata: true })
-        .eq('id', newUserId)
-
-      // Conferma l'email in modo che il login funzioni subito
-      await svc.auth.admin.updateUserById(newUserId, { email_confirm: true })
-
-      // Crea la connessione con l'invitante (stessa logica del route admin/profili/update)
-      if (invitoDa && invitoRuolo) {
+      // Crea la connessione con l'invitante
+      if (invitoDa) {
         const RUOLI_CONNESSIONE = new Set(['agenzia', 'agente', 'distributore', 'studio', 'partner_dipendente'])
         if (RUOLI_CONNESSIONE.has(invitoRuolo)) {
           const { data: profiloInvitante } = await svc
@@ -134,6 +136,22 @@ export async function register(formData: FormData) {
 
     revalidatePath('/', 'layout')
     redirect('/login?message=' + encodeURIComponent('Registrazione completata. Puoi accedere subito con le tue credenziali.'))
+  }
+
+  // Flusso libero (senza invito valido): usa signUp normale con conferma email
+  const supabase = await createClient()
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: { data: userMetadata },
+  })
+
+  if (error) {
+    const msg =
+      error.message.includes('already registered') || error.message.includes('already been registered')
+        ? 'Questa email è già registrata. Prova ad accedere o recupera la password.'
+        : error.message
+    redirect('/registrazione?message=' + encodeURIComponent(msg))
   }
 
   revalidatePath('/', 'layout')
