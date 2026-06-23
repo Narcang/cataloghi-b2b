@@ -19,7 +19,7 @@ type Operatore = {
   nome_completo: string | null
   email: string | null
   telefono: string | null
-  ruolo: 'agente' | 'distributore' | 'studio'
+  ruolo: 'agente' | 'agenzia' | 'distributore' | 'partner_dipendente' | 'studio'
   area_geografica: string | null
 }
 
