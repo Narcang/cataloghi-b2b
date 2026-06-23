@@ -12,9 +12,9 @@ export const RUOLO_LABEL: Record<string, string> = {
   manager:            'Manager',
   agenzia:            'Agenzia',
   agente:             'Agente',
-  distributore:       'Partner',
+  distributore:       'Rivenditori',
   studio:             'Studio',
-  partner_dipendente: 'Partner Dipendenti',
+  partner_dipendente: 'Rivenditori Dipendenti',
 }
 
 /** Restituisce i ruoli che `ruolo` può invitare, con etichette. */

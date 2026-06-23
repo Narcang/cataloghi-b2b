@@ -3,9 +3,9 @@ import { Phone, MessageCircle, Mail } from 'lucide-react'
 const RUOLO_LABEL: Record<string, string> = {
   agenzia:            'Agenzia',
   agente:             'Agente',
-  distributore:       'Partner',
+  distributore:       'Rivenditore',
   studio:             'Studio',
-  partner_dipendente: 'Partner Dip.',
+  partner_dipendente: 'Rivenditore Dip.',
   manager:            'Manager',
   admin:              'Admin',
 }

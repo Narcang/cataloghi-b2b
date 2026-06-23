@@ -27,8 +27,8 @@ export const HIERARCHY_ROOT_ROLE_OPTIONS: { id: HierarchyRootRole; label: string
   { id: 'manager', label: 'Manager' },
   { id: 'agenzia', label: 'Agenzia' },
   { id: 'agente', label: 'Agente' },
-  { id: 'distributore', label: 'Partner' },
-  { id: 'partner_dipendente', label: 'Partner Dip.' },
+  { id: 'distributore', label: 'Rivenditori' },
+  { id: 'partner_dipendente', label: 'Rivenditori Dip.' },
   { id: 'studio', label: 'Studio' },
 ]
 
@@ -47,19 +47,19 @@ export function hierarchyRootRoleLabel(rootRole: HierarchyRootRole): string {
     case 'agente':
       return 'Agenti'
     case 'distributore':
-      return 'Partner'
+      return 'Rivenditori'
     case 'studio':
       return 'Studi'
     case 'partner_dipendente':
-      return 'Partner Dipendenti'
+      return 'Rivenditori Dipendenti'
     default:
       return ruoloGerarchiaLabel(rootRole)
   }
 }
 
 export function ruoloGerarchiaLabel(ruolo: string): string {
-  if (ruolo === 'distributore') return 'Partner'
-  if (ruolo === 'partner_dipendente') return 'Partner Dipendenti'
+  if (ruolo === 'distributore') return 'Rivenditori'
+  if (ruolo === 'partner_dipendente') return 'Rivenditori Dipendenti'
   if (ruolo === 'agenzia') return 'Agenzia'
   return ruolo.charAt(0).toUpperCase() + ruolo.slice(1)
 }
