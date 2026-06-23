@@ -9,7 +9,7 @@ type Props = {
 
 export default function InvitaUtente({ ruoloCorrente }: Props) {
   const opzioni = ruoliInvitabili(ruoloCorrente)
-  const [ruoloSelezionato, setRuoloSelezionato] = useState(opzioni[0]?.value ?? '')
+  const [ruoloSelezionato, setRuoloSelezionato] = useState('')
   const [multiUso, setMultiUso] = useState(false)
   const [loading, setLoading] = useState(false)
   const [link, setLink] = useState<string | null>(null)
@@ -71,6 +71,7 @@ export default function InvitaUtente({ ruoloCorrente }: Props) {
             onChange={(e) => { setRuoloSelezionato(e.target.value); setLink(null) }}
             className="h-9 rounded-md border border-black/20 bg-white px-3 text-sm text-zinc-900 min-w-[140px]"
           >
+            <option value="" disabled>— Seleziona ruolo —</option>
             {opzioni.map((op) => (
               <option key={op.value} value={op.value}>{op.label}</option>
             ))}
@@ -79,7 +80,7 @@ export default function InvitaUtente({ ruoloCorrente }: Props) {
         <button
           type="button"
           onClick={handleCrea}
-          disabled={loading}
+          disabled={loading || !ruoloSelezionato}
           className="h-9 px-4 rounded-md bg-[#060d41] text-white text-sm font-medium hover:bg-[#0a155a] disabled:opacity-60 transition-colors"
         >
           {loading ? 'Generazione…' : 'Genera link'}
