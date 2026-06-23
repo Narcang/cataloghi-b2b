@@ -264,7 +264,7 @@ export default function AdminProfiliPanel({
               <li key={p.id} className="rounded-xl border border-amber-200 bg-amber-50/60 p-4">
                 <p className="text-sm text-zinc-700 mb-3">
                   <strong>{p.nome_completo || 'Senza nome'}</strong> · {p.email} · {p.societa || '—'} · Tel.{' '}
-                  {p.telefono || '—'} · Ruolo: {p.ruolo} · Area: {p.area_geografica || '—'}
+                  {p.telefono || '—'} · Ruolo: {ruoloLabel(p.ruolo)} · Area: {p.area_geografica || '—'}
                 </p>
                 {!readOnly && (
                   <form
@@ -425,7 +425,7 @@ export default function AdminProfiliPanel({
                     <span className="font-medium text-zinc-900">
                       {p.nome_completo || p.email || p.id}
                       <span className="ml-2 text-xs font-normal text-zinc-500">
-                        {p.ruolo}
+                        {ruoloLabel(p.ruolo)}
                         {p.registrazione_approvata === false ? ' · in attesa' : ''}
                       </span>
                     </span>
