@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { MapPin, Phone, Mail } from 'lucide-react'
+import { MapPin } from 'lucide-react'
 import Header from '@/components/Header'
 
 export const metadata: Metadata = {
@@ -24,29 +24,28 @@ export default function DoveSiamoPage() {
             <div className="ladiva-contact-grid">
               <div className="ladiva-home-contact-card">
                 <MapPin className="ladiva-home-contact-icon" size={28} />
-                <h3>Sede</h3>
+                <h3>Show Room</h3>
                 <p>
-                  Carpineti (RE), Appennino Reggiano
-                  <br />
-                  Emilia-Romagna, Italia
+                  Via Matteotti 2<br />
+                  Formigine MO<br />
+                  Italia
                 </p>
               </div>
               <div className="ladiva-home-contact-card">
-                <Phone className="ladiva-home-contact-icon" size={28} />
-                <h3>Telefono</h3>
+                <MapPin className="ladiva-home-contact-icon" size={28} />
+                <h3>Produzione</h3>
                 <p>
-                  Contattaci per informazioni
-                  <br />
-                  sui nostri prodotti e cataloghi
+                  Via San Prospero 65/A<br />
+                  42033 Carpineti RE<br />
+                  Italia
                 </p>
               </div>
               <div className="ladiva-home-contact-card">
-                <Mail className="ladiva-home-contact-icon" size={28} />
-                <h3>Email</h3>
+                <MapPin className="ladiva-home-contact-icon" size={28} />
+                <h3>Deposito</h3>
                 <p>
-                  Scrivici per richieste
-                  <br />
-                  commerciali e partnership
+                  Strada Statale 467<br />
+                  Sant&apos;Antonino di Casalgrande RE
                 </p>
               </div>
             </div>
