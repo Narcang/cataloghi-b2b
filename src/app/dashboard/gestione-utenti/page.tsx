@@ -171,7 +171,7 @@ export default async function GestioneUtentiPage(props: {
                 type="search"
                 name="nome"
                 defaultValue={nomeFilter}
-                placeholder="Es. Anita"
+                placeholder="Es. Fabio"
                 aria-label="Cerca per nome"
                 className="h-10 min-w-[10rem] flex-1 rounded-lg border border-black bg-zinc-50 px-3 text-sm text-zinc-900 placeholder:text-zinc-500"
               />
