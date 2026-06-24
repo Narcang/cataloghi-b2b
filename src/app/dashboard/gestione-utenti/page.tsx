@@ -27,11 +27,23 @@ function escapeIlikePattern(value: string): string {
   return value.replace(/[%_\\]/g, '\\$&')
 }
 
+const RUOLO_FILTER_OPTIONS = [
+  { value: 'all',               label: 'Tutti i ruoli' },
+  { value: 'admin',             label: 'Admin' },
+  { value: 'manager',           label: 'Manager' },
+  { value: 'agenzia',           label: 'Agenzia' },
+  { value: 'agente',            label: 'Agente' },
+  { value: 'distributore',      label: 'Rivenditore' },
+  { value: 'partner_dipendente',label: 'Rivenditore Dip.' },
+  { value: 'studio',            label: 'Studio' },
+  { value: 'free',              label: 'Free' },
+]
+
 export default async function GestioneUtentiPage(props: {
-  searchParams: Promise<{ area?: string; nome?: string; message?: string }>
+  searchParams: Promise<{ ruolo?: string; nome?: string; message?: string }>
 }) {
   const searchParams = await props.searchParams
-  const areaFilter = searchParams?.area ?? 'all'
+  const ruoloFilter = searchParams?.ruolo ?? 'all'
   const nomeFilter = (searchParams?.nome ?? '').trim()
   const actionMessage = searchParams?.message ?? ''
 
@@ -52,20 +64,6 @@ export default async function GestioneUtentiPage(props: {
 
   if (!isManager) redirect('/dashboard')
 
-  // Aree disponibili per il filtro
-  const { data: areeProfili } = await supabase
-    .from('profili')
-    .select('area_geografica')
-    .not('area_geografica', 'is', null)
-
-  const areeDisponibili = Array.from(
-    new Set(
-      (areeProfili ?? [])
-        .map((p) => p.area_geografica)
-        .filter((v): v is string => Boolean(v)),
-    ),
-  ).sort((a, b) => a.localeCompare(b))
-
   const profiloSel =
     'id, nome_completo, email, telefono, societa, area_geografica, ruolo, registrazione_approvata, creato_il'
 
@@ -73,9 +71,9 @@ export default async function GestioneUtentiPage(props: {
     .from('profili')
     .select('id, nome_completo, email, telefono, ruolo, area_geografica')
     .in('ruolo', ['agenzia', 'agente', 'distributore', 'studio', 'partner_dipendente'])
-      .order('nome_completo', { ascending: true })
+    .order('nome_completo', { ascending: true })
 
-  if (areaFilter !== 'all') operatoriQuery = operatoriQuery.eq('area_geografica', areaFilter)
+  if (ruoloFilter !== 'all') operatoriQuery = operatoriQuery.eq('ruolo', ruoloFilter)
   if (nomeFilter.length > 0) operatoriQuery = operatoriQuery.ilike('nome_completo', `%${escapeIlikePattern(nomeFilter)}%`)
 
   let listaQuery = supabase
@@ -86,7 +84,7 @@ export default async function GestioneUtentiPage(props: {
     .order('nome_completo', { ascending: true, nullsFirst: false })
     .limit(150)
 
-  if (areaFilter !== 'all') listaQuery = listaQuery.eq('area_geografica', areaFilter)
+  if (ruoloFilter !== 'all') listaQuery = listaQuery.eq('ruolo', ruoloFilter)
   if (nomeFilter.length > 0) listaQuery = listaQuery.ilike('nome_completo', `%${escapeIlikePattern(nomeFilter)}%`)
 
   const pendQuery = supabase
@@ -106,7 +104,7 @@ export default async function GestioneUtentiPage(props: {
     .neq('ruolo', 'free')
     .order('nome_completo', { ascending: true, nullsFirst: false })
 
-  if (areaFilter !== 'all') gerarchiaQuery = gerarchiaQuery.eq('area_geografica', areaFilter)
+  if (ruoloFilter !== 'all') gerarchiaQuery = gerarchiaQuery.eq('ruolo', ruoloFilter)
   if (nomeFilter.length > 0) {
     gerarchiaQuery = gerarchiaQuery.ilike('nome_completo', `%${escapeIlikePattern(nomeFilter)}%`)
   }
@@ -166,7 +164,7 @@ export default async function GestioneUtentiPage(props: {
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             <div>
               <h2 className="text-xl text-zinc-900 font-medium">Filtra utenti</h2>
-              <p className="text-sm text-zinc-600 mt-1">Filtra per area geografica e/o per nome.</p>
+              <p className="text-sm text-zinc-600 mt-1">Filtra per ruolo e/o per nome.</p>
             </div>
             <form className="flex flex-wrap items-center gap-3" method="get">
               <input
@@ -178,13 +176,12 @@ export default async function GestioneUtentiPage(props: {
                 className="h-10 min-w-[10rem] flex-1 rounded-lg border border-black bg-zinc-50 px-3 text-sm text-zinc-900 placeholder:text-zinc-500"
               />
               <select
-                name="area"
-                defaultValue={areaFilter}
+                name="ruolo"
+                defaultValue={ruoloFilter}
                 className="h-10 rounded-lg border border-black bg-zinc-50 px-3 text-sm text-zinc-900"
               >
-                <option value="all">Tutte le aree</option>
-                {areeDisponibili.map((area) => (
-                  <option key={area} value={area}>{area}</option>
+                {RUOLO_FILTER_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
               <button
