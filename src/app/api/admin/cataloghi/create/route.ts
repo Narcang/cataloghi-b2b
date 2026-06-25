@@ -11,7 +11,7 @@ import { MAX_CATALOG_COVER_BYTES } from '@/lib/catalogUploadLimits'
 import { isZipDownloadCategory, isZipStoragePath } from '@/lib/catalogFileKind'
 
 /** Categorie per cui esiste sempre un solo file attivo: il nuovo sostituisce il vecchio. */
-const SINGLE_FILE_CATEGORIES = new Set(['Scontistiche'])
+const SINGLE_FILE_CATEGORIES = new Set(['Scontistiche', 'Listini', 'Power Point'])
 
 function jsonResponse(ok: boolean, message: string, status: number) {
   return NextResponse.json({ ok, message }, { status })

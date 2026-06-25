@@ -12,7 +12,7 @@ import {
 import { CATALOG_RETURN_TO_PARAM, catalogPdfHref } from '@/lib/catalogNavigation'
 
 /** Categorie che aprono direttamente il PDF (nessuna lista intermedia). */
-const DIRECT_OPEN_CATEGORIES = new Set<string>(['Scontistiche'])
+const DIRECT_OPEN_CATEGORIES = new Set<string>(['Scontistiche', 'Listini', 'Power Point'])
 
 export const dynamic = 'force-dynamic'
 
