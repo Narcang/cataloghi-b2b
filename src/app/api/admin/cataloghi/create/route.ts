@@ -10,6 +10,9 @@ import {
 import { MAX_CATALOG_COVER_BYTES } from '@/lib/catalogUploadLimits'
 import { isZipDownloadCategory, isZipStoragePath } from '@/lib/catalogFileKind'
 
+/** Categorie per cui esiste sempre un solo file attivo: il nuovo sostituisce il vecchio. */
+const SINGLE_FILE_CATEGORIES = new Set(['Scontistiche'])
+
 function jsonResponse(ok: boolean, message: string, status: number) {
   return NextResponse.json({ ok, message }, { status })
 }
@@ -157,6 +160,30 @@ export async function POST(request: NextRequest) {
 
   const statoValido =
     statoPubblicazione === 'attivo' || statoPubblicazione === 'bozza' ? statoPubblicazione : 'bozza'
+
+  // Per le categorie single-file, elimina i vecchi cataloghi prima di inserire il nuovo
+  if (SINGLE_FILE_CATEGORIES.has(categoria)) {
+    const { data: vecchi } = await supabase
+      .from('cataloghi')
+      .select('id, url_file, url_immagine')
+      .eq('categoria', categoria)
+
+    if (vecchi && vecchi.length > 0) {
+      const pathsDaEliminare: string[] = []
+      for (const v of vecchi) {
+        if (v.url_file) pathsDaEliminare.push(v.url_file as string)
+        if (v.url_immagine) {
+          // url_immagine è una URL pubblica, ricava il path relativo al bucket
+          const match = (v.url_immagine as string).match(/\/object\/public\/cataloghi\/(.+)$/)
+          if (match) pathsDaEliminare.push(match[1])
+        }
+      }
+      if (pathsDaEliminare.length > 0) {
+        await supabase.storage.from('cataloghi').remove(pathsDaEliminare)
+      }
+      await supabase.from('cataloghi').delete().eq('categoria', categoria)
+    }
+  }
 
   const { error: insertError } = await supabase.from('cataloghi').insert({
     titolo,

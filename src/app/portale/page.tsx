@@ -9,7 +9,10 @@ import {
   type CatalogCategory,
   type PortaleTile,
 } from '@/lib/catalogCategories'
-import { CATALOG_RETURN_TO_PARAM } from '@/lib/catalogNavigation'
+import { CATALOG_RETURN_TO_PARAM, catalogPdfHref } from '@/lib/catalogNavigation'
+
+/** Categorie che aprono direttamente il PDF (nessuna lista intermedia). */
+const DIRECT_OPEN_CATEGORIES = new Set<string>(['Scontistiche'])
 
 export const dynamic = 'force-dynamic'
 
@@ -62,18 +65,24 @@ export default async function PortalePage() {
     redirect('/dashboard')
   }
 
-  // Recupera il conteggio dei cataloghi attivi per ogni categoria del ruolo
+  // Recupera il conteggio dei cataloghi attivi e gli ID per le categorie direct-open
   const categorie = tiles.map((t) => t.categoria)
-  const { data: counts } = await supabase
+  const { data: catalogRows } = await supabase
     .from('cataloghi')
-    .select('categoria')
+    .select('id, categoria')
     .in('categoria', categorie)
     .eq('stato_pubblicazione', 'attivo')
+    .order('creato_il', { ascending: false })
 
   const countPerCategoria: Record<string, number> = {}
-  for (const row of counts ?? []) {
+  const directOpenIdPerCategoria: Record<string, string> = {}
+  for (const row of catalogRows ?? []) {
     const cat = row.categoria as string
     countPerCategoria[cat] = (countPerCategoria[cat] ?? 0) + 1
+    // Tieni solo il primo (più recente) per le categorie direct-open
+    if (DIRECT_OPEN_CATEGORIES.has(cat) && !directOpenIdPerCategoria[cat]) {
+      directOpenIdPerCategoria[cat] = row.id as string
+    }
   }
 
   const nomeUtente = profilo?.nome_completo?.split(' ')[0] ?? ''
@@ -96,7 +105,10 @@ export default async function PortalePage() {
           {tiles.map((tile) => {
             const count = countPerCategoria[tile.categoria] ?? 0
             const slug = categoryToSlug(tile.categoria)
-            const categoryHref = `/cataloghi/categoria/${slug}?${CATALOG_RETURN_TO_PARAM}=${encodeURIComponent('/portale')}`
+            const directId = directOpenIdPerCategoria[tile.categoria]
+            const categoryHref = directId
+              ? catalogPdfHref(directId, '/portale')
+              : `/cataloghi/categoria/${slug}?${CATALOG_RETURN_TO_PARAM}=${encodeURIComponent('/portale')}`
             return (
               <li key={tile.categoria}>
                 <Link
