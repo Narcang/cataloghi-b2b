@@ -61,7 +61,7 @@ const RUOLI_TAB: { id: RuoloTabId; label: string }[] = [
 ]
 
 function profiloSortKey(p: ProfiloGestioneRow): string {
-  return (p.nome_completo || p.email || p.id).trim().toLocaleLowerCase('it')
+  return (p.societa || p.nome_completo || p.email || p.id).trim().toLocaleLowerCase('it')
 }
 
 function sortProfiliAlfabetico(list: ProfiloGestioneRow[]): ProfiloGestioneRow[] {
@@ -423,7 +423,14 @@ export default function AdminProfiliPanel({
                 <details className="group">
                   <summary className="cursor-pointer list-none px-4 py-3 flex flex-wrap items-center justify-between gap-2">
                     <span className="font-medium text-zinc-900">
-                      {p.nome_completo || p.email || p.id}
+                      {p.societa ? (
+                        <>
+                          {p.societa}
+                          <span className="ml-2 text-xs font-normal text-zinc-400">{p.nome_completo || ''}</span>
+                        </>
+                      ) : (
+                        p.nome_completo || p.email || p.id
+                      )}
                       <span className="ml-2 text-xs font-normal text-zinc-500">
                         {ruoloLabel(p.ruolo)}
                         {p.registrazione_approvata === false ? ' · in attesa' : ''}
