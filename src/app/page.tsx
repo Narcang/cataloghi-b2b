@@ -169,6 +169,13 @@ export default async function LandingPage(props: { searchParams?: Promise<{ mess
       <div className="ladiva-root ladiva-root--auto ladiva-root-home-lower">
         <footer className="ladiva-footer ladiva-footer--compact ladiva-footer-home-strip">
           <div className="ladiva-home-footer-inner">
+            <p className="text-sm max-w-3xl mx-auto text-center mb-1">
+              <Link href="/privacy" className="underline hover:text-zinc-800 transition-colors whitespace-nowrap">Privacy Policy</Link>
+              {' · '}
+              <Link href="/termini" className="underline hover:text-zinc-800 transition-colors whitespace-nowrap">Termini e Condizioni</Link>
+              {' · '}
+              <Link href="/cookie" className="underline hover:text-zinc-800 transition-colors whitespace-nowrap">Cookie Policy</Link>
+            </p>
             <p className="text-sm max-w-3xl mx-auto text-center">
               © {new Date().getFullYear()} Ladiva Ceramica · Carpineti (RE), Italia
               {' · '}
