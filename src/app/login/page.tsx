@@ -17,7 +17,7 @@ export default async function LoginPage(props: { searchParams: Promise<{ message
         <Card className="w-full max-w-sm border border-black bg-white shadow-sm">
           <form action={login}>
             <CardHeader>
-              <CardTitle className="text-2xl text-zinc-900">Accesso Agenti</CardTitle>
+              <CardTitle className="text-2xl text-zinc-900 text-center">Accesso Ladiva</CardTitle>
               <CardDescription className="text-zinc-600">
                 Inserisci le tue credenziali per visualizzare i cataloghi B2B e gestire i fornitori.
               </CardDescription>
