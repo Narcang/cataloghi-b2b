@@ -16,10 +16,10 @@ export default function TerminiPage() {
           <section>
             <h2 className="text-lg font-semibold text-zinc-800 mb-2">1. Accettazione dei termini</h2>
             <p>
-              Registrandosi al portale riservato di <strong>Ladiva Ceramica</strong> l&apos;utente accetta
-              integralmente i presenti Termini e Condizioni d&apos;uso. L&apos;accesso al portale è
-              riservato a soggetti professionali (agenti, studi, partner commerciali) che abbiano ricevuto
-              un invito o la cui richiesta di registrazione sia stata approvata.
+              Registrandosi al portale riservato di <strong>Ladiva Italia srl</strong> e <strong>Ladiva ltd</strong>,
+              l&apos;utente accetta integralmente i presenti Termini e Condizioni d&apos;uso.
+              L&apos;accesso al portale è riservato a soggetti professionali (agenti, studi, partner commerciali)
+              che abbiano ricevuto un invito o la cui richiesta di registrazione sia stata approvata.
             </p>
           </section>
 

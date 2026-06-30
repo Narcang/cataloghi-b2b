@@ -16,9 +16,11 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-lg font-semibold text-zinc-800 mb-2">1. Titolare del trattamento</h2>
             <p>
-              Il titolare del trattamento dei dati personali è <strong>Ladiva Ceramica</strong>, con sede in
-              Carpineti (RE), Italia. Per qualsiasi richiesta relativa alla privacy è possibile contattarci
-              all&apos;indirizzo <a href="mailto:info@ladiva-fpd.com" className="underline text-[#060d41]">info@ladiva-fpd.com</a>.
+              Il titolare del trattamento dei dati personali è <strong>Ladiva Italia srl</strong> e <strong>Ladiva ltd</strong>,
+              con sede in Via Adda 50/D, Sassuolo, Italia e Piazza Tigne Point TP 09, Sliema, Malta.
+              Per qualsiasi richiesta relativa alla privacy è possibile contattarci all&apos;indirizzo{' '}
+              <a href="mailto:info@ladivaceramica.it" className="underline text-[#060d41]">info@ladivaceramica.it</a> o{' '}
+              <a href="mailto:info@ladiva-fpd.com" className="underline text-[#060d41]">info@ladiva-fpd.com</a>.
             </p>
           </section>
 
