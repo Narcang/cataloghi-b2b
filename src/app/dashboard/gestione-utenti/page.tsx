@@ -1,4 +1,5 @@
 import { createClient } from '@/utils/supabase/server'
+import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Phone, MessageCircle, Users, ArrowLeft } from 'lucide-react'
@@ -93,12 +94,16 @@ export default async function GestioneUtentiPage(props: {
     .eq('registrazione_approvata', false)
     .order('nome_completo', { ascending: true, nullsFirst: false })
 
-  const linksQuery = supabase
+  // Per la struttura organizzativa usiamo il service role per bypassare la RLS e
+  // vedere tutte le connessioni/profili indipendentemente dal ruolo del viewer.
+  const svc = createServiceRoleSupabase() ?? supabase
+
+  const linksQuery = svc
     .from('connessioni_utente_operatore')
     .select('utente_id, operatore_id')
     .limit(2000)
 
-  let gerarchiaQuery = supabase
+  let gerarchiaQuery = svc
     .from('profili')
     .select('id, nome_completo, societa, email, area_geografica, ruolo, invitato_da, registrazione_approvata')
     .neq('ruolo', 'free')
@@ -110,7 +115,7 @@ export default async function GestioneUtentiPage(props: {
   }
 
   /** Tutti gli utenti approvati, senza filtro area/nome: usati per associare il ruolo inferiore. */
-  const associazioneQuery = supabase
+  const associazioneQuery = svc
     .from('profili')
     .select('id, nome_completo, societa, email, area_geografica, ruolo, invitato_da, registrazione_approvata')
     .neq('ruolo', 'free')
