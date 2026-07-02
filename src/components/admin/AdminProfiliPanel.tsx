@@ -47,6 +47,11 @@ function ruoloLabel(r: string): string {
   return RUOLO_LABEL[r] ?? r
 }
 
+/** Ruoli per cui ha senso impostare cataloghi visibili per singolo utente. */
+function puoPersonalizzareCataloghi(ruolo: string): boolean {
+  return !['admin', 'free'].includes(ruolo)
+}
+
 type RuoloOption = (typeof RUOLI_OPTIONS)[number]
 
 type RuoloTabId = 'admin' | 'manager' | 'agenzia' | 'agente' | 'distributore' | 'studio' | 'partner_dipendente'
@@ -83,6 +88,8 @@ type Props = {
   allCataloghi: CatalogoDisponibile[]
   /** Quando true (ruolo manager) il pannello è in sola lettura: nessun edit/delete/approvazione. */
   readOnly?: boolean
+  /** Admin e manager possono gestire i cataloghi visibili anche se readOnly è true. */
+  canManageCataloghi?: boolean
 }
 
 export default function AdminProfiliPanel({
@@ -94,6 +101,7 @@ export default function AdminProfiliPanel({
   links,
   allCataloghi,
   readOnly = false,
+  canManageCataloghi = false,
 }: Props) {
   const router = useRouter()
   const [message, setMessage] = useState<string | null>(null)
@@ -571,25 +579,27 @@ export default function AdminProfiliPanel({
                             </div>
                           </div>
                         ) : null}
-
-                        {/* Cataloghi visibili per l'utente (restrizioni individuali) */}
-                        {!['admin', 'manager', 'free'].includes(p.ruolo) && (
-                          <div>
-                            <p className="text-xs font-medium uppercase text-zinc-600 mb-2">
-                              Cataloghi visibili (personalizzati)
-                            </p>
-                            <div className="border border-black/15 rounded-lg p-3 bg-zinc-50">
-                              <CatalogoPermessiPanel
-                                utenteId={p.id}
-                                utenteRuolo={p.ruolo}
-                                allCataloghi={allCataloghi}
-                                readOnly={false}
-                              />
-                            </div>
-                          </div>
-                        )}
                       </>
                     )}
+
+                    {canManageCataloghi && puoPersonalizzareCataloghi(p.ruolo) ? (
+                      <div>
+                        <p className="text-xs font-medium uppercase text-zinc-600 mb-1">
+                          Cataloghi visibili
+                        </p>
+                        <p className="text-xs text-zinc-500 mb-2">
+                          Spunta i PDF da mostrare a questo utente. Se nessuno è selezionato, vede tutti i cataloghi del suo ruolo.
+                        </p>
+                        <div className="border border-black/15 rounded-lg p-3 bg-zinc-50">
+                          <CatalogoPermessiPanel
+                            utenteId={p.id}
+                            utenteRuolo={p.ruolo}
+                            allCataloghi={allCataloghi}
+                            readOnly={false}
+                          />
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
                 </details>
               </li>
