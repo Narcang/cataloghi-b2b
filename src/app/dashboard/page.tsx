@@ -299,7 +299,7 @@ export default async function Dashboard(props: {
     const [profiliRes, linksRes] = await Promise.all([
       supabase
         .from('profili')
-        .select('id, nome_completo, email, area_geografica, ruolo, invitato_da, registrazione_approvata')
+        .select('id, nome_completo, societa, email, area_geografica, ruolo, invitato_da, registrazione_approvata')
         .neq('ruolo', 'free')
         .or('registrazione_approvata.eq.true,registrazione_approvata.is.null')
         .limit(500),

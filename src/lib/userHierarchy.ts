@@ -1,6 +1,7 @@
 export type ProfiloGerarchiaRow = {
   id: string
   nome_completo: string | null
+  societa: string | null
   email: string | null
   area_geografica: string | null
   ruolo: string
@@ -73,6 +74,7 @@ export function profiloToGerarchiaRow(
   p: {
     id: string
     nome_completo: string | null
+    societa?: string | null
     email: string | null
     area_geografica: string | null
     ruolo: string
@@ -83,6 +85,7 @@ export function profiloToGerarchiaRow(
   return {
     id: p.id,
     nome_completo: p.nome_completo,
+    societa: p.societa ?? null,
     email: p.email,
     area_geografica: p.area_geografica,
     ruolo: p.ruolo,
@@ -205,7 +208,7 @@ function isDirectChild(
 }
 
 function profiloSortKey(p: ProfiloGerarchiaRow): string {
-  return (p.nome_completo || p.email || p.id).trim().toLocaleLowerCase('it')
+  return (p.societa || p.nome_completo || p.email || p.id).trim().toLocaleLowerCase('it')
 }
 
 function isProfiloVisibileInGerarchia(p: ProfiloGerarchiaRow): boolean {

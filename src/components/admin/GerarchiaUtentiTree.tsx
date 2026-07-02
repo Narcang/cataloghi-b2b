@@ -105,7 +105,14 @@ function HierarchyNode({
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h4 className="text-base font-semibold text-zinc-900">
-                {profile.nome_completo || 'Utente senza nome'}
+                {profile.societa ? (
+                  <>
+                    {profile.societa}
+                    <span className="ml-2 text-sm font-normal text-zinc-400">{profile.nome_completo || ''}</span>
+                  </>
+                ) : (
+                  profile.nome_completo || 'Utente senza nome'
+                )}
               </h4>
               <p className="text-sm text-zinc-600 mt-0.5">{profile.email}</p>
               <p className="text-xs text-zinc-500 mt-1">

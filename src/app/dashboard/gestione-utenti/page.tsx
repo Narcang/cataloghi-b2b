@@ -100,7 +100,7 @@ export default async function GestioneUtentiPage(props: {
 
   let gerarchiaQuery = supabase
     .from('profili')
-    .select('id, nome_completo, email, area_geografica, ruolo, invitato_da, registrazione_approvata')
+    .select('id, nome_completo, societa, email, area_geografica, ruolo, invitato_da, registrazione_approvata')
     .neq('ruolo', 'free')
     .order('nome_completo', { ascending: true, nullsFirst: false })
 
@@ -112,7 +112,7 @@ export default async function GestioneUtentiPage(props: {
   /** Tutti gli utenti approvati, senza filtro area/nome: usati per associare il ruolo inferiore. */
   const associazioneQuery = supabase
     .from('profili')
-    .select('id, nome_completo, email, area_geografica, ruolo, invitato_da, registrazione_approvata')
+    .select('id, nome_completo, societa, email, area_geografica, ruolo, invitato_da, registrazione_approvata')
     .neq('ruolo', 'free')
     .or('registrazione_approvata.eq.true,registrazione_approvata.is.null')
     .order('nome_completo', { ascending: true, nullsFirst: false })
