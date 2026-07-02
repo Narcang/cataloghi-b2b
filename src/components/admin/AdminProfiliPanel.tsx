@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import { Users, UserCheck } from 'lucide-react'
 import AssociatiDirettiCascade from '@/components/admin/AssociatiDirettiCascade'
+import CatalogoPermessiPanel, { type CatalogoDisponibile } from '@/components/admin/CatalogoPermessiPanel'
 import {
   associatiAggiungiSectionLabel,
   associatiDirettiSectionLabel,
@@ -78,6 +79,8 @@ type Props = {
   /** Tutti gli utenti approvati (senza filtro area): elenco per associare il ruolo inferiore. */
   profiliAssociazione: ProfiloGerarchiaRow[]
   links: { utente_id: string; operatore_id: string }[]
+  /** Tutti i cataloghi attivi (con ruoli_visibili) per la gestione permessi per-utente. */
+  allCataloghi: CatalogoDisponibile[]
   /** Quando true (ruolo manager) il pannello è in sola lettura: nessun edit/delete/approvazione. */
   readOnly?: boolean
 }
@@ -89,6 +92,7 @@ export default function AdminProfiliPanel({
   profiliGerarchia,
   profiliAssociazione,
   links,
+  allCataloghi,
   readOnly = false,
 }: Props) {
   const router = useRouter()
@@ -567,6 +571,23 @@ export default function AdminProfiliPanel({
                             </div>
                           </div>
                         ) : null}
+
+                        {/* Cataloghi visibili per l'utente (restrizioni individuali) */}
+                        {!['admin', 'manager', 'free'].includes(p.ruolo) && (
+                          <div>
+                            <p className="text-xs font-medium uppercase text-zinc-600 mb-2">
+                              Cataloghi visibili (personalizzati)
+                            </p>
+                            <div className="border border-black/15 rounded-lg p-3 bg-zinc-50">
+                              <CatalogoPermessiPanel
+                                utenteId={p.id}
+                                utenteRuolo={p.ruolo}
+                                allCataloghi={allCataloghi}
+                                readOnly={false}
+                              />
+                            </div>
+                          </div>
+                        )}
                       </>
                     )}
                   </div>

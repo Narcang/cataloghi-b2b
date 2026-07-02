@@ -123,13 +123,21 @@ export default async function GestioneUtentiPage(props: {
     .order('nome_completo', { ascending: true, nullsFirst: false })
     .limit(500)
 
-  const [opRes, pendRes, listaRes, linksRes, gerarchiaRes, associazioneRes] = await Promise.all([
+  /** Tutti i cataloghi attivi con ruoli_visibili per la gestione permessi per-utente. */
+  const cataloghiQuery = svc
+    .from('cataloghi')
+    .select('id, titolo, categoria, ruoli_visibili')
+    .eq('stato_pubblicazione', 'attivo')
+    .order('titolo', { ascending: true, nullsFirst: false })
+
+  const [opRes, pendRes, listaRes, linksRes, gerarchiaRes, associazioneRes, cataloghiRes] = await Promise.all([
     operatoriQuery,
     pendQuery,
     listaQuery,
     linksQuery,
     gerarchiaQuery,
     associazioneQuery,
+    cataloghiQuery,
   ])
 
   const operatoriAdmin = (opRes.data ?? []) as Operatore[]
@@ -138,6 +146,7 @@ export default async function GestioneUtentiPage(props: {
   const connessioniUtenteOperatoreRows = (linksRes.data ?? []) as { utente_id: string; operatore_id: string }[]
   const profiliGerarchia = (gerarchiaRes.data ?? []) as ProfiloGerarchiaRow[]
   const profiliAssociazione = (associazioneRes.data ?? []) as ProfiloGerarchiaRow[]
+  const allCataloghi = (cataloghiRes.data ?? []) as { id: string; titolo: string | null; categoria: string | null; ruoli_visibili: string[] }[]
 
   return (
     <div className="ladiva-root ladiva-root-app-dark min-h-screen flex flex-col">
@@ -215,6 +224,7 @@ export default async function GestioneUtentiPage(props: {
           profiliGerarchia={profiliGerarchia}
           profiliAssociazione={profiliAssociazione}
           links={connessioniUtenteOperatoreRows}
+          allCataloghi={allCataloghi}
           readOnly={!isAdmin}
         />
 
