@@ -52,28 +52,11 @@ const menuItemsBase: MenuItem[] = [
   },
 ]
 
-function catalogMenuItemForRole(ruolo: string | null, loggedIn: boolean): MenuItem {
+function catalogMenuItemForRole(loggedIn: boolean): MenuItem {
   if (!loggedIn) {
     return { label: 'Cataloghi', href: '/dashboard#cataloghi', icon: BookOpen }
   }
-  switch (ruolo as ProfiloRuolo | null) {
-    case 'admin':
-    case 'manager':
-      return { label: 'Dashboard', href: '/portale', icon: LayoutDashboard }
-    case 'agenzia':
-    case 'agente':
-      return {
-        label: 'Documentazione Riservata',
-        href: '/portale',
-        icon: BookOpen,
-      }
-    case 'distributore':
-    case 'studio':
-    case 'partner_dipendente':
-      return { label: 'Listini', href: '/portale', icon: BookOpen }
-    default:
-      return { label: 'Cataloghi', href: '/dashboard#cataloghi', icon: BookOpen }
-  }
+  return { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }
 }
 
 export default function Header() {
@@ -159,7 +142,7 @@ export default function Header() {
     setMobileOpen(false)
   }
 
-  const catalogMenuItem = catalogMenuItemForRole(profiloRuolo, Boolean(user))
+  const catalogMenuItem = catalogMenuItemForRole(Boolean(user))
   const visibleBaseItems = user
     ? menuItemsBase.filter((item) => item.href !== '/registrazione')
     : menuItemsBase
