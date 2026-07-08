@@ -49,7 +49,7 @@ function ruoloLabel(r: string): string {
 
 /** Ruoli per cui ha senso impostare cataloghi visibili per singolo utente. */
 function puoPersonalizzareCataloghi(ruolo: string): boolean {
-  return !['admin', 'free'].includes(ruolo)
+  return !['admin', 'free', 'manager'].includes(ruolo)
 }
 
 type RuoloOption = (typeof RUOLI_OPTIONS)[number]
@@ -588,7 +588,7 @@ export default function AdminProfiliPanel({
                           Cataloghi visibili
                         </p>
                         <p className="text-xs text-zinc-500 mb-2">
-                          Spunta i PDF da mostrare a questo utente. Se nessuno è selezionato, vede tutti i cataloghi del suo ruolo.
+                          Spunta le categorie (Family 15, Family 20, …) visibili a questo utente. Se nessuna è selezionata, vede tutte le categorie del suo ruolo.
                         </p>
                         <div className="border border-black/15 rounded-lg p-3 bg-zinc-50">
                           <CatalogoPermessiPanel

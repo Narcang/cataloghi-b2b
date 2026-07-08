@@ -43,7 +43,13 @@ export function getCatalogAccessDenial(
   const rv = catalogo.ruoli_visibili
   if (Array.isArray(rv) && rv.length > 0) {
     const ruoloEffettivo = options.isAuthenticated ? ruolo : 'free'
-    if (!rv.includes(ruoloEffettivo)) {
+    const ruoliAccettati =
+      ruoloEffettivo === 'agenzia'
+        ? ['agenzia', 'agente']
+        : ruoloEffettivo === 'partner_dipendente'
+          ? ['partner_dipendente', 'studio']
+          : [ruoloEffettivo]
+    if (!ruoliAccettati.some(r => rv.includes(r))) {
       return options.isAuthenticated
         ? { status: 403, message: 'Accesso non consentito per il tuo ruolo' }
         : { status: 401, message: 'Accesso riservato: effettua il login' }

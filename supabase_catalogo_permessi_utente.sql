@@ -19,6 +19,10 @@ CREATE TABLE IF NOT EXISTS public.catalogo_permessi_utente (
 
 CREATE INDEX IF NOT EXISTS idx_cpu_utente ON public.catalogo_permessi_utente (utente_id);
 
+-- Permessi di base (RLS limita cosa ogni utente può leggere)
+GRANT SELECT ON public.catalogo_permessi_utente TO authenticated;
+GRANT ALL    ON public.catalogo_permessi_utente TO service_role;
+
 -- RLS: gli utenti leggono solo i propri permessi (scrittura via service role)
 ALTER TABLE public.catalogo_permessi_utente ENABLE ROW LEVEL SECURITY;
 
@@ -41,6 +45,7 @@ CREATE POLICY "Cataloghi visibili per ruolo (autenticati)" ON public.cataloghi
   FOR SELECT USING (
     stato_pubblicazione = 'attivo'
     AND auth.uid() IS NOT NULL
+    AND NOT public.current_user_is_admin()
     AND EXISTS (
       SELECT 1 FROM public.profili
       WHERE id = auth.uid()
