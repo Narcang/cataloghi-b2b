@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
   const { data: operatore } = await supabase.from('profili').select('id, ruolo').eq('id', operatoreId).maybeSingle()
 
   if (!operatore || !isRubricaRuolo(operatore.ruolo)) {
-    return jsonResponse(false, 'Il contatto deve essere un agente, un partner (distributore), uno studio o un partner dipendente', 400)
+    return jsonResponse(false, 'Il contatto deve essere un agente, un venditore, uno studio o uno sponsor', 400)
   }
 
   if (action === 'add') {
