@@ -4,8 +4,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   buildGruppiCategorieConfigurabili,
   categorieConfigurabiliPerRuolo,
-  categorieSelezionateDaIds,
-  idsCataloghiInCategorie,
+  categorieNascoste,
+  categoriaVisibilePerUtente,
+  idsVisibiliDaWhitelist,
+  tuttiIdsAssegnabili,
+  whitelistDaIdsVisibili,
   type CatalogoPermessoRow,
 } from '@/lib/catalogPermessiUtente'
 
@@ -41,19 +44,26 @@ export default function CatalogoPermessiPanel({
   )
   const gruppiConPdf = useMemo(() => gruppi.filter(g => g.cataloghi.length > 0), [gruppi])
   const categorieRuolo = useMemo(() => categorieConfigurabiliPerRuolo(utenteRuolo), [utenteRuolo])
+  const allAssignableIds = useMemo(() => tuttiIdsAssegnabili(gruppiConPdf), [gruppiConPdf])
 
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
-  const [loaded, setLoaded] = useState(false)
+  const [visibleIds, setVisibleIds] = useState<Set<string>>(new Set())
+  const [whitelistLoaded, setWhitelistLoaded] = useState<string[] | null>(null)
+  const [cataloghiReady, setCataloghiReady] = useState(allCataloghi.length > 0)
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
 
-  const selectedCategories = useMemo(
-    () => categorieSelezionateDaIds(gruppiConPdf, selectedIds),
-    [gruppiConPdf, selectedIds],
+  const hiddenCategories = useMemo(
+    () => categorieNascoste(gruppiConPdf, visibleIds),
+    [gruppiConPdf, visibleIds],
   )
 
+  const loaded = whitelistLoaded !== null && (cataloghiReady || allAssignableIds.length === 0)
+
   useEffect(() => {
-    if (allCataloghi.length > 0) setCataloghi(allCataloghi)
+    if (allCataloghi.length > 0) {
+      setCataloghi(allCataloghi)
+      setCataloghiReady(true)
+    }
   }, [allCataloghi])
 
   useEffect(() => {
@@ -65,6 +75,7 @@ export default function CatalogoPermessiPanel({
         if (data.ok && Array.isArray(data.cataloghi)) {
           setCataloghi(data.cataloghi)
           setCataloghiError(null)
+          setCataloghiReady(true)
         } else if (!data.ok) {
           setCataloghiError(data.message ?? 'Errore caricamento cataloghi')
         }
@@ -76,27 +87,32 @@ export default function CatalogoPermessiPanel({
   }, [])
 
   useEffect(() => {
-    setLoaded(false)
+    setWhitelistLoaded(null)
     fetch(`/api/admin/catalogo-permessi?utente_id=${encodeURIComponent(utenteId)}`, {
       credentials: 'same-origin',
     })
       .then(r => r.json())
       .then(data => {
-        if (data.ok) setSelectedIds(new Set<string>(data.catalogo_ids))
-        setLoaded(true)
+        if (data.ok) setWhitelistLoaded(Array.isArray(data.catalogo_ids) ? data.catalogo_ids : [])
+        else setWhitelistLoaded([])
       })
-      .catch(() => setLoaded(true))
+      .catch(() => setWhitelistLoaded([]))
   }, [utenteId])
 
+  useEffect(() => {
+    if (whitelistLoaded === null || allAssignableIds.length === 0) return
+    setVisibleIds(idsVisibiliDaWhitelist(whitelistLoaded, allAssignableIds))
+  }, [whitelistLoaded, allAssignableIds])
+
   const toggleCategory = useCallback((categoria: string) => {
-    setSelectedIds(prev => {
+    setVisibleIds(prev => {
       const next = new Set(prev)
       const gruppo = gruppiConPdf.find(g => g.categoria === categoria)
       if (!gruppo) return next
 
-      const allSelected = gruppo.cataloghi.every(c => next.has(c.id))
+      const isVisible = categoriaVisibilePerUtente(gruppo, next)
       for (const c of gruppo.cataloghi) {
-        if (allSelected) next.delete(c.id)
+        if (isVisible) next.delete(c.id)
         else next.add(c.id)
       }
       return next
@@ -107,17 +123,19 @@ export default function CatalogoPermessiPanel({
   const handleSave = useCallback(async () => {
     setSaving(true)
     setMsg(null)
-    const categorie = [...selectedCategories]
+    const catalogo_ids = whitelistDaIdsVisibili(visibleIds, allAssignableIds)
     try {
       const res = await fetch('/api/admin/catalogo-permessi', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'same-origin',
-        body: JSON.stringify({ utente_id: utenteId, categorie }),
+        body: JSON.stringify({ utente_id: utenteId, catalogo_ids }),
       })
       const data = await res.json()
-      if (data.ok && Array.isArray(data.catalogo_ids)) {
-        setSelectedIds(new Set<string>(data.catalogo_ids))
+      if (data.ok) {
+        const saved = Array.isArray(data.catalogo_ids) ? data.catalogo_ids : catalogo_ids
+        setWhitelistLoaded(saved)
+        setVisibleIds(idsVisibiliDaWhitelist(saved, allAssignableIds))
       }
       setMsg({ type: data.ok ? 'ok' : 'err', text: data.ok ? 'Permessi salvati' : (data.message ?? 'Errore') })
     } catch {
@@ -125,27 +143,30 @@ export default function CatalogoPermessiPanel({
     } finally {
       setSaving(false)
     }
-  }, [utenteId, selectedCategories])
+  }, [utenteId, visibleIds, allAssignableIds])
 
-  const handleClearRestrictions = useCallback(async () => {
-    setSelectedIds(new Set())
-    setMsg(null)
+  const handleResetAllVisible = useCallback(async () => {
     setSaving(true)
+    setMsg(null)
     try {
       const res = await fetch('/api/admin/catalogo-permessi', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'same-origin',
-        body: JSON.stringify({ utente_id: utenteId, categorie: [] }),
+        body: JSON.stringify({ utente_id: utenteId, catalogo_ids: [] }),
       })
       const data = await res.json()
-      setMsg({ type: data.ok ? 'ok' : 'err', text: data.ok ? 'Restrizioni rimosse' : (data.message ?? 'Errore') })
+      if (data.ok) {
+        setWhitelistLoaded([])
+        setVisibleIds(idsVisibiliDaWhitelist([], allAssignableIds))
+      }
+      setMsg({ type: data.ok ? 'ok' : 'err', text: data.ok ? 'Tutte le categorie di nuovo visibili' : (data.message ?? 'Errore') })
     } catch {
       setMsg({ type: 'err', text: 'Errore di rete' })
     } finally {
       setSaving(false)
     }
-  }, [utenteId])
+  }, [utenteId, allAssignableIds])
 
   if (categorieRuolo.length === 0) {
     return (
@@ -155,8 +176,8 @@ export default function CatalogoPermessiPanel({
     )
   }
 
-  const noneSelected = selectedIds.size === 0
   const pdfCountByCat = new Map(gruppi.map(g => [g.categoria, g.cataloghi.length]))
+  const hasRestrictions = hiddenCategories.size > 0
 
   return (
     <div className="space-y-3">
@@ -172,7 +193,10 @@ export default function CatalogoPermessiPanel({
             {categorieRuolo.map(categoria => {
               const pdfCount = pdfCountByCat.get(categoria) ?? 0
               const hasPdf = pdfCount > 0
-              const checked = hasPdf && selectedCategories.has(categoria)
+              const gruppo = gruppiConPdf.find(g => g.categoria === categoria)
+              const checked = hasPdf && gruppo
+                ? categoriaVisibilePerUtente(gruppo, visibleIds)
+                : false
               return (
                 <label
                   key={categoria}
@@ -199,9 +223,9 @@ export default function CatalogoPermessiPanel({
           </div>
 
           <p className="text-xs text-zinc-500">
-            {noneSelected
-              ? 'Nessuna restrizione: l\'utente vede tutte le categorie previste per il suo ruolo.'
-              : `${selectedCategories.size} categorie selezionate — l\'utente vedrà solo quelle linee.`}
+            {hasRestrictions
+              ? `${hiddenCategories.size} categorie nascoste per questo utente. Spunta di nuovo per renderle visibili.`
+              : 'Tutte le categorie sono visibili. Togli la spunta per nascondere una linea a questo utente.'}
           </p>
 
           {!readOnly && (
@@ -214,14 +238,14 @@ export default function CatalogoPermessiPanel({
               >
                 {saving ? 'Salvataggio…' : 'Salva categorie'}
               </button>
-              {!noneSelected && (
+              {hasRestrictions && (
                 <button
                   type="button"
-                  onClick={handleClearRestrictions}
+                  onClick={handleResetAllVisible}
                   disabled={saving}
                   className="h-9 px-4 rounded-md border border-zinc-300 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
                 >
-                  Rimuovi tutte le restrizioni
+                  Mostra tutte le categorie
                 </button>
               )}
               {msg && (

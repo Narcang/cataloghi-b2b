@@ -588,7 +588,7 @@ export default function AdminProfiliPanel({
                           Cataloghi visibili
                         </p>
                         <p className="text-xs text-zinc-500 mb-2">
-                          Spunta le categorie (Family 15, Family 20, …) visibili a questo utente. Se nessuna è selezionata, vede tutte le categorie del suo ruolo.
+                          Le categorie spuntate sono visibili a questo utente. Togli la spunta per nasconderne una; quando tutte sono spuntate, vede tutto il previsto per il suo ruolo.
                         </p>
                         <div className="border border-black/15 rounded-lg p-3 bg-zinc-50">
                           <CatalogoPermessiPanel

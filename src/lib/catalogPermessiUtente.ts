@@ -138,15 +138,42 @@ export function idsCataloghiInCategorie(gruppi: CategoriaCatalogoGruppo[], categ
   return ids
 }
 
-/** Categoria considerata abilitata se tutti i suoi cataloghi sono nella whitelist. */
-export function categorieSelezionateDaIds(
+/** Categoria visibile in UI se tutti i PDF della linea sono consentiti. */
+export function categoriaVisibilePerUtente(
+  gruppo: CategoriaCatalogoGruppo,
+  visibleIds: Set<string>,
+): boolean {
+  if (gruppo.cataloghi.length === 0) return false
+  return gruppo.cataloghi.every(c => visibleIds.has(c.id))
+}
+
+/** Tutti gli ID catalogo assegnabili al ruolo (flat). */
+export function tuttiIdsAssegnabili(gruppi: CategoriaCatalogoGruppo[]): string[] {
+  return gruppi.flatMap(g => g.cataloghi.map(c => c.id))
+}
+
+/** Da stato UI → whitelist DB ([] = nessuna restrizione, vede tutto il ruolo). */
+export function whitelistDaIdsVisibili(visibleIds: Set<string>, allIds: string[]): string[] {
+  if (allIds.length === 0) return []
+  if (allIds.every(id => visibleIds.has(id))) return []
+  return [...visibleIds]
+}
+
+/** Da whitelist DB → IDs visibili in UI (vuota = tutti visibili). */
+export function idsVisibiliDaWhitelist(whitelistIds: string[], allIds: string[]): Set<string> {
+  if (whitelistIds.length === 0) return new Set(allIds)
+  return new Set(whitelistIds)
+}
+
+/** Categorie nascoste rispetto all'accesso completo del ruolo. */
+export function categorieNascoste(
   gruppi: CategoriaCatalogoGruppo[],
-  catalogoIds: Set<string>,
+  visibleIds: Set<string>,
 ): Set<string> {
-  const selected = new Set<string>()
+  const hidden = new Set<string>()
   for (const g of gruppi) {
     if (g.cataloghi.length === 0) continue
-    if (g.cataloghi.every(c => catalogoIds.has(c.id))) selected.add(g.categoria)
+    if (!categoriaVisibilePerUtente(g, visibleIds)) hidden.add(g.categoria)
   }
-  return selected
+  return hidden
 }
