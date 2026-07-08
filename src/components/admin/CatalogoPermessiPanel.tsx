@@ -11,6 +11,7 @@ import {
   whitelistDaIdsVisibili,
   type CatalogoPermessoRow,
 } from '@/lib/catalogPermessiUtente'
+import { categoryDisplayLabel } from '@/lib/catalogCategories'
 
 export type CatalogoDisponibile = CatalogoPermessoRow
 
@@ -21,12 +22,10 @@ type Props = {
   readOnly?: boolean
 }
 
-const CATEGORY_LABEL: Record<string, string> = {
-  Scontistiche: 'Merchandising',
-}
+const CATEGORY_LABEL: Record<string, string> = {}
 
 function catLabel(cat: string): string {
-  return CATEGORY_LABEL[cat] ?? cat
+  return CATEGORY_LABEL[cat] ?? categoryDisplayLabel(cat)
 }
 
 export default function CatalogoPermessiPanel({

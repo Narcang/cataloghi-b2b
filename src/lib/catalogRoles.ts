@@ -2,8 +2,8 @@
 export const RUOLI_CATALOGO = [
   { value: 'free',               label: 'Pubblico (ospiti / Free)' },
   { value: 'studio',             label: 'Studio' },
-  { value: 'partner_dipendente', label: 'Rivenditori Dipendenti' },
-  { value: 'distributore',       label: 'Rivenditori' },
+  { value: 'partner_dipendente', label: 'Venditori Dipendenti' },
+  { value: 'distributore',       label: 'Venditori' },
   { value: 'agente',             label: 'Agente' },
   { value: 'agenzia',            label: 'Agenzia' },
   { value: 'manager',            label: 'Manager' },

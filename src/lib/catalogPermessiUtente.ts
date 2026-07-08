@@ -4,7 +4,8 @@ import {
   categoriesVisibleOnDashboard,
   isAgentOnlyCatalogCategory,
   isCatalogCategoryAllowedForStudioRole,
-  partnerListiniDashboardCategories,
+  STUDIO_CATALOG_CATEGORY,
+  venditoreExtraCategories,
   type CatalogCategory,
 } from '@/lib/catalogCategories'
 
@@ -76,8 +77,11 @@ export function categorieConfigurabiliPerRuolo(ruoloUtente: string): CatalogCate
   if (ruoloUtente === 'agente' || ruoloUtente === 'agenzia') {
     add(agenteReservedDashboardCategories())
   }
-  if (ruoloUtente === 'distributore' || ruoloUtente === 'partner_dipendente') {
-    add(partnerListiniDashboardCategories())
+  if (ruoloUtente === 'distributore') {
+    add(venditoreExtraCategories())
+  }
+  if (ruoloUtente === 'partner_dipendente') {
+    add(['File 2D', 'File 3D', STUDIO_CATALOG_CATEGORY])
   }
 
   return out

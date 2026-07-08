@@ -34,8 +34,8 @@ const RUOLO_FILTER_OPTIONS = [
   { value: 'manager',           label: 'Manager' },
   { value: 'agenzia',           label: 'Agenzia' },
   { value: 'agente',            label: 'Agente' },
-  { value: 'distributore',      label: 'Rivenditore' },
-  { value: 'partner_dipendente',label: 'Rivenditore Dip.' },
+  { value: 'distributore',      label: 'Venditore' },
+  { value: 'partner_dipendente',label: 'Venditore Dip.' },
   { value: 'studio',            label: 'Studio' },
   { value: 'free',              label: 'Free' },
 ]
@@ -253,7 +253,7 @@ export default async function GestioneUtentiPage(props: {
                     <h3 className="text-lg font-medium text-zinc-900 mb-1">{operatore.nome_completo || 'Operatore Senza Nome'}</h3>
                     <p className="text-zinc-600 text-sm">{operatore.email}</p>
                     <p className="text-zinc-600 text-xs mt-2 uppercase tracking-wide">
-                      {operatore.ruolo === 'distributore' ? 'Rivenditore' : operatore.ruolo === 'partner_dipendente' ? 'Rivenditore Dip.' : operatore.ruolo}
+                      {operatore.ruolo === 'distributore' ? 'Venditore' : operatore.ruolo === 'partner_dipendente' ? 'Venditore Dip.' : operatore.ruolo}
                       {operatore.area_geografica ? ` • ${operatore.area_geografica}` : ''}
                     </p>
                   </div>

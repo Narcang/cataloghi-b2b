@@ -106,13 +106,17 @@ export const PUBLIC_CATALOG_CATEGORIES = CATALOG_CATEGORIES.filter(
   (c) => !LOGIN_ONLY_CATALOG_CATEGORIES.has(c) && !UI_HIDDEN_CATEGORIES.has(c),
 )
 
-/** Listini riservati ai partner (distributore): area dedicata in dashboard. */
-export const PARTNER_LISTINI_CATEGORIES = [
+/** Area riservata venditori (ex partner/distributore): listino + file tecnici. */
+export const VENDITORE_EXTRA_CATEGORIES = [
   LISTINI_CATALOG_CATEGORY,
-  STUDIO_CATALOG_CATEGORY,
+  'File 2D',
+  'File 3D',
 ] as const satisfies readonly CatalogCategory[]
 
-const PARTNER_LISTINI_SET = new Set<CatalogCategory>(PARTNER_LISTINI_CATEGORIES)
+/** @deprecated Usa {@link VENDITORE_EXTRA_CATEGORIES}. */
+export const PARTNER_LISTINI_CATEGORIES = VENDITORE_EXTRA_CATEGORIES
+
+const PARTNER_LISTINI_SET = new Set<CatalogCategory>(VENDITORE_EXTRA_CATEGORIES)
 
 export function isPartnerListiniCategory(categoria: string | null | undefined): boolean {
   if (!categoria) return false
@@ -120,7 +124,20 @@ export function isPartnerListiniCategory(categoria: string | null | undefined): 
 }
 
 export function partnerListiniDashboardCategories(): CatalogCategory[] {
-  return [...PARTNER_LISTINI_CATEGORIES]
+  return [...VENDITORE_EXTRA_CATEGORIES]
+}
+
+export function venditoreExtraCategories(): CatalogCategory[] {
+  return [...VENDITORE_EXTRA_CATEGORIES]
+}
+
+/** Etichette UI per categorie catalogo (chiave DB invariata). */
+export function categoryDisplayLabel(categoria: string): string {
+  const labels: Partial<Record<CatalogCategory, string>> = {
+    Listini: 'Listino Pubblico',
+    Scontistiche: 'Merchandising',
+  }
+  return labels[categoria as CatalogCategory] ?? categoria
 }
 
 export function isAgenteReservedCategory(categoria: string | null | undefined): boolean {
