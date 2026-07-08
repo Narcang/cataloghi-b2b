@@ -323,8 +323,7 @@ export default async function Dashboard(props: {
           <p className="text-zinc-600 max-w-2xl text-lg">
             {!user
               ? 'Sfoglia i cataloghi pubblicati, consulta Dove siamo e i contatti diretti. Per aree riservate agenti/partner accedi al portale.'
-              : <>Bentornato {profilo?.nome_completo || user?.email || 'Utente Free'}
-                {profilo?.area_geografica ? ` (Area: ${profilo.area_geografica})` : ''} </>
+              : <>Bentornato {profilo?.nome_completo || user?.email || 'Utente Free'}</>
             }
             {user ? (
               <>
