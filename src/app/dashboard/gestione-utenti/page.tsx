@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Phone, MessageCircle, Users, ArrowLeft } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import Header from '@/components/Header'
 import AdminProfiliPanel, { type ProfiloGestioneRow } from '@/components/admin/AdminProfiliPanel'
 import GerarchiaUtentiTree from '@/components/admin/GerarchiaUtentiTree'
@@ -13,15 +13,6 @@ export const dynamic = 'force-dynamic'
 
 export const metadata = {
   title: 'Gestione Utenti · Ladiva Ceramica',
-}
-
-type Operatore = {
-  id: string
-  nome_completo: string | null
-  email: string | null
-  telefono: string | null
-  ruolo: 'agente' | 'agenzia' | 'distributore' | 'partner_dipendente' | 'studio'
-  area_geografica: string | null
 }
 
 function escapeIlikePattern(value: string): string {
@@ -67,15 +58,6 @@ export default async function GestioneUtentiPage(props: {
 
   const profiloSel =
     'id, nome_completo, email, telefono, societa, area_geografica, ruolo, registrazione_approvata, creato_il'
-
-  let operatoriQuery = supabase
-    .from('profili')
-    .select('id, nome_completo, email, telefono, ruolo, area_geografica')
-    .in('ruolo', ['agenzia', 'agente', 'distributore', 'studio', 'partner_dipendente'])
-    .order('nome_completo', { ascending: true })
-
-  if (ruoloFilter !== 'all') operatoriQuery = operatoriQuery.eq('ruolo', ruoloFilter)
-  if (nomeFilter.length > 0) operatoriQuery = operatoriQuery.ilike('nome_completo', `%${escapeIlikePattern(nomeFilter)}%`)
 
   let listaQuery = supabase
     .from('profili')
@@ -130,8 +112,7 @@ export default async function GestioneUtentiPage(props: {
     .eq('stato_pubblicazione', 'attivo')
     .order('titolo', { ascending: true, nullsFirst: false })
 
-  const [opRes, pendRes, listaRes, linksRes, gerarchiaRes, associazioneRes, cataloghiRes] = await Promise.all([
-    operatoriQuery,
+  const [pendRes, listaRes, linksRes, gerarchiaRes, associazioneRes, cataloghiRes] = await Promise.all([
     pendQuery,
     listaQuery,
     linksQuery,
@@ -140,7 +121,6 @@ export default async function GestioneUtentiPage(props: {
     cataloghiQuery,
   ])
 
-  const operatoriAdmin = (opRes.data ?? []) as Operatore[]
   const profiliRegistrazionePendente = (pendRes.data ?? []) as ProfiloGestioneRow[]
   const profiliGestioneAdmin = (listaRes.data ?? []) as ProfiloGestioneRow[]
   const connessioniUtenteOperatoreRows = (linksRes.data ?? []) as { utente_id: string; operatore_id: string }[]
@@ -236,56 +216,6 @@ export default async function GestioneUtentiPage(props: {
             Genera un link di registrazione per il ruolo scelto. Il nuovo utente sarà collegato al tuo profilo dopo l&apos;approvazione.
           </p>
           <InvitaUtente ruoloCorrente={ruoloCorrente} />
-        </section>
-
-        {/* Operatori abilitati */}
-        <section id="operatori-admin">
-          <div className="flex items-center justify-between mb-8 border-b border-black pb-4">
-            <h2 className="text-3xl md:text-4xl font-sans tracking-tight text-zinc-100 flex items-center gap-3">
-              <Users className="text-black" /> Operatori Abilitati (Agenti e Distributori)
-            </h2>
-          </div>
-          {operatoriAdmin.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {operatoriAdmin.map((operatore) => (
-                <div key={operatore.id} className="bg-white border border-black rounded-2xl p-6 pb-8 flex flex-col h-full shadow-lg">
-                  <div className="mb-4">
-                    <h3 className="text-lg font-medium text-zinc-900 mb-1">{operatore.nome_completo || 'Operatore Senza Nome'}</h3>
-                    <p className="text-zinc-600 text-sm">{operatore.email}</p>
-                    <p className="text-zinc-600 text-xs mt-2 uppercase tracking-wide">
-                      {operatore.ruolo === 'distributore' ? 'Venditore' : operatore.ruolo === 'partner_dipendente' ? 'Sponsor' : operatore.ruolo}
-                      {operatore.area_geografica ? ` • ${operatore.area_geografica}` : ''}
-                    </p>
-                  </div>
-                  <div className="mt-auto flex gap-3 pt-6">
-                    {operatore.telefono ? (
-                      <>
-                        <a href={`tel:${operatore.telefono.trim()}`} className="flex-1 flex justify-center items-center gap-2 bg-[#060d41] text-white hover:bg-[#0a155a] py-2.5 px-4 rounded-lg text-sm font-semibold transition-colors">
-                          <Phone size={16} /> Chiama
-                        </a>
-                        <a href={`https://wa.me/${operatore.telefono.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="flex-1 flex justify-center items-center gap-2 border border-black bg-zinc-50 hover:bg-[#25D366]/10 hover:border-[#25D366] hover:text-[#25D366] text-zinc-900 py-2.5 px-4 rounded-lg text-sm font-medium transition-colors">
-                          <MessageCircle size={16} /> WhatsApp
-                        </a>
-                      </>
-                    ) : (
-                      <>
-                        <span className="flex-1 flex justify-center items-center gap-2 bg-zinc-100 text-zinc-600 opacity-50 py-2.5 px-4 rounded-lg text-sm font-semibold cursor-not-allowed">
-                          <Phone size={16} /> Chiama
-                        </span>
-                        <span className="flex-1 flex justify-center items-center gap-2 border border-black text-zinc-600 opacity-50 bg-zinc-50 py-2.5 px-4 rounded-lg text-sm font-medium cursor-not-allowed">
-                          <MessageCircle size={16} /> WhatsApp
-                        </span>
-                      </>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center p-10 text-center border rounded-2xl border-black bg-white">
-              <p className="text-sm text-zinc-600">Nessun operatore trovato per il filtro selezionato.</p>
-            </div>
-          )}
         </section>
 
       </main>
