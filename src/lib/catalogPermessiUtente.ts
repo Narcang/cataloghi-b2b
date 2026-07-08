@@ -1,8 +1,10 @@
 import { isStudioLike } from '@/lib/catalogAccess'
 import {
+  agenteReservedDashboardCategories,
   categoriesVisibleOnDashboard,
   isAgentOnlyCatalogCategory,
   isCatalogCategoryAllowedForStudioRole,
+  partnerListiniDashboardCategories,
   type CatalogCategory,
 } from '@/lib/catalogCategories'
 
@@ -50,21 +52,61 @@ export function cataloghiAssegnabiliAUtente(
   ruoloUtente: string,
 ): CatalogoPermessoRow[] {
   const filtered = allCataloghi.filter(c => catalogoAssegnabileAUtente(c, ruoloUtente))
-
   if (filtered.length > 0) return filtered
 
-  // Manager o DB non migrato: mostra cataloghi con almeno un ruolo operativo noto
-  if (ruoloUtente === 'manager') {
-    return allCataloghi.filter(c => {
-      const rv = c.ruoli_visibili ?? []
-      if (rv.length === 0) return true
-      return rv.some(r =>
-        ['manager', 'agente', 'agenzia', 'distributore', 'studio', 'partner_dipendente', 'free'].includes(r),
-      )
-    })
+  const allowed = new Set(categorieConfigurabiliPerRuolo(ruoloUtente))
+  return allCataloghi.filter(c => c.categoria && allowed.has(c.categoria as CatalogCategory))
+}
+
+/** Categorie mostrabili nella griglia permessi (allineate alla dashboard del ruolo). */
+export function categorieConfigurabiliPerRuolo(ruoloUtente: string): CatalogCategory[] {
+  const seen = new Set<CatalogCategory>()
+  const out: CatalogCategory[] = []
+
+  const add = (list: readonly CatalogCategory[]) => {
+    for (const c of list) {
+      if (seen.has(c)) continue
+      seen.add(c)
+      out.push(c)
+    }
   }
 
-  return filtered
+  add(categoriesVisibleOnDashboard(ruoloUtente, true))
+
+  if (ruoloUtente === 'agente' || ruoloUtente === 'agenzia') {
+    add(agenteReservedDashboardCategories())
+  }
+  if (ruoloUtente === 'distributore' || ruoloUtente === 'partner_dipendente') {
+    add(partnerListiniDashboardCategories())
+  }
+
+  return out
+}
+
+function cataloghiPerCategoriaConfigurabile(
+  allCataloghi: CatalogoPermessoRow[],
+  ruoloUtente: string,
+  categoria: string,
+): CatalogoPermessoRow[] {
+  const inCategory = allCataloghi.filter(c => (c.categoria?.trim() || 'Altro') === categoria)
+  if (inCategory.length === 0) return []
+
+  const strict = inCategory.filter(c => catalogoAssegnabileAUtente(c, ruoloUtente))
+  if (strict.length > 0) return strict
+
+  // Pannello admin: se ruoli_visibili non è allineato, usa comunque i PDF della categoria
+  return inCategory
+}
+
+/** Griglia categorie + PDF sottostanti per la whitelist per-utente. */
+export function buildGruppiCategorieConfigurabili(
+  allCataloghi: CatalogoPermessoRow[],
+  ruoloUtente: string,
+): CategoriaCatalogoGruppo[] {
+  return categorieConfigurabiliPerRuolo(ruoloUtente).map(categoria => ({
+    categoria,
+    cataloghi: cataloghiPerCategoriaConfigurabile(allCataloghi, ruoloUtente, categoria),
+  }))
 }
 
 export type CategoriaCatalogoGruppo = {

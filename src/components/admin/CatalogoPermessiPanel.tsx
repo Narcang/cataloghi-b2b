@@ -2,10 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
-  cataloghiAssegnabiliAUtente,
+  buildGruppiCategorieConfigurabili,
   categorieSelezionateDaIds,
   idsCataloghiInCategorie,
-  raggruppaCataloghiPerCategoria,
   type CatalogoPermessoRow,
 } from '@/lib/catalogPermessiUtente'
 
@@ -27,11 +26,11 @@ function catLabel(cat: string): string {
 }
 
 export default function CatalogoPermessiPanel({ utenteId, utenteRuolo, allCataloghi, readOnly = false }: Props) {
-  const cataloghiUtente = useMemo(
-    () => cataloghiAssegnabiliAUtente(allCataloghi, utenteRuolo),
+  const gruppi = useMemo(
+    () => buildGruppiCategorieConfigurabili(allCataloghi, utenteRuolo),
     [allCataloghi, utenteRuolo],
   )
-  const gruppi = useMemo(() => raggruppaCataloghiPerCategoria(cataloghiUtente), [cataloghiUtente])
+  const gruppiConPdf = useMemo(() => gruppi.filter(g => g.cataloghi.length > 0), [gruppi])
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [loaded, setLoaded] = useState(false)
@@ -39,8 +38,8 @@ export default function CatalogoPermessiPanel({ utenteId, utenteRuolo, allCatalo
   const [msg, setMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
 
   const selectedCategories = useMemo(
-    () => categorieSelezionateDaIds(gruppi, selectedIds),
-    [gruppi, selectedIds],
+    () => categorieSelezionateDaIds(gruppiConPdf, selectedIds),
+    [gruppiConPdf, selectedIds],
   )
 
   useEffect(() => {
@@ -59,7 +58,7 @@ export default function CatalogoPermessiPanel({ utenteId, utenteRuolo, allCatalo
   const toggleCategory = useCallback((categoria: string) => {
     setSelectedIds(prev => {
       const next = new Set(prev)
-      const gruppo = gruppi.find(g => g.categoria === categoria)
+      const gruppo = gruppiConPdf.find(g => g.categoria === categoria)
       if (!gruppo) return next
 
       const allSelected = gruppo.cataloghi.every(c => next.has(c.id))
@@ -70,7 +69,7 @@ export default function CatalogoPermessiPanel({ utenteId, utenteRuolo, allCatalo
       return next
     })
     setMsg(null)
-  }, [gruppi])
+  }, [gruppiConPdf])
 
   const handleSave = useCallback(async () => {
     setSaving(true)
@@ -93,14 +92,22 @@ export default function CatalogoPermessiPanel({ utenteId, utenteRuolo, allCatalo
   }, [utenteId, selectedIds])
 
   const handleSelectCategories = useCallback((categorie: Set<string>) => {
-    setSelectedIds(new Set(idsCataloghiInCategorie(gruppi, categorie)))
+    setSelectedIds(new Set(idsCataloghiInCategorie(gruppiConPdf, categorie)))
     setMsg(null)
-  }, [gruppi])
+  }, [gruppiConPdf])
 
   if (gruppi.length === 0) {
     return (
       <p className="text-xs text-zinc-400">
-        Nessuna categoria catalogo configurabile per il ruolo &quot;{utenteRuolo}&quot;.
+        Nessuna categoria configurabile per il ruolo &quot;{utenteRuolo}&quot;.
+      </p>
+    )
+  }
+
+  if (allCataloghi.length === 0) {
+    return (
+      <p className="text-xs text-amber-700">
+        Elenco cataloghi non disponibile (verifica SUPABASE_SERVICE_ROLE_KEY in produzione).
       </p>
     )
   }
@@ -113,36 +120,40 @@ export default function CatalogoPermessiPanel({ utenteId, utenteRuolo, allCatalo
         <p className="text-xs text-zinc-400">Caricamento permessi…</p>
       ) : (
         <>
-          <p className="text-xs text-zinc-500 italic">
+          <div className="flex flex-wrap gap-3 max-h-56 overflow-y-auto">
+            {gruppi.map(g => {
+              const hasPdf = g.cataloghi.length > 0
+              const checked = hasPdf && selectedCategories.has(g.categoria)
+              return (
+                <label
+                  key={g.categoria}
+                  className={`flex items-center gap-2 text-sm text-zinc-800 min-w-[200px] ${
+                    !hasPdf || readOnly ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={() => hasPdf && !readOnly && toggleCategory(g.categoria)}
+                    disabled={readOnly || !hasPdf}
+                    className="rounded border-black accent-[#060d41]"
+                  />
+                  <span>
+                    {catLabel(g.categoria)}
+                    <span className="text-zinc-500 text-xs">
+                      {hasPdf ? ` (${g.cataloghi.length} PDF)` : ' (nessun PDF)'}
+                    </span>
+                  </span>
+                </label>
+              )
+            })}
+          </div>
+
+          <p className="text-xs text-zinc-500">
             {noneSelected
               ? 'Nessuna restrizione: l\'utente vede tutte le categorie previste per il suo ruolo.'
-              : `${selectedCategories.size} categorie selezionate — l\'utente vedrà solo i PDF in quelle linee.`}
+              : `${selectedCategories.size} categorie selezionate — l\'utente vedrà solo quelle linee.`}
           </p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-            {gruppi.map(g => (
-              <label
-                key={g.categoria}
-                className={`flex items-start gap-2 rounded-md border border-black/10 bg-white px-3 py-2 text-sm ${
-                  readOnly ? 'cursor-default opacity-70' : 'cursor-pointer hover:bg-zinc-50'
-                }`}
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedCategories.has(g.categoria)}
-                  onChange={() => !readOnly && toggleCategory(g.categoria)}
-                  disabled={readOnly}
-                  className="mt-0.5 h-4 w-4 rounded border-zinc-300 accent-[#060d41]"
-                />
-                <span>
-                  <span className="font-medium text-zinc-900">{catLabel(g.categoria)}</span>
-                  <span className="block text-xs text-zinc-500">
-                    {g.cataloghi.length} PDF
-                  </span>
-                </span>
-              </label>
-            ))}
-          </div>
 
           {!readOnly && (
             <div className="flex flex-wrap items-center gap-3 pt-1">
@@ -150,7 +161,7 @@ export default function CatalogoPermessiPanel({ utenteId, utenteRuolo, allCatalo
                 type="button"
                 onClick={handleSave}
                 disabled={saving}
-                className="h-8 px-3 rounded-md bg-[#060d41] text-white text-xs font-semibold hover:bg-[#0a155a] disabled:opacity-60 transition-colors"
+                className="h-9 px-4 rounded-md bg-[#060d41] text-white text-sm font-semibold hover:bg-[#0a155a] disabled:opacity-60 transition-colors"
               >
                 {saving ? 'Salvataggio…' : 'Salva categorie'}
               </button>
@@ -158,7 +169,7 @@ export default function CatalogoPermessiPanel({ utenteId, utenteRuolo, allCatalo
                 <button
                   type="button"
                   onClick={() => handleSelectCategories(new Set())}
-                  className="h-8 px-3 rounded-md border border-zinc-300 text-xs font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
+                  className="h-9 px-4 rounded-md border border-zinc-300 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
                 >
                   Rimuovi tutte le restrizioni
                 </button>

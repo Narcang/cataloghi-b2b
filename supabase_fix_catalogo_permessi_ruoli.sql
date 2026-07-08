@@ -1,6 +1,21 @@
 -- Aggiunge agenzia e manager ai ruoli_visibili dei cataloghi esistenti.
 -- Esegui nel SQL Editor di Supabase se la griglia permessi risulta vuota.
 
+-- Aggiunge agente/agenzia ai cataloghi Family e linee pubbliche che non li hanno.
+UPDATE public.cataloghi
+SET ruoli_visibili = array_append(ruoli_visibili, 'agente')
+WHERE categoria IN (
+  'Family 15', 'Family 20', 'Family Gres', 'Capsule Collection', 'Bricks',
+  'Family 15 Fotografico', 'Family 20 Fotografico', 'Capsule Collection Fotografico',
+  'Family Gres Fotografico', 'Bricks Fotografico'
+)
+AND NOT ('agente' = ANY (ruoli_visibili));
+
+UPDATE public.cataloghi
+SET ruoli_visibili = array_append(ruoli_visibili, 'agenzia')
+WHERE 'agente' = ANY (ruoli_visibili)
+  AND NOT ('agenzia' = ANY (ruoli_visibili));
+
 -- Agenzia: stessi cataloghi dell'agente
 UPDATE public.cataloghi
 SET ruoli_visibili = array_append(ruoli_visibili, 'agenzia')
