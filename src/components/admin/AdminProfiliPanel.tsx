@@ -47,7 +47,7 @@ function ruoloLabel(r: string): string {
   return RUOLO_LABEL[r] ?? r
 }
 
-/** Ruoli per cui ha senso impostare cataloghi visibili per singolo utente. */
+/** Ruoli per cui ha senso personalizzare la dashboard portale per singolo utente. */
 function puoPersonalizzareCataloghi(ruolo: string): boolean {
   return !['admin', 'free', 'manager'].includes(ruolo)
 }
@@ -585,10 +585,10 @@ export default function AdminProfiliPanel({
                     {canManageCataloghi && puoPersonalizzareCataloghi(p.ruolo) ? (
                       <div>
                         <p className="text-xs font-medium uppercase text-zinc-600 mb-1">
-                          Cataloghi visibili
+                          Dashboard utente
                         </p>
                         <p className="text-xs text-zinc-500 mb-2">
-                          Le categorie spuntate sono visibili a questo utente. Togli la spunta per nasconderne una; quando tutte sono spuntate, vede tutto il previsto per il suo ruolo.
+                          Le sezioni spuntate sono visibili nella dashboard di questo utente. Togli la spunta per nasconderne una; quando tutte sono spuntate, vede tutto il previsto per il suo ruolo.
                         </p>
                         <div className="border border-black/15 rounded-lg p-3 bg-zinc-50">
                           <CatalogoPermessiPanel

@@ -11,7 +11,7 @@ import {
   whitelistDaIdsVisibili,
   type CatalogoPermessoRow,
 } from '@/lib/catalogPermessiUtente'
-import { categoryDisplayLabel } from '@/lib/catalogCategories'
+import { portaleCategoryDisplayLabel } from '@/lib/catalogCategories'
 
 export type CatalogoDisponibile = CatalogoPermessoRow
 
@@ -25,7 +25,7 @@ type Props = {
 const CATEGORY_LABEL: Record<string, string> = {}
 
 function catLabel(cat: string): string {
-  return CATEGORY_LABEL[cat] ?? categoryDisplayLabel(cat)
+  return CATEGORY_LABEL[cat] ?? portaleCategoryDisplayLabel(cat)
 }
 
 export default function CatalogoPermessiPanel({
@@ -223,8 +223,8 @@ export default function CatalogoPermessiPanel({
 
           <p className="text-xs text-zinc-500">
             {hasRestrictions
-              ? `${hiddenCategories.size} categorie nascoste per questo utente. Spunta di nuovo per renderle visibili.`
-              : 'Tutte le categorie sono visibili. Togli la spunta per nascondere una linea a questo utente.'}
+              ? `${hiddenCategories.size} sezioni nascoste per questo utente. Spunta di nuovo per renderle visibili.`
+              : 'Tutte le sezioni della dashboard sono visibili. Togli la spunta per nascondere una sezione a questo utente.'}
           </p>
 
           {!readOnly && (
@@ -235,7 +235,7 @@ export default function CatalogoPermessiPanel({
                 disabled={saving || gruppiConPdf.length === 0}
                 className="h-9 px-4 rounded-md bg-[#060d41] text-white text-sm font-semibold hover:bg-[#0a155a] disabled:opacity-60 transition-colors"
               >
-                {saving ? 'Salvataggio…' : 'Salva categorie'}
+                {saving ? 'Salvataggio…' : 'Salva dashboard'}
               </button>
               {hasRestrictions && (
                 <button
@@ -244,7 +244,7 @@ export default function CatalogoPermessiPanel({
                   disabled={saving}
                   className="h-9 px-4 rounded-md border border-zinc-300 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
                 >
-                  Mostra tutte le categorie
+                  Mostra tutte le sezioni
                 </button>
               )}
               {msg && (

@@ -1,10 +1,7 @@
-import { isStudioLike } from '@/lib/catalogAccess'
 import {
-  agenteReservedDashboardCategories,
   categoriesVisibleOnDashboard,
   isAgentOnlyCatalogCategory,
-  studioLikePortalCategories,
-  venditoreExtraCategories,
+  portaleDashboardCategories,
   type CatalogCategory,
 } from '@/lib/catalogCategories'
 
@@ -24,16 +21,12 @@ export function ruoliEquivalentiPerCatalogo(ruolo: string): string[] {
 
 function categoriaConsentitaLegacy(categoria: string | null, ruolo: string): boolean {
   if (!categoria) return false
+  const portale = portaleDashboardCategories(ruolo)
+  if (portale.length > 0) {
+    return portale.includes(categoria as CatalogCategory)
+  }
   if (isAgentOnlyCatalogCategory(categoria) && ruolo !== 'agente' && ruolo !== 'agenzia' && ruolo !== 'manager') {
     return false
-  }
-  if (ruolo === 'distributore' || ruolo === 'studio' || ruolo === 'partner_dipendente') {
-    const allowed = new Set(categorieConfigurabiliPerRuolo(ruolo))
-    return allowed.has(categoria as CatalogCategory)
-  }
-  if (isStudioLike(ruolo)) {
-    const allowed = new Set(studioLikePortalCategories())
-    return allowed.has(categoria as CatalogCategory)
   }
   const allowed = new Set(categoriesVisibleOnDashboard(ruolo, true))
   return allowed.has(categoria as CatalogCategory)
@@ -63,8 +56,11 @@ export function cataloghiAssegnabiliAUtente(
   return allCataloghi.filter(c => c.categoria && allowed.has(c.categoria as CatalogCategory))
 }
 
-/** Categorie mostrabili nella griglia permessi (solo quelle rilevanti per il ruolo). */
+/** Sezioni dashboard configurabili in Gestione Utenti (tile portale del ruolo). */
 export function categorieConfigurabiliPerRuolo(ruoloUtente: string): CatalogCategory[] {
+  const portale = portaleDashboardCategories(ruoloUtente)
+  if (portale.length > 0) return portale
+
   const seen = new Set<CatalogCategory>()
   const out: CatalogCategory[] = []
 
@@ -76,21 +72,7 @@ export function categorieConfigurabiliPerRuolo(ruoloUtente: string): CatalogCate
     }
   }
 
-  if (ruoloUtente === 'distributore') {
-    add(venditoreExtraCategories())
-    return out
-  }
-  if (ruoloUtente === 'studio' || ruoloUtente === 'partner_dipendente') {
-    add(studioLikePortalCategories())
-    return out
-  }
-
   add(categoriesVisibleOnDashboard(ruoloUtente, true))
-
-  if (ruoloUtente === 'agente' || ruoloUtente === 'agenzia') {
-    add(agenteReservedDashboardCategories())
-  }
-
   return out
 }
 

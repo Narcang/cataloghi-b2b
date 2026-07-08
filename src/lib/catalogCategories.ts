@@ -264,6 +264,20 @@ export const PORTALE_TILES_PER_RUOLO: Record<string, PortaleTile[]> = {
   admin: AGENTE_TILES,
 }
 
+/** Categorie della dashboard portale per un ruolo (ordine tile). */
+export function portaleDashboardCategories(ruolo: string): CatalogCategory[] {
+  return (PORTALE_TILES_PER_RUOLO[ruolo] ?? []).map((t) => t.categoria)
+}
+
+/** Etichetta tile portale per categoria (es. Agenti → Documentazione). */
+export function portaleCategoryDisplayLabel(categoria: string): string {
+  for (const tiles of Object.values(PORTALE_TILES_PER_RUOLO)) {
+    const hit = tiles.find((t) => t.categoria === categoria)
+    if (hit) return hit.label
+  }
+  return categoryDisplayLabel(categoria)
+}
+
 /** Mappa categoria base → categoria fotografico corrispondente. */
 export const FOTO_CATEGORY_MAP: Partial<Record<CatalogCategory, CatalogCategory>> = {
   'Family 15': 'Family 15 Fotografico',
