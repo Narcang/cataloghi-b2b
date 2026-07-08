@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import { User } from '@supabase/supabase-js'
+import { PORTALE_TILES_PER_RUOLO } from '@/lib/catalogCategories'
 
 type BeforeInstallPrompt = Event & {
   prompt: () => Promise<void>
@@ -52,11 +53,16 @@ const menuItemsBase: MenuItem[] = [
   },
 ]
 
-function catalogMenuItemForRole(loggedIn: boolean): MenuItem {
+function catalogMenuItemForRole(ruolo: string | null, loggedIn: boolean): MenuItem {
   if (!loggedIn) {
     return { label: 'Cataloghi', href: '/dashboard#cataloghi', icon: BookOpen }
   }
-  return { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }
+  const hasPortale = Boolean(ruolo && (PORTALE_TILES_PER_RUOLO[ruolo]?.length ?? 0) > 0)
+  return {
+    label: 'Dashboard',
+    href: hasPortale ? '/portale' : '/dashboard',
+    icon: LayoutDashboard,
+  }
 }
 
 export default function Header() {
@@ -142,7 +148,7 @@ export default function Header() {
     setMobileOpen(false)
   }
 
-  const catalogMenuItem = catalogMenuItemForRole(Boolean(user))
+  const catalogMenuItem = catalogMenuItemForRole(profiloRuolo, Boolean(user))
   const visibleBaseItems = user
     ? menuItemsBase.filter((item) => item.href !== '/registrazione')
     : menuItemsBase
