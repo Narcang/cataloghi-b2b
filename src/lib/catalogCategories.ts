@@ -131,6 +131,16 @@ export function venditoreExtraCategories(): CatalogCategory[] {
   return [...VENDITORE_EXTRA_CATEGORIES]
 }
 
+/** Categorie portale per studio e sponsor (solo file tecnici). */
+export const STUDIO_LIKE_PORTAL_CATEGORIES = [
+  'File 2D',
+  'File 3D',
+] as const satisfies readonly CatalogCategory[]
+
+export function studioLikePortalCategories(): CatalogCategory[] {
+  return [...STUDIO_LIKE_PORTAL_CATEGORIES]
+}
+
 /** Etichette UI per categorie catalogo (chiave DB invariata). */
 export function categoryDisplayLabel(categoria: string): string {
   const labels: Partial<Record<CatalogCategory, string>> = {
