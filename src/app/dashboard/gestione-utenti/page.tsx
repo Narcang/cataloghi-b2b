@@ -123,8 +123,8 @@ export default async function GestioneUtentiPage(props: {
     .order('nome_completo', { ascending: true, nullsFirst: false })
     .limit(500)
 
-  /** Tutti i cataloghi attivi con ruoli_visibili per la gestione permessi per-utente. */
-  const cataloghiQuery = svc
+  /** Cataloghi attivi per permessi per-utente (sessione admin/manager, non service role). */
+  const cataloghiQuery = supabase
     .from('cataloghi')
     .select('id, titolo, categoria, ruoli_visibili')
     .eq('stato_pubblicazione', 'attivo')

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   buildGruppiCategorieConfigurabili,
+  categorieConfigurabiliPerRuolo,
   categorieSelezionateDaIds,
   idsCataloghiInCategorie,
   type CatalogoPermessoRow,
@@ -13,7 +14,7 @@ export type CatalogoDisponibile = CatalogoPermessoRow
 type Props = {
   utenteId: string
   utenteRuolo: string
-  allCataloghi: CatalogoDisponibile[]
+  allCataloghi?: CatalogoDisponibile[]
   readOnly?: boolean
 }
 
@@ -25,12 +26,21 @@ function catLabel(cat: string): string {
   return CATEGORY_LABEL[cat] ?? cat
 }
 
-export default function CatalogoPermessiPanel({ utenteId, utenteRuolo, allCataloghi, readOnly = false }: Props) {
+export default function CatalogoPermessiPanel({
+  utenteId,
+  utenteRuolo,
+  allCataloghi = [],
+  readOnly = false,
+}: Props) {
+  const [cataloghi, setCataloghi] = useState<CatalogoPermessoRow[]>(allCataloghi)
+  const [cataloghiError, setCataloghiError] = useState<string | null>(null)
+
   const gruppi = useMemo(
-    () => buildGruppiCategorieConfigurabili(allCataloghi, utenteRuolo),
-    [allCataloghi, utenteRuolo],
+    () => buildGruppiCategorieConfigurabili(cataloghi, utenteRuolo),
+    [cataloghi, utenteRuolo],
   )
   const gruppiConPdf = useMemo(() => gruppi.filter(g => g.cataloghi.length > 0), [gruppi])
+  const categorieRuolo = useMemo(() => categorieConfigurabiliPerRuolo(utenteRuolo), [utenteRuolo])
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [loaded, setLoaded] = useState(false)
@@ -41,6 +51,29 @@ export default function CatalogoPermessiPanel({ utenteId, utenteRuolo, allCatalo
     () => categorieSelezionateDaIds(gruppiConPdf, selectedIds),
     [gruppiConPdf, selectedIds],
   )
+
+  useEffect(() => {
+    if (allCataloghi.length > 0) setCataloghi(allCataloghi)
+  }, [allCataloghi])
+
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/admin/catalogo-permessi/cataloghi', { credentials: 'same-origin' })
+      .then(r => r.json())
+      .then(data => {
+        if (cancelled) return
+        if (data.ok && Array.isArray(data.cataloghi)) {
+          setCataloghi(data.cataloghi)
+          setCataloghiError(null)
+        } else if (!data.ok) {
+          setCataloghiError(data.message ?? 'Errore caricamento cataloghi')
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setCataloghiError('Errore di rete nel caricamento cataloghi')
+      })
+    return () => { cancelled = true }
+  }, [])
 
   useEffect(() => {
     setLoaded(false)
@@ -74,29 +107,47 @@ export default function CatalogoPermessiPanel({ utenteId, utenteRuolo, allCatalo
   const handleSave = useCallback(async () => {
     setSaving(true)
     setMsg(null)
-    const catalogo_ids = [...selectedIds]
+    const categorie = [...selectedCategories]
     try {
       const res = await fetch('/api/admin/catalogo-permessi', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'same-origin',
-        body: JSON.stringify({ utente_id: utenteId, catalogo_ids }),
+        body: JSON.stringify({ utente_id: utenteId, categorie }),
       })
       const data = await res.json()
+      if (data.ok && Array.isArray(data.catalogo_ids)) {
+        setSelectedIds(new Set<string>(data.catalogo_ids))
+      }
       setMsg({ type: data.ok ? 'ok' : 'err', text: data.ok ? 'Permessi salvati' : (data.message ?? 'Errore') })
     } catch {
       setMsg({ type: 'err', text: 'Errore di rete' })
     } finally {
       setSaving(false)
     }
-  }, [utenteId, selectedIds])
+  }, [utenteId, selectedCategories])
 
-  const handleSelectCategories = useCallback((categorie: Set<string>) => {
-    setSelectedIds(new Set(idsCataloghiInCategorie(gruppiConPdf, categorie)))
+  const handleClearRestrictions = useCallback(async () => {
+    setSelectedIds(new Set())
     setMsg(null)
-  }, [gruppiConPdf])
+    setSaving(true)
+    try {
+      const res = await fetch('/api/admin/catalogo-permessi', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ utente_id: utenteId, categorie: [] }),
+      })
+      const data = await res.json()
+      setMsg({ type: data.ok ? 'ok' : 'err', text: data.ok ? 'Restrizioni rimosse' : (data.message ?? 'Errore') })
+    } catch {
+      setMsg({ type: 'err', text: 'Errore di rete' })
+    } finally {
+      setSaving(false)
+    }
+  }, [utenteId])
 
-  if (gruppi.length === 0) {
+  if (categorieRuolo.length === 0) {
     return (
       <p className="text-xs text-zinc-400">
         Nessuna categoria configurabile per il ruolo &quot;{utenteRuolo}&quot;.
@@ -104,29 +155,27 @@ export default function CatalogoPermessiPanel({ utenteId, utenteRuolo, allCatalo
     )
   }
 
-  if (allCataloghi.length === 0) {
-    return (
-      <p className="text-xs text-amber-700">
-        Elenco cataloghi non disponibile (verifica SUPABASE_SERVICE_ROLE_KEY in produzione).
-      </p>
-    )
-  }
-
   const noneSelected = selectedIds.size === 0
+  const pdfCountByCat = new Map(gruppi.map(g => [g.categoria, g.cataloghi.length]))
 
   return (
     <div className="space-y-3">
+      {cataloghiError ? (
+        <p className="text-xs text-amber-700">{cataloghiError}</p>
+      ) : null}
+
       {!loaded ? (
         <p className="text-xs text-zinc-400">Caricamento permessi…</p>
       ) : (
         <>
           <div className="flex flex-wrap gap-3 max-h-56 overflow-y-auto">
-            {gruppi.map(g => {
-              const hasPdf = g.cataloghi.length > 0
-              const checked = hasPdf && selectedCategories.has(g.categoria)
+            {categorieRuolo.map(categoria => {
+              const pdfCount = pdfCountByCat.get(categoria) ?? 0
+              const hasPdf = pdfCount > 0
+              const checked = hasPdf && selectedCategories.has(categoria)
               return (
                 <label
-                  key={g.categoria}
+                  key={categoria}
                   className={`flex items-center gap-2 text-sm text-zinc-800 min-w-[200px] ${
                     !hasPdf || readOnly ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
                   }`}
@@ -134,14 +183,14 @@ export default function CatalogoPermessiPanel({ utenteId, utenteRuolo, allCatalo
                   <input
                     type="checkbox"
                     checked={checked}
-                    onChange={() => hasPdf && !readOnly && toggleCategory(g.categoria)}
+                    onChange={() => hasPdf && !readOnly && toggleCategory(categoria)}
                     disabled={readOnly || !hasPdf}
                     className="rounded border-black accent-[#060d41]"
                   />
                   <span>
-                    {catLabel(g.categoria)}
+                    {catLabel(categoria)}
                     <span className="text-zinc-500 text-xs">
-                      {hasPdf ? ` (${g.cataloghi.length} PDF)` : ' (nessun PDF)'}
+                      {hasPdf ? ` (${pdfCount} PDF)` : ' (nessun PDF)'}
                     </span>
                   </span>
                 </label>
@@ -160,7 +209,7 @@ export default function CatalogoPermessiPanel({ utenteId, utenteRuolo, allCatalo
               <button
                 type="button"
                 onClick={handleSave}
-                disabled={saving}
+                disabled={saving || gruppiConPdf.length === 0}
                 className="h-9 px-4 rounded-md bg-[#060d41] text-white text-sm font-semibold hover:bg-[#0a155a] disabled:opacity-60 transition-colors"
               >
                 {saving ? 'Salvataggio…' : 'Salva categorie'}
@@ -168,7 +217,8 @@ export default function CatalogoPermessiPanel({ utenteId, utenteRuolo, allCatalo
               {!noneSelected && (
                 <button
                   type="button"
-                  onClick={() => handleSelectCategories(new Set())}
+                  onClick={handleClearRestrictions}
+                  disabled={saving}
                   className="h-9 px-4 rounded-md border border-zinc-300 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
                 >
                   Rimuovi tutte le restrizioni
