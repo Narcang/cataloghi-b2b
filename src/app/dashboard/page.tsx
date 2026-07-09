@@ -354,7 +354,7 @@ export default async function Dashboard(props: {
         ) : null}
 
         {/* Invita utenti + Contatti Diretti in cima per ruoli non-admin */}
-        {showFullDashboard && !isManager && (isPartner || isAgenzia || isAgente) && (
+        {showFullDashboard && !isManager && (isPartner || isPartnerDipendente || isAgenzia || isAgente) && (
           <section className="border border-black rounded-2xl bg-white p-6">
             <h2 className="text-xl text-zinc-900 font-medium mb-1">Invita utenti</h2>
             <p className="text-sm text-zinc-500 mb-4">
