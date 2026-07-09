@@ -20,6 +20,7 @@ export const CHILD_ROLES_BY_PARENT: Record<string, string[]> = {
   agente: ['rivenditore'],
   rivenditore: ['distributore', 'partner_dipendente', 'studio'],
   distributore: ['partner_dipendente', 'studio'],
+  partner_dipendente: ['studio'],
 }
 
 /** Ruolo di partenza selezionabile nell'albero Struttura Organizzativa. */
@@ -115,6 +116,8 @@ export function associatiDirettiSectionLabel(ruolo: string): string | null {
       return 'Associati diretti (venditori / promoter / studi)'
     case 'distributore':
       return 'Associati diretti (promoter / studi)'
+    case 'partner_dipendente':
+      return 'Associati diretti (studi)'
     default:
       return 'Associati diretti'
   }
@@ -136,6 +139,8 @@ export function associatiAggiungiSectionLabel(ruolo: string): string | null {
       return 'Associa venditore / promoter / studio'
     case 'distributore':
       return 'Associa promoter / studio'
+    case 'partner_dipendente':
+      return 'Associa studio'
     default:
       return 'Associa profilo'
   }
@@ -280,18 +285,19 @@ export function countChildrenProfiles(
 export function nestedAssociatiLabel(ruolo: string): string | null {
   const childRoles = CHILD_ROLES_BY_PARENT[ruolo]
   if (!childRoles?.length) return null
-  switch (childRoles[0]) {
-    case 'agenzia':
+  switch (ruolo) {
+    case 'manager':
       return 'Agenzie / agenti associati'
-    case 'agente':
+    case 'agenzia':
       return 'Agenti associati'
-    case 'rivenditore':
+    case 'agente':
       return 'Rivenditori associati'
+    case 'rivenditore':
+      return 'Venditori / promoter / studi associati'
     case 'distributore':
-      return 'Venditori associati'
-    case 'studio':
+      return 'Promoter / studi associati'
     case 'partner_dipendente':
-      return 'Studi / promoter associati'
+      return 'Studi associati'
     default:
       return 'Associati'
   }
@@ -315,9 +321,10 @@ export function livelloGerarchiaLabel(
         return 'Rivenditori associati'
       case 'distributore':
         return 'Venditori associati'
-      case 'studio':
       case 'partner_dipendente':
-        return 'Studi / promoter associati'
+        return 'Promoter associati'
+      case 'studio':
+        return 'Studi associati'
       default:
         return `${ruoloGerarchiaLabel(roles[0])} associati`
     }
