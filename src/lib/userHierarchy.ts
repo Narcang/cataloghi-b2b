@@ -23,22 +23,20 @@ export const CHILD_ROLES_BY_PARENT: Record<string, string[]> = {
   partner_dipendente: ['studio'],
 }
 
-/** Ruolo di partenza selezionabile nell'albero Struttura Organizzativa. */
-export type HierarchyRootRole = 'manager' | 'agenzia' | 'agente' | 'rivenditore' | 'distributore' | 'studio' | 'partner_dipendente'
+/** Ruoli di partenza selezionabili nell'albero Struttura Organizzativa (solo categorie principali). */
+export type HierarchyRootRole = 'manager' | 'agenzia' | 'rivenditore' | 'studio'
 
 export const HIERARCHY_ROOT_ROLE_OPTIONS: { id: HierarchyRootRole; label: string }[] = [
   { id: 'manager', label: 'Manager' },
   { id: 'agenzia', label: 'Agenzia' },
-  { id: 'agente', label: 'Agente' },
   { id: 'rivenditore', label: 'Rivenditori' },
-  { id: 'distributore', label: 'Venditori' },
-  { id: 'partner_dipendente', label: 'Promoter' },
   { id: 'studio', label: 'Studio' },
 ]
 
 export function defaultHierarchyRootRole(viewerRole: string): HierarchyRootRole {
   if (viewerRole === 'manager') return 'agenzia'
-  if (viewerRole === 'agenzia') return 'agente'
+  if (viewerRole === 'agenzia') return 'agenzia'
+  if (viewerRole === 'rivenditore') return 'rivenditore'
   return 'manager'
 }
 
@@ -48,16 +46,10 @@ export function hierarchyRootRoleLabel(rootRole: HierarchyRootRole): string {
       return 'Manager'
     case 'agenzia':
       return 'Agenzie'
-    case 'agente':
-      return 'Agenti'
     case 'rivenditore':
       return 'Rivenditori'
-    case 'distributore':
-      return 'Venditori'
     case 'studio':
       return 'Studi'
-    case 'partner_dipendente':
-      return 'Promoter'
     default:
       return ruoloGerarchiaLabel(rootRole)
   }
