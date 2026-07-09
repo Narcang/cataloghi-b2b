@@ -7,6 +7,7 @@ import {
   countChildrenProfiles,
   getChildrenProfiles,
   nestedAssociatiLabel,
+  ruoloGerarchiaLabel,
   type ProfiloGerarchiaRow,
 } from '@/lib/userHierarchy'
 
@@ -106,7 +107,7 @@ function CascadeNode({
                 {node.nome_completo || node.email || 'Utente'}
               </button>
               <span className="text-zinc-500 text-xs block mt-0.5">
-                {node.ruolo === 'distributore' ? 'partner' : node.ruolo}
+                {ruoloGerarchiaLabel(node.ruolo)}
                 {node.area_geografica ? ` · ${node.area_geografica}` : ''}
                 {expandable ? ` · ${childCount} associat${childCount === 1 ? 'o' : 'i'}` : ''}
               </span>
@@ -230,7 +231,7 @@ export default function AssociatiDirettiCascade({
                   <span>
                     {candidate.nome_completo || candidate.email}{' '}
                     <span className="text-zinc-500 text-xs">
-                      ({candidate.ruolo === 'distributore' ? 'partner' : candidate.ruolo}
+                      ({ruoloGerarchiaLabel(candidate.ruolo)}
                       {candidate.area_geografica ? ` · ${candidate.area_geografica}` : ''})
                     </span>
                   </span>

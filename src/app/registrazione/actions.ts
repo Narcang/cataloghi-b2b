@@ -111,7 +111,7 @@ export async function register(formData: FormData) {
 
       // Crea la connessione con l'invitante
       if (invitoDa) {
-        const RUOLI_CONNESSIONE = new Set(['agenzia', 'agente', 'distributore', 'studio', 'partner_dipendente'])
+        const RUOLI_CONNESSIONE = new Set(['agenzia', 'agente', 'rivenditore', 'distributore', 'studio', 'partner_dipendente'])
         if (RUOLI_CONNESSIONE.has(invitoRuolo)) {
           const { data: profiloInvitante } = await svc
             .from('profili')

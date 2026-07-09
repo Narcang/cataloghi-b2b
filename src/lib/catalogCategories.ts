@@ -1,3 +1,5 @@
+import { isVenditoreLike } from '@/lib/catalogRoles'
+
 export const CATALOG_CATEGORIES = [
   'Family 15',
   'Family 20',
@@ -182,7 +184,7 @@ export function categoriesVisibleOnDashboard(
   if (ruoloProfilo === 'studio' || ruoloProfilo === 'partner_dipendente') {
     return CATALOG_CATEGORIES.filter((c) => STUDIO_ROLE_ALLOWED.has(c) && !UI_HIDDEN_CATEGORIES.has(c))
   }
-  if (ruoloProfilo === 'distributore' || ruoloProfilo === 'agente' || ruoloProfilo === 'agenzia') {
+  if (isVenditoreLike(ruoloProfilo) || ruoloProfilo === 'agente' || ruoloProfilo === 'agenzia') {
     return [...PUBLIC_CATALOG_CATEGORIES]
   }
   return CATALOG_CATEGORIES.filter((c) => !UI_HIDDEN_CATEGORIES.has(c))
@@ -250,14 +252,17 @@ const STUDIO_TILES: PortaleTile[] = [
   { categoria: 'File 3D', label: 'File 3D', descrizione: 'File tecnici 3D scaricabili' },
 ]
 
+const VENDITORE_TILES: PortaleTile[] = [
+  { categoria: 'File 2D',  label: 'File 2D',  descrizione: 'File tecnici 2D scaricabili' },
+  { categoria: 'File 3D',  label: 'File 3D',  descrizione: 'File tecnici 3D scaricabili' },
+  { categoria: 'Listini',  label: 'Listini Pubblici',  descrizione: 'Listini prezzi' },
+]
+
 export const PORTALE_TILES_PER_RUOLO: Record<string, PortaleTile[]> = {
   studio: STUDIO_TILES,
   partner_dipendente: STUDIO_TILES,
-  distributore: [
-    { categoria: 'File 2D',  label: 'File 2D',  descrizione: 'File tecnici 2D scaricabili' },
-    { categoria: 'File 3D',  label: 'File 3D',  descrizione: 'File tecnici 3D scaricabili' },
-    { categoria: 'Listini',  label: 'Listini Pubblici',  descrizione: 'Listini prezzi' },
-  ],
+  distributore: VENDITORE_TILES,
+  rivenditore: VENDITORE_TILES,
   agente: AGENTE_TILES,
   agenzia: AGENTE_TILES,
   manager: AGENTE_TILES,

@@ -1,3 +1,4 @@
+import { isVenditoreLike } from '@/lib/catalogRoles'
 import {
   categoriesVisibleOnDashboard,
   isAgentOnlyCatalogCategory,
@@ -16,6 +17,7 @@ export type CatalogoPermessoRow = {
 export function ruoliEquivalentiPerCatalogo(ruolo: string): string[] {
   if (ruolo === 'agenzia') return ['agenzia', 'agente']
   if (ruolo === 'partner_dipendente') return ['partner_dipendente', 'studio']
+  if (isVenditoreLike(ruolo)) return ['distributore', 'rivenditore']
   return [ruolo]
 }
 

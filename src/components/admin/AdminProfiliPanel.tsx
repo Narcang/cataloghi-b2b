@@ -35,10 +35,11 @@ export type OperatoreAssociazione = {
   area_geografica: string | null
 }
 
-const RUOLI_OPTIONS = ['admin', 'manager', 'agenzia', 'agente', 'distributore', 'partner_dipendente', 'studio', 'free'] as const
+const RUOLI_OPTIONS = ['admin', 'manager', 'agenzia', 'agente', 'rivenditore', 'distributore', 'partner_dipendente', 'studio', 'free'] as const
 
 const RUOLO_LABEL: Record<string, string> = {
   agenzia:            'Agenzia',
+  rivenditore:        'Rivenditori',
   distributore:       'Venditori',
   partner_dipendente: 'Promoter',
 }
@@ -54,13 +55,14 @@ function puoPersonalizzareCataloghi(ruolo: string): boolean {
 
 type RuoloOption = (typeof RUOLI_OPTIONS)[number]
 
-type RuoloTabId = 'admin' | 'manager' | 'agenzia' | 'agente' | 'distributore' | 'studio' | 'partner_dipendente'
+type RuoloTabId = 'admin' | 'manager' | 'agenzia' | 'agente' | 'rivenditore' | 'distributore' | 'studio' | 'partner_dipendente'
 
 const RUOLI_TAB: { id: RuoloTabId; label: string }[] = [
   { id: 'admin', label: 'Admin' },
   { id: 'manager', label: 'Manager' },
   { id: 'agenzia', label: 'Agenzia' },
   { id: 'agente', label: 'Agente' },
+  { id: 'rivenditore', label: 'Rivenditori' },
   { id: 'distributore', label: 'Venditori' },
   { id: 'partner_dipendente', label: 'Promoter' },
   { id: 'studio', label: 'Studio' },

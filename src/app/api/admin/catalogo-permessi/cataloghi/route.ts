@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { fetchCataloghiAttivi } from '@/lib/catalogPermessiDb'
 
-const ALLOWED_ROLES = new Set(['admin', 'manager', 'agenzia', 'agente', 'distributore'])
+const ALLOWED_ROLES = new Set(['admin', 'manager', 'agenzia', 'agente', 'rivenditore', 'distributore'])
 
 export async function GET() {
   const supabase = await createClient()

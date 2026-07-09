@@ -27,7 +27,7 @@ type BeforeInstallPrompt = Event & {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
 }
 
-type ProfiloRuolo = 'admin' | 'manager' | 'agenzia' | 'agente' | 'distributore' | 'studio' | 'partner_dipendente' | 'free' | 'fornitore'
+type ProfiloRuolo = 'admin' | 'manager' | 'agenzia' | 'agente' | 'rivenditore' | 'distributore' | 'studio' | 'partner_dipendente' | 'free' | 'fornitore'
 
 type MenuItem = {
   label: string

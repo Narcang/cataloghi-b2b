@@ -11,23 +11,25 @@ export type ProfiloGerarchiaRow = {
 
 type OperatoreLink = { utente_id: string; operatore_id: string }
 
-const OPERATOR_ROLES = new Set(['agenzia', 'agente', 'distributore', 'studio', 'partner_dipendente'])
+const OPERATOR_ROLES = new Set(['agenzia', 'agente', 'rivenditore', 'distributore', 'studio', 'partner_dipendente'])
 
 export const CHILD_ROLES_BY_PARENT: Record<string, string[]> = {
   admin: ['manager'],
   manager: ['agenzia', 'agente'],
   agenzia: ['agente'],
-  agente: ['distributore'],
-  distributore: ['studio', 'partner_dipendente'],
+  agente: ['rivenditore'],
+  rivenditore: ['distributore', 'partner_dipendente', 'studio'],
+  distributore: ['partner_dipendente', 'studio'],
 }
 
 /** Ruolo di partenza selezionabile nell'albero Struttura Organizzativa. */
-export type HierarchyRootRole = 'manager' | 'agenzia' | 'agente' | 'distributore' | 'studio' | 'partner_dipendente'
+export type HierarchyRootRole = 'manager' | 'agenzia' | 'agente' | 'rivenditore' | 'distributore' | 'studio' | 'partner_dipendente'
 
 export const HIERARCHY_ROOT_ROLE_OPTIONS: { id: HierarchyRootRole; label: string }[] = [
   { id: 'manager', label: 'Manager' },
   { id: 'agenzia', label: 'Agenzia' },
   { id: 'agente', label: 'Agente' },
+  { id: 'rivenditore', label: 'Rivenditori' },
   { id: 'distributore', label: 'Venditori' },
   { id: 'partner_dipendente', label: 'Promoter' },
   { id: 'studio', label: 'Studio' },
@@ -47,6 +49,8 @@ export function hierarchyRootRoleLabel(rootRole: HierarchyRootRole): string {
       return 'Agenzie'
     case 'agente':
       return 'Agenti'
+    case 'rivenditore':
+      return 'Rivenditori'
     case 'distributore':
       return 'Venditori'
     case 'studio':
@@ -59,6 +63,7 @@ export function hierarchyRootRoleLabel(rootRole: HierarchyRootRole): string {
 }
 
 export function ruoloGerarchiaLabel(ruolo: string): string {
+  if (ruolo === 'rivenditore') return 'Rivenditori'
   if (ruolo === 'distributore') return 'Venditori'
   if (ruolo === 'partner_dipendente') return 'Promoter'
   if (ruolo === 'agenzia') return 'Agenzia'
@@ -97,18 +102,19 @@ export function profiloToGerarchiaRow(
 export function associatiDirettiSectionLabel(ruolo: string): string | null {
   const childRoles = CHILD_ROLES_BY_PARENT[ruolo]
   if (!childRoles?.length) return null
-  switch (childRoles[0]) {
-    case 'manager':
+  switch (ruolo) {
+    case 'admin':
       return 'Associati diretti (manager)'
-    case 'agenzia':
+    case 'manager':
       return 'Associati diretti (agenzie / agenti)'
-    case 'agente':
+    case 'agenzia':
       return 'Associati diretti (agenti)'
+    case 'agente':
+      return 'Associati diretti (rivenditori)'
+    case 'rivenditore':
+      return 'Associati diretti (venditori / promoter / studi)'
     case 'distributore':
-      return 'Associati diretti (partner)'
-    case 'studio':
-    case 'partner_dipendente':
-      return 'Associati diretti (studi / promoter)'
+      return 'Associati diretti (promoter / studi)'
     default:
       return 'Associati diretti'
   }
@@ -117,18 +123,19 @@ export function associatiDirettiSectionLabel(ruolo: string): string | null {
 export function associatiAggiungiSectionLabel(ruolo: string): string | null {
   const childRoles = CHILD_ROLES_BY_PARENT[ruolo]
   if (!childRoles?.length) return null
-  switch (childRoles[0]) {
-    case 'manager':
+  switch (ruolo) {
+    case 'admin':
       return 'Associa manager'
-    case 'agenzia':
+    case 'manager':
       return 'Associa agenzia / agente'
-    case 'agente':
+    case 'agenzia':
       return 'Associa agente'
+    case 'agente':
+      return 'Associa rivenditore'
+    case 'rivenditore':
+      return 'Associa venditore / promoter / studio'
     case 'distributore':
-      return 'Associa partner'
-    case 'studio':
-    case 'partner_dipendente':
-      return 'Associa studio / promoter'
+      return 'Associa promoter / studio'
     default:
       return 'Associa profilo'
   }
@@ -278,8 +285,10 @@ export function nestedAssociatiLabel(ruolo: string): string | null {
       return 'Agenzie / agenti associati'
     case 'agente':
       return 'Agenti associati'
+    case 'rivenditore':
+      return 'Rivenditori associati'
     case 'distributore':
-      return 'Partner associati'
+      return 'Venditori associati'
     case 'studio':
     case 'partner_dipendente':
       return 'Studi / promoter associati'
@@ -302,8 +311,10 @@ export function livelloGerarchiaLabel(
         return 'Agenzie associate'
       case 'agente':
         return 'Agenti associati'
+      case 'rivenditore':
+        return 'Rivenditori associati'
       case 'distributore':
-        return 'Partner associati'
+        return 'Venditori associati'
       case 'studio':
       case 'partner_dipendente':
         return 'Studi / promoter associati'

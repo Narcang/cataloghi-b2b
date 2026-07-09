@@ -12,6 +12,7 @@ import {
   isLoginOnlyCatalogCategory,
   type CatalogCategory,
 } from '@/lib/catalogCategories'
+import { isVenditoreLike } from '@/lib/catalogRoles'
 import { isStudioLike } from '@/lib/catalogAccess'
 
 const CATEGORY_DISPLAY_LABEL: Partial<Record<CatalogCategory, string>> = {
@@ -47,7 +48,7 @@ export default async function IMieiCataloghiPage() {
   const ruoloCorrente = profilo?.ruolo ?? 'free'
   const isAdmin = ruoloCorrente === 'admin'
   const isManager = isAdmin || ruoloCorrente === 'manager'
-  const isPartner = ruoloCorrente === 'distributore'
+  const isVenditoreLikeRole = isVenditoreLike(ruoloCorrente)
   const isStudio = ruoloCorrente === 'studio'
   const isStudioLikeRole = isStudioLike(ruoloCorrente)
 
@@ -80,7 +81,7 @@ export default async function IMieiCataloghiPage() {
 
   const cataloghiPerVista = cataloghi.filter((c) => {
     if (isLoginOnlyCatalogCategory(c.categoria)) return false
-    if (isPartner && isAgentOnlyCatalogCategory(c.categoria)) return false
+    if (isVenditoreLikeRole && isAgentOnlyCatalogCategory(c.categoria)) return false
     if (isStudioLikeRole && !isCatalogCategoryAllowedForStudioRole(c.categoria)) return false
     return true
   })

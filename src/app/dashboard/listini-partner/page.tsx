@@ -12,6 +12,7 @@ import {
   STUDIO_CATALOG_CATEGORY,
   type CatalogCategory,
 } from '@/lib/catalogCategories'
+import { isVenditoreLike } from '@/lib/catalogRoles'
 
 export default async function ListiniPartnerPage() {
   const supabase = await createClient()
@@ -29,15 +30,15 @@ export default async function ListiniPartnerPage() {
     .eq('id', user.id)
     .single()
 
-  const isPartner = profilo?.ruolo === 'distributore'
+  const isVenditoreLikeRole = isVenditoreLike(profilo?.ruolo)
   const isStudio = profilo?.ruolo === 'studio'
   const isPartnerDipendente = profilo?.ruolo === 'partner_dipendente'
   const isStudioLikeRole = isStudio || isPartnerDipendente
-  if (!isPartner && !isStudioLikeRole) {
+  if (!isVenditoreLikeRole && !isStudioLikeRole) {
     redirect('/dashboard')
   }
 
-  if (profilo.registrazione_approvata === false) {
+  if (!profilo || profilo.registrazione_approvata === false) {
     redirect('/dashboard')
   }
 

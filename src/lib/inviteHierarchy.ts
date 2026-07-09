@@ -1,9 +1,10 @@
 /** Ruoli che ogni ruolo può invitare (gerarchia discendente). */
 export const INVITA_RUOLI_DISPONIBILI: Record<string, string[]> = {
-  admin:              ['manager', 'agenzia', 'agente', 'distributore', 'partner_dipendente', 'studio'],
-  manager:            ['agenzia', 'distributore', 'studio'],
-  agenzia:            ['agente', 'distributore', 'studio'],
-  agente:             ['distributore', 'studio'],
+  admin:              ['manager', 'agenzia', 'agente', 'rivenditore', 'distributore', 'partner_dipendente', 'studio'],
+  manager:            ['agenzia', 'rivenditore', 'studio'],
+  agenzia:            ['agente', 'rivenditore', 'studio'],
+  agente:             ['rivenditore', 'studio'],
+  rivenditore:        ['distributore', 'partner_dipendente', 'studio'],
   distributore:       ['distributore', 'partner_dipendente', 'studio'],
   partner_dipendente: ['studio'],
 }
@@ -13,6 +14,7 @@ export const RUOLO_LABEL: Record<string, string> = {
   manager:            'Manager',
   agenzia:            'Agenzia',
   agente:             'Agente',
+  rivenditore:        'Rivenditori',
   distributore:       'Venditori',
   studio:             'Studio',
   partner_dipendente: 'Promoter',

@@ -3,6 +3,7 @@ import {
   isCatalogCategoryAllowedForStudioRole,
   isLoginOnlyCatalogCategory,
 } from '@/lib/catalogCategories'
+import { isVenditoreLike } from '@/lib/catalogRoles'
 
 export const STUDIO_LIKE_ROLES = ['studio', 'partner_dipendente'] as const
 
@@ -48,7 +49,9 @@ export function getCatalogAccessDenial(
         ? ['agenzia', 'agente']
         : ruoloEffettivo === 'partner_dipendente'
           ? ['partner_dipendente', 'studio']
-          : [ruoloEffettivo]
+          : isVenditoreLike(ruoloEffettivo)
+            ? ['distributore', 'rivenditore']
+            : [ruoloEffettivo]
     if (!ruoliAccettati.some(r => rv.includes(r))) {
       return options.isAuthenticated
         ? { status: 403, message: 'Accesso non consentito per il tuo ruolo' }
@@ -67,7 +70,7 @@ export function getCatalogAccessDenial(
   if (!options.isAuthenticated && catalogoNonPubblico) {
     return { status: 403, message: 'Catalogo non disponibile' }
   }
-  if (options.isAuthenticated && ruolo === 'distributore' && isAgentOnlyCatalogCategory(catalogo.categoria)) {
+  if (options.isAuthenticated && isVenditoreLike(ruolo) && isAgentOnlyCatalogCategory(catalogo.categoria)) {
     return { status: 403, message: 'Accesso non consentito' }
   }
   if (options.isAuthenticated && isStudioLike(ruolo)) {

@@ -9,6 +9,7 @@ import {
   isCatalogCategoryAllowedForStudioRole,
   isLoginOnlyCatalogCategory,
 } from '@/lib/catalogCategories'
+import { isVenditoreLike } from '@/lib/catalogRoles'
 import { getCatalogDeliveryMode } from '@/lib/catalogFileKind'
 import {
   publicCategoryCatalogReturnTo,
@@ -81,7 +82,7 @@ export default async function CatalogoDetail({
   if (user) {
     const { data: profiloCatalogo } = await supabase.from('profili').select('ruolo').eq('id', user.id).maybeSingle()
     const ruolo = profiloCatalogo?.ruolo ?? 'free'
-    if (ruolo === 'distributore' && isAgentOnlyCatalogCategory(catalogo.categoria)) {
+    if (isVenditoreLike(ruolo) && isAgentOnlyCatalogCategory(catalogo.categoria)) {
       return (
         <div className="flex flex-col items-center justify-center min-h-screen p-8 text-center bg-[#fafafa]">
           <h1 className="text-3xl font-bold text-red-600 mb-4">Accesso non consentito</h1>

@@ -16,7 +16,7 @@ import {
 } from '@/lib/catalogCategories'
 import { catalogPdfHref, dashboardCatalogReturnTo } from '@/lib/catalogNavigation'
 import { compareCatalogTitoli } from '@/lib/catalogSorting'
-import { RUOLI_CATALOGO } from '@/lib/catalogRoles'
+import { RUOLI_CATALOGO, isVenditoreLike } from '@/lib/catalogRoles'
 import { isStudioLike } from '@/lib/catalogAccess'
 import CreateCatalogForm from '@/components/admin/CreateCatalogForm'
 import AgenteDocumentazionePortal from '@/components/dashboard/AgenteDocumentazionePortal'
@@ -102,7 +102,9 @@ export default async function Dashboard(props: {
   const isAdmin = ruoloCorrente === 'admin'
   /** isManager è true sia per admin che per manager: entrambi vedono utenti e cataloghi completi. */
   const isManager = isAdmin || ruoloCorrente === 'manager'
+  const isVenditoreLikeRole = isVenditoreLike(ruoloCorrente)
   const isPartner = ruoloCorrente === 'distributore'
+  const isRivenditore = ruoloCorrente === 'rivenditore'
   const isAgente = ruoloCorrente === 'agente'
   const isAgenzia = ruoloCorrente === 'agenzia'
   const isStudio = ruoloCorrente === 'studio'
@@ -129,7 +131,7 @@ export default async function Dashboard(props: {
 
   const cataloghiPerVista = (cataloghi ?? []).filter((c) => {
     if (!user && isLoginOnlyCatalogCategory(c.categoria as string | null)) return false
-    if (isPartner && isAgentOnlyCatalogCategory(c.categoria as string | null)) return false
+    if (isVenditoreLikeRole && isAgentOnlyCatalogCategory(c.categoria as string | null)) return false
     if (isStudioLikeRole && !isCatalogCategoryAllowedForStudioRole(c.categoria as string | null)) return false
     return true
   })
@@ -188,7 +190,7 @@ export default async function Dashboard(props: {
 
   // Per studio, partner_dipendente, partner e agenzia: carica solo il profilo di chi li ha invitati
   let invitatoDaContatto: Fornitore | null = null
-  if ((isStudioLikeRole || isPartner || isAgenzia) && profilo?.invitato_da) {
+  if ((isStudioLikeRole || isVenditoreLikeRole || isAgenzia) && profilo?.invitato_da) {
     const { data: inviterData } = await supabase
       .from('profili')
       .select('id, nome_completo, email, telefono, ruolo')
@@ -202,7 +204,7 @@ export default async function Dashboard(props: {
   // Gerarchia propria per agenzia/agente/partner
   let profiliGerarchiaDashboard: ProfiloGerarchiaRow[] = []
   let linksDashboard: { utente_id: string; operatore_id: string }[] = []
-  if (user && (isAgenzia || isAgente || isPartner)) {
+  if (user && (isAgenzia || isAgente || isVenditoreLikeRole)) {
     const [profiliRes, linksRes] = await Promise.all([
       supabase
         .from('profili')
@@ -239,7 +241,7 @@ export default async function Dashboard(props: {
     const { data: partnerData } = await supabase
       .from('profili')
       .select('id, nome_completo, email, area_geografica')
-      .eq('ruolo', 'distributore')
+      .eq('ruolo', 'rivenditore')
       .eq('area_geografica', profilo.area_geografica)
 
     partnerZona = (partnerData || []) as Partner[]
@@ -252,7 +254,7 @@ export default async function Dashboard(props: {
     let contattiPubbliciQuery = supabase
       .from('profili')
       .select('id, nome_completo, email, telefono')
-      .in('ruolo', ['agente', 'distributore'])
+      .in('ruolo', ['agente', 'rivenditore', 'distributore'])
       .order('nome_completo', { ascending: true })
       .limit(12)
 
@@ -289,7 +291,7 @@ export default async function Dashboard(props: {
 
   const contattiDiRete = (isAgente || isAgenzia)
     ? mergeContattiById(fornitori, operatoriAssegnatiUtente)
-    : (isStudioLikeRole || isPartner)
+    : (isStudioLikeRole || isVenditoreLikeRole)
       ? (invitatoDaContatto ? [invitatoDaContatto] : [])
       : operatoriAssegnatiUtente.length > 0
         ? operatoriAssegnatiUtente
@@ -330,6 +332,7 @@ export default async function Dashboard(props: {
                 {isAdmin ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Admin</span> : null}
                 {ruoloCorrente === 'manager' ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Manager</span> : null}
                 {isPartner ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Venditore</span> : null}
+                {isRivenditore ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Rivenditore</span> : null}
                 {isAgenzia ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Agenzia</span> : null}
                 {isAgente ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Agente</span> : null}
                 {isStudio ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Studio</span> : null}
@@ -339,7 +342,7 @@ export default async function Dashboard(props: {
                     In attesa di approvazione
                   </span>
                 ) : null}
-                {isFree && !isManager && !isPartner && !isAgenzia && !isAgente && !isStudio && !isPartnerDipendente && profilo?.registrazione_approvata !== false ? (
+                {isFree && !isManager && !isVenditoreLikeRole && !isAgenzia && !isAgente && !isStudio && !isPartnerDipendente && profilo?.registrazione_approvata !== false ? (
                   <span className="ml-3 inline-flex items-center rounded-full border border-black/20 px-2.5 py-0.5 text-xs font-semibold bg-zinc-100 text-zinc-800">Free</span>
                 ) : null}
               </>
@@ -354,7 +357,7 @@ export default async function Dashboard(props: {
         ) : null}
 
         {/* Invita utenti + Contatti Diretti in cima per ruoli non-admin */}
-        {showFullDashboard && !isManager && (isPartner || isPartnerDipendente || isAgenzia || isAgente) && (
+        {showFullDashboard && !isManager && (isVenditoreLikeRole || isPartnerDipendente || isAgenzia || isAgente) && (
           <section className="border border-black rounded-2xl bg-white p-6">
             <h2 className="text-xl text-zinc-900 font-medium mb-1">Invita utenti</h2>
             <p className="text-sm text-zinc-500 mb-4">
@@ -364,7 +367,7 @@ export default async function Dashboard(props: {
           </section>
         )}
 
-        {showFullDashboard && (isAgenzia || isAgente || isPartner) && user && profilo && profiliGerarchiaDashboard.length > 0 && (
+        {showFullDashboard && (isAgenzia || isAgente || isVenditoreLikeRole) && user && profilo && profiliGerarchiaDashboard.length > 0 && (
           <GerarchiaUtentiTree
             currentUserId={user.id}
             viewerRole={ruoloCorrente}
@@ -456,7 +459,7 @@ export default async function Dashboard(props: {
         {showFullDashboard && !isManager && user && !isFree && (
           <section>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {isPartner && <PartnerListiniPortal />}
+              {isVenditoreLikeRole && <PartnerListiniPortal />}
               {(isAgente || isAgenzia) && <AgenteDocumentazionePortal />}
               <Link
                 href="/dashboard/i-miei-cataloghi"

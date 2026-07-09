@@ -223,9 +223,15 @@ export default function GerarchiaUtentiTree({
     })
   }
 
-  // --- Modalità propria gerarchia (agente / partner) ---
+  // --- Modalità propria gerarchia (agente / rivenditore / venditore) ---
   if (ownerProfile) {
-    const childLabel = ownerProfile.ruolo === 'agente' ? 'Partner associati' : 'Studi associati'
+    const childLabel = nestedAssociatiLabel(ownerProfile.ruolo) ?? 'Associati'
+    const descByRole: Record<string, string> = {
+      agente: 'I rivenditori collegati al tuo profilo e i loro associati.',
+      rivenditore: 'I venditori, promoter e studi collegati al tuo profilo.',
+      distributore: 'I promoter e gli studi collegati al tuo profilo.',
+      agenzia: 'Gli agenti e i loro associati collegati al tuo profilo.',
+    }
     return (
       <section id="struttura-organizzativa" className="border border-black rounded-2xl bg-white p-6 space-y-6">
         <div>
@@ -234,9 +240,7 @@ export default function GerarchiaUtentiTree({
             I Tuoi Associati
           </h2>
           <p className="text-sm text-zinc-600 mt-1">
-            {ownerProfile.ruolo === 'agente'
-              ? 'I partner collegati al tuo profilo e i loro studi associati.'
-              : 'Gli studi collegati al tuo profilo.'}
+            {descByRole[ownerProfile.ruolo] ?? 'Gli associati collegati al tuo profilo.'}
           </p>
         </div>
 
