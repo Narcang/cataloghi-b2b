@@ -26,7 +26,7 @@ const RUOLO_FILTER_OPTIONS = [
   { value: 'agenzia',           label: 'Agenzia' },
   { value: 'agente',            label: 'Agente' },
   { value: 'distributore',      label: 'Venditore' },
-  { value: 'partner_dipendente',label: 'Sponsor' },
+  { value: 'partner_dipendente',label: 'Promoter' },
   { value: 'studio',            label: 'Studio' },
   { value: 'free',              label: 'Free' },
 ]

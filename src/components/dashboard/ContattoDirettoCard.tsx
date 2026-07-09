@@ -5,7 +5,7 @@ const RUOLO_LABEL: Record<string, string> = {
   agente:             'Agente',
   distributore:       'Venditore',
   studio:             'Studio',
-  partner_dipendente: 'Sponsor',
+  partner_dipendente: 'Promoter',
   manager:            'Manager',
   admin:              'Admin',
 }

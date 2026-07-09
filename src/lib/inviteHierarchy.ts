@@ -14,7 +14,7 @@ export const RUOLO_LABEL: Record<string, string> = {
   agente:             'Agente',
   distributore:       'Venditori',
   studio:             'Studio',
-  partner_dipendente: 'Sponsor',
+  partner_dipendente: 'Promoter',
 }
 
 /** Restituisce i ruoli che `ruolo` può invitare, con etichette. */

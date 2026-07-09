@@ -40,7 +40,7 @@ const RUOLI_OPTIONS = ['admin', 'manager', 'agenzia', 'agente', 'distributore', 
 const RUOLO_LABEL: Record<string, string> = {
   agenzia:            'Agenzia',
   distributore:       'Venditori',
-  partner_dipendente: 'Sponsor',
+  partner_dipendente: 'Promoter',
 }
 
 function ruoloLabel(r: string): string {
@@ -62,7 +62,7 @@ const RUOLI_TAB: { id: RuoloTabId; label: string }[] = [
   { id: 'agenzia', label: 'Agenzia' },
   { id: 'agente', label: 'Agente' },
   { id: 'distributore', label: 'Venditori' },
-  { id: 'partner_dipendente', label: 'Sponsor' },
+  { id: 'partner_dipendente', label: 'Promoter' },
   { id: 'studio', label: 'Studio' },
 ]
 

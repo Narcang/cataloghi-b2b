@@ -29,7 +29,7 @@ export const HIERARCHY_ROOT_ROLE_OPTIONS: { id: HierarchyRootRole; label: string
   { id: 'agenzia', label: 'Agenzia' },
   { id: 'agente', label: 'Agente' },
   { id: 'distributore', label: 'Venditori' },
-  { id: 'partner_dipendente', label: 'Sponsor' },
+  { id: 'partner_dipendente', label: 'Promoter' },
   { id: 'studio', label: 'Studio' },
 ]
 
@@ -52,7 +52,7 @@ export function hierarchyRootRoleLabel(rootRole: HierarchyRootRole): string {
     case 'studio':
       return 'Studi'
     case 'partner_dipendente':
-      return 'Sponsor'
+      return 'Promoter'
     default:
       return ruoloGerarchiaLabel(rootRole)
   }
@@ -60,7 +60,7 @@ export function hierarchyRootRoleLabel(rootRole: HierarchyRootRole): string {
 
 export function ruoloGerarchiaLabel(ruolo: string): string {
   if (ruolo === 'distributore') return 'Venditori'
-  if (ruolo === 'partner_dipendente') return 'Sponsor'
+  if (ruolo === 'partner_dipendente') return 'Promoter'
   if (ruolo === 'agenzia') return 'Agenzia'
   return ruolo.charAt(0).toUpperCase() + ruolo.slice(1)
 }
@@ -108,7 +108,7 @@ export function associatiDirettiSectionLabel(ruolo: string): string | null {
       return 'Associati diretti (partner)'
     case 'studio':
     case 'partner_dipendente':
-      return 'Associati diretti (studi / sponsor)'
+      return 'Associati diretti (studi / promoter)'
     default:
       return 'Associati diretti'
   }
@@ -128,7 +128,7 @@ export function associatiAggiungiSectionLabel(ruolo: string): string | null {
       return 'Associa partner'
     case 'studio':
     case 'partner_dipendente':
-      return 'Associa studio / sponsor'
+      return 'Associa studio / promoter'
     default:
       return 'Associa profilo'
   }
@@ -282,7 +282,7 @@ export function nestedAssociatiLabel(ruolo: string): string | null {
       return 'Partner associati'
     case 'studio':
     case 'partner_dipendente':
-      return 'Studi / sponsor associati'
+      return 'Studi / promoter associati'
     default:
       return 'Associati'
   }
@@ -306,7 +306,7 @@ export function livelloGerarchiaLabel(
         return 'Partner associati'
       case 'studio':
       case 'partner_dipendente':
-        return 'Studi / sponsor associati'
+        return 'Studi / promoter associati'
       default:
         return `${ruoloGerarchiaLabel(roles[0])} associati`
     }

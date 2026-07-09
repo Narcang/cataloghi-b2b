@@ -131,7 +131,7 @@ export function venditoreExtraCategories(): CatalogCategory[] {
   return [...VENDITORE_EXTRA_CATEGORIES]
 }
 
-/** Categorie portale per studio e sponsor (solo file tecnici). */
+/** Categorie portale per studio e promoter (solo file tecnici). */
 export const STUDIO_LIKE_PORTAL_CATEGORIES = [
   'File 2D',
   'File 3D',
