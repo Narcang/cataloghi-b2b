@@ -57,19 +57,20 @@ export default async function LandingPage(props: { searchParams?: Promise<{ mess
   // Fetch il singolo catalogo fotografico attivo per ogni categoria
   const supabase = await createClient()
   const fotoCategorie = Object.values(FOTO_CATEGORY_MAP) as CatalogCategory[]
-  const { data: fotoCataloghi } = await supabase
+  const directLinkCategorie: CatalogCategory[] = [...fotoCategorie, 'Bricks']
+  const { data: directCataloghi } = await supabase
     .from('cataloghi')
     .select('id, categoria')
-    .in('categoria', fotoCategorie)
+    .in('categoria', directLinkCategorie)
     .eq('stato_pubblicazione', 'attivo')
     .order('creato_il', { ascending: false })
-    .limit(10)
+    .limit(15)
 
-  // Mappa categoria fotografico → id catalogo (primo attivo trovato)
-  const fotoCatalogoIdMap: Partial<Record<CatalogCategory, string>> = {}
-  for (const row of fotoCataloghi ?? []) {
-    if (!fotoCatalogoIdMap[row.categoria as CatalogCategory]) {
-      fotoCatalogoIdMap[row.categoria as CatalogCategory] = row.id
+  // Mappa categoria → id catalogo (ultimo attivo caricato per categoria)
+  const directCatalogoIdMap: Partial<Record<CatalogCategory, string>> = {}
+  for (const row of directCataloghi ?? []) {
+    if (!directCatalogoIdMap[row.categoria as CatalogCategory]) {
+      directCatalogoIdMap[row.categoria as CatalogCategory] = row.id
     }
   }
 
@@ -77,9 +78,17 @@ export default async function LandingPage(props: { searchParams?: Promise<{ mess
   // altrimenti rimanda al login senza mostrare la pagina categoria intermedia.
   function fotoHref(baseCat: CatalogCategory): string {
     const fotoCat = FOTO_CATEGORY_MAP[baseCat]
-    const catalogoId = fotoCat ? fotoCatalogoIdMap[fotoCat] : undefined
+    const catalogoId = fotoCat ? directCatalogoIdMap[fotoCat] : undefined
     if (catalogoId) return `/cataloghi/${catalogoId}?returnTo=/`
     return '/login'
+  }
+
+  function homepageTileHref(cat: CatalogCategory): string {
+    if (cat === 'Bricks') {
+      const catalogoId = directCatalogoIdMap.Bricks
+      if (catalogoId) return `/cataloghi/${catalogoId}?returnTo=/`
+    }
+    return `/cataloghi/categoria/${categoryToSlug(cat)}`
   }
 
   const homepageCategories = HOMEPAGE_CATEGORIES_ORDER
@@ -103,7 +112,7 @@ export default async function LandingPage(props: { searchParams?: Promise<{ mess
           {homepageCategories.map((cat) => (
             <li key={cat}>
               <Link
-                href={`/cataloghi/categoria/${categoryToSlug(cat)}`}
+                href={homepageTileHref(cat)}
                 className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#060d41] focus-visible:ring-offset-2 rounded-sm"
               >
                 <div className="relative aspect-square overflow-hidden bg-neutral-100 shadow-sm">
