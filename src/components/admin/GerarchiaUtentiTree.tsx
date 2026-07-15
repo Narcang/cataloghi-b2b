@@ -330,6 +330,7 @@ export default function GerarchiaUtentiTree({
         {HIERARCHY_ROOT_ROLE_OPTIONS.map((option) => {
           const active = rootRole === option.id
           const count = rootCounts?.get(option.id) ?? 0
+          const roleDotClass = ruoloGerarchiaDotClass(option.id)
           return (
             <button
               key={option.id}
@@ -345,8 +346,12 @@ export default function GerarchiaUtentiTree({
             >
               {option.label}
               <span
-                className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                  active ? 'bg-white/20 text-white' : 'bg-zinc-100 text-zinc-700'
+                className={`rounded-full min-w-[1.5rem] px-2 py-0.5 text-xs font-semibold text-center ${
+                  roleDotClass
+                    ? `${roleDotClass} text-white`
+                    : active
+                      ? 'bg-white/20 text-white'
+                      : 'bg-zinc-100 text-zinc-700'
                 }`}
               >
                 {count}
