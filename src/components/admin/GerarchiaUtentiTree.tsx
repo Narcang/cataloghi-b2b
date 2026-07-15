@@ -230,7 +230,7 @@ export default function GerarchiaUtentiTree({
       agente: 'I rivenditori collegati al tuo profilo e i loro associati.',
       rivenditore: 'I venditori, promoter e studi collegati al tuo profilo.',
       distributore: 'I promoter e gli studi collegati al tuo profilo.',
-      agenzia: 'Gli agenti e i loro associati collegati al tuo profilo.',
+      agenzia: 'Gli agenti, i rivenditori e i loro associati collegati al tuo profilo.',
     }
     return (
       <section id="struttura-organizzativa" className="border border-black rounded-2xl bg-white p-6 space-y-6">

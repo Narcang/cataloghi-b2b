@@ -16,7 +16,7 @@ const OPERATOR_ROLES = new Set(['agenzia', 'agente', 'rivenditore', 'distributor
 export const CHILD_ROLES_BY_PARENT: Record<string, string[]> = {
   admin: ['manager'],
   manager: ['agenzia', 'agente'],
-  agenzia: ['agente'],
+  agenzia: ['agente', 'rivenditore'],
   agente: ['rivenditore'],
   rivenditore: ['distributore', 'partner_dipendente', 'studio'],
   distributore: ['partner_dipendente', 'studio'],
@@ -101,7 +101,7 @@ export function associatiDirettiSectionLabel(ruolo: string): string | null {
     case 'manager':
       return 'Associati diretti (agenzie / agenti)'
     case 'agenzia':
-      return 'Associati diretti (agenti)'
+      return 'Associati diretti (agenti / rivenditori)'
     case 'agente':
       return 'Associati diretti (rivenditori)'
     case 'rivenditore':
@@ -124,7 +124,7 @@ export function associatiAggiungiSectionLabel(ruolo: string): string | null {
     case 'manager':
       return 'Associa agenzia / agente'
     case 'agenzia':
-      return 'Associa agente'
+      return 'Associa agente / rivenditore'
     case 'agente':
       return 'Associa rivenditore'
     case 'rivenditore':
@@ -281,7 +281,7 @@ export function nestedAssociatiLabel(ruolo: string): string | null {
     case 'manager':
       return 'Agenzie / agenti associati'
     case 'agenzia':
-      return 'Agenti associati'
+      return 'Agenti / rivenditori associati'
     case 'agente':
       return 'Rivenditori associati'
     case 'rivenditore':
