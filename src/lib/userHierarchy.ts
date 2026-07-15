@@ -68,6 +68,42 @@ export function canHaveHierarchyChildren(ruolo: string): boolean {
   return (CHILD_ROLES_BY_PARENT[ruolo]?.length ?? 0) > 0
 }
 
+export function resolveAgenziaParentForAgent(
+  agentProfile: ProfiloGerarchiaRow,
+  profili: ProfiloGerarchiaRow[],
+  links: OperatoreLink[],
+): ProfiloGerarchiaRow | null {
+  const byId = new Map(profili.map((p) => [p.id, p]))
+
+  const agenziaFromId = (id: string | null | undefined): ProfiloGerarchiaRow | null => {
+    if (!id) return null
+    const p = byId.get(id)
+    return p?.ruolo === 'agenzia' ? p : null
+  }
+
+  const fromInvito = agenziaFromId(agentProfile.invitato_da)
+  if (fromInvito) return fromInvito
+
+  for (const link of links) {
+    const otherId =
+      link.utente_id === agentProfile.id
+        ? link.operatore_id
+        : link.operatore_id === agentProfile.id
+          ? link.utente_id
+          : null
+    if (!otherId) continue
+    const hit = agenziaFromId(otherId)
+    if (hit) return hit
+  }
+
+  const inviter = byId.get(agentProfile.invitato_da ?? '')
+  if (inviter?.ruolo === 'agente') {
+    return agenziaFromId(inviter.invitato_da)
+  }
+
+  return null
+}
+
 export function profiloToGerarchiaRow(
   p: {
     id: string
@@ -193,9 +229,14 @@ function isDirectChild(
   parentProfile: ProfiloGerarchiaRow,
   child: ProfiloGerarchiaRow,
   links: OperatoreLink[],
+  profili: ProfiloGerarchiaRow[],
 ): boolean {
   const expectedRoles = CHILD_ROLES_BY_PARENT[parentProfile.ruolo] ?? []
   if (!expectedRoles.includes(child.ruolo)) return false
+  if (parentProfile.ruolo === 'agenzia' && child.ruolo === 'agente') {
+    const agenzia = resolveAgenziaParentForAgent(child, profili, links)
+    if (agenzia?.id === parentId) return true
+  }
   if (child.invitato_da === parentId) return true
   if (hasDirectedParentChildLink(
     parentId,
@@ -246,17 +287,17 @@ export function getChildrenProfiles(
       if (viewerRole === 'manager') {
         const managerProfile = profili.find((prof) => prof.id === currentUserId)
         if (!managerProfile) return false
-        return isDirectChild(currentUserId, managerProfile, p, links)
+        return isDirectChild(currentUserId, managerProfile, p, links, profili)
       }
       if (viewerRole === 'agenzia') {
         const agenziaProfile = profili.find((prof) => prof.id === currentUserId)
         if (!agenziaProfile) return false
-        return isDirectChild(currentUserId, agenziaProfile, p, links)
+        return isDirectChild(currentUserId, agenziaProfile, p, links, profili)
       }
       return p.ruolo === 'manager'
     }
 
-    return isDirectChild(parentId, parentProfile, p, links)
+    return isDirectChild(parentId, parentProfile, p, links, profili)
   })
 
   const unique = new Map(candidates.map((p) => [p.id, p]))

@@ -25,7 +25,7 @@ import InvitaUtente from '@/components/InvitaUtente'
 import ContattoDirettoCard from '@/components/dashboard/ContattoDirettoCard'
 import GerarchiaUtentiTree from '@/components/admin/GerarchiaUtentiTree'
 import type { ProfiloGerarchiaRow } from '@/lib/userHierarchy'
-import { profiloToGerarchiaRow } from '@/lib/userHierarchy'
+import { profiloToGerarchiaRow, resolveAgenziaParentForAgent } from '@/lib/userHierarchy'
 
 const ASSISTENZA_LADIVA_TELEFONO = '+39 0536 185 6217'
 const ASSISTENZA_LADIVA_EMAIL = 'info@ladiva-fpd.com'
@@ -309,6 +309,20 @@ export default async function Dashboard(props: {
   const inAttesaApprovazione = Boolean(user && profilo && profilo.registrazione_approvata === false)
   const showFullDashboard = !inAttesaApprovazione
 
+  let gerarchiaOwnerProfile: ProfiloGerarchiaRow | undefined
+  if (user && profilo && profiliGerarchiaDashboard.length > 0) {
+    const selfRow = profiloToGerarchiaRow(
+      { ...profilo, email: user.email ?? null },
+      profilo.invitato_da ?? null,
+    )
+    if (isAgente) {
+      gerarchiaOwnerProfile =
+        resolveAgenziaParentForAgent(selfRow, profiliGerarchiaDashboard, linksDashboard) ?? selfRow
+    } else {
+      gerarchiaOwnerProfile = selfRow
+    }
+  }
+
   return (
     <div className="ladiva-root ladiva-root-app-dark min-h-screen flex flex-col">
       <Header />
@@ -367,13 +381,13 @@ export default async function Dashboard(props: {
           </section>
         )}
 
-        {showFullDashboard && (isAgenzia || isAgente || isVenditoreLikeRole) && user && profilo && profiliGerarchiaDashboard.length > 0 && (
+        {showFullDashboard && (isAgenzia || isAgente || isVenditoreLikeRole) && gerarchiaOwnerProfile && (
           <GerarchiaUtentiTree
-            currentUserId={user.id}
+            currentUserId={user!.id}
             viewerRole={ruoloCorrente}
             profili={profiliGerarchiaDashboard}
             links={linksDashboard}
-            ownerProfile={profiloToGerarchiaRow({ ...profilo, email: null }, null)}
+            ownerProfile={gerarchiaOwnerProfile}
           />
         )}
 

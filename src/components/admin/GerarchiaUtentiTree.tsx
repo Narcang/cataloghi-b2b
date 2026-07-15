@@ -182,9 +182,19 @@ export default function GerarchiaUtentiTree({
   )
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set())
 
+  const agentViewsAgenzia = Boolean(
+    ownerProfile && viewerRole === 'agente' && ownerProfile.ruolo === 'agenzia',
+  )
+
   useEffect(() => {
     setExpandedIds(new Set())
   }, [rootRole])
+
+  useEffect(() => {
+    if (agentViewsAgenzia && ownerProfile) {
+      setExpandedIds(new Set([ownerProfile.id]))
+    }
+  }, [agentViewsAgenzia, ownerProfile?.id])
 
   // Modalità "propria gerarchia": radice = figli diretti dell'utente corrente
   const ownedRootNodes = useMemo(() => {
@@ -223,32 +233,51 @@ export default function GerarchiaUtentiTree({
     })
   }
 
-  // --- Modalità propria gerarchia (agente / rivenditore / venditore) ---
+  // --- Modalità propria gerarchia (agente / rivenditore / venditore / agenzia) ---
   if (ownerProfile) {
+    const showOwnerAsRootNode = agentViewsAgenzia
     const childLabel = nestedAssociatiLabel(ownerProfile.ruolo) ?? 'Associati'
     const descByRole: Record<string, string> = {
       agente: 'I rivenditori collegati al tuo profilo e i loro associati.',
       rivenditore: 'I venditori, promoter e studi collegati al tuo profilo.',
       distributore: 'I promoter e gli studi collegati al tuo profilo.',
-      agenzia: 'Gli agenti, i rivenditori e i loro associati collegati al tuo profilo.',
+      agenzia: agentViewsAgenzia
+        ? 'La tua agenzia, gli altri agenti e tutti gli associati collegati. Espandi per vedere la rete completa.'
+        : 'Gli agenti, i rivenditori e i loro associati collegati al tuo profilo.',
     }
+
     return (
       <section id="struttura-organizzativa" className="border border-black rounded-2xl bg-white p-6 space-y-6">
         <div>
           <h2 className="text-xl text-zinc-900 font-medium flex items-center gap-2">
             <Users size={20} className="text-[#060d41]" />
-            I Tuoi Associati
+            {agentViewsAgenzia ? 'Struttura Agenzia' : 'I Tuoi Associati'}
           </h2>
           <p className="text-sm text-zinc-600 mt-1">
-            {descByRole[ownerProfile.ruolo] ?? 'Gli associati collegati al tuo profilo.'}
+            {descByRole[agentViewsAgenzia ? 'agenzia' : ownerProfile.ruolo] ?? 'Gli associati collegati al tuo profilo.'}
           </p>
         </div>
 
         <div>
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-500 mb-4">
-            {childLabel}
-          </h3>
-          {(ownedRootNodes ?? []).length === 0 ? (
+          {!showOwnerAsRootNode ? (
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-500 mb-4">
+              {childLabel}
+            </h3>
+          ) : null}
+          {showOwnerAsRootNode ? (
+            <ul className="m-0 p-0 space-y-1">
+              <HierarchyNode
+                profile={ownerProfile}
+                depth={0}
+                currentUserId={currentUserId}
+                viewerRole={viewerRole}
+                profili={profili}
+                links={links}
+                expandedIds={expandedIds}
+                onToggle={toggleExpanded}
+              />
+            </ul>
+          ) : (ownedRootNodes ?? []).length === 0 ? (
             <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-6 text-center text-sm text-zinc-600">
               Nessun associato collegato al tuo profilo.
             </div>
