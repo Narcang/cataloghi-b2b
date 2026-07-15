@@ -12,6 +12,7 @@ import {
   hierarchyRootRoleLabel,
   nestedAssociatiLabel,
   ruoloGerarchiaLabel,
+  ruoloGerarchiaDotClass,
   type HierarchyRootRole,
   type ProfiloGerarchiaRow,
 } from '@/lib/userHierarchy'
@@ -61,6 +62,7 @@ function HierarchyNode({
   const expandable = canHaveHierarchyChildren(profile.ruolo)
   const expanded = expandedIds.has(profile.id)
   const nestedLabel = nestedAssociatiLabel(profile.ruolo)
+  const roleDotClass = ruoloGerarchiaDotClass(profile.ruolo)
 
   return (
     <li className="list-none">
@@ -104,15 +106,23 @@ function HierarchyNode({
         >
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h4 className="text-base font-semibold text-zinc-900">
-                {profile.societa ? (
-                  <>
-                    {profile.societa}
-                    <span className="ml-2 text-sm font-normal text-zinc-400">{profile.nome_completo || ''}</span>
-                  </>
-                ) : (
-                  profile.nome_completo || 'Utente senza nome'
-                )}
+              <h4 className="text-base font-semibold text-zinc-900 flex items-center gap-2">
+                {roleDotClass ? (
+                  <span
+                    className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ${roleDotClass}`}
+                    aria-hidden
+                  />
+                ) : null}
+                <span>
+                  {profile.societa ? (
+                    <>
+                      {profile.societa}
+                      <span className="ml-2 text-sm font-normal text-zinc-400">{profile.nome_completo || ''}</span>
+                    </>
+                  ) : (
+                    profile.nome_completo || 'Utente senza nome'
+                  )}
+                </span>
               </h4>
               <p className="text-sm text-zinc-600 mt-0.5">{profile.email}</p>
               <p className="text-xs text-zinc-500 mt-1">
@@ -124,7 +134,7 @@ function HierarchyNode({
                 {ruoloGerarchiaLabel(profile.ruolo)}
               </span>
               {expandable ? (
-                <span className="text-xs font-medium text-[#060d41]">
+                <span className="text-xs font-medium text-zinc-400">
                   {childCount} associat{childCount === 1 ? 'o' : 'i'}
                 </span>
               ) : null}

@@ -63,6 +63,22 @@ export function ruoloGerarchiaLabel(ruolo: string): string {
   return ruolo.charAt(0).toUpperCase() + ruolo.slice(1)
 }
 
+/** Pallino colorato per i ruoli principali nella struttura organizzativa. */
+export function ruoloGerarchiaDotClass(ruolo: string): string | null {
+  switch (ruolo) {
+    case 'manager':
+      return 'bg-red-500'
+    case 'agenzia':
+      return 'bg-blue-500'
+    case 'rivenditore':
+      return 'bg-green-500'
+    case 'studio':
+      return 'bg-orange-500'
+    default:
+      return null
+  }
+}
+
 /** Ruoli che possono avere un livello inferiore nell'albero (manager → agente → partner → studio). */
 export function canHaveHierarchyChildren(ruolo: string): boolean {
   return (CHILD_ROLES_BY_PARENT[ruolo]?.length ?? 0) > 0

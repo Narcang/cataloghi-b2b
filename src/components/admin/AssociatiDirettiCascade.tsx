@@ -8,6 +8,7 @@ import {
   getChildrenProfiles,
   nestedAssociatiLabel,
   ruoloGerarchiaLabel,
+  ruoloGerarchiaDotClass,
   type ProfiloGerarchiaRow,
 } from '@/lib/userHierarchy'
 
@@ -61,6 +62,7 @@ function CascadeNode({
   const expanded = expandedIds.has(node.id)
   const selected = linksByUtente.get(linkOwnerId) ?? new Set<string>()
   const nestedLabel = nestedAssociatiLabel(node.ruolo)
+  const roleDotClass = ruoloGerarchiaDotClass(node.ruolo)
 
   return (
     <li className="list-none">
@@ -100,10 +102,16 @@ function CascadeNode({
               <button
                 type="button"
                 onClick={() => expandable && onToggleExpand(node.id)}
-                className={`text-left font-medium text-zinc-900 ${
+                className={`text-left font-medium text-zinc-900 inline-flex items-center gap-2 ${
                   expandable ? 'hover:text-[#060d41] hover:underline' : 'cursor-default'
                 }`}
               >
+                {roleDotClass ? (
+                  <span
+                    className={`inline-block h-2 w-2 shrink-0 rounded-full ${roleDotClass}`}
+                    aria-hidden
+                  />
+                ) : null}
                 {node.nome_completo || node.email || 'Utente'}
               </button>
               <span className="text-zinc-500 text-xs block mt-0.5">
