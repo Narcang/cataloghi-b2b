@@ -13,6 +13,9 @@ import {
   nestedAssociatiLabel,
   ruoloGerarchiaLabel,
   ruoloGerarchiaDotClass,
+  ruoloBreakdownDotClass,
+  roleBreakdownBadgesForNode,
+  countDescendantsByRoles,
   type HierarchyRootRole,
   type ProfiloGerarchiaRow,
 } from '@/lib/userHierarchy'
@@ -63,6 +66,17 @@ function HierarchyNode({
   const expanded = expandedIds.has(profile.id)
   const nestedLabel = nestedAssociatiLabel(profile.ruolo)
   const roleDotClass = ruoloGerarchiaDotClass(profile.ruolo)
+  const breakdownBadges = roleBreakdownBadgesForNode(profile.ruolo)
+  const breakdownCounts = useMemo(() => {
+    if (breakdownBadges.length === 0) return null
+    return countDescendantsByRoles(
+      profile.id,
+      profile,
+      breakdownBadges.map((b) => b.ruolo),
+      profili,
+      links,
+    )
+  }, [profile.id, profile.ruolo, breakdownBadges, profili, links])
 
   return (
     <li className="list-none">
@@ -137,6 +151,24 @@ function HierarchyNode({
                 <span className="text-xs font-medium text-zinc-400">
                   {childCount} associat{childCount === 1 ? 'o' : 'i'}
                 </span>
+              ) : null}
+              {breakdownCounts && breakdownBadges.length > 0 ? (
+                <div className="flex flex-wrap gap-1.5 justify-end mt-0.5">
+                  {breakdownBadges.map(({ ruolo, label }) => {
+                    const dotClass = ruoloBreakdownDotClass(ruolo)
+                    if (!dotClass) return null
+                    return (
+                      <span
+                        key={ruolo}
+                        title={label}
+                        className="inline-flex items-center gap-1 rounded-full border border-black/10 bg-zinc-50 px-1.5 py-0.5 text-xs font-medium text-zinc-500"
+                      >
+                        <span className={`h-2 w-2 shrink-0 rounded-full ${dotClass}`} aria-hidden />
+                        {breakdownCounts[ruolo] ?? 0}
+                      </span>
+                    )
+                  })}
+                </div>
               ) : null}
             </div>
           </div>

@@ -79,6 +79,73 @@ export function ruoloGerarchiaDotClass(ruolo: string): string | null {
   }
 }
 
+/** Pallino per i badge di riepilogo (include ruoli secondari come agente). */
+export function ruoloBreakdownDotClass(ruolo: string): string | null {
+  if (ruolo === 'agente') return 'bg-blue-400'
+  return ruoloGerarchiaDotClass(ruolo)
+}
+
+export type RoleBreakdownBadge = { ruolo: string; label: string }
+
+/** Badge conteggio discendenti da mostrare nel box di un profilo in struttura organizzativa. */
+export function roleBreakdownBadgesForNode(ruolo: string): RoleBreakdownBadge[] {
+  switch (ruolo) {
+    case 'agenzia':
+      return [
+        { ruolo: 'agente', label: 'Agenti' },
+        { ruolo: 'rivenditore', label: 'Rivenditori' },
+        { ruolo: 'studio', label: 'Studi' },
+      ]
+    case 'agente':
+      return [
+        { ruolo: 'rivenditore', label: 'Rivenditori' },
+        { ruolo: 'studio', label: 'Studi' },
+      ]
+    case 'distributore':
+      return [{ ruolo: 'studio', label: 'Studi' }]
+    default:
+      return []
+  }
+}
+
+/** Conta i discendenti per ruolo nell'albero sotto un profilo. */
+export function countDescendantsByRoles(
+  profileId: string,
+  profile: ProfiloGerarchiaRow,
+  targetRoles: string[],
+  profili: ProfiloGerarchiaRow[],
+  links: OperatoreLink[],
+): Record<string, number> {
+  const counts = Object.fromEntries(targetRoles.map((r) => [r, 0])) as Record<string, number>
+  const seen = new Set<string>()
+
+  function walk(parentId: string, parentProfile: ProfiloGerarchiaRow) {
+    const children = getChildrenProfiles(
+      parentId,
+      parentProfile,
+      profileId,
+      profile.ruolo,
+      profili,
+      links,
+    )
+    for (const child of children) {
+      if (seen.has(child.id)) continue
+      seen.add(child.id)
+      if (targetRoles.includes(child.ruolo)) {
+        counts[child.ruolo]++
+      }
+      if (canHaveHierarchyChildren(child.ruolo)) {
+        walk(child.id, child)
+      }
+    }
+  }
+
+  if (canHaveHierarchyChildren(profile.ruolo)) {
+    walk(profileId, profile)
+  }
+  return counts
+}
+
 /** Ruoli che possono avere un livello inferiore nell'albero (manager → agente → partner → studio). */
 export function canHaveHierarchyChildren(ruolo: string): boolean {
   return (CHILD_ROLES_BY_PARENT[ruolo]?.length ?? 0) > 0
