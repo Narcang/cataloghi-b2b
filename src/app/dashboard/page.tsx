@@ -391,7 +391,7 @@ export default async function Dashboard(props: {
           />
         )}
 
-        {showFullDashboard && (isAgente || isPartner) && gerarchiaOwnerProfile && (
+        {showFullDashboard && (isAgenzia || isAgente || isVenditoreLikeRole) && gerarchiaOwnerProfile && (
           <GerarchiaUtentiTree
             currentUserId={user!.id}
             viewerRole={ruoloCorrente}
