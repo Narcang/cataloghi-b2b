@@ -67,7 +67,7 @@ export function ruoloGerarchiaLabel(ruolo: string): string {
 export function ruoloGerarchiaDotClass(ruolo: string): string | null {
   switch (ruolo) {
     case 'manager':
-      return 'bg-red-500'
+      return 'bg-zinc-500'
     case 'agenzia':
       return 'bg-blue-500'
     case 'rivenditore':
