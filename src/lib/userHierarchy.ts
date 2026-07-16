@@ -378,6 +378,62 @@ function isDirectChild(
   return false
 }
 
+function findDirectParentProfile(
+  child: ProfiloGerarchiaRow,
+  profili: ProfiloGerarchiaRow[],
+  links: OperatoreLink[],
+): ProfiloGerarchiaRow | null {
+  for (const candidate of profili) {
+    if (candidate.id === child.id) continue
+    if (isDirectChild(candidate.id, candidate, child, links, profili)) {
+      return candidate
+    }
+  }
+  return null
+}
+
+/** Referente gerarchico da mostrare nell'elenco piatto (agente/agenzia o venditore/rivenditore). */
+export function resolveFlatListReferent(
+  child: ProfiloGerarchiaRow,
+  ownerProfile: ProfiloGerarchiaRow,
+  profili: ProfiloGerarchiaRow[],
+  links: OperatoreLink[],
+): ProfiloGerarchiaRow | null {
+  const stopRoles =
+    ownerProfile.ruolo === 'agenzia'
+      ? ['agente', 'agenzia']
+      : ownerProfile.ruolo === 'rivenditore'
+        ? ['distributore', 'rivenditore']
+        : []
+
+  if (stopRoles.length === 0) return null
+
+  const stopSet = new Set(stopRoles)
+  let current: ProfiloGerarchiaRow | null = child
+  const visited = new Set<string>()
+
+  while (current) {
+    const parent = findDirectParentProfile(current, profili, links)
+    if (!parent || visited.has(parent.id)) break
+    visited.add(parent.id)
+
+    if (parent.id === ownerProfile.id) return ownerProfile
+    if (stopSet.has(parent.ruolo)) return parent
+
+    current = parent
+  }
+
+  if (isDirectChild(ownerProfile.id, ownerProfile, child, links, profili)) {
+    return ownerProfile
+  }
+
+  return null
+}
+
+export function referentAssociatoLabel(referent: ProfiloGerarchiaRow): string {
+  return `${profiloGerarchiaDisplayLabel(referent)} (${ruoloGerarchiaLabel(referent.ruolo)})`
+}
+
 function profiloSortKey(p: ProfiloGerarchiaRow): string {
   return (p.societa || p.nome_completo || p.email || p.id).trim().toLocaleLowerCase('it')
 }

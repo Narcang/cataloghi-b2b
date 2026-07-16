@@ -5,6 +5,8 @@ import { Users } from 'lucide-react'
 import {
   getDescendantsByRole,
   profiloGerarchiaDisplayLabel,
+  referentAssociatoLabel,
+  resolveFlatListReferent,
   ruoloGerarchiaDotClass,
   ruoloGerarchiaLabel,
   type ProfiloGerarchiaRow,
@@ -24,7 +26,13 @@ type Props = {
   links: { utente_id: string; operatore_id: string }[]
 }
 
-function AssociatoCard({ profile }: { profile: ProfiloGerarchiaRow }) {
+function AssociatoCard({
+  profile,
+  referent,
+}: {
+  profile: ProfiloGerarchiaRow
+  referent: ProfiloGerarchiaRow | null
+}) {
   const roleDotClass = ruoloGerarchiaDotClass(profile.ruolo)
 
   return (
@@ -47,6 +55,11 @@ function AssociatoCard({ profile }: { profile: ProfiloGerarchiaRow }) {
             <p className="text-xs text-zinc-500 mt-1">
               {profile.area_geografica || 'Area non indicata'}
             </p>
+            {referent ? (
+              <p className="text-xs text-zinc-600 mt-1">
+                Associato a: <span className="font-medium">{referentAssociatoLabel(referent)}</span>
+              </p>
+            ) : null}
           </div>
           <span className="rounded-full border border-black/10 bg-zinc-100 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-zinc-700">
             {ruoloGerarchiaLabel(profile.ruolo)}
@@ -90,11 +103,20 @@ export default function AssociatiPiattiPanel({
     ) as Record<string, number>
   }, [ownerProfile, profili, links, tabs])
 
-  const sectionTitle = viewerRole === 'agenzia' ? 'Elenco Associati' : 'I Tuoi Studi Associati'
+  const referentById = useMemo(() => {
+    const map = new Map<string, ProfiloGerarchiaRow | null>()
+    for (const profile of associati) {
+      map.set(profile.id, resolveFlatListReferent(profile, ownerProfile, profili, links))
+    }
+    return map
+  }, [associati, ownerProfile, profili, links])
+
+  const sectionTitle =
+    viewerRole === 'agenzia' ? 'Elenco Tutti Gli Associati' : 'Elenco Tutti Gli Studi Associati'
   const sectionDesc =
     viewerRole === 'agenzia'
-      ? 'Vista rapida di tutti i rivenditori e gli studi collegati alla tua agenzia, senza espandere livelli.'
-      : 'Vista rapida di tutti gli studi collegati al tuo profilo rivenditore.'
+      ? 'Vista rapida di tutti i rivenditori e gli studi collegati alla tua agenzia, con il referente agente o agenzia.'
+      : 'Vista rapida di tutti gli studi collegati al tuo profilo rivenditore, con il venditore di riferimento.'
 
   const listHeading =
     viewerRole === 'agenzia'
@@ -160,7 +182,11 @@ export default function AssociatiPiattiPanel({
         ) : (
           <ul className="m-0 p-0 space-y-2">
             {associati.map((profile) => (
-              <AssociatoCard key={profile.id} profile={profile} />
+              <AssociatoCard
+                key={profile.id}
+                profile={profile}
+                referent={referentById.get(profile.id) ?? null}
+              />
             ))}
           </ul>
         )}
