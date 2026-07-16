@@ -342,13 +342,20 @@ function profiloSortKey(p: ProfiloGerarchiaRow): string {
   return (p.societa || p.nome_completo || p.email || p.id).trim().toLocaleLowerCase('it')
 }
 
-/** Etichetta leggibile per liste/checkbox (mostra la società quando il nome è assente). */
+/** Etichetta leggibile per liste/checkbox. Agenzie e rivenditori: solo società. */
 export function profiloGerarchiaDisplayLabel(
-  p: Pick<ProfiloGerarchiaRow, 'societa' | 'nome_completo' | 'email'>,
+  p: Pick<ProfiloGerarchiaRow, 'societa' | 'nome_completo' | 'email' | 'ruolo'>,
 ): string {
   const societa = p.societa?.trim()
   const nome = p.nome_completo?.trim()
   const email = p.email?.trim()
+  const preferSocieta = p.ruolo === 'agenzia' || p.ruolo === 'rivenditore'
+
+  if (preferSocieta) {
+    if (societa) return societa
+    return nome || email || 'Utente senza nome'
+  }
+
   if (societa && nome && nome.toLocaleLowerCase('it') !== societa.toLocaleLowerCase('it')) {
     return `${societa} · ${nome}`
   }
