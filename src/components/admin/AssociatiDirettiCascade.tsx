@@ -9,6 +9,7 @@ import {
   nestedAssociatiLabel,
   ruoloGerarchiaLabel,
   ruoloGerarchiaDotClass,
+  profiloGerarchiaDisplayLabel,
   type ProfiloGerarchiaRow,
 } from '@/lib/userHierarchy'
 
@@ -112,7 +113,7 @@ function CascadeNode({
                     aria-hidden
                   />
                 ) : null}
-                {node.nome_completo || node.email || 'Utente'}
+                {profiloGerarchiaDisplayLabel(node)}
               </button>
               <span className="text-zinc-500 text-xs block mt-0.5">
                 {ruoloGerarchiaLabel(node.ruolo)}
@@ -237,7 +238,7 @@ export default function AssociatiDirettiCascade({
                     }}
                   />
                   <span>
-                    {candidate.nome_completo || candidate.email}{' '}
+                    {profiloGerarchiaDisplayLabel(candidate)}{' '}
                     <span className="text-zinc-500 text-xs">
                       ({ruoloGerarchiaLabel(candidate.ruolo)}
                       {candidate.area_geografica ? ` · ${candidate.area_geografica}` : ''})

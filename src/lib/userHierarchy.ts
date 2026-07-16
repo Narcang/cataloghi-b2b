@@ -282,12 +282,7 @@ export function getCandidateAssociatiProfiles(
         p.registrazione_approvata !== false,
     )
     .sort((a, b) =>
-      (a.nome_completo || a.email || a.id)
-        .trim()
-        .toLocaleLowerCase('it')
-        .localeCompare((b.nome_completo || b.email || b.id).trim().toLocaleLowerCase('it'), 'it', {
-          sensitivity: 'base',
-        }),
+      profiloSortKey(a).localeCompare(profiloSortKey(b), 'it', { sensitivity: 'base' }),
     )
 }
 
@@ -345,6 +340,20 @@ function isDirectChild(
 
 function profiloSortKey(p: ProfiloGerarchiaRow): string {
   return (p.societa || p.nome_completo || p.email || p.id).trim().toLocaleLowerCase('it')
+}
+
+/** Etichetta leggibile per liste/checkbox (mostra la società quando il nome è assente). */
+export function profiloGerarchiaDisplayLabel(
+  p: Pick<ProfiloGerarchiaRow, 'societa' | 'nome_completo' | 'email'>,
+): string {
+  const societa = p.societa?.trim()
+  const nome = p.nome_completo?.trim()
+  const email = p.email?.trim()
+  if (societa && nome && nome.toLocaleLowerCase('it') !== societa.toLocaleLowerCase('it')) {
+    return `${societa} · ${nome}`
+  }
+  if (societa) return societa
+  return nome || email || 'Utente senza nome'
 }
 
 function isProfiloVisibileInGerarchia(p: ProfiloGerarchiaRow): boolean {
