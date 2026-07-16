@@ -161,10 +161,11 @@ function HierarchyNode({
                       <span
                         key={ruolo}
                         title={label}
-                        className="inline-flex items-center gap-1 rounded-full border border-black/10 bg-zinc-50 px-1.5 py-0.5 text-xs font-medium text-zinc-500"
+                        className="inline-flex items-center gap-1 rounded-full border border-black/10 bg-zinc-50 px-2 py-0.5 text-xs font-medium text-zinc-600"
                       >
                         <span className={`h-2 w-2 shrink-0 rounded-full ${dotClass}`} aria-hidden />
-                        {breakdownCounts[ruolo] ?? 0}
+                        <span>{ruoloGerarchiaLabel(ruolo)}</span>
+                        <span className="font-semibold text-zinc-800">{breakdownCounts[ruolo] ?? 0}</span>
                       </span>
                     )
                   })}
