@@ -107,6 +107,8 @@ export function roleBreakdownBadgesForNode(ruolo: string): RoleBreakdownBadge[] 
         { ruolo: 'rivenditore', label: 'Rivenditori' },
         { ruolo: 'studio', label: 'Studi' },
       ]
+    case 'rivenditore':
+      return [{ ruolo: 'studio', label: 'Studi' }]
     case 'distributore':
       return [{ ruolo: 'studio', label: 'Studi' }]
     default:

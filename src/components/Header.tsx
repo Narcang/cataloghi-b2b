@@ -153,6 +153,8 @@ export default function Header() {
     ? menuItemsBase.filter((item) => item.href !== '/registrazione')
     : menuItemsBase
   const menuItems: MenuItem[] = [catalogMenuItem, ...visibleBaseItems]
+  const gestioneUtentiHref =
+    profiloRuolo === 'admin' ? '/dashboard/gestione-utenti' : '/dashboard'
 
   return (
     <header className="ladiva-header">
@@ -239,9 +241,9 @@ export default function Header() {
                     className="ladiva-dropdown-menu ladiva-account-dropdown-panel"
                     role="menu"
                   >
-                    {(profiloRuolo === 'admin' || profiloRuolo === 'manager') && (
+                    {user ? (
                       <Link
-                        href="/dashboard/gestione-utenti"
+                        href={gestioneUtentiHref}
                         className="ladiva-dropdown-item"
                         role="menuitem"
                         onClick={() => setAccountMenuOpen(false)}
@@ -249,7 +251,7 @@ export default function Header() {
                         <Users size={16} aria-hidden />
                         Gestione Utenti
                       </Link>
-                    )}
+                    ) : null}
                     {profiloRuolo === 'admin' && (
                       <Link
                         href="/dashboard/gestione-cataloghi"
