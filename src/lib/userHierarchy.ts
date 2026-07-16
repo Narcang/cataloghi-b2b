@@ -90,6 +90,12 @@ export type RoleBreakdownBadge = { ruolo: string; label: string }
 /** Badge conteggio discendenti da mostrare nel box di un profilo in struttura organizzativa. */
 export function roleBreakdownBadgesForNode(ruolo: string): RoleBreakdownBadge[] {
   switch (ruolo) {
+    case 'manager':
+      return [
+        { ruolo: 'agenzia', label: 'Agenzie' },
+        { ruolo: 'rivenditore', label: 'Rivenditori' },
+        { ruolo: 'studio', label: 'Studi' },
+      ]
     case 'agenzia':
       return [
         { ruolo: 'agente', label: 'Agenti' },
