@@ -153,6 +153,47 @@ export function countDescendantsByRoles(
   return counts
 }
 
+/** Elenco piatto di tutti i discendenti con un dato ruolo sotto un profilo. */
+export function getDescendantsByRole(
+  profileId: string,
+  profile: ProfiloGerarchiaRow,
+  targetRole: string,
+  profili: ProfiloGerarchiaRow[],
+  links: OperatoreLink[],
+): ProfiloGerarchiaRow[] {
+  const result: ProfiloGerarchiaRow[] = []
+  const seen = new Set<string>()
+
+  function walk(parentId: string, parentProfile: ProfiloGerarchiaRow) {
+    const children = getChildrenProfiles(
+      parentId,
+      parentProfile,
+      profileId,
+      profile.ruolo,
+      profili,
+      links,
+    )
+    for (const child of children) {
+      if (seen.has(child.id)) continue
+      seen.add(child.id)
+      if (child.ruolo === targetRole) {
+        result.push(child)
+      }
+      if (canHaveHierarchyChildren(child.ruolo)) {
+        walk(child.id, child)
+      }
+    }
+  }
+
+  if (canHaveHierarchyChildren(profile.ruolo)) {
+    walk(profileId, profile)
+  }
+
+  return result.sort((a, b) =>
+    profiloSortKey(a).localeCompare(profiloSortKey(b), 'it', { sensitivity: 'base' }),
+  )
+}
+
 /** Ruoli che possono avere un livello inferiore nell'albero (manager → agente → partner → studio). */
 export function canHaveHierarchyChildren(ruolo: string): boolean {
   return (CHILD_ROLES_BY_PARENT[ruolo]?.length ?? 0) > 0

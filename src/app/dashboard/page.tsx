@@ -24,6 +24,7 @@ import PartnerListiniPortal from '@/components/dashboard/PartnerListiniPortal'
 import InvitaUtente from '@/components/InvitaUtente'
 import ContattoDirettoCard from '@/components/dashboard/ContattoDirettoCard'
 import GerarchiaUtentiTree from '@/components/admin/GerarchiaUtentiTree'
+import AssociatiPiattiPanel from '@/components/dashboard/AssociatiPiattiPanel'
 import type { ProfiloGerarchiaRow } from '@/lib/userHierarchy'
 import { profiloToGerarchiaRow, resolveAgenziaParentForAgent } from '@/lib/userHierarchy'
 
@@ -381,7 +382,16 @@ export default async function Dashboard(props: {
           </section>
         )}
 
-        {showFullDashboard && (isAgenzia || isAgente || isVenditoreLikeRole) && gerarchiaOwnerProfile && (
+        {showFullDashboard && (isAgenzia || isRivenditore) && gerarchiaOwnerProfile && (
+          <AssociatiPiattiPanel
+            ownerProfile={gerarchiaOwnerProfile}
+            viewerRole={isAgenzia ? 'agenzia' : 'rivenditore'}
+            profili={profiliGerarchiaDashboard}
+            links={linksDashboard}
+          />
+        )}
+
+        {showFullDashboard && (isAgente || isPartner) && gerarchiaOwnerProfile && (
           <GerarchiaUtentiTree
             currentUserId={user!.id}
             viewerRole={ruoloCorrente}
