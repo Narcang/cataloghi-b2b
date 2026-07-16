@@ -98,7 +98,6 @@ export function roleBreakdownBadgesForNode(ruolo: string): RoleBreakdownBadge[] 
       ]
     case 'agenzia':
       return [
-        { ruolo: 'agente', label: 'Agenti' },
         { ruolo: 'rivenditore', label: 'Rivenditori' },
         { ruolo: 'studio', label: 'Studi' },
       ]
