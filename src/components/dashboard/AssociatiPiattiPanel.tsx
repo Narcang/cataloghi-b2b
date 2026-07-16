@@ -55,15 +55,17 @@ function AssociatoCard({
             <p className="text-xs text-zinc-500 mt-1">
               {profile.area_geografica || 'Area non indicata'}
             </p>
+          </div>
+          <div className="flex flex-col items-end gap-1.5 text-right">
+            <span className="rounded-full border border-black/10 bg-zinc-100 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-zinc-700">
+              {ruoloGerarchiaLabel(profile.ruolo)}
+            </span>
             {referent ? (
-              <p className="text-xs text-zinc-600 mt-1">
-                Associato a: <span className="font-medium">{referentAssociatoLabel(referent)}</span>
+              <p className="text-base font-semibold text-zinc-800 max-w-[16rem] leading-snug">
+                Associato a: {referentAssociatoLabel(referent)}
               </p>
             ) : null}
           </div>
-          <span className="rounded-full border border-black/10 bg-zinc-100 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-zinc-700">
-            {ruoloGerarchiaLabel(profile.ruolo)}
-          </span>
         </div>
       </div>
     </li>
