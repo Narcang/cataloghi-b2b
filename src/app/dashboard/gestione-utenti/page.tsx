@@ -58,7 +58,7 @@ export default async function GestioneUtentiPage(props: {
   if (!isManager) redirect('/dashboard')
 
   const profiloSel =
-    'id, nome_completo, email, telefono, societa, area_geografica, ruolo, registrazione_approvata, creato_il'
+    'id, nome_completo, email, telefono, societa, area_geografica, ruolo, registrazione_approvata, creato_il, espositore_1, espositore_2, box_show_room_1, box_show_room_2, box_show_room_3, box_show_room_4'
 
   let listaQuery = supabase
     .from('profili')
@@ -88,7 +88,7 @@ export default async function GestioneUtentiPage(props: {
 
   let gerarchiaQuery = svc
     .from('profili')
-    .select('id, nome_completo, societa, email, area_geografica, ruolo, invitato_da, registrazione_approvata')
+    .select('id, nome_completo, societa, email, area_geografica, ruolo, invitato_da, registrazione_approvata, espositore_1, espositore_2, box_show_room_1, box_show_room_2, box_show_room_3, box_show_room_4')
     .neq('ruolo', 'free')
     .order('nome_completo', { ascending: true, nullsFirst: false })
 
@@ -100,7 +100,7 @@ export default async function GestioneUtentiPage(props: {
   /** Tutti gli utenti approvati, senza filtro area/nome: usati per associare il ruolo inferiore. */
   const associazioneQuery = svc
     .from('profili')
-    .select('id, nome_completo, societa, email, area_geografica, ruolo, invitato_da, registrazione_approvata')
+    .select('id, nome_completo, societa, email, area_geografica, ruolo, invitato_da, registrazione_approvata, espositore_1, espositore_2, box_show_room_1, box_show_room_2, box_show_room_3, box_show_room_4')
     .neq('ruolo', 'free')
     .or('registrazione_approvata.eq.true,registrazione_approvata.is.null')
     .order('nome_completo', { ascending: true, nullsFirst: false })

@@ -203,13 +203,16 @@ export default async function Dashboard(props: {
   }
 
   // Gerarchia propria per agenzia/agente/partner
+  const PROFILI_GERARCHIA_SEL =
+    'id, nome_completo, societa, email, area_geografica, ruolo, invitato_da, registrazione_approvata, espositore_1, espositore_2, box_show_room_1, box_show_room_2, box_show_room_3, box_show_room_4'
+
   let profiliGerarchiaDashboard: ProfiloGerarchiaRow[] = []
   let linksDashboard: { utente_id: string; operatore_id: string }[] = []
   if (user && (isAgenzia || isAgente || isVenditoreLikeRole)) {
     const [profiliRes, linksRes] = await Promise.all([
       supabase
         .from('profili')
-        .select('id, nome_completo, societa, email, area_geografica, ruolo, invitato_da, registrazione_approvata')
+        .select(PROFILI_GERARCHIA_SEL)
         .neq('ruolo', 'free')
         .or('registrazione_approvata.eq.true,registrazione_approvata.is.null')
         .limit(500),

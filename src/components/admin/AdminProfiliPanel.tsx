@@ -5,6 +5,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { Users, UserCheck } from 'lucide-react'
 import AssociatiDirettiCascade from '@/components/admin/AssociatiDirettiCascade'
 import CatalogoPermessiPanel, { type CatalogoDisponibile } from '@/components/admin/CatalogoPermessiPanel'
+import RivenditoreProfiloCampi from '@/components/admin/RivenditoreProfiloCampi'
+import { readRivenditoreCampiFromFormData } from '@/lib/rivenditoreProfiloOptions'
 import {
   associatiAggiungiSectionLabel,
   associatiDirettiSectionLabel,
@@ -24,6 +26,12 @@ export type ProfiloGestioneRow = {
   ruolo: string
   registrazione_approvata: boolean | null
   creato_il: string | null
+  espositore_1?: string | null
+  espositore_2?: string | null
+  box_show_room_1?: string | null
+  box_show_room_2?: string | null
+  box_show_room_3?: string | null
+  box_show_room_4?: string | null
 }
 
 export type OperatoreAssociazione = {
@@ -235,7 +243,7 @@ export default function AdminProfiliPanel({
     const rawApprovazione = fd.get('registrazione_approvata')
     const registrazione_approvata =
       rawApprovazione === 'on' || rawApprovazione === 'true' || rawApprovazione === '1'
-    return {
+    const body: Record<string, unknown> = {
       profilo_id: profiloId,
       nome_completo,
       email,
@@ -245,6 +253,10 @@ export default function AdminProfiliPanel({
       ruolo,
       registrazione_approvata,
     }
+    if (ruolo === 'rivenditore') {
+      Object.assign(body, readRivenditoreCampiFromFormData(fd))
+    }
+    return body
   }
 
   return (
@@ -353,6 +365,19 @@ export default function AdminProfiliPanel({
                       <input type="checkbox" name="registrazione_approvata" value="on" defaultChecked={false} className="rounded border-black" />
                       Approva registrazione (accesso ai cataloghi secondo ruolo e area)
                     </label>
+                    {p.ruolo === 'rivenditore' ? (
+                      <RivenditoreProfiloCampi
+                        profilo={{
+                          espositore_1: p.espositore_1 ?? null,
+                          espositore_2: p.espositore_2 ?? null,
+                          box_show_room_1: p.box_show_room_1 ?? null,
+                          box_show_room_2: p.box_show_room_2 ?? null,
+                          box_show_room_3: p.box_show_room_3 ?? null,
+                          box_show_room_4: p.box_show_room_4 ?? null,
+                        }}
+                        inputClassName="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
+                      />
+                    ) : null}
                     <div className="md:col-span-2 flex flex-wrap items-center gap-3">
                       <button
                         type="submit"
@@ -538,6 +563,18 @@ export default function AdminProfiliPanel({
                             />
                             Registrazione approvata
                           </label>
+                          {p.ruolo === 'rivenditore' ? (
+                            <RivenditoreProfiloCampi
+                              profilo={{
+                                espositore_1: p.espositore_1 ?? null,
+                                espositore_2: p.espositore_2 ?? null,
+                                box_show_room_1: p.box_show_room_1 ?? null,
+                                box_show_room_2: p.box_show_room_2 ?? null,
+                                box_show_room_3: p.box_show_room_3 ?? null,
+                                box_show_room_4: p.box_show_room_4 ?? null,
+                              }}
+                            />
+                          ) : null}
                           <div className="md:col-span-2 flex flex-wrap items-center gap-3">
                             <button
                               type="submit"

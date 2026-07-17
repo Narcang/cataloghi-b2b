@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
+import {
+  BOX_SHOW_ROOM_OPTIONS,
+  ESPOSITORE_OPTIONS,
+  RIVENDITORE_PROFILO_CAMPI_KEYS,
+} from '@/lib/rivenditoreProfiloOptions'
 
 const RUOLI_OK = new Set(['admin', 'manager', 'agenzia', 'agente', 'fornitore', 'rivenditore', 'distributore', 'free', 'studio', 'partner_dipendente'])
 
@@ -17,6 +22,40 @@ type Body = {
   area_geografica?: string | null
   ruolo?: string | null
   registrazione_approvata?: boolean | null
+  espositore_1?: string | null
+  espositore_2?: string | null
+  box_show_room_1?: string | null
+  box_show_room_2?: string | null
+  box_show_room_3?: string | null
+  box_show_room_4?: string | null
+}
+
+const ESPOSITORE_SET = new Set<string>(ESPOSITORE_OPTIONS)
+const SHOW_ROOM_SET = new Set<string>(BOX_SHOW_ROOM_OPTIONS)
+
+function applyRivenditoreSelectPatch(
+  patch: Record<string, unknown>,
+  body: Body,
+  field: (typeof RIVENDITORE_PROFILO_CAMPI_KEYS)[number],
+  allowed: Set<string>,
+): string | null {
+  if (!(field in body)) return null
+  const raw = body[field]
+  if (raw === undefined) return null
+  if (raw === null) {
+    patch[field] = null
+    return null
+  }
+  const trimmed = String(raw).trim()
+  if (trimmed === '') {
+    patch[field] = null
+    return null
+  }
+  if (!allowed.has(trimmed)) {
+    return `Valore non valido per ${field.replaceAll('_', ' ')}`
+  }
+  patch[field] = trimmed
+  return null
 }
 
 export async function POST(request: NextRequest) {
@@ -80,6 +119,31 @@ export async function POST(request: NextRequest) {
   }
   if (typeof body.registrazione_approvata === 'boolean') {
     patch.registrazione_approvata = body.registrazione_approvata
+  }
+
+  const { data: profiloEsistente } = await supabase
+    .from('profili')
+    .select('ruolo')
+    .eq('id', profiloId)
+    .maybeSingle()
+
+  const ruoloEffettivo =
+    typeof patch.ruolo === 'string' ? patch.ruolo : (profiloEsistente?.ruolo ?? null)
+
+  if (ruoloEffettivo === 'rivenditore') {
+    for (const field of ['espositore_1', 'espositore_2'] as const) {
+      const err = applyRivenditoreSelectPatch(patch, body, field, ESPOSITORE_SET)
+      if (err) return jsonResponse(false, err, 400)
+    }
+    for (const field of [
+      'box_show_room_1',
+      'box_show_room_2',
+      'box_show_room_3',
+      'box_show_room_4',
+    ] as const) {
+      const err = applyRivenditoreSelectPatch(patch, body, field, SHOW_ROOM_SET)
+      if (err) return jsonResponse(false, err, 400)
+    }
   }
 
   if (Object.keys(patch).length === 0) {

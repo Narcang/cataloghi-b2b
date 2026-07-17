@@ -19,6 +19,8 @@ import {
   type HierarchyRootRole,
   type ProfiloGerarchiaRow,
 } from '@/lib/userHierarchy'
+import RivenditoreProfiloRiepilogo from '@/components/admin/RivenditoreProfiloRiepilogo'
+import { hasRivenditoreProfiloCampi } from '@/lib/rivenditoreProfiloOptions'
 
 type Props = {
   currentUserId: string
@@ -77,6 +79,8 @@ function HierarchyNode({
       links,
     )
   }, [profile.id, profile.ruolo, breakdownBadges, profili, links])
+  const showRivenditoreCampi =
+    profile.ruolo === 'rivenditore' && hasRivenditoreProfiloCampi(profile)
 
   return (
     <li className="list-none">
@@ -118,8 +122,14 @@ function HierarchyNode({
               : undefined
           }
         >
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
+          <div
+            className={`grid gap-3 items-start ${
+              showRivenditoreCampi
+                ? 'grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]'
+                : 'grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto]'
+            }`}
+          >
+            <div className="min-w-0">
               <h4 className="text-base font-semibold text-zinc-900 flex items-center gap-2">
                 {roleDotClass ? (
                   <span
@@ -143,7 +153,12 @@ function HierarchyNode({
                 {profile.area_geografica || 'Area non indicata'}
               </p>
             </div>
-            <div className="flex flex-col items-end gap-1">
+            {showRivenditoreCampi ? (
+              <div className="flex justify-center md:justify-self-center px-1 md:px-3">
+                <RivenditoreProfiloRiepilogo profilo={profile} />
+              </div>
+            ) : null}
+            <div className="flex flex-col items-start md:items-end gap-1 md:justify-self-end">
               <span className="rounded-full border border-black/10 bg-zinc-100 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-zinc-700">
                 {ruoloGerarchiaLabel(profile.ruolo)}
               </span>

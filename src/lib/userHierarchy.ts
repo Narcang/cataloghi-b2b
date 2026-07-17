@@ -7,6 +7,12 @@ export type ProfiloGerarchiaRow = {
   ruolo: string
   invitato_da: string | null
   registrazione_approvata?: boolean | null
+  espositore_1?: string | null
+  espositore_2?: string | null
+  box_show_room_1?: string | null
+  box_show_room_2?: string | null
+  box_show_room_3?: string | null
+  box_show_room_4?: string | null
 }
 
 type OperatoreLink = { utente_id: string; operatore_id: string }
