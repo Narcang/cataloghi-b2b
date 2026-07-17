@@ -553,16 +553,6 @@ export default function AdminProfiliPanel({
                               ))}
                             </select>
                           </label>
-                          <label className="md:col-span-2 flex items-center gap-2 text-sm text-zinc-800">
-                            <input
-                              type="checkbox"
-                              name="registrazione_approvata"
-                              value="on"
-                              defaultChecked={p.registrazione_approvata !== false}
-                              className="rounded border-black"
-                            />
-                            Registrazione approvata
-                          </label>
                           {p.ruolo === 'rivenditore' ? (
                             <RivenditoreProfiloCampi
                               profilo={{
@@ -575,6 +565,16 @@ export default function AdminProfiliPanel({
                               }}
                             />
                           ) : null}
+                          <label className="md:col-span-2 flex items-center gap-2 text-sm text-zinc-800">
+                            <input
+                              type="checkbox"
+                              name="registrazione_approvata"
+                              value="on"
+                              defaultChecked={p.registrazione_approvata !== false}
+                              className="rounded border-black"
+                            />
+                            Registrazione approvata
+                          </label>
                           <div className="md:col-span-2 flex flex-wrap items-center gap-3">
                             <button
                               type="submit"
