@@ -438,6 +438,27 @@ function profiloSortKey(p: ProfiloGerarchiaRow): string {
   return (p.societa || p.nome_completo || p.email || p.id).trim().toLocaleLowerCase('it')
 }
 
+function childRoleSortIndex(parentRuolo: string | undefined, childRuolo: string): number {
+  if (!parentRuolo) return 0
+  const order = CHILD_ROLES_BY_PARENT[parentRuolo]
+  if (!order?.length) return 0
+  const idx = order.indexOf(childRuolo)
+  return idx === -1 ? order.length : idx
+}
+
+function sortProfilesByRoleThenName(
+  profiles: ProfiloGerarchiaRow[],
+  parentProfile: ProfiloGerarchiaRow | null,
+): ProfiloGerarchiaRow[] {
+  const parentRuolo = parentProfile?.ruolo
+  return [...profiles].sort((a, b) => {
+    const byRole =
+      childRoleSortIndex(parentRuolo, a.ruolo) - childRoleSortIndex(parentRuolo, b.ruolo)
+    if (byRole !== 0) return byRole
+    return profiloSortKey(a).localeCompare(profiloSortKey(b), 'it', { sensitivity: 'base' })
+  })
+}
+
 /** Etichetta leggibile per liste/checkbox. Agenzie e rivenditori: solo società. */
 export function profiloGerarchiaDisplayLabel(
   p: Pick<ProfiloGerarchiaRow, 'societa' | 'nome_completo' | 'email' | 'ruolo'>,
@@ -504,9 +525,7 @@ export function getChildrenProfiles(
   })
 
   const unique = new Map(candidates.map((p) => [p.id, p]))
-  return [...unique.values()].sort((a, b) =>
-    profiloSortKey(a).localeCompare(profiloSortKey(b), 'it', { sensitivity: 'base' }),
-  )
+  return sortProfilesByRoleThenName([...unique.values()], parentProfile)
 }
 
 export function countChildrenProfiles(
