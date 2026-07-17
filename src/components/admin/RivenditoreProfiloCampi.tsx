@@ -44,7 +44,7 @@ export default function RivenditoreProfiloCampi({
   inputClassName = 'mt-1 w-full h-9 rounded-md border border-black bg-zinc-50 px-2 text-sm',
 }: Props) {
   return (
-    <div className="md:col-span-2 space-y-4 rounded-lg border border-black/15 bg-zinc-50/80 p-4">
+    <div className="md:col-span-2 space-y-4 rounded-lg border border-black/20 p-4">
       <div>
         <p className="text-xs font-semibold uppercase tracking-wide">Espositori e Box Show Room</p>
         <p className="text-xs opacity-80 mt-0.5">Solo per profili Rivenditori — scelta singola per ogni voce.</p>
