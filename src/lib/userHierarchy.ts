@@ -261,13 +261,11 @@ const FLAT_LIST_TABS_BY_VIEWER: Record<FlatListViewerRole, FlatListTab[]> = {
     { id: 'studio', label: 'Studi', ruolo: 'studio' },
   ],
   rivenditore: [
-    { id: 'agente', label: 'Agenti', ruolo: 'agente' },
     { id: 'distributore', label: 'Venditori', ruolo: 'distributore' },
     { id: 'partner_dipendente', label: 'Promoter', ruolo: 'partner_dipendente' },
     { id: 'studio', label: 'Studi', ruolo: 'studio' },
   ],
   distributore: [
-    { id: 'agente', label: 'Agenti', ruolo: 'agente' },
     { id: 'distributore', label: 'Venditori', ruolo: 'distributore' },
     { id: 'partner_dipendente', label: 'Promoter', ruolo: 'partner_dipendente' },
     { id: 'studio', label: 'Studi', ruolo: 'studio' },
@@ -431,9 +429,9 @@ export function flatListSectionDescription(viewerRole: FlatListViewerRole): stri
     case 'agente':
       return 'Vista rapida di agenti, venditori, rivenditori e studi della tua compagnia, con il referente di riferimento.'
     case 'rivenditore':
-      return 'Vista rapida di agenti, venditori, promoter e studi collegati al tuo rivenditore, con il referente di riferimento.'
+      return 'Vista rapida di venditori, promoter e studi collegati al tuo rivenditore, con il referente di riferimento.'
     case 'distributore':
-      return 'Vista rapida di agenti, venditori, promoter e studi della tua compagnia rivenditore, con il referente di riferimento.'
+      return 'Vista rapida di venditori, promoter e studi della tua compagnia rivenditore, con il referente di riferimento.'
   }
 }
 
