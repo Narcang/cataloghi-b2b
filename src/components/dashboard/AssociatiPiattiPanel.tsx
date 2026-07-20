@@ -3,50 +3,23 @@
 import { useMemo, useState } from 'react'
 import { Users } from 'lucide-react'
 import {
-  getDescendantsByRole,
+  flatListSectionDescription,
+  flatListTabsForViewer,
+  getFlatListProfilesByRole,
   profiloGerarchiaDisplayLabel,
   referentAssociatoLabel,
   resolveFlatListReferent,
-  ruoloGerarchiaDotClass,
+  ruoloBreakdownDotClass,
   ruoloGerarchiaLabel,
+  type FlatListViewerRole,
   type ProfiloGerarchiaRow,
 } from '@/lib/userHierarchy'
-
-type FlatTab = { id: string; label: string; ruolo: string }
-
-const MULTI_TAB_ROLES = new Set(['agenzia', 'agente'])
-
-const MULTI_TABS: FlatTab[] = [
-  { id: 'rivenditore', label: 'Rivenditori', ruolo: 'rivenditore' },
-  { id: 'studio', label: 'Studi', ruolo: 'studio' },
-]
-
-type FlatListViewerRole = 'agenzia' | 'agente' | 'rivenditore' | 'distributore'
 
 type Props = {
   ownerProfile: ProfiloGerarchiaRow
   viewerRole: FlatListViewerRole
   profili: ProfiloGerarchiaRow[]
   links: { utente_id: string; operatore_id: string }[]
-}
-
-function flatListSectionTitle(viewerRole: FlatListViewerRole): string {
-  return viewerRole === 'rivenditore' || viewerRole === 'distributore'
-    ? 'Elenco Tutti Gli Studi Associati'
-    : 'Elenco Tutti Gli Associati'
-}
-
-function flatListSectionDesc(viewerRole: FlatListViewerRole): string {
-  switch (viewerRole) {
-    case 'agenzia':
-      return 'Vista rapida di tutti i rivenditori e gli studi collegati alla tua agenzia, con il referente agente o agenzia.'
-    case 'agente':
-      return 'Vista rapida di tutti i rivenditori e gli studi collegati al tuo profilo agente, con il referente di riferimento.'
-    case 'rivenditore':
-      return 'Vista rapida di tutti gli studi collegati al tuo profilo rivenditore, con il venditore di riferimento.'
-    case 'distributore':
-      return 'Vista rapida di tutti gli studi collegati al tuo profilo venditore, con il rivenditore o promoter di riferimento.'
-  }
 }
 
 function AssociatoCard({
@@ -56,7 +29,7 @@ function AssociatoCard({
   profile: ProfiloGerarchiaRow
   referent: ProfiloGerarchiaRow | null
 }) {
-  const roleDotClass = ruoloGerarchiaDotClass(profile.ruolo)
+  const roleDotClass = ruoloBreakdownDotClass(profile.ruolo)
 
   return (
     <li className="list-none">
@@ -101,32 +74,26 @@ export default function AssociatiPiattiPanel({
   profili,
   links,
 }: Props) {
-  const tabs = MULTI_TAB_ROLES.has(viewerRole) ? MULTI_TABS : null
-  const [activeTab, setActiveTab] = useState<string>('rivenditore')
+  const tabs = flatListTabsForViewer(viewerRole)
+  const [activeTab, setActiveTab] = useState<string>(tabs[0]?.id ?? 'rivenditore')
 
-  const activeRole = tabs ? tabs.find((t) => t.id === activeTab)?.ruolo ?? 'rivenditore' : 'studio'
+  const activeRole = tabs.find((t) => t.id === activeTab)?.ruolo ?? tabs[0]?.ruolo ?? 'studio'
 
   const associati = useMemo(
-    () =>
-      getDescendantsByRole(
-        ownerProfile.id,
-        ownerProfile,
-        activeRole,
-        profili,
-        links,
-      ),
+    () => getFlatListProfilesByRole(ownerProfile, activeRole, profili, links),
     [ownerProfile, activeRole, profili, links],
   )
 
-  const tabCounts = useMemo(() => {
-    if (!tabs) return null
-    return Object.fromEntries(
-      tabs.map((tab) => [
-        tab.id,
-        getDescendantsByRole(ownerProfile.id, ownerProfile, tab.ruolo, profili, links).length,
-      ]),
-    ) as Record<string, number>
-  }, [ownerProfile, profili, links, tabs])
+  const tabCounts = useMemo(
+    () =>
+      Object.fromEntries(
+        tabs.map((tab) => [
+          tab.id,
+          getFlatListProfilesByRole(ownerProfile, tab.ruolo, profili, links).length,
+        ]),
+      ) as Record<string, number>,
+    [ownerProfile, profili, links, tabs],
+  )
 
   const referentById = useMemo(() => {
     const map = new Map<string, ProfiloGerarchiaRow | null>()
@@ -136,59 +103,52 @@ export default function AssociatiPiattiPanel({
     return map
   }, [associati, ownerProfile, profili, links])
 
-  const sectionTitle = flatListSectionTitle(viewerRole)
-  const sectionDesc = flatListSectionDesc(viewerRole)
-
-  const listHeading = tabs
-    ? tabs.find((t) => t.id === activeTab)?.label ?? 'Associati'
-    : 'Studi'
+  const listHeading = tabs.find((t) => t.id === activeTab)?.label ?? 'Associati'
 
   return (
     <section id="elenco-associati" className="border border-black rounded-2xl bg-white p-6 space-y-6">
       <div>
         <h2 className="text-xl text-zinc-900 font-medium flex items-center gap-2">
           <Users size={20} className="text-[#060d41]" />
-          {sectionTitle}
+          Elenco Tutti Gli Associati
         </h2>
-        <p className="text-sm text-zinc-600 mt-1">{sectionDesc}</p>
+        <p className="text-sm text-zinc-600 mt-1">{flatListSectionDescription(viewerRole)}</p>
       </div>
 
-      {tabs ? (
-        <div className="flex flex-wrap gap-2" role="tablist" aria-label="Filtra associati per categoria">
-          {tabs.map((tab) => {
-            const active = activeTab === tab.id
-            const roleDotClass = ruoloGerarchiaDotClass(tab.ruolo)
-            const count = tabCounts?.[tab.id] ?? 0
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                role="tab"
-                aria-selected={active}
-                onClick={() => setActiveTab(tab.id)}
-                className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
-                  active
-                    ? 'border-[#060d41] bg-[#060d41] text-white'
-                    : 'border-black/20 bg-zinc-50 text-zinc-800 hover:bg-zinc-100'
+      <div className="flex flex-wrap gap-2" role="tablist" aria-label="Filtra associati per categoria">
+        {tabs.map((tab) => {
+          const active = activeTab === tab.id
+          const roleDotClass = ruoloBreakdownDotClass(tab.ruolo)
+          const count = tabCounts[tab.id] ?? 0
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              onClick={() => setActiveTab(tab.id)}
+              className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
+                active
+                  ? 'border-[#060d41] bg-[#060d41] text-white'
+                  : 'border-black/20 bg-zinc-50 text-zinc-800 hover:bg-zinc-100'
+              }`}
+            >
+              {tab.label}
+              <span
+                className={`rounded-full min-w-[1.5rem] px-2 py-0.5 text-xs font-semibold text-center ${
+                  roleDotClass
+                    ? `${roleDotClass} text-white`
+                    : active
+                      ? 'bg-white/20 text-white'
+                      : 'bg-zinc-100 text-zinc-700'
                 }`}
               >
-                {tab.label}
-                <span
-                  className={`rounded-full min-w-[1.5rem] px-2 py-0.5 text-xs font-semibold text-center ${
-                    roleDotClass
-                      ? `${roleDotClass} text-white`
-                      : active
-                        ? 'bg-white/20 text-white'
-                        : 'bg-zinc-100 text-zinc-700'
-                  }`}
-                >
-                  {count}
-                </span>
-              </button>
-            )
-          })}
-        </div>
-      ) : null}
+                {count}
+              </span>
+            </button>
+          )
+        })}
+      </div>
 
       <div>
         <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-500 mb-4">

@@ -25,8 +25,12 @@ import InvitaUtente from '@/components/InvitaUtente'
 import ContattoDirettoCard from '@/components/dashboard/ContattoDirettoCard'
 import GerarchiaUtentiTree from '@/components/admin/GerarchiaUtentiTree'
 import AssociatiPiattiPanel from '@/components/dashboard/AssociatiPiattiPanel'
-import type { ProfiloGerarchiaRow } from '@/lib/userHierarchy'
-import { profiloToGerarchiaRow, resolveAgenziaParentForAgent } from '@/lib/userHierarchy'
+import {
+  profiloToGerarchiaRow,
+  resolveAgenziaParentForAgent,
+  resolveFlatListOwnerProfile,
+  type ProfiloGerarchiaRow,
+} from '@/lib/userHierarchy'
 
 const ASSISTENZA_LADIVA_TELEFONO = '+39 0536 185 6217'
 const ASSISTENZA_LADIVA_EMAIL = 'info@ladiva-fpd.com'
@@ -320,7 +324,12 @@ export default async function Dashboard(props: {
       { ...profilo, email: user.email ?? null },
       profilo.invitato_da ?? null,
     )
-    associatiPiattiOwnerProfile = selfRow
+    associatiPiattiOwnerProfile = resolveFlatListOwnerProfile(
+      isAgenzia ? 'agenzia' : isAgente ? 'agente' : isPartner ? 'distributore' : 'rivenditore',
+      selfRow,
+      profiliGerarchiaDashboard,
+      linksDashboard,
+    )
     if (isAgente) {
       gerarchiaOwnerProfile =
         resolveAgenziaParentForAgent(selfRow, profiliGerarchiaDashboard, linksDashboard) ?? selfRow

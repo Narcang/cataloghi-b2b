@@ -88,6 +88,8 @@ export function ruoloGerarchiaDotClass(ruolo: string): string | null {
 /** Pallino per i badge di riepilogo (include ruoli secondari come agente). */
 export function ruoloBreakdownDotClass(ruolo: string): string | null {
   if (ruolo === 'agente') return 'bg-blue-400'
+  if (ruolo === 'distributore') return 'bg-violet-500'
+  if (ruolo === 'partner_dipendente') return 'bg-fuchsia-500'
   return ruoloGerarchiaDotClass(ruolo)
 }
 
@@ -239,6 +241,200 @@ export function resolveAgenziaParentForAgent(
   }
 
   return null
+}
+
+export type FlatListViewerRole = 'agenzia' | 'agente' | 'rivenditore' | 'distributore'
+
+export type FlatListTab = { id: string; label: string; ruolo: string }
+
+const FLAT_LIST_TABS_BY_VIEWER: Record<FlatListViewerRole, FlatListTab[]> = {
+  agenzia: [
+    { id: 'agente', label: 'Agenti', ruolo: 'agente' },
+    { id: 'distributore', label: 'Venditori', ruolo: 'distributore' },
+    { id: 'rivenditore', label: 'Rivenditori', ruolo: 'rivenditore' },
+    { id: 'studio', label: 'Studi', ruolo: 'studio' },
+  ],
+  agente: [
+    { id: 'agente', label: 'Agenti', ruolo: 'agente' },
+    { id: 'distributore', label: 'Venditori', ruolo: 'distributore' },
+    { id: 'rivenditore', label: 'Rivenditori', ruolo: 'rivenditore' },
+    { id: 'studio', label: 'Studi', ruolo: 'studio' },
+  ],
+  rivenditore: [
+    { id: 'agente', label: 'Agenti', ruolo: 'agente' },
+    { id: 'distributore', label: 'Venditori', ruolo: 'distributore' },
+    { id: 'partner_dipendente', label: 'Promoter', ruolo: 'partner_dipendente' },
+    { id: 'studio', label: 'Studi', ruolo: 'studio' },
+  ],
+  distributore: [
+    { id: 'agente', label: 'Agenti', ruolo: 'agente' },
+    { id: 'distributore', label: 'Venditori', ruolo: 'distributore' },
+    { id: 'partner_dipendente', label: 'Promoter', ruolo: 'partner_dipendente' },
+    { id: 'studio', label: 'Studi', ruolo: 'studio' },
+  ],
+}
+
+export function flatListTabsForViewer(viewerRole: FlatListViewerRole): FlatListTab[] {
+  return FLAT_LIST_TABS_BY_VIEWER[viewerRole] ?? []
+}
+
+export function resolveRivenditoreParentForDistributore(
+  distributoreProfile: ProfiloGerarchiaRow,
+  profili: ProfiloGerarchiaRow[],
+  links: OperatoreLink[],
+): ProfiloGerarchiaRow | null {
+  const byId = new Map(profili.map((p) => [p.id, p]))
+
+  const rivenditoreFromId = (id: string | null | undefined): ProfiloGerarchiaRow | null => {
+    if (!id) return null
+    const p = byId.get(id)
+    return p?.ruolo === 'rivenditore' ? p : null
+  }
+
+  const fromInvito = rivenditoreFromId(distributoreProfile.invitato_da)
+  if (fromInvito) return fromInvito
+
+  for (const link of links) {
+    const otherId =
+      link.utente_id === distributoreProfile.id
+        ? link.operatore_id
+        : link.operatore_id === distributoreProfile.id
+          ? link.utente_id
+          : null
+    if (!otherId) continue
+    const hit = rivenditoreFromId(otherId)
+    if (hit) return hit
+  }
+
+  let current: ProfiloGerarchiaRow | null = distributoreProfile
+  const visited = new Set<string>()
+  while (current && !visited.has(current.id)) {
+    visited.add(current.id)
+    const parent = findDirectParentProfile(current, profili, links)
+    if (!parent) break
+    if (parent.ruolo === 'rivenditore') return parent
+    current = parent
+  }
+
+  return null
+}
+
+function resolveAgenziaParentForRivenditore(
+  rivenditoreProfile: ProfiloGerarchiaRow,
+  profili: ProfiloGerarchiaRow[],
+  links: OperatoreLink[],
+): ProfiloGerarchiaRow | null {
+  const byId = new Map(profili.map((p) => [p.id, p]))
+
+  const agenziaFromId = (id: string | null | undefined): ProfiloGerarchiaRow | null => {
+    if (!id) return null
+    const p = byId.get(id)
+    return p?.ruolo === 'agenzia' ? p : null
+  }
+
+  const fromInvito = agenziaFromId(rivenditoreProfile.invitato_da)
+  if (fromInvito) return fromInvito
+
+  const agenteParent = findAgenteParentForRivenditore(rivenditoreProfile, profili, links)
+  if (agenteParent) {
+    return resolveAgenziaParentForAgent(agenteParent, profili, links)
+  }
+
+  for (const link of links) {
+    const otherId =
+      link.utente_id === rivenditoreProfile.id
+        ? link.operatore_id
+        : link.operatore_id === rivenditoreProfile.id
+          ? link.utente_id
+          : null
+    if (!otherId) continue
+    const hit = agenziaFromId(otherId)
+    if (hit) return hit
+  }
+
+  return null
+}
+
+function findAgenteParentForRivenditore(
+  rivenditoreProfile: ProfiloGerarchiaRow,
+  profili: ProfiloGerarchiaRow[],
+  links: OperatoreLink[],
+): ProfiloGerarchiaRow | null {
+  const byId = new Map(profili.map((p) => [p.id, p]))
+  const fromInvito = byId.get(rivenditoreProfile.invitato_da ?? '')
+  if (fromInvito?.ruolo === 'agente') return fromInvito
+
+  const parent = findDirectParentProfile(rivenditoreProfile, profili, links)
+  return parent?.ruolo === 'agente' ? parent : null
+}
+
+function getAgentiInCompanyScope(
+  ownerProfile: ProfiloGerarchiaRow,
+  profili: ProfiloGerarchiaRow[],
+  links: OperatoreLink[],
+): ProfiloGerarchiaRow[] {
+  if (ownerProfile.ruolo === 'agenzia') {
+    return getDescendantsByRole(ownerProfile.id, ownerProfile, 'agente', profili, links)
+  }
+
+  if (ownerProfile.ruolo === 'rivenditore') {
+    const agente = findAgenteParentForRivenditore(ownerProfile, profili, links)
+    if (agente) {
+      const agenzia = resolveAgenziaParentForAgent(agente, profili, links)
+      if (agenzia) {
+        return getDescendantsByRole(agenzia.id, agenzia, 'agente', profili, links)
+      }
+      return [agente]
+    }
+
+    const agenzia = resolveAgenziaParentForRivenditore(ownerProfile, profili, links)
+    if (agenzia) {
+      return getDescendantsByRole(agenzia.id, agenzia, 'agente', profili, links)
+    }
+  }
+
+  return []
+}
+
+/** Radice gerarchica per l'elenco piatto: compagnia agenzia (agente) o rivenditore (venditore). */
+export function resolveFlatListOwnerProfile(
+  viewerRole: FlatListViewerRole,
+  selfProfile: ProfiloGerarchiaRow,
+  profili: ProfiloGerarchiaRow[],
+  links: OperatoreLink[],
+): ProfiloGerarchiaRow {
+  if (viewerRole === 'agente') {
+    return resolveAgenziaParentForAgent(selfProfile, profili, links) ?? selfProfile
+  }
+  if (viewerRole === 'distributore') {
+    return resolveRivenditoreParentForDistributore(selfProfile, profili, links) ?? selfProfile
+  }
+  return selfProfile
+}
+
+export function getFlatListProfilesByRole(
+  ownerProfile: ProfiloGerarchiaRow,
+  targetRole: string,
+  profili: ProfiloGerarchiaRow[],
+  links: OperatoreLink[],
+): ProfiloGerarchiaRow[] {
+  if (targetRole === 'agente') {
+    return getAgentiInCompanyScope(ownerProfile, profili, links)
+  }
+  return getDescendantsByRole(ownerProfile.id, ownerProfile, targetRole, profili, links)
+}
+
+export function flatListSectionDescription(viewerRole: FlatListViewerRole): string {
+  switch (viewerRole) {
+    case 'agenzia':
+      return 'Vista rapida di agenti, venditori, rivenditori e studi collegati alla tua agenzia, con il referente di riferimento.'
+    case 'agente':
+      return 'Vista rapida di agenti, venditori, rivenditori e studi della tua compagnia, con il referente di riferimento.'
+    case 'rivenditore':
+      return 'Vista rapida di agenti, venditori, promoter e studi collegati al tuo rivenditore, con il referente di riferimento.'
+    case 'distributore':
+      return 'Vista rapida di agenti, venditori, promoter e studi della tua compagnia rivenditore, con il referente di riferimento.'
+  }
 }
 
 export function profiloToGerarchiaRow(
@@ -408,11 +604,25 @@ export function resolveFlatListReferent(
   const stopRolesByOwner: Record<string, string[]> = {
     agenzia: ['agente', 'agenzia'],
     agente: ['agente', 'agenzia'],
-    rivenditore: ['distributore', 'rivenditore'],
+    rivenditore: ['distributore', 'rivenditore', 'partner_dipendente'],
     distributore: ['partner_dipendente', 'distributore', 'rivenditore'],
   }
 
-  const stopRoles = stopRolesByOwner[ownerProfile.ruolo] ?? []
+  let stopRoles: string[]
+  switch (child.ruolo) {
+    case 'agente':
+      stopRoles = ['agente', 'agenzia']
+      break
+    case 'distributore':
+    case 'partner_dipendente':
+      stopRoles = ['partner_dipendente', 'distributore', 'rivenditore']
+      break
+    case 'rivenditore':
+      stopRoles = ['agente', 'agenzia']
+      break
+    default:
+      stopRoles = stopRolesByOwner[ownerProfile.ruolo] ?? []
+  }
 
   if (stopRoles.length === 0) return null
 
