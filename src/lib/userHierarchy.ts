@@ -422,6 +422,37 @@ export function getFlatListProfilesByRole(
   return getDescendantsByRole(ownerProfile.id, ownerProfile, targetRole, profili, links)
 }
 
+/** Limita i profili al sotto-albero gerarchico di una radice (es. compagnia agenzia). */
+export function filterProfiliInHierarchySubtree(
+  root: ProfiloGerarchiaRow,
+  profili: ProfiloGerarchiaRow[],
+  links: OperatoreLink[],
+): ProfiloGerarchiaRow[] {
+  const ids = new Set<string>([root.id])
+  const queue: ProfiloGerarchiaRow[] = [root]
+
+  while (queue.length > 0) {
+    const parent = queue.shift()!
+    const children = getChildrenProfiles(
+      parent.id,
+      parent,
+      root.id,
+      root.ruolo,
+      profili,
+      links,
+    )
+    for (const child of children) {
+      if (ids.has(child.id)) continue
+      ids.add(child.id)
+      if (canHaveHierarchyChildren(child.ruolo)) {
+        queue.push(child)
+      }
+    }
+  }
+
+  return profili.filter((p) => ids.has(p.id))
+}
+
 export function flatListSectionDescription(viewerRole: FlatListViewerRole): string {
   switch (viewerRole) {
     case 'agenzia':

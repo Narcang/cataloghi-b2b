@@ -1,4 +1,5 @@
 ﻿import { createClient } from '@/utils/supabase/server'
+import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -19,14 +20,13 @@ import { compareCatalogTitoli } from '@/lib/catalogSorting'
 import { RUOLI_CATALOGO, isVenditoreLike } from '@/lib/catalogRoles'
 import { isStudioLike } from '@/lib/catalogAccess'
 import CreateCatalogForm from '@/components/admin/CreateCatalogForm'
-import AgenteDocumentazionePortal from '@/components/dashboard/AgenteDocumentazionePortal'
-import PartnerListiniPortal from '@/components/dashboard/PartnerListiniPortal'
 import InvitaUtente from '@/components/InvitaUtente'
 import ContattoDirettoCard from '@/components/dashboard/ContattoDirettoCard'
 import GerarchiaUtentiTree from '@/components/admin/GerarchiaUtentiTree'
 import AssociatiPiattiPanel from '@/components/dashboard/AssociatiPiattiPanel'
 import {
   profiloToGerarchiaRow,
+  filterProfiliInHierarchySubtree,
   resolveAgenziaParentForAgent,
   resolveFlatListOwnerProfile,
   type ProfiloGerarchiaRow,
@@ -213,20 +213,38 @@ export default async function Dashboard(props: {
   let profiliGerarchiaDashboard: ProfiloGerarchiaRow[] = []
   let linksDashboard: { utente_id: string; operatore_id: string }[] = []
   if (user && (isAgenzia || isAgente || isVenditoreLikeRole)) {
+    const gerarchiaClient =
+      isAgenzia || isAgente ? createServiceRoleSupabase() ?? supabase : supabase
     const [profiliRes, linksRes] = await Promise.all([
-      supabase
+      gerarchiaClient
         .from('profili')
         .select(PROFILI_GERARCHIA_SEL)
         .neq('ruolo', 'free')
         .or('registrazione_approvata.eq.true,registrazione_approvata.is.null')
         .limit(500),
-      supabase
+      gerarchiaClient
         .from('connessioni_utente_operatore')
         .select('utente_id, operatore_id')
         .limit(2000),
     ])
     profiliGerarchiaDashboard = (profiliRes.data ?? []) as ProfiloGerarchiaRow[]
     linksDashboard = (linksRes.data ?? []) as { utente_id: string; operatore_id: string }[]
+
+    if (isAgenzia || isAgente) {
+      const selfRowForScope = profiloToGerarchiaRow(
+        { ...profilo!, email: user.email ?? null },
+        profilo!.invitato_da ?? null,
+      )
+      const scopeRoot = isAgente
+        ? resolveAgenziaParentForAgent(selfRowForScope, profiliGerarchiaDashboard, linksDashboard) ??
+          selfRowForScope
+        : selfRowForScope
+      profiliGerarchiaDashboard = filterProfiliInHierarchySubtree(
+        scopeRoot,
+        profiliGerarchiaDashboard,
+        linksDashboard,
+      )
+    }
   }
 
   // Recupera agenti della stessa zona se l'utente è un distributore
@@ -498,8 +516,6 @@ export default async function Dashboard(props: {
         {showFullDashboard && !isManager && user && !isFree && (
           <section>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {isVenditoreLikeRole && <PartnerListiniPortal />}
-              {(isAgente || isAgenzia) && <AgenteDocumentazionePortal />}
               <Link
                 href="/dashboard/i-miei-cataloghi"
                 className="group flex flex-col justify-between rounded-2xl border border-black bg-white p-8 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#060d41]"
