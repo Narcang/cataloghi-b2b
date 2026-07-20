@@ -14,16 +14,39 @@ import {
 
 type FlatTab = { id: string; label: string; ruolo: string }
 
-const AGENZIA_TABS: FlatTab[] = [
+const MULTI_TAB_ROLES = new Set(['agenzia', 'agente'])
+
+const MULTI_TABS: FlatTab[] = [
   { id: 'rivenditore', label: 'Rivenditori', ruolo: 'rivenditore' },
   { id: 'studio', label: 'Studi', ruolo: 'studio' },
 ]
 
+type FlatListViewerRole = 'agenzia' | 'agente' | 'rivenditore' | 'distributore'
+
 type Props = {
   ownerProfile: ProfiloGerarchiaRow
-  viewerRole: 'agenzia' | 'rivenditore'
+  viewerRole: FlatListViewerRole
   profili: ProfiloGerarchiaRow[]
   links: { utente_id: string; operatore_id: string }[]
+}
+
+function flatListSectionTitle(viewerRole: FlatListViewerRole): string {
+  return viewerRole === 'rivenditore' || viewerRole === 'distributore'
+    ? 'Elenco Tutti Gli Studi Associati'
+    : 'Elenco Tutti Gli Associati'
+}
+
+function flatListSectionDesc(viewerRole: FlatListViewerRole): string {
+  switch (viewerRole) {
+    case 'agenzia':
+      return 'Vista rapida di tutti i rivenditori e gli studi collegati alla tua agenzia, con il referente agente o agenzia.'
+    case 'agente':
+      return 'Vista rapida di tutti i rivenditori e gli studi collegati al tuo profilo agente, con il referente di riferimento.'
+    case 'rivenditore':
+      return 'Vista rapida di tutti gli studi collegati al tuo profilo rivenditore, con il venditore di riferimento.'
+    case 'distributore':
+      return 'Vista rapida di tutti gli studi collegati al tuo profilo venditore, con il rivenditore o promoter di riferimento.'
+  }
 }
 
 function AssociatoCard({
@@ -78,7 +101,7 @@ export default function AssociatiPiattiPanel({
   profili,
   links,
 }: Props) {
-  const tabs = viewerRole === 'agenzia' ? AGENZIA_TABS : null
+  const tabs = MULTI_TAB_ROLES.has(viewerRole) ? MULTI_TABS : null
   const [activeTab, setActiveTab] = useState<string>('rivenditore')
 
   const activeRole = tabs ? tabs.find((t) => t.id === activeTab)?.ruolo ?? 'rivenditore' : 'studio'
@@ -113,17 +136,12 @@ export default function AssociatiPiattiPanel({
     return map
   }, [associati, ownerProfile, profili, links])
 
-  const sectionTitle =
-    viewerRole === 'agenzia' ? 'Elenco Tutti Gli Associati' : 'Elenco Tutti Gli Studi Associati'
-  const sectionDesc =
-    viewerRole === 'agenzia'
-      ? 'Vista rapida di tutti i rivenditori e gli studi collegati alla tua agenzia, con il referente agente o agenzia.'
-      : 'Vista rapida di tutti gli studi collegati al tuo profilo rivenditore, con il venditore di riferimento.'
+  const sectionTitle = flatListSectionTitle(viewerRole)
+  const sectionDesc = flatListSectionDesc(viewerRole)
 
-  const listHeading =
-    viewerRole === 'agenzia'
-      ? tabs?.find((t) => t.id === activeTab)?.label ?? 'Associati'
-      : 'Studi'
+  const listHeading = tabs
+    ? tabs.find((t) => t.id === activeTab)?.label ?? 'Associati'
+    : 'Studi'
 
   return (
     <section id="elenco-associati" className="border border-black rounded-2xl bg-white p-6 space-y-6">

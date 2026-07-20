@@ -314,11 +314,13 @@ export default async function Dashboard(props: {
   const showFullDashboard = !inAttesaApprovazione
 
   let gerarchiaOwnerProfile: ProfiloGerarchiaRow | undefined
+  let associatiPiattiOwnerProfile: ProfiloGerarchiaRow | undefined
   if (user && profilo && profiliGerarchiaDashboard.length > 0) {
     const selfRow = profiloToGerarchiaRow(
       { ...profilo, email: user.email ?? null },
       profilo.invitato_da ?? null,
     )
+    associatiPiattiOwnerProfile = selfRow
     if (isAgente) {
       gerarchiaOwnerProfile =
         resolveAgenziaParentForAgent(selfRow, profiliGerarchiaDashboard, linksDashboard) ?? selfRow
@@ -385,10 +387,12 @@ export default async function Dashboard(props: {
           </section>
         )}
 
-        {showFullDashboard && (isAgenzia || isRivenditore) && gerarchiaOwnerProfile && (
+        {showFullDashboard && (isAgenzia || isVenditoreLikeRole || isAgente) && associatiPiattiOwnerProfile && (
           <AssociatiPiattiPanel
-            ownerProfile={gerarchiaOwnerProfile}
-            viewerRole={isAgenzia ? 'agenzia' : 'rivenditore'}
+            ownerProfile={associatiPiattiOwnerProfile}
+            viewerRole={
+              isAgenzia ? 'agenzia' : isAgente ? 'agente' : isPartner ? 'distributore' : 'rivenditore'
+            }
             profili={profiliGerarchiaDashboard}
             links={linksDashboard}
           />

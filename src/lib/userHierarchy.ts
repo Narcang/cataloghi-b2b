@@ -405,12 +405,14 @@ export function resolveFlatListReferent(
   profili: ProfiloGerarchiaRow[],
   links: OperatoreLink[],
 ): ProfiloGerarchiaRow | null {
-  const stopRoles =
-    ownerProfile.ruolo === 'agenzia'
-      ? ['agente', 'agenzia']
-      : ownerProfile.ruolo === 'rivenditore'
-        ? ['distributore', 'rivenditore']
-        : []
+  const stopRolesByOwner: Record<string, string[]> = {
+    agenzia: ['agente', 'agenzia'],
+    agente: ['agente', 'agenzia'],
+    rivenditore: ['distributore', 'rivenditore'],
+    distributore: ['partner_dipendente', 'distributore', 'rivenditore'],
+  }
+
+  const stopRoles = stopRolesByOwner[ownerProfile.ruolo] ?? []
 
   if (stopRoles.length === 0) return null
 
