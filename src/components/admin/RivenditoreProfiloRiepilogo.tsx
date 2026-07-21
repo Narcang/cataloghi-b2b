@@ -11,8 +11,7 @@ type Props = {
 
 export default function RivenditoreProfiloRiepilogo({ profilo, className = '' }: Props) {
   const campi = pickRivenditoreProfiloCampi(profilo)
-  const seguitoDa = campi.seguito_da?.trim()
-  if (!hasRivenditoreProfiloCampi(campi) && !seguitoDa) return null
+  if (!hasRivenditoreProfiloCampi(campi)) return null
 
   const rows: [string | null, string | null][] = [
     [campi.espositore_1, campi.espositore_2],
@@ -22,13 +21,6 @@ export default function RivenditoreProfiloRiepilogo({ profilo, className = '' }:
 
   return (
     <div className={`text-center ${className}`.trim()}>
-      {seguitoDa ? (
-        <p className="text-xs text-zinc-600 leading-snug">
-          Seguito da: <span className="font-medium text-zinc-800">{seguitoDa}</span>
-        </p>
-      ) : null}
-      {hasRivenditoreProfiloCampi(campi) ? (
-        <>
       <p className="text-xs font-semibold uppercase tracking-wide text-zinc-700">
         Espositori e Box
       </p>
@@ -48,8 +40,6 @@ export default function RivenditoreProfiloRiepilogo({ profilo, className = '' }:
           ),
         )}
       </div>
-        </>
-      ) : null}
     </div>
   )
 }

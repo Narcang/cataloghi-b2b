@@ -79,9 +79,10 @@ function HierarchyNode({
       links,
     )
   }, [profile.id, profile.ruolo, breakdownBadges, profili, links])
-  const showRivenditoreCampi =
-    profile.ruolo === 'rivenditore' &&
-    (hasRivenditoreProfiloCampi(profile) || Boolean(profile.seguito_da?.trim()))
+  const showRivenditoreEspositori =
+    profile.ruolo === 'rivenditore' && hasRivenditoreProfiloCampi(profile)
+  const seguitoDa =
+    profile.ruolo === 'rivenditore' ? profile.seguito_da?.trim() || null : null
 
   return (
     <li className="list-none">
@@ -125,7 +126,7 @@ function HierarchyNode({
         >
           <div
             className={`grid gap-3 items-start ${
-              showRivenditoreCampi
+              showRivenditoreEspositori
                 ? 'grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]'
                 : 'grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto]'
             }`}
@@ -153,8 +154,13 @@ function HierarchyNode({
               <p className="text-xs text-zinc-500 mt-1">
                 {profile.area_geografica || 'Area non indicata'}
               </p>
+              {seguitoDa ? (
+                <p className="text-xs text-zinc-600 mt-1">
+                  Seguito da: <span className="font-medium text-zinc-800">{seguitoDa}</span>
+                </p>
+              ) : null}
             </div>
-            {showRivenditoreCampi ? (
+            {showRivenditoreEspositori ? (
               <div className="flex justify-center md:justify-self-center px-1 md:px-3">
                 <RivenditoreProfiloRiepilogo profilo={profile} />
               </div>
