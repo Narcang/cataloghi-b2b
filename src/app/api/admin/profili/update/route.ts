@@ -5,11 +5,22 @@ import {
   CAMPIONE_OPTIONS,
   CATALOGO_AGENZIA_OPTIONS,
 } from '@/lib/agenziaProfiloOptions'
+import { profiloSezioneCampiModificati } from '@/lib/profiloSpecializzazioneDate'
 import {
   BOX_SHOW_ROOM_OPTIONS,
   ESPOSITORE_OPTIONS,
   readRivenditoreCampiFromBody,
 } from '@/lib/rivenditoreProfiloOptions'
+
+const ESPOSITORI_FIELDS = ['espositore_1', 'espositore_2'] as const
+const BOX_FIELDS = [
+  'box_show_room_1',
+  'box_show_room_2',
+  'box_show_room_3',
+  'box_show_room_4',
+] as const
+const CAMPIONI_FIELDS = ['agenzia_campione_1', 'agenzia_campione_2'] as const
+const CATALOGHI_FIELDS = ['agenzia_catalogo_1', 'agenzia_catalogo_2'] as const
 
 const RUOLI_OK = new Set(['admin', 'manager', 'agenzia', 'agente', 'fornitore', 'rivenditore', 'distributore', 'free', 'studio', 'partner_dipendente'])
 
@@ -134,7 +145,9 @@ export async function POST(request: NextRequest) {
 
   const { data: profiloEsistente } = await supabase
     .from('profili')
-    .select('ruolo')
+    .select(
+      'ruolo, espositore_1, espositore_2, box_show_room_1, box_show_room_2, box_show_room_3, box_show_room_4, agenzia_campione_1, agenzia_campione_2, agenzia_catalogo_1, agenzia_catalogo_2',
+    )
     .eq('id', profiloId)
     .maybeSingle()
 
@@ -169,6 +182,24 @@ export async function POST(request: NextRequest) {
     for (const field of ['agenzia_catalogo_1', 'agenzia_catalogo_2'] as const) {
       const err = applySelectPatch(patch, body, field, CATALOGO_AGENZIA_SET)
       if (err) return jsonResponse(false, err, 400)
+    }
+  }
+
+  const now = new Date().toISOString()
+  if (ruoloEffettivo === 'rivenditore') {
+    if (profiloSezioneCampiModificati(ESPOSITORI_FIELDS, patch, profiloEsistente)) {
+      patch.espositori_aggiornato_il = now
+    }
+    if (profiloSezioneCampiModificati(BOX_FIELDS, patch, profiloEsistente)) {
+      patch.box_aggiornato_il = now
+    }
+  }
+  if (ruoloEffettivo === 'agenzia') {
+    if (profiloSezioneCampiModificati(CAMPIONI_FIELDS, patch, profiloEsistente)) {
+      patch.agenzia_campioni_aggiornato_il = now
+    }
+    if (profiloSezioneCampiModificati(CATALOGHI_FIELDS, patch, profiloEsistente)) {
+      patch.agenzia_cataloghi_aggiornato_il = now
     }
   }
 

@@ -21,6 +21,7 @@ import {
 } from '@/lib/userHierarchy'
 import RivenditoreProfiloRiepilogo from '@/components/admin/RivenditoreProfiloRiepilogo'
 import AgenziaProfiloRiepilogo from '@/components/admin/AgenziaProfiloRiepilogo'
+import { canViewProfiloSpecializzazioneAggiornato } from '@/lib/profiloSpecializzazioneDate'
 
 type Props = {
   currentUserId: string
@@ -81,6 +82,7 @@ function HierarchyNode({
   }, [profile.id, profile.ruolo, breakdownBadges, profili, links])
   const showProfiloSpecializzazione =
     profile.ruolo === 'rivenditore' || profile.ruolo === 'agenzia'
+  const mostraDateAggiornamento = canViewProfiloSpecializzazioneAggiornato(viewerRole)
   const seguitoDa =
     profile.ruolo === 'rivenditore' ? profile.seguito_da?.trim() || null : null
 
@@ -163,9 +165,15 @@ function HierarchyNode({
             {showProfiloSpecializzazione ? (
               <div className="flex justify-center md:justify-self-center px-1 md:px-3">
                 {profile.ruolo === 'rivenditore' ? (
-                  <RivenditoreProfiloRiepilogo profilo={profile} />
+                  <RivenditoreProfiloRiepilogo
+                    profilo={profile}
+                    mostraDateAggiornamento={mostraDateAggiornamento}
+                  />
                 ) : (
-                  <AgenziaProfiloRiepilogo profilo={profile} />
+                  <AgenziaProfiloRiepilogo
+                    profilo={profile}
+                    mostraDateAggiornamento={mostraDateAggiornamento}
+                  />
                 )}
               </div>
             ) : null}

@@ -18,6 +18,10 @@ export type ProfiloGerarchiaRow = {
   agenzia_campione_2?: string | null
   agenzia_catalogo_1?: string | null
   agenzia_catalogo_2?: string | null
+  agenzia_campioni_aggiornato_il?: string | null
+  agenzia_cataloghi_aggiornato_il?: string | null
+  espositori_aggiornato_il?: string | null
+  box_aggiornato_il?: string | null
 }
 
 type OperatoreLink = { utente_id: string; operatore_id: string }

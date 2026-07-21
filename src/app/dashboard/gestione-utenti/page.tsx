@@ -58,7 +58,7 @@ export default async function GestioneUtentiPage(props: {
   if (!isManager) redirect('/dashboard')
 
   const profiloSel =
-    'id, nome_completo, email, telefono, societa, area_geografica, ruolo, registrazione_approvata, creato_il, seguito_da, espositore_1, espositore_2, box_show_room_1, box_show_room_2, box_show_room_3, box_show_room_4, agenzia_campione_1, agenzia_campione_2, agenzia_catalogo_1, agenzia_catalogo_2'
+    'id, nome_completo, email, telefono, societa, area_geografica, ruolo, registrazione_approvata, creato_il, seguito_da, espositore_1, espositore_2, box_show_room_1, box_show_room_2, box_show_room_3, box_show_room_4, agenzia_campione_1, agenzia_campione_2, agenzia_catalogo_1, agenzia_catalogo_2, agenzia_campioni_aggiornato_il, agenzia_cataloghi_aggiornato_il, espositori_aggiornato_il, box_aggiornato_il'
 
   let listaQuery = supabase
     .from('profili')
@@ -88,7 +88,7 @@ export default async function GestioneUtentiPage(props: {
 
   let gerarchiaQuery = svc
     .from('profili')
-    .select('id, nome_completo, societa, email, area_geografica, ruolo, invitato_da, registrazione_approvata, seguito_da, espositore_1, espositore_2, box_show_room_1, box_show_room_2, box_show_room_3, box_show_room_4, agenzia_campione_1, agenzia_campione_2, agenzia_catalogo_1, agenzia_catalogo_2')
+    .select('id, nome_completo, societa, email, area_geografica, ruolo, invitato_da, registrazione_approvata, seguito_da, espositore_1, espositore_2, box_show_room_1, box_show_room_2, box_show_room_3, box_show_room_4, agenzia_campione_1, agenzia_campione_2, agenzia_catalogo_1, agenzia_catalogo_2, agenzia_campioni_aggiornato_il, agenzia_cataloghi_aggiornato_il, espositori_aggiornato_il, box_aggiornato_il')
     .neq('ruolo', 'free')
     .order('nome_completo', { ascending: true, nullsFirst: false })
 
@@ -100,7 +100,7 @@ export default async function GestioneUtentiPage(props: {
   /** Tutti gli utenti approvati, senza filtro area/nome: usati per associare il ruolo inferiore. */
   const associazioneQuery = svc
     .from('profili')
-    .select('id, nome_completo, societa, email, area_geografica, ruolo, invitato_da, registrazione_approvata, seguito_da, espositore_1, espositore_2, box_show_room_1, box_show_room_2, box_show_room_3, box_show_room_4, agenzia_campione_1, agenzia_campione_2, agenzia_catalogo_1, agenzia_catalogo_2')
+    .select('id, nome_completo, societa, email, area_geografica, ruolo, invitato_da, registrazione_approvata, seguito_da, espositore_1, espositore_2, box_show_room_1, box_show_room_2, box_show_room_3, box_show_room_4, agenzia_campione_1, agenzia_campione_2, agenzia_catalogo_1, agenzia_catalogo_2, agenzia_campioni_aggiornato_il, agenzia_cataloghi_aggiornato_il, espositori_aggiornato_il, box_aggiornato_il')
     .neq('ruolo', 'free')
     .or('registrazione_approvata.eq.true,registrazione_approvata.is.null')
     .order('nome_completo', { ascending: true, nullsFirst: false })

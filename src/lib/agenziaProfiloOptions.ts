@@ -13,6 +13,8 @@ export type AgenziaProfiloCampi = {
   agenzia_campione_2: string | null
   agenzia_catalogo_1: string | null
   agenzia_catalogo_2: string | null
+  agenzia_campioni_aggiornato_il?: string | null
+  agenzia_cataloghi_aggiornato_il?: string | null
 }
 
 export const AGENZIA_PROFILO_CAMPI_KEYS = [
@@ -72,6 +74,8 @@ export function pickAgenziaProfiloCampi(p: Partial<AgenziaProfiloCampi>): Agenzi
     agenzia_campione_2: p.agenzia_campione_2 ?? null,
     agenzia_catalogo_1: p.agenzia_catalogo_1 ?? null,
     agenzia_catalogo_2: p.agenzia_catalogo_2 ?? null,
+    agenzia_campioni_aggiornato_il: p.agenzia_campioni_aggiornato_il ?? null,
+    agenzia_cataloghi_aggiornato_il: p.agenzia_cataloghi_aggiornato_il ?? null,
   }
 }
 

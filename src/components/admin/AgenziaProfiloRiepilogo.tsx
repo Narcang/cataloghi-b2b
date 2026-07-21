@@ -9,9 +9,14 @@ import ProfiloColonneRiepilogo from '@/components/admin/ProfiloColonneRiepilogo'
 type Props = {
   profilo: Partial<AgenziaProfiloCampi>
   className?: string
+  mostraDateAggiornamento?: boolean
 }
 
-export default function AgenziaProfiloRiepilogo({ profilo, className = '' }: Props) {
+export default function AgenziaProfiloRiepilogo({
+  profilo,
+  className = '',
+  mostraDateAggiornamento = false,
+}: Props) {
   const campi = pickAgenziaProfiloCampi(profilo)
   const campioni = [campi.agenzia_campione_1, campi.agenzia_campione_2].filter((v): v is string =>
     Boolean(v?.trim()),
@@ -23,9 +28,20 @@ export default function AgenziaProfiloRiepilogo({ profilo, className = '' }: Pro
   return (
     <ProfiloColonneRiepilogo
       className={className}
+      mostraDateAggiornamento={mostraDateAggiornamento}
       colonne={[
-        { label: 'Campioni', compilato: hasAgenziaCampioni(campi), valori: campioni },
-        { label: 'Cataloghi', compilato: hasAgenziaCataloghi(campi), valori: cataloghi },
+        {
+          label: 'Campioni',
+          compilato: hasAgenziaCampioni(campi),
+          valori: campioni,
+          aggiornatoIl: campi.agenzia_campioni_aggiornato_il,
+        },
+        {
+          label: 'Cataloghi',
+          compilato: hasAgenziaCataloghi(campi),
+          valori: cataloghi,
+          aggiornatoIl: campi.agenzia_cataloghi_aggiornato_il,
+        },
       ]}
     />
   )

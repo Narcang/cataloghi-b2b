@@ -26,6 +26,8 @@ export type RivenditoreProfiloCampi = {
   box_show_room_2: string | null
   box_show_room_3: string | null
   box_show_room_4: string | null
+  espositori_aggiornato_il?: string | null
+  box_aggiornato_il?: string | null
 }
 
 export const RIVENDITORE_PROFILO_CAMPI_KEYS = [
@@ -103,6 +105,8 @@ export function pickRivenditoreProfiloCampi(
     box_show_room_2: p.box_show_room_2 ?? null,
     box_show_room_3: p.box_show_room_3 ?? null,
     box_show_room_4: p.box_show_room_4 ?? null,
+    espositori_aggiornato_il: p.espositori_aggiornato_il ?? null,
+    box_aggiornato_il: p.box_aggiornato_il ?? null,
   }
 }
 
