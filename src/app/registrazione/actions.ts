@@ -50,6 +50,26 @@ export async function register(formData: FormData) {
         invitoRuolo = invito.ruolo_invitato
         invitoDa = invito.creato_da
         invitoMultiUso = invito.multi_uso ?? false
+
+        if (invitoRuolo === 'rivenditore' && invitoDa) {
+          const { data: invitante } = await svc
+            .from('profili')
+            .select('ruolo, invitato_da')
+            .eq('id', invitoDa)
+            .single()
+
+          if (invitante?.ruolo === 'agente' && invitante.invitato_da) {
+            const { data: agenziaParent } = await svc
+              .from('profili')
+              .select('id, ruolo')
+              .eq('id', invitante.invitato_da)
+              .single()
+
+            if (agenziaParent?.ruolo === 'agenzia') {
+              invitoDa = agenziaParent.id
+            }
+          }
+        }
       }
     }
   }

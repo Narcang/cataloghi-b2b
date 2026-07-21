@@ -307,7 +307,7 @@ export default function GerarchiaUtentiTree({
       rivenditore: 'I venditori, promoter e studi collegati al tuo profilo.',
       distributore: 'I promoter e gli studi collegati al tuo profilo.',
       agenzia: agentViewsAgenzia
-        ? 'La tua agenzia, gli altri agenti e tutti gli associati collegati. Espandi per vedere la rete completa.'
+        ? 'La tua agenzia: prima gli agenti, poi i rivenditori collegati all\'agenzia (non sotto il singolo agente).'
         : 'Gli agenti, i rivenditori e i loro associati collegati al tuo profilo.',
     }
 

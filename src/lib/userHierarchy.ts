@@ -24,7 +24,7 @@ export const CHILD_ROLES_BY_PARENT: Record<string, string[]> = {
   admin: ['manager'],
   manager: ['agenzia', 'agente'],
   agenzia: ['agente', 'rivenditore'],
-  agente: ['rivenditore'],
+  agente: ['studio'],
   rivenditore: ['distributore', 'partner_dipendente', 'studio'],
   distributore: ['partner_dipendente', 'studio'],
   partner_dipendente: ['studio'],
@@ -111,10 +111,7 @@ export function roleBreakdownBadgesForNode(ruolo: string): RoleBreakdownBadge[] 
         { ruolo: 'studio', label: 'Studi' },
       ]
     case 'agente':
-      return [
-        { ruolo: 'rivenditore', label: 'Rivenditori' },
-        { ruolo: 'studio', label: 'Studi' },
-      ]
+      return [{ ruolo: 'studio', label: 'Studi' }]
     case 'rivenditore':
       return [{ ruolo: 'studio', label: 'Studi' }]
     case 'distributore':
@@ -502,7 +499,7 @@ export function associatiDirettiSectionLabel(ruolo: string): string | null {
     case 'agenzia':
       return 'Associati diretti (agenti / rivenditori)'
     case 'agente':
-      return 'Associati diretti (rivenditori)'
+      return 'Associati diretti (studi)'
     case 'rivenditore':
       return 'Associati diretti (venditori / promoter / studi)'
     case 'distributore':
@@ -525,7 +522,7 @@ export function associatiAggiungiSectionLabel(ruolo: string): string | null {
     case 'agenzia':
       return 'Associa agente / rivenditore'
     case 'agente':
-      return 'Associa rivenditore'
+      return 'Associa studio'
     case 'rivenditore':
       return 'Associa venditore / promoter / studio'
     case 'distributore':
@@ -591,8 +588,14 @@ function isDirectChild(
 ): boolean {
   const expectedRoles = CHILD_ROLES_BY_PARENT[parentProfile.ruolo] ?? []
   if (!expectedRoles.includes(child.ruolo)) return false
+  if (parentProfile.ruolo === 'agente' && child.ruolo === 'rivenditore') return false
   if (parentProfile.ruolo === 'agenzia' && child.ruolo === 'agente') {
     const agenzia = resolveAgenziaParentForAgent(child, profili, links)
+    if (agenzia?.id === parentId) return true
+  }
+  if (parentProfile.ruolo === 'agenzia' && child.ruolo === 'rivenditore') {
+    if (child.invitato_da === parentId) return true
+    const agenzia = resolveAgenziaParentForRivenditore(child, profili, links)
     if (agenzia?.id === parentId) return true
   }
   if (child.invitato_da === parentId) return true
@@ -794,7 +797,7 @@ export function nestedAssociatiLabel(ruolo: string): string | null {
     case 'agenzia':
       return 'Agenti / rivenditori associati'
     case 'agente':
-      return 'Rivenditori associati'
+      return 'Studi associati'
     case 'rivenditore':
       return 'Venditori / promoter / studi associati'
     case 'distributore':
