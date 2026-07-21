@@ -77,6 +77,8 @@ export function ruoloGerarchiaDotClass(ruolo: string): string | null {
       return 'bg-zinc-500'
     case 'agenzia':
       return 'bg-blue-500'
+    case 'agente':
+      return 'bg-blue-400'
     case 'rivenditore':
       return 'bg-green-500'
     case 'studio':
