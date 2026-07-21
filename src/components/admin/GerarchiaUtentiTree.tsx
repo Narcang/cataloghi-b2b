@@ -20,6 +20,7 @@ import {
   type ProfiloGerarchiaRow,
 } from '@/lib/userHierarchy'
 import RivenditoreProfiloRiepilogo from '@/components/admin/RivenditoreProfiloRiepilogo'
+import AgenziaProfiloRiepilogo from '@/components/admin/AgenziaProfiloRiepilogo'
 
 type Props = {
   currentUserId: string
@@ -78,7 +79,8 @@ function HierarchyNode({
       links,
     )
   }, [profile.id, profile.ruolo, breakdownBadges, profili, links])
-  const showRivenditoreEspositori = profile.ruolo === 'rivenditore'
+  const showProfiloSpecializzazione =
+    profile.ruolo === 'rivenditore' || profile.ruolo === 'agenzia'
   const seguitoDa =
     profile.ruolo === 'rivenditore' ? profile.seguito_da?.trim() || null : null
 
@@ -124,7 +126,7 @@ function HierarchyNode({
         >
           <div
             className={`grid gap-3 items-start ${
-              showRivenditoreEspositori
+              showProfiloSpecializzazione
                 ? 'grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]'
                 : 'grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto]'
             }`}
@@ -158,9 +160,13 @@ function HierarchyNode({
                 </p>
               ) : null}
             </div>
-            {showRivenditoreEspositori ? (
+            {showProfiloSpecializzazione ? (
               <div className="flex justify-center md:justify-self-center px-1 md:px-3">
-                <RivenditoreProfiloRiepilogo profilo={profile} />
+                {profile.ruolo === 'rivenditore' ? (
+                  <RivenditoreProfiloRiepilogo profilo={profile} />
+                ) : (
+                  <AgenziaProfiloRiepilogo profilo={profile} />
+                )}
               </div>
             ) : null}
             <div className="flex flex-col items-start md:items-end gap-1 md:justify-self-end">

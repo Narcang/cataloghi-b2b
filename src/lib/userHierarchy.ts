@@ -14,6 +14,10 @@ export type ProfiloGerarchiaRow = {
   box_show_room_2?: string | null
   box_show_room_3?: string | null
   box_show_room_4?: string | null
+  agenzia_campione_1?: string | null
+  agenzia_campione_2?: string | null
+  agenzia_catalogo_1?: string | null
+  agenzia_catalogo_2?: string | null
 }
 
 type OperatoreLink = { utente_id: string; operatore_id: string }

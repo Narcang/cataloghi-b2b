@@ -6,7 +6,9 @@ import { Users, UserCheck } from 'lucide-react'
 import AssociatiDirettiCascade from '@/components/admin/AssociatiDirettiCascade'
 import CatalogoPermessiPanel, { type CatalogoDisponibile } from '@/components/admin/CatalogoPermessiPanel'
 import RivenditoreProfiloCampi from '@/components/admin/RivenditoreProfiloCampi'
+import AgenziaProfiloCampi from '@/components/admin/AgenziaProfiloCampi'
 import { readRivenditoreCampiFromFormData } from '@/lib/rivenditoreProfiloOptions'
+import { readAgenziaCampiFromFormData } from '@/lib/agenziaProfiloOptions'
 import {
   associatiAggiungiSectionLabel,
   associatiDirettiSectionLabel,
@@ -33,6 +35,10 @@ export type ProfiloGestioneRow = {
   box_show_room_2?: string | null
   box_show_room_3?: string | null
   box_show_room_4?: string | null
+  agenzia_campione_1?: string | null
+  agenzia_campione_2?: string | null
+  agenzia_catalogo_1?: string | null
+  agenzia_catalogo_2?: string | null
 }
 
 export type OperatoreAssociazione = {
@@ -257,6 +263,9 @@ export default function AdminProfiliPanel({
     if (ruolo === 'rivenditore') {
       Object.assign(body, readRivenditoreCampiFromFormData(fd))
     }
+    if (ruolo === 'agenzia') {
+      Object.assign(body, readAgenziaCampiFromFormData(fd))
+    }
     return body
   }
 
@@ -387,6 +396,17 @@ export default function AdminProfiliPanel({
                           box_show_room_2: p.box_show_room_2 ?? null,
                           box_show_room_3: p.box_show_room_3 ?? null,
                           box_show_room_4: p.box_show_room_4 ?? null,
+                        }}
+                        inputClassName="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
+                      />
+                    ) : null}
+                    {p.ruolo === 'agenzia' ? (
+                      <AgenziaProfiloCampi
+                        profilo={{
+                          agenzia_campione_1: p.agenzia_campione_1 ?? null,
+                          agenzia_campione_2: p.agenzia_campione_2 ?? null,
+                          agenzia_catalogo_1: p.agenzia_catalogo_1 ?? null,
+                          agenzia_catalogo_2: p.agenzia_catalogo_2 ?? null,
                         }}
                         inputClassName="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
                       />
@@ -587,6 +607,16 @@ export default function AdminProfiliPanel({
                                 box_show_room_2: p.box_show_room_2 ?? null,
                                 box_show_room_3: p.box_show_room_3 ?? null,
                                 box_show_room_4: p.box_show_room_4 ?? null,
+                              }}
+                            />
+                          ) : null}
+                          {p.ruolo === 'agenzia' ? (
+                            <AgenziaProfiloCampi
+                              profilo={{
+                                agenzia_campione_1: p.agenzia_campione_1 ?? null,
+                                agenzia_campione_2: p.agenzia_campione_2 ?? null,
+                                agenzia_catalogo_1: p.agenzia_catalogo_1 ?? null,
+                                agenzia_catalogo_2: p.agenzia_catalogo_2 ?? null,
                               }}
                             />
                           ) : null}

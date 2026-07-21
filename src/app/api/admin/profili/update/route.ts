@@ -2,10 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
 import {
+  CAMPIONE_OPTIONS,
+  CATALOGO_AGENZIA_OPTIONS,
+} from '@/lib/agenziaProfiloOptions'
+import {
   BOX_SHOW_ROOM_OPTIONS,
   ESPOSITORE_OPTIONS,
   readRivenditoreCampiFromBody,
-  RIVENDITORE_PROFILO_CAMPI_KEYS,
 } from '@/lib/rivenditoreProfiloOptions'
 
 const RUOLI_OK = new Set(['admin', 'manager', 'agenzia', 'agente', 'fornitore', 'rivenditore', 'distributore', 'free', 'studio', 'partner_dipendente'])
@@ -30,19 +33,25 @@ type Body = {
   box_show_room_2?: string | null
   box_show_room_3?: string | null
   box_show_room_4?: string | null
+  agenzia_campione_1?: string | null
+  agenzia_campione_2?: string | null
+  agenzia_catalogo_1?: string | null
+  agenzia_catalogo_2?: string | null
 }
 
 const ESPOSITORE_SET = new Set<string>(ESPOSITORE_OPTIONS)
 const SHOW_ROOM_SET = new Set<string>(BOX_SHOW_ROOM_OPTIONS)
+const CAMPIONE_SET = new Set<string>(CAMPIONE_OPTIONS)
+const CATALOGO_AGENZIA_SET = new Set<string>(CATALOGO_AGENZIA_OPTIONS)
 
-function applyRivenditoreSelectPatch(
+function applySelectPatch(
   patch: Record<string, unknown>,
   body: Body,
-  field: (typeof RIVENDITORE_PROFILO_CAMPI_KEYS)[number],
+  field: string,
   allowed: Set<string>,
 ): string | null {
   if (!(field in body)) return null
-  const raw = body[field]
+  const raw = body[field as keyof Body]
   if (raw === undefined) return null
   if (raw === null) {
     patch[field] = null
@@ -54,7 +63,7 @@ function applyRivenditoreSelectPatch(
     return null
   }
   if (!allowed.has(trimmed)) {
-    return `Valore non valido per ${field.replaceAll('_', ' ')}`
+    return `Valore non valido per ${field}`
   }
   patch[field] = trimmed
   return null
@@ -138,7 +147,7 @@ export async function POST(request: NextRequest) {
       patch.seguito_da = rivenditoreCampi.seguito_da ?? null
     }
     for (const field of ['espositore_1', 'espositore_2'] as const) {
-      const err = applyRivenditoreSelectPatch(patch, body, field, ESPOSITORE_SET)
+      const err = applySelectPatch(patch, body, field, ESPOSITORE_SET)
       if (err) return jsonResponse(false, err, 400)
     }
     for (const field of [
@@ -147,7 +156,18 @@ export async function POST(request: NextRequest) {
       'box_show_room_3',
       'box_show_room_4',
     ] as const) {
-      const err = applyRivenditoreSelectPatch(patch, body, field, SHOW_ROOM_SET)
+      const err = applySelectPatch(patch, body, field, SHOW_ROOM_SET)
+      if (err) return jsonResponse(false, err, 400)
+    }
+  }
+
+  if (ruoloEffettivo === 'agenzia') {
+    for (const field of ['agenzia_campione_1', 'agenzia_campione_2'] as const) {
+      const err = applySelectPatch(patch, body, field, CAMPIONE_SET)
+      if (err) return jsonResponse(false, err, 400)
+    }
+    for (const field of ['agenzia_catalogo_1', 'agenzia_catalogo_2'] as const) {
+      const err = applySelectPatch(patch, body, field, CATALOGO_AGENZIA_SET)
       if (err) return jsonResponse(false, err, 400)
     }
   }
