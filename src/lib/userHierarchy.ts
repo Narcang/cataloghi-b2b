@@ -331,9 +331,11 @@ function resolveAgenziaParentForRivenditore(
   const fromInvito = agenziaFromId(rivenditoreProfile.invitato_da)
   if (fromInvito) return fromInvito
 
-  const agenteParent = findAgenteParentForRivenditore(rivenditoreProfile, profili, links)
-  if (agenteParent) {
-    return resolveAgenziaParentForAgent(agenteParent, profili, links)
+  const inviter = byId.get(rivenditoreProfile.invitato_da ?? '')
+  if (inviter?.ruolo === 'agente') {
+    const agenziaViaAgente = agenziaFromId(inviter.invitato_da)
+    if (agenziaViaAgente) return agenziaViaAgente
+    return resolveAgenziaParentForAgent(inviter, profili, links)
   }
 
   for (const link of links) {
