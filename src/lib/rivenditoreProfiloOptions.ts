@@ -19,6 +19,7 @@ export type EspositoreOption = (typeof ESPOSITORE_OPTIONS)[number]
 export type BoxShowRoomOption = (typeof BOX_SHOW_ROOM_OPTIONS)[number]
 
 export type RivenditoreProfiloCampi = {
+  seguito_da: string | null
   espositore_1: string | null
   espositore_2: string | null
   box_show_room_1: string | null
@@ -53,6 +54,14 @@ export function normalizeRivenditoreSelectValue(
 
 export function readRivenditoreCampiFromBody(body: Record<string, unknown>): Partial<RivenditoreProfiloCampi> {
   const out: Partial<RivenditoreProfiloCampi> = {}
+  if ('seguito_da' in body) {
+    const raw = body.seguito_da
+    if (raw === null || raw === undefined) {
+      out.seguito_da = null
+    } else {
+      out.seguito_da = String(raw).trim() || null
+    }
+  }
   for (const key of ['espositore_1', 'espositore_2'] as const) {
     if (key in body) {
       out[key] = normalizeRivenditoreSelectValue(body[key], ESPOSITORE_SET)
@@ -73,6 +82,7 @@ export function readRivenditoreCampiFromFormData(fd: FormData): RivenditoreProfi
     return String(raw).trim() || null
   }
   return {
+    seguito_da: read('seguito_da'),
     espositore_1: read('espositore_1'),
     espositore_2: read('espositore_2'),
     box_show_room_1: read('box_show_room_1'),
@@ -86,6 +96,7 @@ export function pickRivenditoreProfiloCampi(
   p: Partial<RivenditoreProfiloCampi>,
 ): RivenditoreProfiloCampi {
   return {
+    seguito_da: p.seguito_da ?? null,
     espositore_1: p.espositore_1 ?? null,
     espositore_2: p.espositore_2 ?? null,
     box_show_room_1: p.box_show_room_1 ?? null,

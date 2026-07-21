@@ -4,6 +4,7 @@ import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
 import {
   BOX_SHOW_ROOM_OPTIONS,
   ESPOSITORE_OPTIONS,
+  readRivenditoreCampiFromBody,
   RIVENDITORE_PROFILO_CAMPI_KEYS,
 } from '@/lib/rivenditoreProfiloOptions'
 
@@ -22,6 +23,7 @@ type Body = {
   area_geografica?: string | null
   ruolo?: string | null
   registrazione_approvata?: boolean | null
+  seguito_da?: string | null
   espositore_1?: string | null
   espositore_2?: string | null
   box_show_room_1?: string | null
@@ -131,6 +133,10 @@ export async function POST(request: NextRequest) {
     typeof patch.ruolo === 'string' ? patch.ruolo : (profiloEsistente?.ruolo ?? null)
 
   if (ruoloEffettivo === 'rivenditore') {
+    const rivenditoreCampi = readRivenditoreCampiFromBody(body as Record<string, unknown>)
+    if ('seguito_da' in rivenditoreCampi) {
+      patch.seguito_da = rivenditoreCampi.seguito_da ?? null
+    }
     for (const field of ['espositore_1', 'espositore_2'] as const) {
       const err = applyRivenditoreSelectPatch(patch, body, field, ESPOSITORE_SET)
       if (err) return jsonResponse(false, err, 400)

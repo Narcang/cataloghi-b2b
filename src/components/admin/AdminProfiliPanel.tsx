@@ -28,6 +28,7 @@ export type ProfiloGestioneRow = {
   creato_il: string | null
   espositore_1?: string | null
   espositore_2?: string | null
+  seguito_da?: string | null
   box_show_room_1?: string | null
   box_show_room_2?: string | null
   box_show_room_3?: string | null
@@ -361,6 +362,18 @@ export default function AdminProfiliPanel({
                         ))}
                       </select>
                     </label>
+                    {p.ruolo === 'rivenditore' ? (
+                      <label className="block text-xs font-medium uppercase text-zinc-600">
+                        Seguito da
+                        <input
+                          name="seguito_da"
+                          type="text"
+                          placeholder="Es. nome agente o referente"
+                          defaultValue={p.seguito_da ?? ''}
+                          className="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
+                        />
+                      </label>
+                    ) : null}
                     <label className="md:col-span-2 flex items-center gap-2 text-sm text-zinc-800">
                       <input type="checkbox" name="registrazione_approvata" value="on" defaultChecked={false} className="rounded border-black" />
                       Approva registrazione (accesso ai cataloghi secondo ruolo e area)
@@ -553,6 +566,18 @@ export default function AdminProfiliPanel({
                               ))}
                             </select>
                           </label>
+                          {p.ruolo === 'rivenditore' ? (
+                            <label className="block text-xs font-medium uppercase text-zinc-600">
+                              Seguito da
+                              <input
+                                name="seguito_da"
+                                type="text"
+                                placeholder="Es. nome agente o referente"
+                                defaultValue={p.seguito_da ?? ''}
+                                className="mt-1 w-full h-9 rounded-md border border-black bg-zinc-50 px-2 text-sm"
+                              />
+                            </label>
+                          ) : null}
                           {p.ruolo === 'rivenditore' ? (
                             <RivenditoreProfiloCampi
                               profilo={{

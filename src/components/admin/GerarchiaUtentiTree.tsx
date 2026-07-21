@@ -80,7 +80,8 @@ function HierarchyNode({
     )
   }, [profile.id, profile.ruolo, breakdownBadges, profili, links])
   const showRivenditoreCampi =
-    profile.ruolo === 'rivenditore' && hasRivenditoreProfiloCampi(profile)
+    profile.ruolo === 'rivenditore' &&
+    (hasRivenditoreProfiloCampi(profile) || Boolean(profile.seguito_da?.trim()))
 
   return (
     <li className="list-none">

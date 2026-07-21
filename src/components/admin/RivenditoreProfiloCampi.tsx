@@ -7,7 +7,7 @@ import {
 } from '@/lib/rivenditoreProfiloOptions'
 
 type Props = {
-  profilo: RivenditoreProfiloCampiValues
+  profilo: Omit<RivenditoreProfiloCampiValues, 'seguito_da'>
   inputClassName?: string
 }
 

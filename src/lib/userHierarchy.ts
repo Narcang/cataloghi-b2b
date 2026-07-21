@@ -7,6 +7,7 @@ export type ProfiloGerarchiaRow = {
   ruolo: string
   invitato_da: string | null
   registrazione_approvata?: boolean | null
+  seguito_da?: string | null
   espositore_1?: string | null
   espositore_2?: string | null
   box_show_room_1?: string | null
