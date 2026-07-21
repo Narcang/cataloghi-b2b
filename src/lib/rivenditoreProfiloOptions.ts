@@ -109,3 +109,16 @@ export function pickRivenditoreProfiloCampi(
 export function hasRivenditoreProfiloCampi(p: Partial<RivenditoreProfiloCampi>): boolean {
   return RIVENDITORE_PROFILO_CAMPI_KEYS.some((key) => Boolean(p[key]?.trim()))
 }
+
+export function hasRivenditoreEspositori(p: Partial<RivenditoreProfiloCampi>): boolean {
+  return Boolean(p.espositore_1?.trim()) || Boolean(p.espositore_2?.trim())
+}
+
+export function hasRivenditoreBoxShowRoom(p: Partial<RivenditoreProfiloCampi>): boolean {
+  return (
+    Boolean(p.box_show_room_1?.trim()) ||
+    Boolean(p.box_show_room_2?.trim()) ||
+    Boolean(p.box_show_room_3?.trim()) ||
+    Boolean(p.box_show_room_4?.trim())
+  )
+}

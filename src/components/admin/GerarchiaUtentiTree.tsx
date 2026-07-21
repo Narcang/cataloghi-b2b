@@ -20,7 +20,6 @@ import {
   type ProfiloGerarchiaRow,
 } from '@/lib/userHierarchy'
 import RivenditoreProfiloRiepilogo from '@/components/admin/RivenditoreProfiloRiepilogo'
-import { hasRivenditoreProfiloCampi } from '@/lib/rivenditoreProfiloOptions'
 
 type Props = {
   currentUserId: string
@@ -79,8 +78,7 @@ function HierarchyNode({
       links,
     )
   }, [profile.id, profile.ruolo, breakdownBadges, profili, links])
-  const showRivenditoreEspositori =
-    profile.ruolo === 'rivenditore' && hasRivenditoreProfiloCampi(profile)
+  const showRivenditoreEspositori = profile.ruolo === 'rivenditore'
   const seguitoDa =
     profile.ruolo === 'rivenditore' ? profile.seguito_da?.trim() || null : null
 
