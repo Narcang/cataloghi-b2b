@@ -31,6 +31,7 @@ import {
   resolveFlatListOwnerProfile,
   type ProfiloGerarchiaRow,
 } from '@/lib/userHierarchy'
+import { fetchUltimoAccessoMap, ultimoAccessoMapToRecord } from '@/lib/ultimoAccessoUtenti'
 
 const ASSISTENZA_LADIVA_TELEFONO = '+39 0536 185 6217'
 const ASSISTENZA_LADIVA_EMAIL = 'info@ladiva-fpd.com'
@@ -247,6 +248,18 @@ export default async function Dashboard(props: {
     }
   }
 
+  let ultimoAccessoByProfiloId: Record<string, string> = {}
+  if (user && (isAgenzia || isAgente || isVenditoreLikeRole)) {
+    const svcAccesso = createServiceRoleSupabase()
+    if (svcAccesso) {
+      try {
+        ultimoAccessoByProfiloId = ultimoAccessoMapToRecord(await fetchUltimoAccessoMap(svcAccesso))
+      } catch (error) {
+        console.error('dashboard: fetch ultimo accesso', error)
+      }
+    }
+  }
+
   // Recupera agenti della stessa zona se l'utente è un distributore
   let agentiZona: Pick<Operatore, 'id' | 'nome_completo' | 'email' | 'telefono'>[] = []
   if (isPartner && profilo?.area_geografica) {
@@ -421,6 +434,7 @@ export default async function Dashboard(props: {
             profili={profiliGerarchiaDashboard}
             links={linksDashboard}
             ownerProfile={gerarchiaOwnerProfile}
+            ultimoAccessoByProfiloId={ultimoAccessoByProfiloId}
           />
         )}
 

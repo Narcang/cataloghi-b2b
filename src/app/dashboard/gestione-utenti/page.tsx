@@ -8,6 +8,7 @@ import AdminProfiliPanel, { type ProfiloGestioneRow } from '@/components/admin/A
 import GerarchiaUtentiTree from '@/components/admin/GerarchiaUtentiTree'
 import InvitaUtente from '@/components/InvitaUtente'
 import type { ProfiloGerarchiaRow } from '@/lib/userHierarchy'
+import { fetchUltimoAccessoMap, ultimoAccessoMapToRecord } from '@/lib/ultimoAccessoUtenti'
 
 export const dynamic = 'force-dynamic'
 
@@ -129,6 +130,15 @@ export default async function GestioneUtentiPage(props: {
   const profiliAssociazione = (associazioneRes.data ?? []) as ProfiloGerarchiaRow[]
   const allCataloghi = (cataloghiRes.data ?? []) as { id: string; titolo: string | null; categoria: string | null; ruoli_visibili: string[] }[]
 
+  let ultimoAccessoByProfiloId: Record<string, string> = {}
+  if (svc) {
+    try {
+      ultimoAccessoByProfiloId = ultimoAccessoMapToRecord(await fetchUltimoAccessoMap(svc))
+    } catch (error) {
+      console.error('gestione-utenti: fetch ultimo accesso', error)
+    }
+  }
+
   return (
     <div className="ladiva-root ladiva-root-app-dark min-h-screen flex flex-col">
       <Header />
@@ -195,6 +205,7 @@ export default async function GestioneUtentiPage(props: {
           viewerRole={ruoloCorrente}
           profili={profiliGerarchia}
           links={connessioniUtenteOperatoreRows}
+          ultimoAccessoByProfiloId={ultimoAccessoByProfiloId}
         />
 
         {/* Gestione profili */}

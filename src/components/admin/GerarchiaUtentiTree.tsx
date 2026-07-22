@@ -22,12 +22,17 @@ import {
 import RivenditoreProfiloRiepilogo from '@/components/admin/RivenditoreProfiloRiepilogo'
 import AgenziaProfiloRiepilogo from '@/components/admin/AgenziaProfiloRiepilogo'
 import { canViewProfiloSpecializzazioneAggiornato } from '@/lib/profiloSpecializzazioneDate'
+import {
+  canViewerSeeUltimoAccessoForProfile,
+  formatUltimoAccessoRiga,
+} from '@/lib/ultimoAccessoUtenti'
 
 type Props = {
   currentUserId: string
   viewerRole: string
   profili: ProfiloGerarchiaRow[]
   links: { utente_id: string; operatore_id: string }[]
+  ultimoAccessoByProfiloId?: Record<string, string | null>
   /**
    * Quando impostato, l'albero mostra solo i discendenti di questo profilo
    * (nessun filtro per ruolo; usato da agente/partner nella propria dashboard).
@@ -42,6 +47,7 @@ type HierarchyNodeProps = {
   viewerRole: string
   profili: ProfiloGerarchiaRow[]
   links: { utente_id: string; operatore_id: string }[]
+  ultimoAccessoByProfiloId: Record<string, string | null>
   expandedIds: Set<string>
   onToggle: (id: string) => void
 }
@@ -53,6 +59,7 @@ function HierarchyNode({
   viewerRole,
   profili,
   links,
+  ultimoAccessoByProfiloId,
   expandedIds,
   onToggle,
 }: HierarchyNodeProps) {
@@ -85,6 +92,10 @@ function HierarchyNode({
   const mostraDateAggiornamento = canViewProfiloSpecializzazioneAggiornato(viewerRole)
   const seguitoDa =
     profile.ruolo === 'rivenditore' ? profile.seguito_da?.trim() || null : null
+  const mostraUltimoAccesso = canViewerSeeUltimoAccessoForProfile(viewerRole, profile.ruolo)
+  const ultimoAccessoRiga = mostraUltimoAccesso
+    ? formatUltimoAccessoRiga(ultimoAccessoByProfiloId[profile.id] ?? null)
+    : null
 
   return (
     <li className="list-none">
@@ -156,6 +167,9 @@ function HierarchyNode({
               <p className="text-xs text-zinc-500 mt-1">
                 {profile.area_geografica || 'Area non indicata'}
               </p>
+              {ultimoAccessoRiga ? (
+                <p className="text-xs text-zinc-500 mt-1">{ultimoAccessoRiga}</p>
+              ) : null}
               {seguitoDa ? (
                 <p className="text-xs text-zinc-600 mt-1">
                   Seguito da: <span className="font-medium text-zinc-800">{seguitoDa}</span>
@@ -235,6 +249,7 @@ function HierarchyNode({
                   viewerRole={viewerRole}
                   profili={profili}
                   links={links}
+                  ultimoAccessoByProfiloId={ultimoAccessoByProfiloId}
                   expandedIds={expandedIds}
                   onToggle={onToggle}
                 />
@@ -253,6 +268,7 @@ export default function GerarchiaUtentiTree({
   profili,
   links,
   ownerProfile,
+  ultimoAccessoByProfiloId = {},
 }: Props) {
   const [rootRole, setRootRole] = useState<HierarchyRootRole>(() =>
     defaultHierarchyRootRole(viewerRole),
@@ -350,6 +366,7 @@ export default function GerarchiaUtentiTree({
                 viewerRole={viewerRole}
                 profili={profili}
                 links={links}
+                ultimoAccessoByProfiloId={ultimoAccessoByProfiloId}
                 expandedIds={expandedIds}
                 onToggle={toggleExpanded}
               />
@@ -369,6 +386,7 @@ export default function GerarchiaUtentiTree({
                   viewerRole={viewerRole}
                   profili={profili}
                   links={links}
+                  ultimoAccessoByProfiloId={ultimoAccessoByProfiloId}
                   expandedIds={expandedIds}
                   onToggle={toggleExpanded}
                 />
@@ -448,6 +466,7 @@ export default function GerarchiaUtentiTree({
                 viewerRole={viewerRole}
                 profili={profili}
                 links={links}
+                ultimoAccessoByProfiloId={ultimoAccessoByProfiloId}
                 expandedIds={expandedIds}
                 onToggle={toggleExpanded}
               />
