@@ -9,6 +9,7 @@ import {
   nestedAssociatiLabel,
   ruoloGerarchiaLabel,
   ruoloGerarchiaDotClass,
+  ruoloBreakdownDotClass,
   profiloGerarchiaDisplayLabel,
   resolveAgenziaParentForAgent,
   resolveRivenditoreParentForDistributore,
@@ -187,6 +188,7 @@ type CandidateCheckboxProps = {
 }
 
 function CandidateCheckbox({ candidate, checked, readOnly, onToggle }: CandidateCheckboxProps) {
+  const dotClass = ruoloBreakdownDotClass(candidate.ruolo)
   return (
     <label className="flex items-center gap-2 text-sm text-zinc-800 min-w-[200px]">
       <input
@@ -199,6 +201,9 @@ function CandidateCheckbox({ candidate, checked, readOnly, onToggle }: Candidate
           if (!ok) e.target.checked = !on
         }}
       />
+      {dotClass ? (
+        <span className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ${dotClass}`} aria-hidden />
+      ) : null}
       <span>
         {profiloGerarchiaDisplayLabel(candidate)}{' '}
         <span className="text-zinc-500 text-xs">
@@ -246,6 +251,8 @@ function AssociaCandidatiPicker({
 
   const usaGruppi = ruoloCorrente ? RUOLI_CON_GRUPPO.has(ruoloCorrente) : false
 
+  const gruppoRuolo = ruoloCorrente === 'agente' ? 'agenzia' : 'rivenditore'
+
   const gruppi = useMemo(() => {
     if (!usaGruppi || !ruoloCorrente) return []
     const map = new Map<string, { id: string; label: string; items: ProfiloGerarchiaRow[] }>()
@@ -287,6 +294,7 @@ function AssociaCandidatiPicker({
         {ruoliPresenti.map((ruolo) => {
           const count = candidates.filter((c) => c.ruolo === ruolo).length
           const active = ruolo === ruoloCorrente
+          const dotClass = ruoloBreakdownDotClass(ruolo)
           return (
             <button
               key={ruolo}
@@ -300,6 +308,9 @@ function AssociaCandidatiPicker({
                   : 'border-black/20 bg-white text-zinc-800 hover:bg-zinc-100'
               }`}
             >
+              {dotClass ? (
+                <span className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ${dotClass}`} aria-hidden />
+              ) : null}
               {ruoloGerarchiaLabel(ruolo)}
               <span
                 className={`rounded-full px-1.5 text-xs font-semibold ${
@@ -321,6 +332,7 @@ function AssociaCandidatiPicker({
           <div className="flex flex-wrap gap-2">
             {gruppi.map((gruppo) => {
               const active = gruppo.id === gruppoCorrente?.id
+              const dotClass = gruppo.id === SENZA_GRUPPO_ID ? 'bg-zinc-400' : ruoloGerarchiaDotClass(gruppoRuolo)
               return (
                 <button
                   key={gruppo.id}
@@ -332,6 +344,9 @@ function AssociaCandidatiPicker({
                       : 'border-black/15 bg-zinc-50 text-zinc-700 hover:bg-zinc-100'
                   }`}
                 >
+                  {dotClass ? (
+                    <span className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ${dotClass}`} aria-hidden />
+                  ) : null}
                   {gruppo.label}
                   <span className="rounded-full bg-zinc-200 px-1.5 text-xs font-semibold text-zinc-700">
                     {gruppo.items.length}
