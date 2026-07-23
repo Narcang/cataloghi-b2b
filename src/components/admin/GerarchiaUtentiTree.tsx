@@ -19,8 +19,12 @@ import {
   type HierarchyRootRole,
   type ProfiloGerarchiaRow,
 } from '@/lib/userHierarchy'
-import RivenditoreProfiloRiepilogo from '@/components/admin/RivenditoreProfiloRiepilogo'
-import AgenziaProfiloRiepilogo from '@/components/admin/AgenziaProfiloRiepilogo'
+import RivenditoreEspositoriColonna, {
+  RivenditoreBoxColonna,
+} from '@/components/admin/RivenditoreProfiloRiepilogo'
+import AgenziaCampioniColonna, {
+  AgenziaCataloghiColonna,
+} from '@/components/admin/AgenziaProfiloRiepilogo'
 import { canViewProfiloSpecializzazioneAggiornato } from '@/lib/profiloSpecializzazioneDate'
 import {
   canViewerSeeUltimoAccessoForProfile,
@@ -87,8 +91,6 @@ function HierarchyNode({
       links,
     )
   }, [profile.id, profile.ruolo, breakdownBadges, profili, links])
-  const showProfiloSpecializzazione =
-    profile.ruolo === 'rivenditore' || profile.ruolo === 'agenzia'
   const mostraDateAggiornamento = canViewProfiloSpecializzazioneAggiornato(viewerRole)
   const seguitoDa =
     profile.ruolo === 'rivenditore' ? profile.seguito_da?.trim() || null : null
@@ -137,13 +139,7 @@ function HierarchyNode({
               : undefined
           }
         >
-          <div
-            className={`grid gap-3 items-start ${
-              showProfiloSpecializzazione
-                ? 'grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]'
-                : 'grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto]'
-            }`}
-          >
+          <div className="grid gap-3 items-start grid-cols-1 md:grid-cols-[minmax(0,1.35fr)_minmax(0,0.85fr)_minmax(0,1fr)_minmax(0,1fr)]">
             <div className="min-w-0">
               <h4 className="text-base font-semibold text-zinc-900 flex items-center gap-2">
                 {roleDotClass ? (
@@ -176,32 +172,18 @@ function HierarchyNode({
                 </p>
               ) : null}
             </div>
-            {showProfiloSpecializzazione ? (
-              <div className="flex justify-center md:justify-self-center px-1 md:px-3">
-                {profile.ruolo === 'rivenditore' ? (
-                  <RivenditoreProfiloRiepilogo
-                    profilo={profile}
-                    mostraDateAggiornamento={mostraDateAggiornamento}
-                  />
-                ) : (
-                  <AgenziaProfiloRiepilogo
-                    profilo={profile}
-                    mostraDateAggiornamento={mostraDateAggiornamento}
-                  />
-                )}
-              </div>
-            ) : null}
-            <div className="flex flex-col items-start md:items-end gap-1 md:justify-self-end">
-              <span className="rounded-full border border-black/10 bg-zinc-100 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-zinc-700">
+
+            <div className="flex flex-col items-start gap-1 min-w-0">
+              <span className="text-xs font-semibold uppercase tracking-wide text-zinc-700">
                 {ruoloGerarchiaLabel(profile.ruolo)}
               </span>
               {expandable ? (
-                <span className="text-xs font-medium text-zinc-400">
+                <span className="text-xs font-medium text-zinc-500">
                   {childCount} associat{childCount === 1 ? 'o' : 'i'}
                 </span>
               ) : null}
               {breakdownCounts && breakdownBadges.length > 0 ? (
-                <div className="flex flex-wrap gap-1.5 justify-end mt-0.5">
+                <div className="flex flex-wrap gap-1.5 mt-0.5">
                   {breakdownBadges.map(({ ruolo, label }) => {
                     const dotClass = ruoloBreakdownDotClass(ruolo)
                     if (!dotClass) return null
@@ -220,6 +202,35 @@ function HierarchyNode({
                 </div>
               ) : null}
             </div>
+
+            {profile.ruolo === 'agenzia' ? (
+              <>
+                <AgenziaCampioniColonna
+                  profilo={profile}
+                  mostraDateAggiornamento={mostraDateAggiornamento}
+                />
+                <AgenziaCataloghiColonna
+                  profilo={profile}
+                  mostraDateAggiornamento={mostraDateAggiornamento}
+                />
+              </>
+            ) : profile.ruolo === 'rivenditore' ? (
+              <>
+                <RivenditoreEspositoriColonna
+                  profilo={profile}
+                  mostraDateAggiornamento={mostraDateAggiornamento}
+                />
+                <RivenditoreBoxColonna
+                  profilo={profile}
+                  mostraDateAggiornamento={mostraDateAggiornamento}
+                />
+              </>
+            ) : (
+              <>
+                <div className="hidden md:block" aria-hidden />
+                <div className="hidden md:block" aria-hidden />
+              </>
+            )}
           </div>
         </div>
       </div>

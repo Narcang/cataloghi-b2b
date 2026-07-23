@@ -7,16 +7,15 @@ export type ColonnaRiepilogo = {
   aggiornatoIl?: string | null
 }
 
-type Props = {
-  colonne: ColonnaRiepilogo[]
+type ColonnaProps = ColonnaRiepilogo & {
   className?: string
   mostraDateAggiornamento?: boolean
 }
 
-function CampoStatusDot({ compilato }: { compilato: boolean }) {
+function CampoStatusQuadrato({ compilato }: { compilato: boolean }) {
   return (
     <span
-      className={`inline-block h-2 w-2 shrink-0 rounded-full ${
+      className={`inline-block h-2 w-2 shrink-0 rounded-sm ${
         compilato ? 'bg-green-500' : 'bg-red-500'
       }`}
       aria-hidden
@@ -24,19 +23,20 @@ function CampoStatusDot({ compilato }: { compilato: boolean }) {
   )
 }
 
-function CampoColonna({
+export function ProfiloSpecializzazioneColonna({
   label,
   compilato,
   valori,
   aggiornatoIl,
-  mostraDateAggiornamento,
-}: ColonnaRiepilogo & { mostraDateAggiornamento: boolean }) {
+  className = '',
+  mostraDateAggiornamento = false,
+}: ColonnaProps) {
   const dataLabel = formatProfiloAggiornatoIl(aggiornatoIl)
 
   return (
-    <div className="min-w-0 text-left">
+    <div className={`min-w-0 text-left ${className}`.trim()}>
       <p className="text-xs font-semibold uppercase tracking-wide text-zinc-700 flex items-center gap-1.5">
-        <CampoStatusDot compilato={compilato} />
+        <CampoStatusQuadrato compilato={compilato} />
         {label}
       </p>
       {valori.length > 0 ? (
@@ -44,7 +44,7 @@ function CampoColonna({
           {valori.map((value, index) => (
             <p
               key={`${label}-${index}-${value}`}
-              className="text-xs text-zinc-500 leading-snug max-w-[9.5rem]"
+              className="text-xs text-zinc-500 leading-snug max-w-[10rem]"
             >
               {value}
             </p>
@@ -58,6 +58,13 @@ function CampoColonna({
   )
 }
 
+type Props = {
+  colonne: ColonnaRiepilogo[]
+  className?: string
+  mostraDateAggiornamento?: boolean
+}
+
+/** Due colonne affiancate (legacy); in gerarchia usare ProfiloSpecializzazioneColonna singole. */
 export default function ProfiloColonneRiepilogo({
   colonne,
   className = '',
@@ -66,7 +73,7 @@ export default function ProfiloColonneRiepilogo({
   return (
     <div className={`grid grid-cols-2 gap-x-6 ${className}`.trim()}>
       {colonne.map((colonna) => (
-        <CampoColonna
+        <ProfiloSpecializzazioneColonna
           key={colonna.label}
           {...colonna}
           mostraDateAggiornamento={mostraDateAggiornamento}
