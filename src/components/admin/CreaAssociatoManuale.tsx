@@ -10,6 +10,8 @@ type Props = {
   parentId: string
   parentLabel: string
   ruoloNuovo: RuoloNuovo
+  /** Se valorizzata, la società è fissata a questo valore (uguale a quella del genitore) e non modificabile. */
+  societaBloccata?: string
 }
 
 const CONFIG: Record<
@@ -30,9 +32,15 @@ const CONFIG: Record<
   },
 }
 
-export default function CreaAssociatoManuale({ parentId, parentLabel, ruoloNuovo }: Props) {
+export default function CreaAssociatoManuale({
+  parentId,
+  parentLabel,
+  ruoloNuovo,
+  societaBloccata,
+}: Props) {
   const router = useRouter()
   const cfg = CONFIG[ruoloNuovo]
+  const societaLocked = Boolean(societaBloccata?.trim())
   const [nomeCompleto, setNomeCompleto] = useState('')
   const [email, setEmail] = useState('')
   const [telefono, setTelefono] = useState('')
@@ -70,7 +78,7 @@ export default function CreaAssociatoManuale({ parentId, parentLabel, ruoloNuovo
           nome_completo: nomeCompleto,
           email,
           telefono,
-          societa,
+          societa: societaLocked ? societaBloccata : societa,
           area_geografica: areaGeografica,
         }),
       })
@@ -149,8 +157,18 @@ export default function CreaAssociatoManuale({ parentId, parentLabel, ruoloNuovo
           />
         </label>
         <label className="block text-xs font-medium uppercase text-zinc-600 md:col-span-2">
-          Società (opzionale)
-          <input type="text" value={societa} onChange={(e) => setSocieta(e.target.value)} className={inputClass} />
+          Società {societaLocked ? '(uguale alla tua azienda)' : '(opzionale)'}
+          {societaLocked ? (
+            <input
+              type="text"
+              value={societaBloccata ?? ''}
+              readOnly
+              disabled
+              className={`${inputClass} bg-zinc-100 text-zinc-500 cursor-not-allowed`}
+            />
+          ) : (
+            <input type="text" value={societa} onChange={(e) => setSocieta(e.target.value)} className={inputClass} />
+          )}
         </label>
         <div className="md:col-span-2">
           <button

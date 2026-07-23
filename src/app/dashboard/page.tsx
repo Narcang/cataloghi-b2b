@@ -452,6 +452,7 @@ export default async function Dashboard(props: {
               parentId={user.id}
               parentLabel={profilo?.societa || profilo?.nome_completo || 'il tuo profilo'}
               ruoloNuovo={isAgenzia ? 'agente' : 'distributore'}
+              societaBloccata={profilo?.societa ?? undefined}
             />
           </section>
         )}
