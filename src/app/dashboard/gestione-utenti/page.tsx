@@ -219,6 +219,7 @@ export default async function GestioneUtentiPage(props: {
           allCataloghi={allCataloghi}
           readOnly={!isAdmin}
           canManageCataloghi={isManager}
+          canCreateAssociati={isManager}
         />
 
         {/* Invita utenti */}

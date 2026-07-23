@@ -4,13 +4,35 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { UserPlus } from 'lucide-react'
 
+type RuoloNuovo = 'agente' | 'distributore'
+
 type Props = {
-  agenziaId: string
-  agenziaLabel: string
+  parentId: string
+  parentLabel: string
+  ruoloNuovo: RuoloNuovo
 }
 
-export default function CreaAgenteManuale({ agenziaId, agenziaLabel }: Props) {
+const CONFIG: Record<
+  RuoloNuovo,
+  { titolo: string; persona: string; nomePlaceholder: string; button: string }
+> = {
+  agente: {
+    titolo: 'Inserisci agente manualmente',
+    persona: 'agente',
+    nomePlaceholder: 'Es. Mario Rossi',
+    button: 'Crea e associa agente',
+  },
+  distributore: {
+    titolo: 'Inserisci venditore manualmente',
+    persona: 'venditore',
+    nomePlaceholder: 'Es. Luca Bianchi',
+    button: 'Crea e associa venditore',
+  },
+}
+
+export default function CreaAssociatoManuale({ parentId, parentLabel, ruoloNuovo }: Props) {
   const router = useRouter()
+  const cfg = CONFIG[ruoloNuovo]
   const [nomeCompleto, setNomeCompleto] = useState('')
   const [email, setEmail] = useState('')
   const [telefono, setTelefono] = useState('')
@@ -33,17 +55,18 @@ export default function CreaAgenteManuale({ agenziaId, agenziaLabel }: Props) {
     setError(null)
     setMessage(null)
     if (!nomeCompleto.trim()) {
-      setError('Il nome dell’agente è obbligatorio')
+      setError('Il nome è obbligatorio')
       return
     }
     setSaving(true)
     try {
-      const res = await fetch('/api/admin/profili/crea-agente', {
+      const res = await fetch('/api/admin/profili/crea-associato', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'same-origin',
         body: JSON.stringify({
-          agenzia_id: agenziaId,
+          parent_id: parentId,
+          ruolo_nuovo: ruoloNuovo,
           nome_completo: nomeCompleto,
           email,
           telefono,
@@ -56,7 +79,7 @@ export default function CreaAgenteManuale({ agenziaId, agenziaLabel }: Props) {
         setError(data?.message ?? 'Creazione non riuscita')
         return
       }
-      setMessage(data.message ?? 'Agente creato')
+      setMessage(data.message ?? 'Creato')
       reset()
       router.refresh()
     } finally {
@@ -70,12 +93,12 @@ export default function CreaAgenteManuale({ agenziaId, agenziaLabel }: Props) {
     <div>
       <p className="text-xs font-medium uppercase text-zinc-600 mb-1 flex items-center gap-1.5">
         <UserPlus size={14} aria-hidden />
-        Inserisci agente manualmente
+        {cfg.titolo}
       </p>
       <p className="text-xs text-zinc-500 mb-2">
-        Crea un agente e collegalo a <span className="font-medium text-zinc-700">{agenziaLabel}</span>: comparirà
-        nella struttura organizzativa sotto questa agenzia. Se non indichi un’email viene creato un account tecnico
-        interno (l’agente resta visibile ma non può accedere finché non gli configuri l’accesso).
+        Crea un {cfg.persona} e collegalo a <span className="font-medium text-zinc-700">{parentLabel}</span>:
+        comparirà nella struttura organizzativa. Se non indichi un’email viene creato un account tecnico interno
+        (il profilo resta visibile ma non può accedere finché non gli configuri l’accesso).
       </p>
 
       {message ? (
@@ -87,14 +110,17 @@ export default function CreaAgenteManuale({ agenziaId, agenziaLabel }: Props) {
         <div className="mb-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">{error}</div>
       ) : null}
 
-      <form className="grid grid-cols-1 md:grid-cols-2 gap-3 border border-black/15 rounded-lg p-3 bg-zinc-50" onSubmit={submit}>
+      <form
+        className="grid grid-cols-1 md:grid-cols-2 gap-3 border border-black/15 rounded-lg p-3 bg-zinc-50"
+        onSubmit={submit}
+      >
         <label className="block text-xs font-medium uppercase text-zinc-600">
           Nome completo *
           <input
             type="text"
             value={nomeCompleto}
             onChange={(e) => setNomeCompleto(e.target.value)}
-            placeholder="Es. Mario Rossi"
+            placeholder={cfg.nomePlaceholder}
             className={inputClass}
           />
         </label>
@@ -110,12 +136,7 @@ export default function CreaAgenteManuale({ agenziaId, agenziaLabel }: Props) {
         </label>
         <label className="block text-xs font-medium uppercase text-zinc-600">
           Telefono (opzionale)
-          <input
-            type="tel"
-            value={telefono}
-            onChange={(e) => setTelefono(e.target.value)}
-            className={inputClass}
-          />
+          <input type="tel" value={telefono} onChange={(e) => setTelefono(e.target.value)} className={inputClass} />
         </label>
         <label className="block text-xs font-medium uppercase text-zinc-600">
           Area geografica (opzionale)
@@ -129,12 +150,7 @@ export default function CreaAgenteManuale({ agenziaId, agenziaLabel }: Props) {
         </label>
         <label className="block text-xs font-medium uppercase text-zinc-600 md:col-span-2">
           Società (opzionale)
-          <input
-            type="text"
-            value={societa}
-            onChange={(e) => setSocieta(e.target.value)}
-            className={inputClass}
-          />
+          <input type="text" value={societa} onChange={(e) => setSocieta(e.target.value)} className={inputClass} />
         </label>
         <div className="md:col-span-2">
           <button
@@ -142,7 +158,7 @@ export default function CreaAgenteManuale({ agenziaId, agenziaLabel }: Props) {
             disabled={saving}
             className="h-9 rounded-md bg-[#060d41] text-white px-3 text-sm font-semibold hover:bg-[#0a155a] disabled:opacity-50"
           >
-            {saving ? 'Creazione…' : 'Crea e associa agente'}
+            {saving ? 'Creazione…' : cfg.button}
           </button>
         </div>
       </form>

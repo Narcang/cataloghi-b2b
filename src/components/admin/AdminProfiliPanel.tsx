@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import { Users, UserCheck } from 'lucide-react'
 import AssociatiDirettiCascade from '@/components/admin/AssociatiDirettiCascade'
-import CreaAgenteManuale from '@/components/admin/CreaAgenteManuale'
+import CreaAssociatoManuale from '@/components/admin/CreaAssociatoManuale'
 import CatalogoPermessiPanel, { type CatalogoDisponibile } from '@/components/admin/CatalogoPermessiPanel'
 import RivenditoreProfiloCampi from '@/components/admin/RivenditoreProfiloCampi'
 import AgenziaProfiloCampi from '@/components/admin/AgenziaProfiloCampi'
@@ -108,6 +108,8 @@ type Props = {
   readOnly?: boolean
   /** Admin e manager possono gestire i cataloghi visibili anche se readOnly è true. */
   canManageCataloghi?: boolean
+  /** Admin e manager possono inserire manualmente agenti (agenzie) e venditori (rivenditori). */
+  canCreateAssociati?: boolean
 }
 
 export default function AdminProfiliPanel({
@@ -120,6 +122,7 @@ export default function AdminProfiliPanel({
   allCataloghi,
   readOnly = false,
   canManageCataloghi = false,
+  canCreateAssociati = false,
 }: Props) {
   const router = useRouter()
   const [message, setMessage] = useState<string | null>(null)
@@ -674,15 +677,23 @@ export default function AdminProfiliPanel({
                             </div>
                           </div>
                         ) : null}
-
-                        {p.ruolo === 'agenzia' ? (
-                          <CreaAgenteManuale
-                            agenziaId={p.id}
-                            agenziaLabel={p.societa || p.nome_completo || p.email || 'questa agenzia'}
-                          />
-                        ) : null}
                       </>
                     )}
+
+                    {canCreateAssociati && p.ruolo === 'agenzia' ? (
+                      <CreaAssociatoManuale
+                        parentId={p.id}
+                        parentLabel={p.societa || p.nome_completo || p.email || 'questa agenzia'}
+                        ruoloNuovo="agente"
+                      />
+                    ) : null}
+                    {canCreateAssociati && p.ruolo === 'rivenditore' ? (
+                      <CreaAssociatoManuale
+                        parentId={p.id}
+                        parentLabel={p.societa || p.nome_completo || p.email || 'questo rivenditore'}
+                        ruoloNuovo="distributore"
+                      />
+                    ) : null}
 
                     {canManageCataloghi && puoPersonalizzareCataloghi(p.ruolo) ? (
                       <div>

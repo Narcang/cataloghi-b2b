@@ -23,6 +23,7 @@ import CreateCatalogForm from '@/components/admin/CreateCatalogForm'
 import InvitaUtente from '@/components/InvitaUtente'
 import ContattoDirettoCard from '@/components/dashboard/ContattoDirettoCard'
 import GerarchiaUtentiTree from '@/components/admin/GerarchiaUtentiTree'
+import CreaAssociatoManuale from '@/components/admin/CreaAssociatoManuale'
 import AssociatiPiattiPanel from '@/components/dashboard/AssociatiPiattiPanel'
 import {
   profiloToGerarchiaRow,
@@ -436,6 +437,23 @@ export default async function Dashboard(props: {
             ownerProfile={gerarchiaOwnerProfile}
             ultimoAccessoByProfiloId={ultimoAccessoByProfiloId}
           />
+        )}
+
+        {showFullDashboard && !isManager && (isAgenzia || isRivenditore) && user && (
+          <section className="border border-black rounded-2xl bg-white p-6">
+            <h2 className="text-xl text-zinc-900 font-medium mb-1">
+              {isAgenzia ? 'Inserisci agente manualmente' : 'Inserisci venditore manualmente'}
+            </h2>
+            <p className="text-sm text-zinc-500 mb-4">
+              Aggiungi manualmente {isAgenzia ? 'un agente' : 'un venditore'} non ancora registrato: comparirà subito
+              nella tua struttura organizzativa.
+            </p>
+            <CreaAssociatoManuale
+              parentId={user.id}
+              parentLabel={profilo?.societa || profilo?.nome_completo || 'il tuo profilo'}
+              ruoloNuovo={isAgenzia ? 'agente' : 'distributore'}
+            />
+          </section>
         )}
 
         {showFullDashboard && !isManager && (isVenditoreLikeRole || isPartnerDipendente || isAgenzia || isAgente) && (
