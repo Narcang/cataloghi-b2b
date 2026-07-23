@@ -19,12 +19,14 @@ import {
   type HierarchyRootRole,
   type ProfiloGerarchiaRow,
 } from '@/lib/userHierarchy'
-import RivenditoreEspositoriColonna, {
-  RivenditoreBoxColonna,
-} from '@/components/admin/RivenditoreProfiloRiepilogo'
-import AgenziaCampioniColonna, {
+import {
+  AgenziaCampioniColonna,
   AgenziaCataloghiColonna,
 } from '@/components/admin/AgenziaProfiloRiepilogo'
+import {
+  RivenditoreBoxColonna,
+  RivenditoreEspositoriColonna,
+} from '@/components/admin/RivenditoreProfiloRiepilogo'
 import { canViewProfiloSpecializzazioneAggiornato } from '@/lib/profiloSpecializzazioneDate'
 import {
   canViewerSeeUltimoAccessoForProfile,
