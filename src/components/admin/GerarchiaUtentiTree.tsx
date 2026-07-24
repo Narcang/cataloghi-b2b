@@ -185,7 +185,7 @@ function HierarchyNode({
                 </span>
               ) : null}
               {breakdownCounts && breakdownBadges.length > 0 ? (
-                <div className="flex flex-wrap gap-1.5 mt-0.5">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-0.5">
                   {breakdownBadges.map(({ ruolo, label }) => {
                     const dotClass = ruoloBreakdownDotClass(ruolo)
                     if (!dotClass) return null
@@ -193,7 +193,7 @@ function HierarchyNode({
                       <span
                         key={ruolo}
                         title={label}
-                        className="inline-flex items-center gap-1 rounded-full border border-black/10 bg-zinc-50 px-2 py-0.5 text-xs font-medium text-zinc-600"
+                        className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-600"
                       >
                         <span className={`h-2 w-2 shrink-0 rounded-full ${dotClass}`} aria-hidden />
                         <span>{ruoloGerarchiaLabel(ruolo)}</span>
