@@ -34,3 +34,22 @@ export function componiValoreConQuantita(
   const badge = formatQuantitaBadge(qta)
   return badge ? `${testo} ${badge}` : testo
 }
+
+/** Normalizza una data inserita manualmente (testo libero): trim, vuoto => null. */
+export function normalizeDataTesto(value: unknown): string | null {
+  if (value === null || value === undefined) return null
+  const trimmed = String(value).trim()
+  return trimmed === '' ? null : trimmed
+}
+
+/** Compone valore + quantità + data manuale per i riepiloghi (es. "VALIGIA AGENTI ×20 · 27/07/2026"). */
+export function componiValoreConQuantitaEData(
+  valore: string | null | undefined,
+  qta: number | null | undefined,
+  data: string | null | undefined,
+): string | null {
+  const base = componiValoreConQuantita(valore, qta)
+  if (!base) return null
+  const dataTesto = normalizeDataTesto(data)
+  return dataTesto ? `${base} · ${dataTesto}` : base
+}

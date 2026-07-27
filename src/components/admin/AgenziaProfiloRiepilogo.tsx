@@ -4,7 +4,7 @@ import {
   pickAgenziaProfiloCampi,
   type AgenziaProfiloCampi,
 } from '@/lib/agenziaProfiloOptions'
-import { componiValoreConQuantita } from '@/lib/profiloQuantita'
+import { componiValoreConQuantitaEData } from '@/lib/profiloQuantita'
 import ProfiloColonneRiepilogo, {
   ProfiloSpecializzazioneColonna,
 } from '@/components/admin/ProfiloColonneRiepilogo'
@@ -18,12 +18,12 @@ type Props = {
 function useAgenziaColonne(profilo: Partial<AgenziaProfiloCampi>) {
   const campi = pickAgenziaProfiloCampi(profilo)
   const campioni = [
-    componiValoreConQuantita(campi.agenzia_campione_1, campi.agenzia_campione_1_qta),
-    componiValoreConQuantita(campi.agenzia_campione_2, campi.agenzia_campione_2_qta),
+    componiValoreConQuantitaEData(campi.agenzia_campione_1, campi.agenzia_campione_1_qta, campi.agenzia_campione_1_data),
+    componiValoreConQuantitaEData(campi.agenzia_campione_2, campi.agenzia_campione_2_qta, campi.agenzia_campione_2_data),
   ].filter((v): v is string => Boolean(v))
   const cataloghi = [
-    componiValoreConQuantita(campi.agenzia_catalogo_1, campi.agenzia_catalogo_1_qta),
-    componiValoreConQuantita(campi.agenzia_catalogo_2, campi.agenzia_catalogo_2_qta),
+    componiValoreConQuantitaEData(campi.agenzia_catalogo_1, campi.agenzia_catalogo_1_qta, campi.agenzia_catalogo_1_data),
+    componiValoreConQuantitaEData(campi.agenzia_catalogo_2, campi.agenzia_catalogo_2_qta, campi.agenzia_catalogo_2_data),
   ].filter((v): v is string => Boolean(v))
   return { campi, campioni, cataloghi }
 }

@@ -20,6 +20,8 @@ function SelectCampo({
   inputClassName,
   qtaName,
   qtaValue,
+  dataName,
+  dataValue,
 }: {
   name: string
   label: string
@@ -28,10 +30,12 @@ function SelectCampo({
   inputClassName: string
   qtaName: string
   qtaValue: number | null
+  dataName: string
+  dataValue: string | null
 }) {
   return (
-    <div className="grid grid-cols-[1fr_auto] gap-2 items-end">
-      <label className="block text-xs font-medium uppercase text-zinc-600">
+    <div className="grid grid-cols-[minmax(0,1fr)_auto_auto] gap-2 items-end">
+      <label className="block text-xs font-medium uppercase text-zinc-600 min-w-0">
         {label}
         <select name={name} defaultValue={value ?? ''} className={inputClassName}>
           <option value="">— Nessuna selezione —</option>
@@ -53,7 +57,17 @@ function SelectCampo({
           name={qtaName}
           defaultValue={qtaValue ?? ''}
           placeholder="—"
-          className={`${inputClassName} w-20 text-center`}
+          className={`${inputClassName} w-16 text-center`}
+        />
+      </label>
+      <label className="block text-xs font-medium uppercase text-zinc-600">
+        Data
+        <input
+          type="text"
+          name={dataName}
+          defaultValue={dataValue ?? ''}
+          placeholder="gg/mm/aaaa"
+          className={`${inputClassName} w-28 text-center`}
         />
       </label>
     </div>
@@ -69,12 +83,12 @@ export default function AgenziaProfiloCampi({
       <div>
         <p className="text-xs font-semibold uppercase tracking-wide">Campioni e Cataloghi</p>
         <p className="text-xs opacity-80 mt-0.5">
-          Solo per profili Agenzia — scelta singola e quantità per ogni voce.
+          Solo per profili Agenzia — scelta singola, quantità e data per ogni voce.
         </p>
       </div>
       <div>
         <p className="text-xs font-medium uppercase opacity-90 mb-2">Campioni</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
           <SelectCampo
             name="agenzia_campione_1"
             label="Campione"
@@ -83,6 +97,8 @@ export default function AgenziaProfiloCampi({
             inputClassName={inputClassName}
             qtaName="agenzia_campione_1_qta"
             qtaValue={profilo.agenzia_campione_1_qta ?? null}
+            dataName="agenzia_campione_1_data"
+            dataValue={profilo.agenzia_campione_1_data ?? null}
           />
           <SelectCampo
             name="agenzia_campione_2"
@@ -92,12 +108,14 @@ export default function AgenziaProfiloCampi({
             inputClassName={inputClassName}
             qtaName="agenzia_campione_2_qta"
             qtaValue={profilo.agenzia_campione_2_qta ?? null}
+            dataName="agenzia_campione_2_data"
+            dataValue={profilo.agenzia_campione_2_data ?? null}
           />
         </div>
       </div>
       <div>
         <p className="text-xs font-medium uppercase opacity-90 mb-2">Cataloghi</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
           <SelectCampo
             name="agenzia_catalogo_1"
             label="Catalogo"
@@ -106,6 +124,8 @@ export default function AgenziaProfiloCampi({
             inputClassName={inputClassName}
             qtaName="agenzia_catalogo_1_qta"
             qtaValue={profilo.agenzia_catalogo_1_qta ?? null}
+            dataName="agenzia_catalogo_1_data"
+            dataValue={profilo.agenzia_catalogo_1_data ?? null}
           />
           <SelectCampo
             name="agenzia_catalogo_2"
@@ -115,6 +135,8 @@ export default function AgenziaProfiloCampi({
             inputClassName={inputClassName}
             qtaName="agenzia_catalogo_2_qta"
             qtaValue={profilo.agenzia_catalogo_2_qta ?? null}
+            dataName="agenzia_catalogo_2_data"
+            dataValue={profilo.agenzia_catalogo_2_data ?? null}
           />
         </div>
       </div>

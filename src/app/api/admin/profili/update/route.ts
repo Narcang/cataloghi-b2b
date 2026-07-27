@@ -6,14 +6,21 @@ import {
   CATALOGO_AGENZIA_OPTIONS,
 } from '@/lib/agenziaProfiloOptions'
 import { profiloSezioneCampiModificati } from '@/lib/profiloSpecializzazioneDate'
-import { normalizeQuantita } from '@/lib/profiloQuantita'
+import { normalizeQuantita, normalizeDataTesto } from '@/lib/profiloQuantita'
 import {
   BOX_SHOW_ROOM_OPTIONS,
   ESPOSITORE_OPTIONS,
   readRivenditoreCampiFromBody,
 } from '@/lib/rivenditoreProfiloOptions'
 
-const ESPOSITORI_FIELDS = ['espositore_1', 'espositore_2', 'espositore_1_qta', 'espositore_2_qta'] as const
+const ESPOSITORI_FIELDS = [
+  'espositore_1',
+  'espositore_2',
+  'espositore_1_qta',
+  'espositore_2_qta',
+  'espositore_1_data',
+  'espositore_2_data',
+] as const
 const BOX_FIELDS = [
   'box_show_room_1',
   'box_show_room_2',
@@ -23,9 +30,27 @@ const BOX_FIELDS = [
   'box_show_room_2_qta',
   'box_show_room_3_qta',
   'box_show_room_4_qta',
+  'box_show_room_1_data',
+  'box_show_room_2_data',
+  'box_show_room_3_data',
+  'box_show_room_4_data',
 ] as const
-const CAMPIONI_FIELDS = ['agenzia_campione_1', 'agenzia_campione_2', 'agenzia_campione_1_qta', 'agenzia_campione_2_qta'] as const
-const CATALOGHI_FIELDS = ['agenzia_catalogo_1', 'agenzia_catalogo_2', 'agenzia_catalogo_1_qta', 'agenzia_catalogo_2_qta'] as const
+const CAMPIONI_FIELDS = [
+  'agenzia_campione_1',
+  'agenzia_campione_2',
+  'agenzia_campione_1_qta',
+  'agenzia_campione_2_qta',
+  'agenzia_campione_1_data',
+  'agenzia_campione_2_data',
+] as const
+const CATALOGHI_FIELDS = [
+  'agenzia_catalogo_1',
+  'agenzia_catalogo_2',
+  'agenzia_catalogo_1_qta',
+  'agenzia_catalogo_2_qta',
+  'agenzia_catalogo_1_data',
+  'agenzia_catalogo_2_data',
+] as const
 
 const ESPOSITORE_QTA_FIELDS = ['espositore_1_qta', 'espositore_2_qta'] as const
 const BOX_QTA_FIELDS = [
@@ -36,6 +61,16 @@ const BOX_QTA_FIELDS = [
 ] as const
 const CAMPIONE_QTA_FIELDS = ['agenzia_campione_1_qta', 'agenzia_campione_2_qta'] as const
 const CATALOGO_QTA_FIELDS = ['agenzia_catalogo_1_qta', 'agenzia_catalogo_2_qta'] as const
+
+const ESPOSITORE_DATA_FIELDS = ['espositore_1_data', 'espositore_2_data'] as const
+const BOX_DATA_FIELDS = [
+  'box_show_room_1_data',
+  'box_show_room_2_data',
+  'box_show_room_3_data',
+  'box_show_room_4_data',
+] as const
+const CAMPIONE_DATA_FIELDS = ['agenzia_campione_1_data', 'agenzia_campione_2_data'] as const
+const CATALOGO_DATA_FIELDS = ['agenzia_catalogo_1_data', 'agenzia_catalogo_2_data'] as const
 
 const RUOLI_OK = new Set(['admin', 'manager', 'agenzia', 'agente', 'fornitore', 'rivenditore', 'distributore', 'free', 'studio', 'partner_dipendente'])
 
@@ -73,6 +108,16 @@ type Body = {
   agenzia_campione_2_qta?: number | string | null
   agenzia_catalogo_1_qta?: number | string | null
   agenzia_catalogo_2_qta?: number | string | null
+  espositore_1_data?: string | null
+  espositore_2_data?: string | null
+  box_show_room_1_data?: string | null
+  box_show_room_2_data?: string | null
+  box_show_room_3_data?: string | null
+  box_show_room_4_data?: string | null
+  agenzia_campione_1_data?: string | null
+  agenzia_campione_2_data?: string | null
+  agenzia_catalogo_1_data?: string | null
+  agenzia_catalogo_2_data?: string | null
 }
 
 const ESPOSITORE_SET = new Set<string>(ESPOSITORE_OPTIONS)
@@ -108,6 +153,11 @@ function applySelectPatch(
 function applyQtaPatch(patch: Record<string, unknown>, body: Body, field: string) {
   if (!(field in body)) return
   patch[field] = normalizeQuantita(body[field as keyof Body]) ?? null
+}
+
+function applyDataPatch(patch: Record<string, unknown>, body: Body, field: string) {
+  if (!(field in body)) return
+  patch[field] = normalizeDataTesto(body[field as keyof Body])
 }
 
 export async function POST(request: NextRequest) {
@@ -176,7 +226,7 @@ export async function POST(request: NextRequest) {
   const { data: profiloEsistente } = await supabase
     .from('profili')
     .select(
-      'ruolo, espositore_1, espositore_2, box_show_room_1, box_show_room_2, box_show_room_3, box_show_room_4, agenzia_campione_1, agenzia_campione_2, agenzia_catalogo_1, agenzia_catalogo_2, espositore_1_qta, espositore_2_qta, box_show_room_1_qta, box_show_room_2_qta, box_show_room_3_qta, box_show_room_4_qta, agenzia_campione_1_qta, agenzia_campione_2_qta, agenzia_catalogo_1_qta, agenzia_catalogo_2_qta',
+      'ruolo, espositore_1, espositore_2, box_show_room_1, box_show_room_2, box_show_room_3, box_show_room_4, agenzia_campione_1, agenzia_campione_2, agenzia_catalogo_1, agenzia_catalogo_2, espositore_1_qta, espositore_2_qta, box_show_room_1_qta, box_show_room_2_qta, box_show_room_3_qta, box_show_room_4_qta, agenzia_campione_1_qta, agenzia_campione_2_qta, agenzia_catalogo_1_qta, agenzia_catalogo_2_qta, espositore_1_data, espositore_2_data, box_show_room_1_data, box_show_room_2_data, box_show_room_3_data, box_show_room_4_data, agenzia_campione_1_data, agenzia_campione_2_data, agenzia_catalogo_1_data, agenzia_catalogo_2_data',
     )
     .eq('id', profiloId)
     .maybeSingle()
@@ -205,6 +255,9 @@ export async function POST(request: NextRequest) {
     for (const field of [...ESPOSITORE_QTA_FIELDS, ...BOX_QTA_FIELDS]) {
       applyQtaPatch(patch, body, field)
     }
+    for (const field of [...ESPOSITORE_DATA_FIELDS, ...BOX_DATA_FIELDS]) {
+      applyDataPatch(patch, body, field)
+    }
   }
 
   if (ruoloEffettivo === 'agenzia') {
@@ -218,6 +271,9 @@ export async function POST(request: NextRequest) {
     }
     for (const field of [...CAMPIONE_QTA_FIELDS, ...CATALOGO_QTA_FIELDS]) {
       applyQtaPatch(patch, body, field)
+    }
+    for (const field of [...CAMPIONE_DATA_FIELDS, ...CATALOGO_DATA_FIELDS]) {
+      applyDataPatch(patch, body, field)
     }
   }
 

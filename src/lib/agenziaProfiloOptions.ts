@@ -1,4 +1,4 @@
-import { normalizeQuantita } from '@/lib/profiloQuantita'
+import { normalizeQuantita, normalizeDataTesto } from '@/lib/profiloQuantita'
 
 export const CAMPIONE_OPTIONS = ['VALIGIA AGENTI', 'CAMPIONI SCIOLTI'] as const
 
@@ -19,6 +19,10 @@ export type AgenziaProfiloCampi = {
   agenzia_campione_2_qta?: number | null
   agenzia_catalogo_1_qta?: number | null
   agenzia_catalogo_2_qta?: number | null
+  agenzia_campione_1_data?: string | null
+  agenzia_campione_2_data?: string | null
+  agenzia_catalogo_1_data?: string | null
+  agenzia_catalogo_2_data?: string | null
   agenzia_campioni_aggiornato_il?: string | null
   agenzia_cataloghi_aggiornato_il?: string | null
 }
@@ -35,6 +39,13 @@ export const AGENZIA_QTA_KEYS = [
   'agenzia_campione_2_qta',
   'agenzia_catalogo_1_qta',
   'agenzia_catalogo_2_qta',
+] as const satisfies readonly (keyof AgenziaProfiloCampi)[]
+
+export const AGENZIA_DATA_KEYS = [
+  'agenzia_campione_1_data',
+  'agenzia_campione_2_data',
+  'agenzia_catalogo_1_data',
+  'agenzia_catalogo_2_data',
 ] as const satisfies readonly (keyof AgenziaProfiloCampi)[]
 
 const CAMPIONE_SET = new Set<string>(CAMPIONE_OPTIONS)
@@ -69,6 +80,11 @@ export function readAgenziaCampiFromBody(body: Record<string, unknown>): Partial
       out[key] = normalizeQuantita(body[key])
     }
   }
+  for (const key of AGENZIA_DATA_KEYS) {
+    if (key in body) {
+      out[key] = normalizeDataTesto(body[key])
+    }
+  }
   return out
 }
 
@@ -82,6 +98,7 @@ export function readAgenziaCampiFromFormData(fd: FormData): AgenziaProfiloCampi 
     const raw = fd.get(name)
     return normalizeQuantita(raw === null ? null : raw) ?? null
   }
+  const readData = (name: keyof AgenziaProfiloCampi) => normalizeDataTesto(fd.get(name))
   return {
     agenzia_campione_1: read('agenzia_campione_1'),
     agenzia_campione_2: read('agenzia_campione_2'),
@@ -91,6 +108,10 @@ export function readAgenziaCampiFromFormData(fd: FormData): AgenziaProfiloCampi 
     agenzia_campione_2_qta: readQta('agenzia_campione_2_qta'),
     agenzia_catalogo_1_qta: readQta('agenzia_catalogo_1_qta'),
     agenzia_catalogo_2_qta: readQta('agenzia_catalogo_2_qta'),
+    agenzia_campione_1_data: readData('agenzia_campione_1_data'),
+    agenzia_campione_2_data: readData('agenzia_campione_2_data'),
+    agenzia_catalogo_1_data: readData('agenzia_catalogo_1_data'),
+    agenzia_catalogo_2_data: readData('agenzia_catalogo_2_data'),
   }
 }
 
@@ -104,6 +125,10 @@ export function pickAgenziaProfiloCampi(p: Partial<AgenziaProfiloCampi>): Agenzi
     agenzia_campione_2_qta: p.agenzia_campione_2_qta ?? null,
     agenzia_catalogo_1_qta: p.agenzia_catalogo_1_qta ?? null,
     agenzia_catalogo_2_qta: p.agenzia_catalogo_2_qta ?? null,
+    agenzia_campione_1_data: p.agenzia_campione_1_data ?? null,
+    agenzia_campione_2_data: p.agenzia_campione_2_data ?? null,
+    agenzia_catalogo_1_data: p.agenzia_catalogo_1_data ?? null,
+    agenzia_catalogo_2_data: p.agenzia_catalogo_2_data ?? null,
     agenzia_campioni_aggiornato_il: p.agenzia_campioni_aggiornato_il ?? null,
     agenzia_cataloghi_aggiornato_il: p.agenzia_cataloghi_aggiornato_il ?? null,
   }

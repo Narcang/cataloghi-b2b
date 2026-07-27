@@ -50,6 +50,16 @@ export type ProfiloGestioneRow = {
   agenzia_campione_2_qta?: number | null
   agenzia_catalogo_1_qta?: number | null
   agenzia_catalogo_2_qta?: number | null
+  espositore_1_data?: string | null
+  espositore_2_data?: string | null
+  box_show_room_1_data?: string | null
+  box_show_room_2_data?: string | null
+  box_show_room_3_data?: string | null
+  box_show_room_4_data?: string | null
+  agenzia_campione_1_data?: string | null
+  agenzia_campione_2_data?: string | null
+  agenzia_catalogo_1_data?: string | null
+  agenzia_catalogo_2_data?: string | null
 }
 
 export type OperatoreAssociazione = {
@@ -416,6 +426,12 @@ export default function AdminProfiliPanel({
                           box_show_room_2_qta: p.box_show_room_2_qta ?? null,
                           box_show_room_3_qta: p.box_show_room_3_qta ?? null,
                           box_show_room_4_qta: p.box_show_room_4_qta ?? null,
+                          espositore_1_data: p.espositore_1_data ?? null,
+                          espositore_2_data: p.espositore_2_data ?? null,
+                          box_show_room_1_data: p.box_show_room_1_data ?? null,
+                          box_show_room_2_data: p.box_show_room_2_data ?? null,
+                          box_show_room_3_data: p.box_show_room_3_data ?? null,
+                          box_show_room_4_data: p.box_show_room_4_data ?? null,
                         }}
                         inputClassName="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
                       />
@@ -431,6 +447,10 @@ export default function AdminProfiliPanel({
                           agenzia_campione_2_qta: p.agenzia_campione_2_qta ?? null,
                           agenzia_catalogo_1_qta: p.agenzia_catalogo_1_qta ?? null,
                           agenzia_catalogo_2_qta: p.agenzia_catalogo_2_qta ?? null,
+                          agenzia_campione_1_data: p.agenzia_campione_1_data ?? null,
+                          agenzia_campione_2_data: p.agenzia_campione_2_data ?? null,
+                          agenzia_catalogo_1_data: p.agenzia_catalogo_1_data ?? null,
+                          agenzia_catalogo_2_data: p.agenzia_catalogo_2_data ?? null,
                         }}
                         inputClassName="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
                       />
@@ -637,6 +657,12 @@ export default function AdminProfiliPanel({
                                 box_show_room_2_qta: p.box_show_room_2_qta ?? null,
                                 box_show_room_3_qta: p.box_show_room_3_qta ?? null,
                                 box_show_room_4_qta: p.box_show_room_4_qta ?? null,
+                                espositore_1_data: p.espositore_1_data ?? null,
+                                espositore_2_data: p.espositore_2_data ?? null,
+                                box_show_room_1_data: p.box_show_room_1_data ?? null,
+                                box_show_room_2_data: p.box_show_room_2_data ?? null,
+                                box_show_room_3_data: p.box_show_room_3_data ?? null,
+                                box_show_room_4_data: p.box_show_room_4_data ?? null,
                               }}
                             />
                           ) : null}
@@ -651,6 +677,10 @@ export default function AdminProfiliPanel({
                                 agenzia_campione_2_qta: p.agenzia_campione_2_qta ?? null,
                                 agenzia_catalogo_1_qta: p.agenzia_catalogo_1_qta ?? null,
                                 agenzia_catalogo_2_qta: p.agenzia_catalogo_2_qta ?? null,
+                                agenzia_campione_1_data: p.agenzia_campione_1_data ?? null,
+                                agenzia_campione_2_data: p.agenzia_campione_2_data ?? null,
+                                agenzia_catalogo_1_data: p.agenzia_catalogo_1_data ?? null,
+                                agenzia_catalogo_2_data: p.agenzia_catalogo_2_data ?? null,
                               }}
                             />
                           ) : null}

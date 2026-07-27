@@ -20,6 +20,8 @@ function SelectCampo({
   inputClassName,
   qtaName,
   qtaValue,
+  dataName,
+  dataValue,
 }: {
   name: string
   label: string
@@ -28,10 +30,12 @@ function SelectCampo({
   inputClassName: string
   qtaName: string
   qtaValue: number | null
+  dataName: string
+  dataValue: string | null
 }) {
   return (
-    <div className="grid grid-cols-[1fr_auto] gap-2 items-end">
-      <label className="block text-xs font-medium uppercase text-zinc-600">
+    <div className="grid grid-cols-[minmax(0,1fr)_auto_auto] gap-2 items-end">
+      <label className="block text-xs font-medium uppercase text-zinc-600 min-w-0">
         {label}
         <select name={name} defaultValue={value ?? ''} className={inputClassName}>
           <option value="">— Nessuna selezione —</option>
@@ -53,7 +57,17 @@ function SelectCampo({
           name={qtaName}
           defaultValue={qtaValue ?? ''}
           placeholder="—"
-          className={`${inputClassName} w-20 text-center`}
+          className={`${inputClassName} w-16 text-center`}
+        />
+      </label>
+      <label className="block text-xs font-medium uppercase text-zinc-600">
+        Data
+        <input
+          type="text"
+          name={dataName}
+          defaultValue={dataValue ?? ''}
+          placeholder="gg/mm/aaaa"
+          className={`${inputClassName} w-28 text-center`}
         />
       </label>
     </div>
@@ -69,12 +83,12 @@ export default function RivenditoreProfiloCampi({
       <div>
         <p className="text-xs font-semibold uppercase tracking-wide">Espositori e Box Show Room</p>
         <p className="text-xs opacity-80 mt-0.5">
-          Solo per profili Rivenditori — scelta singola e quantità per ogni voce.
+          Solo per profili Rivenditori — scelta singola, quantità e data per ogni voce.
         </p>
       </div>
       <div>
         <p className="text-xs font-medium uppercase opacity-90 mb-2">Espositori</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
           <SelectCampo
             name="espositore_1"
             label="Espositore"
@@ -83,6 +97,8 @@ export default function RivenditoreProfiloCampi({
             inputClassName={inputClassName}
             qtaName="espositore_1_qta"
             qtaValue={profilo.espositore_1_qta ?? null}
+            dataName="espositore_1_data"
+            dataValue={profilo.espositore_1_data ?? null}
           />
           <SelectCampo
             name="espositore_2"
@@ -92,14 +108,16 @@ export default function RivenditoreProfiloCampi({
             inputClassName={inputClassName}
             qtaName="espositore_2_qta"
             qtaValue={profilo.espositore_2_qta ?? null}
+            dataName="espositore_2_data"
+            dataValue={profilo.espositore_2_data ?? null}
           />
         </div>
       </div>
 
       <div>
         <p className="text-xs font-medium uppercase opacity-90 mb-2">Box Show Room</p>
-        <p className="text-xs opacity-70 mb-2">Quattro scelte singole (01–04) con quantità.</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <p className="text-xs opacity-70 mb-2">Quattro scelte singole (01–04) con quantità e data.</p>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
           <SelectCampo
             name="box_show_room_1"
             label="Box Show Room 01"
@@ -108,6 +126,8 @@ export default function RivenditoreProfiloCampi({
             inputClassName={inputClassName}
             qtaName="box_show_room_1_qta"
             qtaValue={profilo.box_show_room_1_qta ?? null}
+            dataName="box_show_room_1_data"
+            dataValue={profilo.box_show_room_1_data ?? null}
           />
           <SelectCampo
             name="box_show_room_2"
@@ -117,6 +137,8 @@ export default function RivenditoreProfiloCampi({
             inputClassName={inputClassName}
             qtaName="box_show_room_2_qta"
             qtaValue={profilo.box_show_room_2_qta ?? null}
+            dataName="box_show_room_2_data"
+            dataValue={profilo.box_show_room_2_data ?? null}
           />
           <SelectCampo
             name="box_show_room_3"
@@ -126,6 +148,8 @@ export default function RivenditoreProfiloCampi({
             inputClassName={inputClassName}
             qtaName="box_show_room_3_qta"
             qtaValue={profilo.box_show_room_3_qta ?? null}
+            dataName="box_show_room_3_data"
+            dataValue={profilo.box_show_room_3_data ?? null}
           />
           <SelectCampo
             name="box_show_room_4"
@@ -135,6 +159,8 @@ export default function RivenditoreProfiloCampi({
             inputClassName={inputClassName}
             qtaName="box_show_room_4_qta"
             qtaValue={profilo.box_show_room_4_qta ?? null}
+            dataName="box_show_room_4_data"
+            dataValue={profilo.box_show_room_4_data ?? null}
           />
         </div>
       </div>
