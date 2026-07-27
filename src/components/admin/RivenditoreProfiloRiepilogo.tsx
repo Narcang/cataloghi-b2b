@@ -4,6 +4,7 @@ import {
   pickRivenditoreProfiloCampi,
   type RivenditoreProfiloCampi,
 } from '@/lib/rivenditoreProfiloOptions'
+import { componiValoreConQuantita } from '@/lib/profiloQuantita'
 import ProfiloColonneRiepilogo, {
   ProfiloSpecializzazioneColonna,
 } from '@/components/admin/ProfiloColonneRiepilogo'
@@ -16,15 +17,16 @@ type Props = {
 
 function useRivenditoreColonne(profilo: Partial<RivenditoreProfiloCampi>) {
   const campi = pickRivenditoreProfiloCampi(profilo)
-  const espositori = [campi.espositore_1, campi.espositore_2].filter((v): v is string =>
-    Boolean(v?.trim()),
-  )
+  const espositori = [
+    componiValoreConQuantita(campi.espositore_1, campi.espositore_1_qta),
+    componiValoreConQuantita(campi.espositore_2, campi.espositore_2_qta),
+  ].filter((v): v is string => Boolean(v))
   const box = [
-    campi.box_show_room_1,
-    campi.box_show_room_2,
-    campi.box_show_room_3,
-    campi.box_show_room_4,
-  ].filter((v): v is string => Boolean(v?.trim()))
+    componiValoreConQuantita(campi.box_show_room_1, campi.box_show_room_1_qta),
+    componiValoreConQuantita(campi.box_show_room_2, campi.box_show_room_2_qta),
+    componiValoreConQuantita(campi.box_show_room_3, campi.box_show_room_3_qta),
+    componiValoreConQuantita(campi.box_show_room_4, campi.box_show_room_4_qta),
+  ].filter((v): v is string => Boolean(v))
   return { campi, espositori, box }
 }
 

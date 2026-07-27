@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guida Newsletter — Listmonk + Wix</title>
+  <style>
+    @page { size: A4; margin: 22mm 18mm 24mm 18mm; }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      font-size: 10.5pt;
+      line-height: 1.55;
+      color: #1a1a1a;
+      max-width: 210mm;
+      margin: 0 auto;
+    }
+    .cover {
+      page-break-after: always;
+      min-height: 250mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 12mm 0 0 0;
+    }
+    .cover-label {
+      font-size: 9pt;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #666;
+      margin-bottom: 12mm;
+    }
+    .cover h1 {
+      font-size: 26pt;
+      font-weight: 700;
+      line-height: 1.2;
+      margin: 0 0 8mm 0;
+    }
+    .cover .subtitle { font-size: 13pt; color: #444; margin-bottom: 18mm; max-width: 145mm; }
+    .cover-meta { border-top: 2px solid #111; padding-top: 6mm; font-size: 10pt; color: #555; }
+    .cover-meta p { margin: 2mm 0; }
+    h2 {
+      font-size: 14pt;
+      font-weight: 700;
+      margin: 10mm 0 4mm 0;
+      padding-bottom: 2mm;
+      border-bottom: 1px solid #ddd;
+      page-break-after: avoid;
+    }
+    h3 { font-size: 11pt; font-weight: 600; margin: 6mm 0 3mm 0; page-break-after: avoid; }
+    p { margin: 0 0 3mm 0; }
+    ul, ol { margin: 0 0 4mm 0; padding-left: 6mm; }
+    li { margin-bottom: 1.5mm; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 4mm 0 6mm 0;
+      font-size: 9.5pt;
+      page-break-inside: avoid;
+    }
+    th, td { border: 1px solid #ccc; padding: 2.5mm 3mm; text-align: left; vertical-align: top; }
+    th { background: #f3f3f3; font-weight: 600; }
+    .highlight-box {
+      background: #f7f9fc;
+      border-left: 3px solid #2563eb;
+      padding: 4mm 5mm;
+      margin: 4mm 0 6mm 0;
+      page-break-inside: avoid;
+    }
+    .highlight-box strong { display: block; margin-bottom: 2mm; color: #1e40af; }
+    .best-box {
+      background: #ecfdf5;
+      border-left: 3px solid #059669;
+      padding: 4mm 5mm;
+      margin: 4mm 0 6mm 0;
+      page-break-inside: avoid;
+    }
+    .best-box strong { display: block; margin-bottom: 2mm; color: #047857; }
+    .warn-box {
+      background: #fffbeb;
+      border-left: 3px solid #d97706;
+      padding: 4mm 5mm;
+      margin: 4mm 0 6mm 0;
+      page-break-inside: avoid;
+    }
+    pre, code { font-family: Consolas, "Courier New", monospace; font-size: 8.5pt; }
+    pre {
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      padding: 4mm;
+      margin: 3mm 0 5mm 0;
+      page-break-inside: avoid;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .checklist { list-style: none; padding-left: 0; }
+    .checklist li { padding-left: 6mm; position: relative; }
+    .checklist li::before { content: "☐"; position: absolute; left: 0; }
+    .flow, .arch {
+      background: #fafafa;
+      border: 1px solid #ddd;
+      padding: 4mm 5mm;
+      font-family: Consolas, monospace;
+      font-size: 9pt;
+      line-height: 1.7;
+      margin: 4mm 0 6mm 0;
+      page-break-inside: avoid;
+    }
+    .page-break { page-break-before: always; }
+    .footer-note {
+      font-size: 9pt;
+      color: #666;
+      margin-top: 8mm;
+      padding-top: 4mm;
+      border-top: 1px solid #eee;
+    }
+    .badge {
+      display: inline-block;
+      background: #dcfce7;
+      color: #166534;
+      font-size: 8.5pt;
+      font-weight: 600;
+      padding: 1mm 2.5mm;
+      border-radius: 3px;
+    }
+    .badge-alt {
+      display: inline-block;
+      background: #e0e7ff;
+      color: #3730a3;
+      font-size: 8.5pt;
+      font-weight: 600;
+      padding: 1mm 2.5mm;
+      border-radius: 3px;
+    }
+    tr.row-best { background: #f0fdf4; }
+  </style>
+</head>
+<body>
+
+  <section class="cover">
+    <div class="cover-label">Documento tecnico-operativo</div>
+    <h1>Newsletter self-hosted con Listmonk</h1>
+    <p class="subtitle">
+      Due opzioni per siti su Wix — consigliata: PikaPods + Amazon SES + IP dedicato + iframe
+    </p>
+    <div class="cover-meta">
+      <p><strong>Contatti attuali:</strong> ~12.000 — obiettivo 20.000–25.000 a fine anno</p>
+      <p><strong>Volume invii:</strong> fino a 100.000 email/mese</p>
+      <p><strong>Sito web:</strong> Wix — integrazione via iframe (form embedded)</p>
+      <p><strong>Data:</strong> Luglio 2026</p>
+    </div>
+  </section>
+
+  <h2>1. Architettura: chi fa cosa</h2>
+
+  <div class="highlight-box">
+    <strong>Amazon SES non è il server.</strong>
+    PikaPods o Elestio ospitano Listmonk (applicazione + database contatti). Amazon SES consegna le email ai destinatari. Wix mostra solo il form di iscrizione.
+  </div>
+
+  <div class="arch">
+Sito Wix (iframe)  →  PIKAPODS / ELESTIO (Listmonk)  →  AMAZON SES (IP dedicato)
+newsletter.dominio.it         database 12k+ contatti         consegna email
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>Componente</th><th>Cos’è</th><th>Cosa fa</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>PikaPods / Elestio</strong></td>
+        <td>Hosting gestito Listmonk</td>
+        <td>Server applicazione, database contatti, pannello admin, form iscrizione, HTTPS</td>
+      </tr>
+      <tr>
+        <td><strong>Amazon SES</strong></td>
+        <td>Servizio AWS di invio</td>
+        <td>Recapita le newsletter — non ospita dati né applicazioni</td>
+      </tr>
+      <tr>
+        <td><strong>Wix</strong></td>
+        <td>Sito web</td>
+        <td>Embed iframe del form — nessun codice backend necessario</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>2. Confronto opzioni hosting</h2>
+
+  <p>Entrambe le opzioni usano <strong>Listmonk + Amazon SES + IP dedicato</strong> e la <strong>stessa integrazione Wix</strong>. Cambia solo dove gira Listmonk.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th></th>
+        <th>Opzione A — Elestio</th>
+        <th>Opzione B — PikaPods</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="row-best">
+        <td><strong>Valutazione</strong></td>
+        <td><span class="badge-alt">Managed premium</span></td>
+        <td><span class="badge">Consigliata</span></td>
+      </tr>
+      <tr>
+        <td>Hosting Listmonk</td>
+        <td>Elestio (piano medio)</td>
+        <td>PikaPods (pod ~512 MB–1 GB)</td>
+      </tr>
+      <tr>
+        <td>Invio + IP dedicato</td>
+        <td>Amazon SES (~10 €) + IP (~24 €)</td>
+        <td>Amazon SES (~10 €) + IP (~24 €)</td>
+      </tr>
+      <tr>
+        <td><strong>Costo totale/mese</strong></td>
+        <td><strong>~55–65 €</strong></td>
+        <td><strong>~38–42 €</strong></td>
+      </tr>
+      <tr>
+        <td>Setup (ore)</td>
+        <td>11–17 h</td>
+        <td>10–14 h</td>
+      </tr>
+      <tr>
+        <td>Backup / update</td>
+        <td>Automatici (Elestio)</td>
+        <td>Auto-update; backup da verificare</td>
+      </tr>
+      <tr>
+        <td>Integrazione Wix</td>
+        <td>✅ Identica (iframe)</td>
+        <td>✅ Identica (iframe)</td>
+      </tr>
+      <tr>
+        <td>Difficoltà tecnica</td>
+        <td>Bassa</td>
+        <td>Bassa-media</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="best-box">
+    <strong>Perché Opzione B (PikaPods) è consigliata</strong>
+    Stesso risultato funzionale e stessa integrazione Wix di Elestio, con risparmio di ~15–25 €/mese (~180–300 €/anno). Ideale con 12k–25k contatti e fino a 100k invii/mese con IP dedicato.
+  </div>
+
+  <h3>Dettaglio costi — Opzione B (PikaPods + SES + IP dedicato)</h3>
+
+  <table>
+    <thead>
+      <tr><th>Voce</th><th>Dettaglio</th><th>Costo/mese</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>PikaPods</strong></td><td>Listmonk, deploy 1-click, HTTPS incluso</td><td>~4–6 €</td></tr>
+      <tr><td><strong>Amazon SES</strong></td><td>Invio fino a 100k email (~0,10 € / 1.000)</td><td>~10 €</td></tr>
+      <tr><td><strong>IP dedicato SES</strong></td><td>Indirizzo IP esclusivo per deliverability</td><td>~24 €</td></tr>
+      <tr><td><strong>Subdomain</strong></td><td>newsletter.dominio.it</td><td>0 €</td></tr>
+      <tr><td colspan="2"><strong>Totale Opzione B</strong></td><td><strong>~38–42 €/mese</strong></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Dettaglio costi — Opzione A (Elestio + SES + IP dedicato)</h3>
+
+  <table>
+    <thead>
+      <tr><th>Voce</th><th>Dettaglio</th><th>Costo/mese</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Elestio</strong></td><td>Listmonk managed, piano medio</td><td>~20–30 €</td></tr>
+      <tr><td><strong>Amazon SES</strong></td><td>Invio fino a 100k email</td><td>~10 €</td></tr>
+      <tr><td><strong>IP dedicato SES</strong></td><td>Indirizzo IP esclusivo</td><td>~24 €</td></tr>
+      <tr><td colspan="2"><strong>Totale Opzione A</strong></td><td><strong>~55–65 €/mese</strong></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Confronto con Brevo (100k email/mese)</h3>
+
+  <table>
+    <thead>
+      <tr><th>Soluzione</th><th>Costo/mese</th><th>Note</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Brevo Starter (100k invii)</td><td>~65–69 €</td><td>Automazioni limitate, logo Brevo</td></tr>
+      <tr><td>Brevo Standard (100k invii)</td><td>~115–129 €</td><td>Automazioni, A/B test avanzati</td></tr>
+      <tr class="row-best">
+        <td><strong>Opzione B — PikaPods + SES + IP dedicato</strong></td>
+        <td><strong>~38–42 €</strong></td>
+        <td>Nessun limite contatti; dati self-hosted</td>
+      </tr>
+      <tr>
+        <td>Opzione A — Elestio + SES + IP dedicato</td>
+        <td>~55–65 €</td>
+        <td>Più managed, stesso risultato</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 class="page-break">3. IP dedicato: cos’è</h2>
+
+  <p>Ogni email parte da un <strong>indirizzo IP</strong>. Gmail e Outlook lo usano per decidere inbox vs spam.</p>
+
+  <table>
+    <thead>
+      <tr><th>Tipo</th><th>Come funziona</th><th>Costo</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>IP condiviso</strong></td>
+        <td>IP usato anche da altri clienti AWS</td>
+        <td>Incluso (0 € extra)</td>
+      </tr>
+      <tr>
+        <td><strong>IP dedicato</strong></td>
+        <td>IP usato esclusivamente da voi; reputazione solo vostra</td>
+        <td>~24 €/mese</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>Con invii regolari fino a 100k/mese si consiglia l’<strong>IP dedicato</strong>, accompagnato da <strong>warm-up</strong> graduale (2k → 5k → 10k → …) nelle prime settimane.</p>
+
+  <h2>4. Integrazione Wix: è semplice?</h2>
+
+  <div class="best-box">
+    <strong>Sì — l’integrazione Wix è la stessa per Opzione A e B, ed è semplice.</strong>
+    Non servono automazioni Wix, webhook, codice Velo né spostare il sito da Wix. Bastano 3 passi lato Wix.
+  </div>
+
+  <h3>Cosa serve su Wix</h3>
+  <ul>
+    <li>Piano Wix con <strong>HTML embed / iframe</strong> (presente sui piani Business e superiori)</li>
+    <li>Accesso al <strong>DNS del dominio</strong> (separato dall’editor Wix) per il subdomain newsletter</li>
+  </ul>
+
+  <h3>3 passi su Wix (circa 1–2 ore)</h3>
+  <ol>
+    <li><strong>DNS:</strong> creare <code>newsletter.cliente.it</code> che punta a PikaPods/Elestio</li>
+    <li><strong>Pagina Wix:</strong> aggiungere elemento “HTML embed” o “iframe”</li>
+    <li><strong>Incollare il codice:</strong></li>
+  </ol>
+
+  <pre>&lt;iframe
+  src="https://newsletter.cliente.it/subscription/form"
+  width="100%"
+  height="420"
+  frameborder="0"
+  style="border:0; max-width:480px;"
+  title="Iscriviti alla newsletter"&gt;
+&lt;/iframe&gt;</pre>
+
+  <p>Il visitatore compila il form <strong>dentro la pagina Wix</strong>. I dati vanno direttamente su Listmonk (PikaPods). Wix non gestisce contatti né email.</p>
+
+  <h3>Cosa NON dovete fare su Wix</h3>
+  <ul>
+    <li>❌ Installare plugin o app newsletter</li>
+    <li>❌ Scrivere codice backend (Velo)</li>
+    <li>❌ Configurare automazioni o webhook</li>
+    <li>❌ Spostare il sito da Wix</li>
+  </ul>
+
+  <h3>DNS: sito e newsletter convivono</h3>
+  <table>
+    <thead>
+      <tr><th>Record</th><th>Punta a</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>cliente.it / www</td><td>Wix (invariato)</td></tr>
+      <tr><td>newsletter.cliente.it</td><td>PikaPods o Elestio (Listmonk)</td></tr>
+      <tr><td>SPF, DKIM, DMARC</td><td>Amazon SES</td></tr>
+    </tbody>
+  </table>
+
+  <h2 class="page-break">5. Fattibilità con i volumi previsti</h2>
+
+  <table>
+    <thead>
+      <tr><th>Parametro</th><th>Valore</th><th>Supporto</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Contatti attuali</td><td>~12.000</td><td>✅ Nessun limite</td></tr>
+      <tr><td>Obiettivo fine anno</td><td>20.000–25.000</td><td>✅ Senza upgrade piano</td></tr>
+      <tr><td>Invii massimi/mese</td><td>100.000</td><td>✅ Listmonk + SES reggono</td></tr>
+      <tr><td>Form su Wix</td><td>Iframe</td><td>✅ Identico su A e B</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Attenzioni operative</h3>
+  <ol>
+    <li>SES: uscire dalla sandbox + quota 100k/giorno + rate ~14+ email/sec</li>
+    <li>Warm-up IP dedicato: invii graduali nelle prime settimane</li>
+    <li>PikaPods: pod con almeno 512 MB–1 GB RAM per 12k+ contatti</li>
+    <li>DNS: SPF, DKIM, DMARC obbligatori</li>
+  </ol>
+
+  <h2>6. Piano operativo — Opzione B (PikaPods)</h2>
+
+  <h3>Fase 1 — Infrastruttura (3–4 ore)</h3>
+  <ol>
+    <li>Account <strong>AWS</strong> + attivazione <strong>Amazon SES</strong> (regione EU)</li>
+    <li>Account <strong>PikaPods</strong> → deploy <strong>Listmonk</strong> (1-click dal catalogo)</li>
+    <li>Configurare dominio custom <strong>newsletter.cliente.it</strong> su PikaPods (HTTPS automatico)</li>
+    <li>Listmonk → Settings → SMTP con credenziali SES + IP dedicato</li>
+    <li>Credenziali admin sicure</li>
+  </ol>
+
+  <h3>Fase 2 — Deliverability SES (3–4 ore + attesa AWS 1–3 gg)</h3>
+  <ol>
+    <li>Record SPF, DKIM, DMARC sul DNS del dominio</li>
+    <li>Richiesta <strong>Production Access</strong> + quota 100k/giorno</li>
+    <li>Attivazione <strong>IP dedicato</strong> su SES</li>
+  </ol>
+
+  <h3>Fase 3 — Listmonk + Wix (2–3 ore)</h3>
+  <ol>
+    <li>Lista newsletter pubblica + double opt-in + hCaptcha</li>
+    <li>Test form: <code>https://newsletter.cliente.it/subscription/form</code></li>
+    <li>Embed iframe su pagina Wix + test mobile</li>
+  </ol>
+
+  <h3>Fase 4 — Migrazione e go-live (4–5 ore)</h3>
+  <ol>
+    <li>Export ~12.000 contatti da Brevo → import Listmonk</li>
+    <li>Migrazione template HTML</li>
+    <li>Invii test → warm-up graduale → campagne a regime</li>
+  </ol>
+
+  <h3>Piano operativo — Opzione A (Elestio)</h3>
+  <p>Identico all’Opzione B, sostituendo il deploy PikaPods con Elestio (piano medio). Tempi e integrazione Wix restano equivalenti; costo hosting più alto.</p>
+
+  <h2>7. Stima tempi di lavoro</h2>
+
+  <table>
+    <thead>
+      <tr><th>Fase</th><th>Opzione B (PikaPods)</th><th>Opzione A (Elestio)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Setup hosting + SES + DNS + quota</td><td>5–7 h</td><td>6–9 h</td></tr>
+      <tr><td>Embed Wix + test</td><td>1–2 h</td><td>1–2 h</td></tr>
+      <tr><td>Migrazione 12k contatti + template + warm-up</td><td>4–5 h</td><td>4–6 h</td></tr>
+      <tr><td><strong>Totale</strong></td><td><strong>10–14 h</strong></td><td><strong>11–17 h</strong></td></tr>
+    </tbody>
+  </table>
+
+  <h2 class="page-break">8. Checklist prerequisiti</h2>
+
+  <ul class="checklist">
+    <li>Accesso al <strong>DNS</strong> del dominio</li>
+    <li><strong>Piano Wix</strong> con embed HTML/iframe</li>
+    <li>Export contatti (~12k: email, nome, data consenso)</li>
+    <li>Email mittente (es. newsletter@cliente.it)</li>
+    <li>Stima invii mensili (fino a 100k)</li>
+  </ul>
+
+  <h2>9. Ordine di esecuzione</h2>
+
+  <div class="flow">
+1. PikaPods (o Elestio) + subdomain newsletter + HTTPS
+2. SES + IP dedicato + DNS (SPF / DKIM / DMARC)
+3. Richiesta production access + quota 100k/giorno
+4. Attesa approvazione AWS
+5. Test invio email
+6. Form pubblico + iframe su Wix
+7. Import 12k contatti
+8. Warm-up invii graduali (IP dedicato)
+9. Campagne a regime
+  </div>
+
+  <h2>10. Riepilogo decisioni</h2>
+
+  <table>
+    <thead>
+      <tr><th>Scelta</th><th>Consiglio</th></tr>
+    </thead>
+    <tbody>
+      <tr class="row-best">
+        <td><strong>Opzione consigliata</strong></td>
+        <td><strong>B — PikaPods + SES + IP dedicato (~38–42 €/mese)</strong></td>
+      </tr>
+      <tr>
+        <td>Alternativa più managed</td>
+        <td>A — Elestio + SES + IP dedicato (~55–65 €/mese)</td>
+      </tr>
+      <tr><td>Server (app + dati)</td><td>PikaPods o Elestio — Listmonk</td></tr>
+      <tr><td>Invio email</td><td>Amazon SES + IP dedicato — non è il server</td></tr>
+      <tr><td>Integrazione Wix</td><td>Iframe — semplice, ~1–2 h, identica per A e B</td></tr>
+      <tr><td>Tempi setup</td><td>10–14 h (Opzione B) / 11–17 h (Opzione A)</td></tr>
+    </tbody>
+  </table>
+
+  <h2>11. Cosa include Listmonk</h2>
+
+  <table>
+    <thead>
+      <tr><th>Funzione</th><th>Disponibile</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Newsletter / campagne</td><td>Sì</td></tr>
+      <tr><td>Liste, segmenti, import CSV (12k+)</td><td>Sì</td></tr>
+      <tr><td>Statistiche open / click / bounce</td><td>Sì</td></tr>
+      <tr><td>Double opt-in</td><td>Sì</td></tr>
+      <tr><td>Template HTML</td><td>Sì</td></tr>
+      <tr><td>Automazioni marketing avanzate</td><td>Limitate</td></tr>
+      <tr><td>SMS, CRM, landing page builder</td><td>No</td></tr>
+    </tbody>
+  </table>
+
+  <p class="footer-note">
+    Documento aggiornato a Luglio 2026. Costi = soli servizi infrastrutturali (PikaPods/Elestio, Amazon SES, IP dedicato). Non include consulenza o gestione.
+  </p>
+
+</body>
+</html>

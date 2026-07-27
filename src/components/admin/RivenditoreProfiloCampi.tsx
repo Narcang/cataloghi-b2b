@@ -5,6 +5,7 @@ import {
   ESPOSITORE_OPTIONS,
   type RivenditoreProfiloCampi as RivenditoreProfiloCampiValues,
 } from '@/lib/rivenditoreProfiloOptions'
+import { QUANTITA_MAX } from '@/lib/profiloQuantita'
 
 type Props = {
   profilo: Omit<RivenditoreProfiloCampiValues, 'seguito_da'>
@@ -17,25 +18,45 @@ function SelectCampo({
   value,
   options,
   inputClassName,
+  qtaName,
+  qtaValue,
 }: {
   name: string
   label: string
   value: string | null
   options: readonly string[]
   inputClassName: string
+  qtaName: string
+  qtaValue: number | null
 }) {
   return (
-    <label className="block text-xs font-medium uppercase text-zinc-600">
-      {label}
-      <select name={name} defaultValue={value ?? ''} className={inputClassName}>
-        <option value="">— Nessuna selezione —</option>
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
-    </label>
+    <div className="grid grid-cols-[1fr_auto] gap-2 items-end">
+      <label className="block text-xs font-medium uppercase text-zinc-600">
+        {label}
+        <select name={name} defaultValue={value ?? ''} className={inputClassName}>
+          <option value="">— Nessuna selezione —</option>
+          {options.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="block text-xs font-medium uppercase text-zinc-600">
+        Qtà
+        <input
+          type="number"
+          inputMode="numeric"
+          min={0}
+          max={QUANTITA_MAX}
+          step={1}
+          name={qtaName}
+          defaultValue={qtaValue ?? ''}
+          placeholder="—"
+          className={`${inputClassName} w-20 text-center`}
+        />
+      </label>
+    </div>
   )
 }
 
@@ -47,7 +68,9 @@ export default function RivenditoreProfiloCampi({
     <div className="md:col-span-2 space-y-4 rounded-lg border border-black/20 p-4">
       <div>
         <p className="text-xs font-semibold uppercase tracking-wide">Espositori e Box Show Room</p>
-        <p className="text-xs opacity-80 mt-0.5">Solo per profili Rivenditori — scelta singola per ogni voce.</p>
+        <p className="text-xs opacity-80 mt-0.5">
+          Solo per profili Rivenditori — scelta singola e quantità per ogni voce.
+        </p>
       </div>
       <div>
         <p className="text-xs font-medium uppercase opacity-90 mb-2">Espositori</p>
@@ -58,6 +81,8 @@ export default function RivenditoreProfiloCampi({
             value={profilo.espositore_1}
             options={ESPOSITORE_OPTIONS}
             inputClassName={inputClassName}
+            qtaName="espositore_1_qta"
+            qtaValue={profilo.espositore_1_qta ?? null}
           />
           <SelectCampo
             name="espositore_2"
@@ -65,13 +90,15 @@ export default function RivenditoreProfiloCampi({
             value={profilo.espositore_2}
             options={ESPOSITORE_OPTIONS}
             inputClassName={inputClassName}
+            qtaName="espositore_2_qta"
+            qtaValue={profilo.espositore_2_qta ?? null}
           />
         </div>
       </div>
 
       <div>
         <p className="text-xs font-medium uppercase opacity-90 mb-2">Box Show Room</p>
-        <p className="text-xs opacity-70 mb-2">Quattro scelte singole (01–04).</p>
+        <p className="text-xs opacity-70 mb-2">Quattro scelte singole (01–04) con quantità.</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <SelectCampo
             name="box_show_room_1"
@@ -79,6 +106,8 @@ export default function RivenditoreProfiloCampi({
             value={profilo.box_show_room_1}
             options={BOX_SHOW_ROOM_OPTIONS}
             inputClassName={inputClassName}
+            qtaName="box_show_room_1_qta"
+            qtaValue={profilo.box_show_room_1_qta ?? null}
           />
           <SelectCampo
             name="box_show_room_2"
@@ -86,6 +115,8 @@ export default function RivenditoreProfiloCampi({
             value={profilo.box_show_room_2}
             options={BOX_SHOW_ROOM_OPTIONS}
             inputClassName={inputClassName}
+            qtaName="box_show_room_2_qta"
+            qtaValue={profilo.box_show_room_2_qta ?? null}
           />
           <SelectCampo
             name="box_show_room_3"
@@ -93,6 +124,8 @@ export default function RivenditoreProfiloCampi({
             value={profilo.box_show_room_3}
             options={BOX_SHOW_ROOM_OPTIONS}
             inputClassName={inputClassName}
+            qtaName="box_show_room_3_qta"
+            qtaValue={profilo.box_show_room_3_qta ?? null}
           />
           <SelectCampo
             name="box_show_room_4"
@@ -100,6 +133,8 @@ export default function RivenditoreProfiloCampi({
             value={profilo.box_show_room_4}
             options={BOX_SHOW_ROOM_OPTIONS}
             inputClassName={inputClassName}
+            qtaName="box_show_room_4_qta"
+            qtaValue={profilo.box_show_room_4_qta ?? null}
           />
         </div>
       </div>

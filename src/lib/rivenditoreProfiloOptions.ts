@@ -1,3 +1,5 @@
+import { normalizeQuantita } from '@/lib/profiloQuantita'
+
 export const ESPOSITORE_OPTIONS = [
   'KIT COLORS',
   'VALIGIA AGENTI',
@@ -26,6 +28,12 @@ export type RivenditoreProfiloCampi = {
   box_show_room_2: string | null
   box_show_room_3: string | null
   box_show_room_4: string | null
+  espositore_1_qta?: number | null
+  espositore_2_qta?: number | null
+  box_show_room_1_qta?: number | null
+  box_show_room_2_qta?: number | null
+  box_show_room_3_qta?: number | null
+  box_show_room_4_qta?: number | null
   espositori_aggiornato_il?: string | null
   box_aggiornato_il?: string | null
 }
@@ -37,6 +45,15 @@ export const RIVENDITORE_PROFILO_CAMPI_KEYS = [
   'box_show_room_2',
   'box_show_room_3',
   'box_show_room_4',
+] as const satisfies readonly (keyof RivenditoreProfiloCampi)[]
+
+export const RIVENDITORE_QTA_KEYS = [
+  'espositore_1_qta',
+  'espositore_2_qta',
+  'box_show_room_1_qta',
+  'box_show_room_2_qta',
+  'box_show_room_3_qta',
+  'box_show_room_4_qta',
 ] as const satisfies readonly (keyof RivenditoreProfiloCampi)[]
 
 const ESPOSITORE_SET = new Set<string>(ESPOSITORE_OPTIONS)
@@ -74,6 +91,11 @@ export function readRivenditoreCampiFromBody(body: Record<string, unknown>): Par
       out[key] = normalizeRivenditoreSelectValue(body[key], SHOW_ROOM_SET)
     }
   }
+  for (const key of RIVENDITORE_QTA_KEYS) {
+    if (key in body) {
+      out[key] = normalizeQuantita(body[key])
+    }
+  }
   return out
 }
 
@@ -83,6 +105,10 @@ export function readRivenditoreCampiFromFormData(fd: FormData): RivenditoreProfi
     if (raw === null) return null
     return String(raw).trim() || null
   }
+  const readQta = (name: keyof RivenditoreProfiloCampi) => {
+    const raw = fd.get(name)
+    return normalizeQuantita(raw === null ? null : raw) ?? null
+  }
   return {
     seguito_da: read('seguito_da'),
     espositore_1: read('espositore_1'),
@@ -91,6 +117,12 @@ export function readRivenditoreCampiFromFormData(fd: FormData): RivenditoreProfi
     box_show_room_2: read('box_show_room_2'),
     box_show_room_3: read('box_show_room_3'),
     box_show_room_4: read('box_show_room_4'),
+    espositore_1_qta: readQta('espositore_1_qta'),
+    espositore_2_qta: readQta('espositore_2_qta'),
+    box_show_room_1_qta: readQta('box_show_room_1_qta'),
+    box_show_room_2_qta: readQta('box_show_room_2_qta'),
+    box_show_room_3_qta: readQta('box_show_room_3_qta'),
+    box_show_room_4_qta: readQta('box_show_room_4_qta'),
   }
 }
 
@@ -105,6 +137,12 @@ export function pickRivenditoreProfiloCampi(
     box_show_room_2: p.box_show_room_2 ?? null,
     box_show_room_3: p.box_show_room_3 ?? null,
     box_show_room_4: p.box_show_room_4 ?? null,
+    espositore_1_qta: p.espositore_1_qta ?? null,
+    espositore_2_qta: p.espositore_2_qta ?? null,
+    box_show_room_1_qta: p.box_show_room_1_qta ?? null,
+    box_show_room_2_qta: p.box_show_room_2_qta ?? null,
+    box_show_room_3_qta: p.box_show_room_3_qta ?? null,
+    box_show_room_4_qta: p.box_show_room_4_qta ?? null,
     espositori_aggiornato_il: p.espositori_aggiornato_il ?? null,
     box_aggiornato_il: p.box_aggiornato_il ?? null,
   }
