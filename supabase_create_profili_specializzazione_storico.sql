@@ -24,7 +24,9 @@ COMMENT ON TABLE public.profili_specializzazione_storico IS 'Storico snapshot de
 --  come fallback quando il service role non è configurato.)
 ALTER TABLE public.profili_specializzazione_storico ENABLE ROW LEVEL SECURITY;
 
--- Permessi di tabella per il ruolo delle sessioni utente autenticate.
+-- Permessi di tabella. Le tabelle nuove su Supabase non ereditano i grant:
+-- il service_role (API server) e le sessioni autenticate devono riceverli esplicitamente.
+GRANT ALL ON public.profili_specializzazione_storico TO service_role;
 GRANT SELECT, INSERT ON public.profili_specializzazione_storico TO authenticated;
 
 DROP POLICY IF EXISTS "storico_select_admin_manager" ON public.profili_specializzazione_storico;
