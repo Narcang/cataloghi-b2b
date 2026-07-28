@@ -13,6 +13,8 @@ type Props = {
   profilo: Partial<RivenditoreProfiloCampi>
   className?: string
   mostraDateAggiornamento?: boolean
+  /** Id del profilo: se presente insieme a mostraDateAggiornamento abilita lo storico. */
+  profiloId?: string
 }
 
 function useRivenditoreColonne(profilo: Partial<RivenditoreProfiloCampi>) {
@@ -34,12 +36,15 @@ export function RivenditoreEspositoriColonna({
   profilo,
   className = '',
   mostraDateAggiornamento = false,
+  profiloId,
 }: Props) {
   const { campi, espositori } = useRivenditoreColonne(profilo)
   return (
     <ProfiloSpecializzazioneColonna
       className={className}
       mostraDateAggiornamento={mostraDateAggiornamento}
+      profiloId={profiloId}
+      sezione="espositori"
       label="Espositori"
       compilato={hasRivenditoreEspositori(campi)}
       valori={espositori}
@@ -52,12 +57,15 @@ export function RivenditoreBoxColonna({
   profilo,
   className = '',
   mostraDateAggiornamento = false,
+  profiloId,
 }: Props) {
   const { campi, box } = useRivenditoreColonne(profilo)
   return (
     <ProfiloSpecializzazioneColonna
       className={className}
       mostraDateAggiornamento={mostraDateAggiornamento}
+      profiloId={profiloId}
+      sezione="box"
       label="Box"
       compilato={hasRivenditoreBoxShowRoom(campi)}
       valori={box}

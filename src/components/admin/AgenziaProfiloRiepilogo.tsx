@@ -13,6 +13,8 @@ type Props = {
   profilo: Partial<AgenziaProfiloCampi>
   className?: string
   mostraDateAggiornamento?: boolean
+  /** Id del profilo: se presente insieme a mostraDateAggiornamento abilita lo storico. */
+  profiloId?: string
 }
 
 function useAgenziaColonne(profilo: Partial<AgenziaProfiloCampi>) {
@@ -32,12 +34,15 @@ export function AgenziaCampioniColonna({
   profilo,
   className = '',
   mostraDateAggiornamento = false,
+  profiloId,
 }: Props) {
   const { campi, campioni } = useAgenziaColonne(profilo)
   return (
     <ProfiloSpecializzazioneColonna
       className={className}
       mostraDateAggiornamento={mostraDateAggiornamento}
+      profiloId={profiloId}
+      sezione="campioni"
       label="Campioni"
       compilato={hasAgenziaCampioni(campi)}
       valori={campioni}
@@ -50,12 +55,15 @@ export function AgenziaCataloghiColonna({
   profilo,
   className = '',
   mostraDateAggiornamento = false,
+  profiloId,
 }: Props) {
   const { campi, cataloghi } = useAgenziaColonne(profilo)
   return (
     <ProfiloSpecializzazioneColonna
       className={className}
       mostraDateAggiornamento={mostraDateAggiornamento}
+      profiloId={profiloId}
+      sezione="cataloghi"
       label="Cataloghi"
       compilato={hasAgenziaCataloghi(campi)}
       valori={cataloghi}

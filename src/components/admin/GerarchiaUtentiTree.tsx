@@ -209,10 +209,12 @@ function HierarchyNode({
               <>
                 <AgenziaCampioniColonna
                   profilo={profile}
+                  profiloId={profile.id}
                   mostraDateAggiornamento={mostraDateAggiornamento}
                 />
                 <AgenziaCataloghiColonna
                   profilo={profile}
+                  profiloId={profile.id}
                   mostraDateAggiornamento={mostraDateAggiornamento}
                 />
               </>
@@ -220,10 +222,12 @@ function HierarchyNode({
               <>
                 <RivenditoreEspositoriColonna
                   profilo={profile}
+                  profiloId={profile.id}
                   mostraDateAggiornamento={mostraDateAggiornamento}
                 />
                 <RivenditoreBoxColonna
                   profilo={profile}
+                  profiloId={profile.id}
                   mostraDateAggiornamento={mostraDateAggiornamento}
                 />
               </>

@@ -8,6 +8,11 @@ import {
 import { profiloSezioneCampiModificati } from '@/lib/profiloSpecializzazioneDate'
 import { normalizeQuantita, normalizeDataTesto } from '@/lib/profiloQuantita'
 import {
+  costruisciVociSezione,
+  SEZIONE_AGGIORNATO_IL,
+  type SezioneStorico,
+} from '@/lib/profiloSpecializzazioneStorico'
+import {
   BOX_SHOW_ROOM_OPTIONS,
   ESPOSITORE_OPTIONS,
   readRivenditoreCampiFromBody,
@@ -226,7 +231,7 @@ export async function POST(request: NextRequest) {
   const { data: profiloEsistente } = await supabase
     .from('profili')
     .select(
-      'ruolo, espositore_1, espositore_2, box_show_room_1, box_show_room_2, box_show_room_3, box_show_room_4, agenzia_campione_1, agenzia_campione_2, agenzia_catalogo_1, agenzia_catalogo_2, espositore_1_qta, espositore_2_qta, box_show_room_1_qta, box_show_room_2_qta, box_show_room_3_qta, box_show_room_4_qta, agenzia_campione_1_qta, agenzia_campione_2_qta, agenzia_catalogo_1_qta, agenzia_catalogo_2_qta, espositore_1_data, espositore_2_data, box_show_room_1_data, box_show_room_2_data, box_show_room_3_data, box_show_room_4_data, agenzia_campione_1_data, agenzia_campione_2_data, agenzia_catalogo_1_data, agenzia_catalogo_2_data',
+      'ruolo, espositore_1, espositore_2, box_show_room_1, box_show_room_2, box_show_room_3, box_show_room_4, agenzia_campione_1, agenzia_campione_2, agenzia_catalogo_1, agenzia_catalogo_2, espositore_1_qta, espositore_2_qta, box_show_room_1_qta, box_show_room_2_qta, box_show_room_3_qta, box_show_room_4_qta, agenzia_campione_1_qta, agenzia_campione_2_qta, agenzia_catalogo_1_qta, agenzia_catalogo_2_qta, espositore_1_data, espositore_2_data, box_show_room_1_data, box_show_room_2_data, box_show_room_3_data, box_show_room_4_data, agenzia_campione_1_data, agenzia_campione_2_data, agenzia_catalogo_1_data, agenzia_catalogo_2_data, agenzia_campioni_aggiornato_il, agenzia_cataloghi_aggiornato_il, espositori_aggiornato_il, box_aggiornato_il',
     )
     .eq('id', profiloId)
     .maybeSingle()
@@ -278,20 +283,25 @@ export async function POST(request: NextRequest) {
   }
 
   const now = new Date().toISOString()
+  const sezioniModificate: SezioneStorico[] = []
   if (ruoloEffettivo === 'rivenditore') {
     if (profiloSezioneCampiModificati(ESPOSITORI_FIELDS, patch, profiloEsistente)) {
       patch.espositori_aggiornato_il = now
+      sezioniModificate.push('espositori')
     }
     if (profiloSezioneCampiModificati(BOX_FIELDS, patch, profiloEsistente)) {
       patch.box_aggiornato_il = now
+      sezioniModificate.push('box')
     }
   }
   if (ruoloEffettivo === 'agenzia') {
     if (profiloSezioneCampiModificati(CAMPIONI_FIELDS, patch, profiloEsistente)) {
       patch.agenzia_campioni_aggiornato_il = now
+      sezioniModificate.push('campioni')
     }
     if (profiloSezioneCampiModificati(CATALOGHI_FIELDS, patch, profiloEsistente)) {
       patch.agenzia_cataloghi_aggiornato_il = now
+      sezioniModificate.push('cataloghi')
     }
   }
 
@@ -322,6 +332,34 @@ export async function POST(request: NextRequest) {
       'Nessuna riga aggiornata: verifica ID profilo ed esegui su Supabase supabase_alter_profili_rls_admin_fix.sql (policy admin).',
       409,
     )
+  }
+
+  // Archivia lo stato PRECEDENTE delle sezioni modificate (se aveva contenuto).
+  if (svc && sezioniModificate.length > 0 && profiloEsistente) {
+    const record = profiloEsistente as Record<string, unknown>
+    const snapshots = sezioniModificate
+      .map((sezione) => {
+        const voci = costruisciVociSezione(record, sezione)
+        if (voci.length === 0) return null
+        const aggPrec = record[SEZIONE_AGGIORNATO_IL[sezione]]
+        return {
+          profilo_id: profiloId,
+          sezione,
+          voci,
+          aggiornato_il_precedente: aggPrec ? String(aggPrec) : null,
+          creato_da: user.id,
+        }
+      })
+      .filter((s): s is NonNullable<typeof s> => s !== null)
+
+    if (snapshots.length > 0) {
+      const { error: storicoErr } = await svc
+        .from('profili_specializzazione_storico')
+        .insert(snapshots)
+      if (storicoErr) {
+        console.error('admin profili update: storico insert', storicoErr)
+      }
+    }
   }
 
   if (patch.registrazione_approvata === true) {
