@@ -77,7 +77,7 @@ export default function StoricoSpecializzazione({ profiloId, sezione }: Props) {
       <button
         type="button"
         onClick={toggle}
-        className="inline-flex items-center gap-1 text-[10px] font-medium uppercase tracking-wide text-[#060d41] hover:underline"
+        className="inline-flex items-center gap-1 text-[10px] font-medium uppercase tracking-wide text-white hover:underline"
       >
         {aperto ? <ChevronDown size={12} aria-hidden /> : <ChevronRight size={12} aria-hidden />}
         <History size={12} aria-hidden />

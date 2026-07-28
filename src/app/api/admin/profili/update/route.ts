@@ -335,7 +335,8 @@ export async function POST(request: NextRequest) {
   }
 
   // Archivia lo stato PRECEDENTE delle sezioni modificate (se aveva contenuto).
-  if (svc && sezioniModificate.length > 0 && profiloEsistente) {
+  const storicoClient = svc ?? supabase
+  if (sezioniModificate.length > 0 && profiloEsistente) {
     const record = profiloEsistente as Record<string, unknown>
     const snapshots = sezioniModificate
       .map((sezione) => {
@@ -353,7 +354,7 @@ export async function POST(request: NextRequest) {
       .filter((s): s is NonNullable<typeof s> => s !== null)
 
     if (snapshots.length > 0) {
-      const { error: storicoErr } = await svc
+      const { error: storicoErr } = await storicoClient
         .from('profili_specializzazione_storico')
         .insert(snapshots)
       if (storicoErr) {
