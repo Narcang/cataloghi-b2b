@@ -154,7 +154,11 @@ export default function Header() {
     : menuItemsBase
   const menuItems: MenuItem[] = [catalogMenuItem, ...visibleBaseItems]
   const gestioneUtentiHref =
-    profiloRuolo === 'admin' ? '/dashboard/gestione-utenti' : '/dashboard'
+    profiloRuolo === 'admin' || profiloRuolo === 'manager' || profiloRuolo === 'agenzia'
+      ? '/dashboard/gestione-utenti'
+      : '/dashboard'
+  const mostraGestioneUtenti =
+    profiloRuolo === 'admin' || profiloRuolo === 'manager' || profiloRuolo === 'agenzia'
 
   return (
     <header className="ladiva-header">
@@ -241,7 +245,7 @@ export default function Header() {
                     className="ladiva-dropdown-menu ladiva-account-dropdown-panel"
                     role="menu"
                   >
-                    {user ? (
+                    {user && mostraGestioneUtenti ? (
                       <Link
                         href={gestioneUtentiHref}
                         className="ladiva-dropdown-item"

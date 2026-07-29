@@ -15,6 +15,7 @@ import {
   associatiDirettiSectionLabel,
   getCandidateAssociatiProfiles,
   getChildrenProfiles,
+  isRivenditoreManagedByAgenzia,
   profiloToGerarchiaRow,
   type ProfiloGerarchiaRow,
 } from '@/lib/userHierarchy'
@@ -138,6 +139,10 @@ type Props = {
   canManageCataloghi?: boolean
   /** Admin e manager possono inserire manualmente agenti (agenzie) e venditori (rivenditori). */
   canCreateAssociati?: boolean
+  /** Vista agenzia: elenco rivenditori associati, senza approvazioni né tab multi-ruolo. */
+  agenziaRivenditoriMode?: boolean
+  /** L'agenzia può aggiornare espositori e box dei rivenditori collegati. */
+  canEditRivenditoreAsAgenzia?: boolean
 }
 
 export default function AdminProfiliPanel({
@@ -152,12 +157,20 @@ export default function AdminProfiliPanel({
   canEditSpecializzazione = false,
   canManageCataloghi = false,
   canCreateAssociati = false,
+  agenziaRivenditoriMode = false,
+  canEditRivenditoreAsAgenzia = false,
 }: Props) {
   const router = useRouter()
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
-  const [ruoloAttivo, setRuoloAttivo] = useState<RuoloTabId>('admin')
+  const [ruoloAttivo, setRuoloAttivo] = useState<RuoloTabId>(
+    agenziaRivenditoriMode ? 'rivenditore' : 'admin',
+  )
+
+  const ruoliTab = agenziaRivenditoriMode
+    ? RUOLI_TAB.filter((tab) => tab.id === 'rivenditore')
+    : RUOLI_TAB
 
   const profiliPendentiOrdinati = useMemo(() => sortProfiliAlfabetico(profiliPendenti), [profiliPendenti])
 
@@ -180,10 +193,10 @@ export default function AdminProfiliPanel({
   const profiliRuoloAttivo = profiliPerRuolo.get(ruoloAttivo) ?? []
 
   useEffect(() => {
-    const firstConUtenti = RUOLI_TAB.find((tab) => (profiliPerRuolo.get(tab.id)?.length ?? 0) > 0)
+    const firstConUtenti = ruoliTab.find((tab) => (profiliPerRuolo.get(tab.id)?.length ?? 0) > 0)
     if ((profiliPerRuolo.get(ruoloAttivo)?.length ?? 0) > 0) return
     if (firstConUtenti) setRuoloAttivo(firstConUtenti.id)
-  }, [profiliPerRuolo, ruoloAttivo])
+  }, [profiliPerRuolo, ruoloAttivo, ruoliTab])
 
   const linksByUtente = useMemo(() => {
     const m = new Map<string, Set<string>>()
@@ -321,8 +334,9 @@ export default function AdminProfiliPanel({
         <div>
           <h2 className="text-2xl font-medium text-zinc-900">Gestione utenti</h2>
           <p className="text-sm text-zinc-600 mt-1">
-            Approva le registrazioni, aggiorna i dati o elimina account, associa i contatti (agenti, partner e studio)
-            visibili nella rubrica: email e telefono del profilo compaiono per chi è collegato, in entrambe le direzioni tra questi ruoli.
+            {agenziaRivenditoriMode
+              ? 'Aggiorna espositori e box dei rivenditori collegati alla tua agenzia. Gli altri dati del profilo restano in sola lettura.'
+              : 'Approva le registrazioni, aggiorna i dati o elimina account, associa i contatti (agenti, partner e studio) visibili nella rubrica: email e telefono del profilo compaiono per chi è collegato, in entrambe le direzioni tra questi ruoli.'}
           </p>
         </div>
       </div>
@@ -334,7 +348,7 @@ export default function AdminProfiliPanel({
         <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">{error}</div>
       ) : null}
 
-      {profiliPendentiOrdinati.length > 0 ? (
+      {!agenziaRivenditoriMode && profiliPendentiOrdinati.length > 0 ? (
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-zinc-900 flex items-center gap-2">
             <UserCheck size={20} aria-hidden />
@@ -507,20 +521,23 @@ export default function AdminProfiliPanel({
             ))}
           </ul>
         </div>
-      ) : (
+      ) : !agenziaRivenditoriMode ? (
         <p className="text-sm text-zinc-500">Nessuna registrazione in attesa.</p>
-      )}
+      ) : null}
 
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-zinc-900">Utenti e operatori associati</h3>
+        <h3 className="text-lg font-semibold text-zinc-900">
+          {agenziaRivenditoriMode ? 'Rivenditori associati' : 'Utenti e operatori associati'}
+        </h3>
         <p className="text-sm text-zinc-600">
-          Elenco filtrato come il Filtro Manager (area). Scegli un ruolo per vedere solo quegli utenti (ordine
-          alfabetico). Per ogni profilo puoi modificare i dati e spuntare i contatti in rubrica: tra agente, partner e
-          studio la connessione è reciproca (entrambi vedono nome, email e telefono se presenti).
+          {agenziaRivenditoriMode
+            ? 'Elenco dei rivenditori collegati alla tua agenzia (ordine alfabetico). Apri un profilo per aggiornare espositori e box.'
+            : 'Elenco filtrato come il Filtro Manager (area). Scegli un ruolo per vedere solo quegli utenti (ordine alfabetico). Per ogni profilo puoi modificare i dati e spuntare i contatti in rubrica: tra agente, partner e studio la connessione è reciproca (entrambi vedono nome, email e telefono se presenti).'}
         </p>
 
+        {!agenziaRivenditoriMode ? (
         <div className="flex flex-wrap gap-2" role="tablist" aria-label="Filtra utenti per ruolo">
-          {RUOLI_TAB.map((tab) => {
+          {ruoliTab.map((tab) => {
             const count = profiliPerRuolo.get(tab.id)?.length ?? 0
             const active = ruoloAttivo === tab.id
             return (
@@ -548,14 +565,22 @@ export default function AdminProfiliPanel({
             )
           })}
         </div>
+        ) : (
+          <p className="text-sm font-medium text-zinc-700">
+            {profiliRuoloAttivo.length} rivenditor{profiliRuoloAttivo.length === 1 ? 'e' : 'i'}
+          </p>
+        )}
 
         <ul className="space-y-3 list-none p-0 m-0" role="tabpanel" aria-label={`Utenti ${ruoloAttivo}`}>
           {profiliRuoloAttivo.length === 0 ? (
             <li className="rounded-xl border border-dashed border-black/30 bg-zinc-50 px-4 py-6 text-center text-sm text-zinc-600">
-              Nessun utente con questo ruolo nel filtro area corrente.
+              {agenziaRivenditoriMode
+                ? 'Nessun rivenditore collegato alla tua agenzia.'
+                : 'Nessun utente con questo ruolo nel filtro area corrente.'}
             </li>
           ) : null}
           {profiliRuoloAttivo.map((p) => {
+            const profiloGerarchia = profiloToGerarchiaRow(p, invitatoDaById.get(p.id) ?? null)
             const profiloReadOnly = readOnly || p.id === currentUserId || p.ruolo === 'admin'
             const directAssociati = getDirectAssociati(p)
             const associatiLabel = associatiDirettiSectionLabel(p.ruolo)
@@ -565,6 +590,16 @@ export default function AdminProfiliPanel({
               profiloReadOnly &&
               canEditSpecializzazione &&
               (p.ruolo === 'agenzia' || p.ruolo === 'rivenditore')
+            const agenziaEditRivenditore =
+              canEditRivenditoreAsAgenzia &&
+              p.ruolo === 'rivenditore' &&
+              isRivenditoreManagedByAgenzia(
+                currentUserId,
+                profiloGerarchia,
+                profiliGerarchia,
+                links,
+              )
+            const editSpecializzazione = managerEditSpecializzazione || agenziaEditRivenditore
             return (
               <li key={p.id} className="rounded-xl border border-black bg-zinc-50/80">
                 <details className="group">
@@ -586,11 +621,12 @@ export default function AdminProfiliPanel({
                     <span className="text-xs text-zinc-500">{p.area_geografica || 'Area non definita'}</span>
                   </summary>
                   <div className="border-t border-black/10 px-4 py-4 space-y-4 bg-white">
-                    {managerEditSpecializzazione ? (
+                    {editSpecializzazione ? (
                       <>
                         <p className="text-sm text-zinc-600">
-                          Puoi aggiornare strumenti lavoro agente, cataloghi, espositori e box. Gli altri dati del
-                          profilo restano in sola lettura.
+                          {agenziaEditRivenditore
+                            ? 'Puoi aggiornare espositori e box di questo rivenditore. Gli altri dati del profilo restano in sola lettura.'
+                            : 'Puoi aggiornare strumenti lavoro agente, cataloghi, espositori e box. Gli altri dati del profilo restano in sola lettura.'}
                         </p>
                         <form
                           className="grid grid-cols-1 md:grid-cols-2 gap-3"
@@ -624,7 +660,7 @@ export default function AdminProfiliPanel({
                               }}
                             />
                           ) : null}
-                          {p.ruolo === 'agenzia' ? (
+                          {!agenziaEditRivenditore && p.ruolo === 'agenzia' ? (
                             <AgenziaProfiloCampi
                               profilo={{
                                 agenzia_campione_1: p.agenzia_campione_1 ?? null,
@@ -653,16 +689,18 @@ export default function AdminProfiliPanel({
                               type="submit"
                               className="h-9 rounded-md bg-[#060d41] text-white px-3 text-sm font-semibold hover:bg-[#0a155a] disabled:opacity-50"
                             >
-                              Salva specializzazione
+                              {agenziaEditRivenditore ? 'Salva espositori e box' : 'Salva specializzazione'}
                             </button>
                           </div>
                         </form>
                       </>
                     ) : profiloReadOnly ? (
                       <p className="text-sm text-zinc-600">
-                        {readOnly
-                          ? 'Visualizzazione in sola lettura (ruolo Manager).'
-                          : 'Profilo admin o il tuo account: modifica da Supabase se necessario.'}
+                        {agenziaRivenditoriMode
+                          ? 'Profilo in sola lettura.'
+                          : readOnly
+                            ? 'Visualizzazione in sola lettura (ruolo Manager).'
+                            : 'Profilo admin o il tuo account: modifica da Supabase se necessario.'}
                       </p>
                     ) : (
                       <>

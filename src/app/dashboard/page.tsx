@@ -545,6 +545,32 @@ export default async function Dashboard(props: {
           </section>
         )}
 
+        {showFullDashboard && isAgenzia && !isManager && (
+          <section>
+            <div className="mb-6 border-b border-black pb-4">
+              <h2 className="text-2xl text-zinc-900 font-semibold tracking-tight">Gestione</h2>
+              <p className="text-sm text-zinc-600 mt-1">Aggiorna i dati dei tuoi rivenditori associati.</p>
+            </div>
+            <Link
+              href="/dashboard/gestione-utenti"
+              className="group flex flex-col justify-between rounded-2xl border border-black bg-white p-8 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#060d41] max-w-md"
+            >
+              <div>
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[#060d41] text-white mb-5">
+                  <Users size={24} />
+                </div>
+                <h3 className="text-xl font-semibold text-zinc-900 mb-2">Gestione Rivenditori</h3>
+                <p className="text-sm text-zinc-500 leading-relaxed">
+                  Modifica espositori e box dei rivenditori collegati alla tua agenzia.
+                </p>
+              </div>
+              <div className="mt-6 flex items-center gap-1 text-xs font-semibold text-white uppercase tracking-wide group-hover:gap-2 transition-all">
+                Apri <span aria-hidden>→</span>
+              </div>
+            </Link>
+          </section>
+        )}
+
         {/* Contatti diretti per admin/manager (in fondo, come prima) e per utenti free */}
         {(isManager || isFree) && (
           <section id="contatti">

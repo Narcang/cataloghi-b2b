@@ -8,6 +8,7 @@ import AdminProfiliPanel, { type ProfiloGestioneRow } from '@/components/admin/A
 import GerarchiaUtentiTree from '@/components/admin/GerarchiaUtentiTree'
 import InvitaUtente from '@/components/InvitaUtente'
 import type { ProfiloGerarchiaRow } from '@/lib/userHierarchy'
+import { getDescendantsByRole, profiloToGerarchiaRow } from '@/lib/userHierarchy'
 import { fetchUltimoAccessoMap, ultimoAccessoMapToRecord } from '@/lib/ultimoAccessoUtenti'
 
 export const dynamic = 'force-dynamic'
@@ -48,15 +49,16 @@ export default async function GestioneUtentiPage(props: {
 
   const { data: profilo } = await supabase
     .from('profili')
-    .select('id, nome_completo, ruolo, area_geografica')
+    .select('id, nome_completo, ruolo, area_geografica, invitato_da')
     .eq('id', user.id)
     .single()
 
   const ruoloCorrente = profilo?.ruolo ?? 'free'
   const isAdmin = ruoloCorrente === 'admin'
   const isManager = isAdmin || ruoloCorrente === 'manager'
+  const isAgenzia = ruoloCorrente === 'agenzia'
 
-  if (!isManager) redirect('/dashboard')
+  if (!isManager && !isAgenzia) redirect('/dashboard')
 
   const profiloSel =
     'id, nome_completo, email, telefono, societa, area_geografica, ruolo, registrazione_approvata, creato_il, seguito_da, espositore_1, espositore_2, box_show_room_1, box_show_room_2, box_show_room_3, box_show_room_4, agenzia_campione_1, agenzia_campione_2, agenzia_catalogo_1, agenzia_catalogo_2, espositore_1_qta, espositore_2_qta, box_show_room_1_qta, box_show_room_2_qta, box_show_room_3_qta, box_show_room_4_qta, agenzia_campione_1_qta, agenzia_campione_2_qta, agenzia_catalogo_1_qta, agenzia_catalogo_2_qta, espositore_1_data, espositore_2_data, box_show_room_1_data, box_show_room_2_data, box_show_room_3_data, box_show_room_4_data, agenzia_campione_1_data, agenzia_campione_2_data, agenzia_catalogo_1_data, agenzia_catalogo_2_data, agenzia_catalogo_3, agenzia_catalogo_4, agenzia_catalogo_3_qta, agenzia_catalogo_4_qta, agenzia_catalogo_3_data, agenzia_catalogo_4_data, agenzia_campioni_aggiornato_il, agenzia_cataloghi_aggiornato_il, espositori_aggiornato_il, box_aggiornato_il'
@@ -139,6 +141,43 @@ export default async function GestioneUtentiPage(props: {
     }
   }
 
+  let profiliGestioneAgenzia: ProfiloGestioneRow[] = []
+  let profiliGerarchiaAgenzia: ProfiloGerarchiaRow[] = []
+  let linksAgenzia: { utente_id: string; operatore_id: string }[] = []
+
+  if (isAgenzia && profilo) {
+    const agenziaRow = profiloToGerarchiaRow(
+      { ...profilo, email: user.email ?? null },
+      profilo.invitato_da ?? null,
+    )
+    const allProfiliRes = await svc
+      .from('profili')
+      .select(
+        'id, nome_completo, societa, email, area_geografica, ruolo, invitato_da, registrazione_approvata, seguito_da, espositore_1, espositore_2, box_show_room_1, box_show_room_2, box_show_room_3, box_show_room_4, agenzia_campione_1, agenzia_campione_2, agenzia_catalogo_1, agenzia_catalogo_2, espositore_1_qta, espositore_2_qta, box_show_room_1_qta, box_show_room_2_qta, box_show_room_3_qta, box_show_room_4_qta, agenzia_campione_1_qta, agenzia_campione_2_qta, agenzia_catalogo_1_qta, agenzia_catalogo_2_qta, espositore_1_data, espositore_2_data, box_show_room_1_data, box_show_room_2_data, box_show_room_3_data, box_show_room_4_data, agenzia_campione_1_data, agenzia_campione_2_data, agenzia_catalogo_1_data, agenzia_catalogo_2_data, agenzia_catalogo_3, agenzia_catalogo_4, agenzia_catalogo_3_qta, agenzia_catalogo_4_qta, agenzia_catalogo_3_data, agenzia_catalogo_4_data, agenzia_campioni_aggiornato_il, agenzia_cataloghi_aggiornato_il, espositori_aggiornato_il, box_aggiornato_il, telefono, creato_il',
+      )
+      .neq('ruolo', 'free')
+      .or('registrazione_approvata.eq.true,registrazione_approvata.is.null')
+      .order('nome_completo', { ascending: true, nullsFirst: false })
+      .limit(500)
+
+    const allLinksRes = await svc
+      .from('connessioni_utente_operatore')
+      .select('utente_id, operatore_id')
+      .limit(2000)
+
+    profiliGerarchiaAgenzia = (allProfiliRes.data ?? []) as ProfiloGerarchiaRow[]
+    linksAgenzia = (allLinksRes.data ?? []) as { utente_id: string; operatore_id: string }[]
+
+    const rivenditori = getDescendantsByRole(
+      user.id,
+      agenziaRow,
+      'rivenditore',
+      profiliGerarchiaAgenzia,
+      linksAgenzia,
+    )
+    profiliGestioneAgenzia = rivenditori as unknown as ProfiloGestioneRow[]
+  }
+
   return (
     <div className="ladiva-root ladiva-root-app-dark min-h-screen flex flex-col">
       <Header />
@@ -154,8 +193,13 @@ export default async function GestioneUtentiPage(props: {
             <ArrowLeft size={15} /> Dashboard
           </Link>
           <h1 className="text-3xl md:text-4xl font-semibold text-zinc-900 tracking-tight mt-3">
-            Gestione Utenti
+            {isAgenzia ? 'Gestione Rivenditori' : 'Gestione Utenti'}
           </h1>
+          {isAgenzia ? (
+            <p className="text-sm text-zinc-600 mt-2 max-w-2xl">
+              Aggiorna espositori e box dei rivenditori collegati alla tua agenzia.
+            </p>
+          ) : null}
         </div>
 
         {actionMessage ? (
@@ -164,6 +208,21 @@ export default async function GestioneUtentiPage(props: {
           </div>
         ) : null}
 
+        {isAgenzia ? (
+          <AdminProfiliPanel
+            currentUserId={user.id}
+            profiliPendenti={[]}
+            profiliLista={profiliGestioneAgenzia}
+            profiliGerarchia={profiliGerarchiaAgenzia}
+            profiliAssociazione={[]}
+            links={linksAgenzia}
+            allCataloghi={[]}
+            readOnly
+            agenziaRivenditoriMode
+            canEditRivenditoreAsAgenzia
+          />
+        ) : (
+          <>
         {/* Filtro */}
         <section id="filtro-utenti" className="border border-black rounded-2xl bg-white p-5">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
@@ -231,6 +290,8 @@ export default async function GestioneUtentiPage(props: {
           </p>
           <InvitaUtente ruoloCorrente={ruoloCorrente} />
         </section>
+          </>
+        )}
 
       </main>
 
