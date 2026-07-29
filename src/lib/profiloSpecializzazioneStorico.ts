@@ -5,7 +5,7 @@ export type SezioneStorico = 'campioni' | 'cataloghi' | 'espositori' | 'box'
 export const SEZIONI_STORICO: readonly SezioneStorico[] = ['campioni', 'cataloghi', 'espositori', 'box']
 
 export const SEZIONE_STORICO_LABEL: Record<SezioneStorico, string> = {
-  campioni: 'Campioni',
+  campioni: 'Strumenti lavoro agente',
   cataloghi: 'Cataloghi',
   espositori: 'Espositori',
   box: 'Box',

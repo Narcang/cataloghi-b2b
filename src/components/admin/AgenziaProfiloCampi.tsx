@@ -81,17 +81,17 @@ export default function AgenziaProfiloCampi({
   return (
     <div className="md:col-span-2 space-y-4 rounded-lg border border-black/20 p-4">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide">Campioni e Cataloghi</p>
+        <p className="text-xs font-semibold uppercase tracking-wide">Strumenti lavoro agente e Cataloghi</p>
         <p className="text-xs opacity-80 mt-0.5">
           Solo per profili Agenzia — scelta singola, quantità e data per ogni voce.
         </p>
       </div>
       <div>
-        <p className="text-xs font-medium uppercase opacity-90 mb-2">Campioni</p>
+        <p className="text-xs font-medium uppercase opacity-90 mb-2">Strumenti lavoro agente</p>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
           <SelectCampo
             name="agenzia_campione_1"
-            label="Campione"
+            label="Strumento"
             value={profilo.agenzia_campione_1}
             options={CAMPIONE_OPTIONS}
             inputClassName={inputClassName}
@@ -102,7 +102,7 @@ export default function AgenziaProfiloCampi({
           />
           <SelectCampo
             name="agenzia_campione_2"
-            label="Campione"
+            label="Strumento"
             value={profilo.agenzia_campione_2}
             options={CAMPIONE_OPTIONS}
             inputClassName={inputClassName}

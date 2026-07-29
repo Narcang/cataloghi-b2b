@@ -1,10 +1,13 @@
 import { normalizeQuantita, normalizeDataTesto } from '@/lib/profiloQuantita'
 
-export const CAMPIONE_OPTIONS = ['VALIGIA AGENTI', 'CAMPIONI SCIOLTI'] as const
+export const CAMPIONE_OPTIONS = ['VALIGIA AGENTI', 'FOLDER'] as const
 
 export const CATALOGO_AGENZIA_OPTIONS = [
-  'CATALOGO GENERALE 2026',
-  'LISTINO PUBBLICO 2026',
+  'Family 15',
+  'Family 20',
+  'Capsule Collection',
+  'Brick',
+  'Family Gres',
 ] as const
 
 export type CampioneOption = (typeof CAMPIONE_OPTIONS)[number]

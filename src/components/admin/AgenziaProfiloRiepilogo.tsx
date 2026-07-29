@@ -43,7 +43,7 @@ export function AgenziaCampioniColonna({
       mostraDateAggiornamento={mostraDateAggiornamento}
       profiloId={profiloId}
       sezione="campioni"
-      label="Campioni"
+      label="Strumenti lavoro agente"
       compilato={hasAgenziaCampioni(campi)}
       valori={campioni}
       aggiornatoIl={campi.agenzia_campioni_aggiornato_il}
@@ -85,7 +85,7 @@ export default function AgenziaProfiloRiepilogo({
       mostraDateAggiornamento={mostraDateAggiornamento}
       colonne={[
         {
-          label: 'Campioni',
+          label: 'Strumenti lavoro agente',
           compilato: hasAgenziaCampioni(campi),
           valori: campioni,
           aggiornatoIl: campi.agenzia_campioni_aggiornato_il,
