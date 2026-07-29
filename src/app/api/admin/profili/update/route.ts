@@ -93,6 +93,18 @@ const CATALOGO_DATA_FIELDS = [
   'agenzia_catalogo_4_data',
 ] as const
 
+/** Campi che un manager può aggiornare (solo specializzazione agenzia/rivenditore). */
+const MANAGER_PATCH_KEYS = new Set<string>([
+  ...CAMPIONI_FIELDS,
+  ...CATALOGHI_FIELDS,
+  ...ESPOSITORI_FIELDS,
+  ...BOX_FIELDS,
+  'agenzia_campioni_aggiornato_il',
+  'agenzia_cataloghi_aggiornato_il',
+  'espositori_aggiornato_il',
+  'box_aggiornato_il',
+])
+
 const RUOLI_OK = new Set(['admin', 'manager', 'agenzia', 'agente', 'fornitore', 'rivenditore', 'distributore', 'free', 'studio', 'partner_dipendente'])
 
 function jsonResponse(ok: boolean, message: string, status: number) {
@@ -198,8 +210,11 @@ export async function POST(request: NextRequest) {
   }
 
   const { data: profiloUtente } = await supabase.from('profili').select('ruolo').eq('id', user.id).single()
+  const callerRuolo = profiloUtente?.ruolo ?? ''
+  const isAdmin = callerRuolo === 'admin'
+  const isManager = callerRuolo === 'manager'
 
-  if (profiloUtente?.ruolo !== 'admin') {
+  if (!isAdmin && !isManager) {
     return jsonResponse(false, 'Operazione non consentita', 403)
   }
 
@@ -324,6 +339,17 @@ export async function POST(request: NextRequest) {
     if (profiloSezioneCampiModificati(CATALOGHI_FIELDS, patch, profiloEsistente)) {
       patch.agenzia_cataloghi_aggiornato_il = now
       sezioniModificate.push('cataloghi')
+    }
+  }
+
+  if (isManager && !isAdmin) {
+    if (ruoloEffettivo !== 'agenzia' && ruoloEffettivo !== 'rivenditore') {
+      return jsonResponse(false, 'Il manager può modificare solo agenzie e rivenditori', 403)
+    }
+    for (const key of Object.keys(patch)) {
+      if (!MANAGER_PATCH_KEYS.has(key)) {
+        delete patch[key]
+      }
     }
   }
 

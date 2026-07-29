@@ -132,6 +132,8 @@ type Props = {
   allCataloghi: CatalogoDisponibile[]
   /** Quando true (ruolo manager) il pannello è in sola lettura: nessun edit/delete/approvazione. */
   readOnly?: boolean
+  /** Admin e manager possono aggiornare strumenti/cataloghi (agenzia) ed espositori/box (rivenditore). */
+  canEditSpecializzazione?: boolean
   /** Admin e manager possono gestire i cataloghi visibili anche se readOnly è true. */
   canManageCataloghi?: boolean
   /** Admin e manager possono inserire manualmente agenti (agenzie) e venditori (rivenditori). */
@@ -147,6 +149,7 @@ export default function AdminProfiliPanel({
   links,
   allCataloghi,
   readOnly = false,
+  canEditSpecializzazione = false,
   canManageCataloghi = false,
   canCreateAssociati = false,
 }: Props) {
@@ -292,6 +295,18 @@ export default function AdminProfiliPanel({
     }
     if (ruolo === 'rivenditore') {
       Object.assign(body, readRivenditoreCampiFromFormData(fd))
+    }
+    if (ruolo === 'agenzia') {
+      Object.assign(body, readAgenziaCampiFromFormData(fd))
+    }
+    return body
+  }
+
+  function readFormSpecializzazione(fd: FormData, profiloId: string, ruolo: string) {
+    const body: Record<string, unknown> = { profilo_id: profiloId }
+    if (ruolo === 'rivenditore') {
+      Object.assign(body, readRivenditoreCampiFromFormData(fd))
+      delete body.seguito_da
     }
     if (ruolo === 'agenzia') {
       Object.assign(body, readAgenziaCampiFromFormData(fd))
@@ -546,6 +561,10 @@ export default function AdminProfiliPanel({
             const associatiLabel = associatiDirettiSectionLabel(p.ruolo)
             const aggiungiLabel = associatiAggiungiSectionLabel(p.ruolo)
             const candidateAssociati = getCandidateAssociatiProfiles(p.id, p.ruolo, profiliAssociazione)
+            const managerEditSpecializzazione =
+              profiloReadOnly &&
+              canEditSpecializzazione &&
+              (p.ruolo === 'agenzia' || p.ruolo === 'rivenditore')
             return (
               <li key={p.id} className="rounded-xl border border-black bg-zinc-50/80">
                 <details className="group">
@@ -567,7 +586,79 @@ export default function AdminProfiliPanel({
                     <span className="text-xs text-zinc-500">{p.area_geografica || 'Area non definita'}</span>
                   </summary>
                   <div className="border-t border-black/10 px-4 py-4 space-y-4 bg-white">
-                    {profiloReadOnly ? (
+                    {managerEditSpecializzazione ? (
+                      <>
+                        <p className="text-sm text-zinc-600">
+                          Puoi aggiornare strumenti lavoro agente, cataloghi, espositori e box. Gli altri dati del
+                          profilo restano in sola lettura.
+                        </p>
+                        <form
+                          className="grid grid-cols-1 md:grid-cols-2 gap-3"
+                          onSubmit={async (e) => {
+                            e.preventDefault()
+                            const fd = new FormData(e.currentTarget)
+                            await postUpdate(readFormSpecializzazione(fd, p.id, p.ruolo))
+                          }}
+                        >
+                          {p.ruolo === 'rivenditore' ? (
+                            <RivenditoreProfiloCampi
+                              profilo={{
+                                espositore_1: p.espositore_1 ?? null,
+                                espositore_2: p.espositore_2 ?? null,
+                                box_show_room_1: p.box_show_room_1 ?? null,
+                                box_show_room_2: p.box_show_room_2 ?? null,
+                                box_show_room_3: p.box_show_room_3 ?? null,
+                                box_show_room_4: p.box_show_room_4 ?? null,
+                                espositore_1_qta: p.espositore_1_qta ?? null,
+                                espositore_2_qta: p.espositore_2_qta ?? null,
+                                box_show_room_1_qta: p.box_show_room_1_qta ?? null,
+                                box_show_room_2_qta: p.box_show_room_2_qta ?? null,
+                                box_show_room_3_qta: p.box_show_room_3_qta ?? null,
+                                box_show_room_4_qta: p.box_show_room_4_qta ?? null,
+                                espositore_1_data: p.espositore_1_data ?? null,
+                                espositore_2_data: p.espositore_2_data ?? null,
+                                box_show_room_1_data: p.box_show_room_1_data ?? null,
+                                box_show_room_2_data: p.box_show_room_2_data ?? null,
+                                box_show_room_3_data: p.box_show_room_3_data ?? null,
+                                box_show_room_4_data: p.box_show_room_4_data ?? null,
+                              }}
+                            />
+                          ) : null}
+                          {p.ruolo === 'agenzia' ? (
+                            <AgenziaProfiloCampi
+                              profilo={{
+                                agenzia_campione_1: p.agenzia_campione_1 ?? null,
+                                agenzia_campione_2: p.agenzia_campione_2 ?? null,
+                                agenzia_catalogo_1: p.agenzia_catalogo_1 ?? null,
+                                agenzia_catalogo_2: p.agenzia_catalogo_2 ?? null,
+                                agenzia_catalogo_3: p.agenzia_catalogo_3 ?? null,
+                                agenzia_catalogo_4: p.agenzia_catalogo_4 ?? null,
+                                agenzia_campione_1_qta: p.agenzia_campione_1_qta ?? null,
+                                agenzia_campione_2_qta: p.agenzia_campione_2_qta ?? null,
+                                agenzia_catalogo_1_qta: p.agenzia_catalogo_1_qta ?? null,
+                                agenzia_catalogo_2_qta: p.agenzia_catalogo_2_qta ?? null,
+                                agenzia_catalogo_3_qta: p.agenzia_catalogo_3_qta ?? null,
+                                agenzia_catalogo_4_qta: p.agenzia_catalogo_4_qta ?? null,
+                                agenzia_campione_1_data: p.agenzia_campione_1_data ?? null,
+                                agenzia_campione_2_data: p.agenzia_campione_2_data ?? null,
+                                agenzia_catalogo_1_data: p.agenzia_catalogo_1_data ?? null,
+                                agenzia_catalogo_2_data: p.agenzia_catalogo_2_data ?? null,
+                                agenzia_catalogo_3_data: p.agenzia_catalogo_3_data ?? null,
+                                agenzia_catalogo_4_data: p.agenzia_catalogo_4_data ?? null,
+                              }}
+                            />
+                          ) : null}
+                          <div className="md:col-span-2">
+                            <button
+                              type="submit"
+                              className="h-9 rounded-md bg-[#060d41] text-white px-3 text-sm font-semibold hover:bg-[#0a155a] disabled:opacity-50"
+                            >
+                              Salva specializzazione
+                            </button>
+                          </div>
+                        </form>
+                      </>
+                    ) : profiloReadOnly ? (
                       <p className="text-sm text-zinc-600">
                         {readOnly
                           ? 'Visualizzazione in sola lettura (ruolo Manager).'

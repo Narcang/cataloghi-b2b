@@ -218,6 +218,7 @@ export default async function GestioneUtentiPage(props: {
           links={connessioniUtenteOperatoreRows}
           allCataloghi={allCataloghi}
           readOnly={!isAdmin}
+          canEditSpecializzazione={isManager}
           canManageCataloghi={isManager}
           canCreateAssociati={isManager}
         />
