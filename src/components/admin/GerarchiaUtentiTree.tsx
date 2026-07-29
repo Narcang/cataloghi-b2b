@@ -10,6 +10,7 @@ import {
   getHierarchyRootProfiles,
   HIERARCHY_ROOT_ROLE_OPTIONS,
   hierarchyRootRoleLabel,
+  isRivenditoreManagedByAgenzia,
   nestedAssociatiLabel,
   ruoloGerarchiaLabel,
   ruoloGerarchiaDotClass,
@@ -27,6 +28,7 @@ import {
   RivenditoreBoxColonna,
   RivenditoreEspositoriColonna,
 } from '@/components/admin/RivenditoreProfiloRiepilogo'
+import RivenditoreSpecializzazioneEditForm from '@/components/admin/RivenditoreSpecializzazioneEditForm'
 import { canViewProfiloSpecializzazioneAggiornato } from '@/lib/profiloSpecializzazioneDate'
 import {
   canViewerSeeUltimoAccessoForProfile,
@@ -100,6 +102,10 @@ function HierarchyNode({
   const ultimoAccessoRiga = mostraUltimoAccesso
     ? formatUltimoAccessoRiga(ultimoAccessoByProfiloId[profile.id] ?? null)
     : null
+  const canEditRivenditoreSpecializzazione =
+    viewerRole === 'agenzia' &&
+    profile.ruolo === 'rivenditore' &&
+    isRivenditoreManagedByAgenzia(currentUserId, profile, profili, links)
 
   return (
     <li className="list-none">
@@ -238,6 +244,31 @@ function HierarchyNode({
               </>
             )}
           </div>
+          {canEditRivenditoreSpecializzazione ? (
+            <RivenditoreSpecializzazioneEditForm
+              profiloId={profile.id}
+              profilo={{
+                espositore_1: profile.espositore_1 ?? null,
+                espositore_2: profile.espositore_2 ?? null,
+                box_show_room_1: profile.box_show_room_1 ?? null,
+                box_show_room_2: profile.box_show_room_2 ?? null,
+                box_show_room_3: profile.box_show_room_3 ?? null,
+                box_show_room_4: profile.box_show_room_4 ?? null,
+                espositore_1_qta: profile.espositore_1_qta ?? null,
+                espositore_2_qta: profile.espositore_2_qta ?? null,
+                box_show_room_1_qta: profile.box_show_room_1_qta ?? null,
+                box_show_room_2_qta: profile.box_show_room_2_qta ?? null,
+                box_show_room_3_qta: profile.box_show_room_3_qta ?? null,
+                box_show_room_4_qta: profile.box_show_room_4_qta ?? null,
+                espositore_1_data: profile.espositore_1_data ?? null,
+                espositore_2_data: profile.espositore_2_data ?? null,
+                box_show_room_1_data: profile.box_show_room_1_data ?? null,
+                box_show_room_2_data: profile.box_show_room_2_data ?? null,
+                box_show_room_3_data: profile.box_show_room_3_data ?? null,
+                box_show_room_4_data: profile.box_show_room_4_data ?? null,
+              }}
+            />
+          ) : null}
         </div>
       </div>
 

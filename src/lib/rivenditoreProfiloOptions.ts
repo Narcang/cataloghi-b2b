@@ -71,6 +71,17 @@ export const RIVENDITORE_DATA_KEYS = [
   'box_show_room_4_data',
 ] as const satisfies readonly (keyof RivenditoreProfiloCampi)[]
 
+/** Campi espositori/box (+ timestamp sezione) modificabili da agenzia sul rivenditore associato. */
+export const AGENZIA_RIVENDITORE_PATCH_KEYS = [
+  ...RIVENDITORE_PROFILO_CAMPI_KEYS,
+  ...RIVENDITORE_QTA_KEYS,
+  ...RIVENDITORE_DATA_KEYS,
+  'espositori_aggiornato_il',
+  'box_aggiornato_il',
+] as const
+
+export const AGENZIA_RIVENDITORE_PATCH_KEY_SET = new Set<string>(AGENZIA_RIVENDITORE_PATCH_KEYS)
+
 const ESPOSITORE_SET = new Set<string>(ESPOSITORE_OPTIONS)
 const SHOW_ROOM_SET = new Set<string>(BOX_SHOW_ROOM_OPTIONS)
 

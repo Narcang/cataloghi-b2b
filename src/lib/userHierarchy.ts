@@ -351,7 +351,7 @@ export function resolveRivenditoreParentForDistributore(
   return null
 }
 
-function resolveAgenziaParentForRivenditore(
+export function resolveAgenziaParentForRivenditore(
   rivenditoreProfile: ProfiloGerarchiaRow,
   profili: ProfiloGerarchiaRow[],
   links: OperatoreLink[],
@@ -387,6 +387,18 @@ function resolveAgenziaParentForRivenditore(
   }
 
   return null
+}
+
+/** True se il rivenditore appartiene alla gerarchia dell'agenzia (invito diretto, agente o rubrica). */
+export function isRivenditoreManagedByAgenzia(
+  agenziaId: string,
+  rivenditore: ProfiloGerarchiaRow,
+  profili: ProfiloGerarchiaRow[],
+  links: OperatoreLink[],
+): boolean {
+  if (rivenditore.ruolo !== 'rivenditore') return false
+  const agenzia = resolveAgenziaParentForRivenditore(rivenditore, profili, links)
+  return agenzia?.id === agenziaId
 }
 
 function findAgenteParentForRivenditore(

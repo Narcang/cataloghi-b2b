@@ -15,8 +15,10 @@ import {
 import {
   BOX_SHOW_ROOM_OPTIONS,
   ESPOSITORE_OPTIONS,
+  AGENZIA_RIVENDITORE_PATCH_KEY_SET,
   readRivenditoreCampiFromBody,
 } from '@/lib/rivenditoreProfiloOptions'
+import { agenziaCanEditRivenditoreSpecializzazione } from '@/lib/agenziaRivenditoreAccess'
 
 const ESPOSITORI_FIELDS = [
   'espositore_1',
@@ -213,8 +215,9 @@ export async function POST(request: NextRequest) {
   const callerRuolo = profiloUtente?.ruolo ?? ''
   const isAdmin = callerRuolo === 'admin'
   const isManager = callerRuolo === 'manager'
+  const isAgenzia = callerRuolo === 'agenzia'
 
-  if (!isAdmin && !isManager) {
+  if (!isAdmin && !isManager && !isAgenzia) {
     return jsonResponse(false, 'Operazione non consentita', 403)
   }
 
@@ -348,6 +351,22 @@ export async function POST(request: NextRequest) {
     }
     for (const key of Object.keys(patch)) {
       if (!MANAGER_PATCH_KEYS.has(key)) {
+        delete patch[key]
+      }
+    }
+  }
+
+  if (isAgenzia && !isAdmin && !isManager) {
+    if (ruoloEffettivo !== 'rivenditore') {
+      return jsonResponse(false, 'L\'agenzia può modificare solo i rivenditori associati', 403)
+    }
+    const authClient = svc ?? supabase
+    const allowed = await agenziaCanEditRivenditoreSpecializzazione(authClient, user.id, profiloId)
+    if (!allowed) {
+      return jsonResponse(false, 'Rivenditore non associato alla tua agenzia', 403)
+    }
+    for (const key of Object.keys(patch)) {
+      if (!AGENZIA_RIVENDITORE_PATCH_KEY_SET.has(key)) {
         delete patch[key]
       }
     }

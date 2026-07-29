@@ -42,12 +42,13 @@ CREATE POLICY "storico_select_admin_manager"
 
 DROP POLICY IF EXISTS "storico_insert_admin" ON public.profili_specializzazione_storico;
 DROP POLICY IF EXISTS "storico_insert_admin_manager" ON public.profili_specializzazione_storico;
-CREATE POLICY "storico_insert_admin_manager"
+DROP POLICY IF EXISTS "storico_insert_admin_manager_agenzia" ON public.profili_specializzazione_storico;
+CREATE POLICY "storico_insert_admin_manager_agenzia"
   ON public.profili_specializzazione_storico
   FOR INSERT
   WITH CHECK (
     EXISTS (
       SELECT 1 FROM public.profili p
-      WHERE p.id = auth.uid() AND p.ruolo IN ('admin', 'manager')
+      WHERE p.id = auth.uid() AND p.ruolo IN ('admin', 'manager', 'agenzia')
     )
   );
