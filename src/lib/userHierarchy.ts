@@ -401,6 +401,29 @@ export function isRivenditoreManagedByAgenzia(
   return agenzia?.id === agenziaId
 }
 
+/** True se il rivenditore è collegato all'agente (invito diretto, referente o rubrica). */
+export function isRivenditoreManagedByAgente(
+  agenteId: string,
+  rivenditore: ProfiloGerarchiaRow,
+  profili: ProfiloGerarchiaRow[],
+  links: OperatoreLink[],
+): boolean {
+  if (rivenditore.ruolo !== 'rivenditore') return false
+  if (rivenditore.invitato_da === agenteId) return true
+  const agente = findAgenteParentForRivenditore(rivenditore, profili, links)
+  if (agente?.id === agenteId) return true
+  for (const link of links) {
+    const otherId =
+      link.utente_id === rivenditore.id
+        ? link.operatore_id
+        : link.operatore_id === rivenditore.id
+          ? link.utente_id
+          : null
+    if (otherId === agenteId) return true
+  }
+  return false
+}
+
 function findAgenteParentForRivenditore(
   rivenditoreProfile: ProfiloGerarchiaRow,
   profili: ProfiloGerarchiaRow[],

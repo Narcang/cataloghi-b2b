@@ -30,6 +30,7 @@ import {
   profiloToGerarchiaRow,
   filterProfiliInHierarchySubtree,
   getDescendantsByRole,
+  isRivenditoreManagedByAgente,
   resolveAgenziaParentForAgent,
   resolveFlatListOwnerProfile,
   type ProfiloGerarchiaRow,
@@ -354,6 +355,7 @@ export default async function Dashboard(props: {
   let gerarchiaOwnerProfile: ProfiloGerarchiaRow | undefined
   let associatiPiattiOwnerProfile: ProfiloGerarchiaRow | undefined
   let profiliGestioneAgenziaRivenditori: ProfiloGestioneRow[] = []
+  let profiliGestioneAgenteRivenditori: ProfiloGestioneRow[] = []
   if (user && profilo && profiliGerarchiaDashboard.length > 0) {
     const selfRow = profiloToGerarchiaRow(
       { ...profilo, email: user.email ?? null },
@@ -379,6 +381,21 @@ export default async function Dashboard(props: {
         profiliGerarchiaDashboard,
         linksDashboard,
       ) as unknown as ProfiloGestioneRow[]
+    }
+    if (isAgente) {
+      profiliGestioneAgenteRivenditori = profiliGerarchiaDashboard
+        .filter(
+          (p) =>
+            p.ruolo === 'rivenditore' &&
+            isRivenditoreManagedByAgente(user.id, p, profiliGerarchiaDashboard, linksDashboard),
+        )
+        .sort((a, b) =>
+          (a.societa || a.nome_completo || a.email || a.id)
+            .trim()
+            .localeCompare((b.societa || b.nome_completo || b.email || b.id).trim(), 'it', {
+              sensitivity: 'base',
+            }),
+        ) as unknown as ProfiloGestioneRow[]
     }
   }
 
@@ -469,18 +486,21 @@ export default async function Dashboard(props: {
           </section>
         )}
 
-        {showFullDashboard && isAgenzia && !isManager && user && (
+        {showFullDashboard && (isAgenzia || isAgente) && !isManager && user && (
           <AdminProfiliPanel
             currentUserId={user.id}
             profiliPendenti={[]}
-            profiliLista={profiliGestioneAgenziaRivenditori}
+            profiliLista={
+              isAgenzia ? profiliGestioneAgenziaRivenditori : profiliGestioneAgenteRivenditori
+            }
             profiliGerarchia={profiliGerarchiaDashboard}
             profiliAssociazione={[]}
             links={linksDashboard}
             allCataloghi={[]}
             readOnly
             agenziaRivenditoriMode
-            canEditRivenditoreAsAgenzia
+            canEditRivenditoreAsAgenzia={isAgenzia}
+            canEditRivenditoreAsAgente={isAgente}
             apriProfiliDiDefault
           />
         )}

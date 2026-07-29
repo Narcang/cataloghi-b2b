@@ -1,5 +1,10 @@
 export function canViewProfiloSpecializzazioneAggiornato(viewerRole: string): boolean {
-  return viewerRole === 'admin' || viewerRole === 'manager'
+  return (
+    viewerRole === 'admin' ||
+    viewerRole === 'manager' ||
+    viewerRole === 'agenzia' ||
+    viewerRole === 'agente'
+  )
 }
 
 export function formatProfiloAggiornatoIl(value: string | null | undefined): string | null {

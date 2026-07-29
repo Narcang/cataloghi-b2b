@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
+import { canReadRivenditoreSpecializzazioneStorico } from '@/lib/agenziaRivenditoreAccess'
 import { SEZIONI_STORICO, type SezioneStorico } from '@/lib/profiloSpecializzazioneStorico'
 
 export async function GET(request: NextRequest) {
@@ -20,7 +21,13 @@ export async function GET(request: NextRequest) {
     .single()
 
   const ruolo = profiloUtente?.ruolo ?? ''
-  if (ruolo !== 'admin' && ruolo !== 'manager') {
+  const isPrivileged =
+    ruolo === 'admin' ||
+    ruolo === 'manager' ||
+    ruolo === 'agenzia' ||
+    ruolo === 'agente'
+
+  if (!isPrivileged) {
     return NextResponse.json({ ok: false, message: 'Operazione non consentita' }, { status: 403 })
   }
 
@@ -36,6 +43,16 @@ export async function GET(request: NextRequest) {
   }
 
   const svc = createServiceRoleSupabase() ?? supabase
+
+  if (ruolo === 'agenzia' || ruolo === 'agente') {
+    if (sezione !== 'espositori' && sezione !== 'box') {
+      return NextResponse.json({ ok: false, message: 'Sezione non consentita' }, { status: 403 })
+    }
+    const allowed = await canReadRivenditoreSpecializzazioneStorico(svc, ruolo, user.id, profiloId)
+    if (!allowed) {
+      return NextResponse.json({ ok: false, message: 'Rivenditore non associato' }, { status: 403 })
+    }
+  }
 
   const { data, error } = await svc
     .from('profili_specializzazione_storico')

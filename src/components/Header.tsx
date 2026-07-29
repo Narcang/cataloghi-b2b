@@ -154,13 +154,16 @@ export default function Header() {
     : menuItemsBase
   const menuItems: MenuItem[] = [catalogMenuItem, ...visibleBaseItems]
   const gestioneUtentiHref =
-    profiloRuolo === 'agenzia'
+    profiloRuolo === 'agenzia' || profiloRuolo === 'agente'
       ? '/dashboard#gestione-utenti'
       : profiloRuolo === 'admin' || profiloRuolo === 'manager'
         ? '/dashboard/gestione-utenti'
         : '/dashboard'
   const mostraGestioneUtenti =
-    profiloRuolo === 'admin' || profiloRuolo === 'manager' || profiloRuolo === 'agenzia'
+    profiloRuolo === 'admin' ||
+    profiloRuolo === 'manager' ||
+    profiloRuolo === 'agenzia' ||
+    profiloRuolo === 'agente'
 
   return (
     <header className="ladiva-header">

@@ -30,25 +30,27 @@ GRANT ALL ON public.profili_specializzazione_storico TO service_role;
 GRANT SELECT, INSERT ON public.profili_specializzazione_storico TO authenticated;
 
 DROP POLICY IF EXISTS "storico_select_admin_manager" ON public.profili_specializzazione_storico;
-CREATE POLICY "storico_select_admin_manager"
+DROP POLICY IF EXISTS "storico_select_admin_manager_agenzia_agente" ON public.profili_specializzazione_storico;
+CREATE POLICY "storico_select_admin_manager_agenzia_agente"
   ON public.profili_specializzazione_storico
   FOR SELECT
   USING (
     EXISTS (
       SELECT 1 FROM public.profili p
-      WHERE p.id = auth.uid() AND p.ruolo IN ('admin', 'manager')
+      WHERE p.id = auth.uid() AND p.ruolo IN ('admin', 'manager', 'agenzia', 'agente')
     )
   );
 
 DROP POLICY IF EXISTS "storico_insert_admin" ON public.profili_specializzazione_storico;
 DROP POLICY IF EXISTS "storico_insert_admin_manager" ON public.profili_specializzazione_storico;
 DROP POLICY IF EXISTS "storico_insert_admin_manager_agenzia" ON public.profili_specializzazione_storico;
-CREATE POLICY "storico_insert_admin_manager_agenzia"
+DROP POLICY IF EXISTS "storico_insert_admin_manager_agenzia_agente" ON public.profili_specializzazione_storico;
+CREATE POLICY "storico_insert_admin_manager_agenzia_agente"
   ON public.profili_specializzazione_storico
   FOR INSERT
   WITH CHECK (
     EXISTS (
       SELECT 1 FROM public.profili p
-      WHERE p.id = auth.uid() AND p.ruolo IN ('admin', 'manager', 'agenzia')
+      WHERE p.id = auth.uid() AND p.ruolo IN ('admin', 'manager', 'agenzia', 'agente')
     )
   );

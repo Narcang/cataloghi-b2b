@@ -37,6 +37,6 @@ CREATE POLICY "storico_insert_admin_manager_agenzia"
   WITH CHECK (
     EXISTS (
       SELECT 1 FROM public.profili p
-      WHERE p.id = auth.uid() AND p.ruolo IN ('admin', 'manager', 'agenzia')
+      WHERE p.id = auth.uid() AND p.ruolo IN ('admin', 'manager', 'agenzia', 'agente')
     )
   );

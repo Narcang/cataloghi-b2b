@@ -16,6 +16,7 @@ import {
   getCandidateAssociatiProfiles,
   getChildrenProfiles,
   isRivenditoreManagedByAgenzia,
+  isRivenditoreManagedByAgente,
   profiloToGerarchiaRow,
   type ProfiloGerarchiaRow,
 } from '@/lib/userHierarchy'
@@ -139,10 +140,12 @@ type Props = {
   canManageCataloghi?: boolean
   /** Admin e manager possono inserire manualmente agenti (agenzie) e venditori (rivenditori). */
   canCreateAssociati?: boolean
-  /** Vista agenzia: elenco rivenditori associati, senza approvazioni né tab multi-ruolo. */
+  /** Vista agenzia/agente: elenco rivenditori associati, senza approvazioni né tab multi-ruolo. */
   agenziaRivenditoriMode?: boolean
   /** L'agenzia può aggiornare espositori e box dei rivenditori collegati. */
   canEditRivenditoreAsAgenzia?: boolean
+  /** L'agente può aggiornare espositori e box dei rivenditori collegati. */
+  canEditRivenditoreAsAgente?: boolean
   /** Apre di default i profili nell'elenco (details espansi). */
   apriProfiliDiDefault?: boolean
 }
@@ -161,6 +164,7 @@ export default function AdminProfiliPanel({
   canCreateAssociati = false,
   agenziaRivenditoriMode = false,
   canEditRivenditoreAsAgenzia = false,
+  canEditRivenditoreAsAgente = false,
   apriProfiliDiDefault = false,
 }: Props) {
   const router = useRouter()
@@ -602,7 +606,17 @@ export default function AdminProfiliPanel({
                 profiliGerarchia,
                 links,
               )
-            const editSpecializzazione = managerEditSpecializzazione || agenziaEditRivenditore
+            const agenteEditRivenditore =
+              canEditRivenditoreAsAgente &&
+              p.ruolo === 'rivenditore' &&
+              isRivenditoreManagedByAgente(
+                currentUserId,
+                profiloGerarchia,
+                profiliGerarchia,
+                links,
+              )
+            const rivenditoreEditEsterno = agenziaEditRivenditore || agenteEditRivenditore
+            const editSpecializzazione = managerEditSpecializzazione || rivenditoreEditEsterno
             return (
               <li key={p.id} className="rounded-xl border border-black bg-zinc-50/80">
                 <details className="group" open={apriProfiliDiDefault || undefined}>
@@ -627,7 +641,7 @@ export default function AdminProfiliPanel({
                     {editSpecializzazione ? (
                       <>
                         <p className="text-sm text-zinc-600">
-                          {agenziaEditRivenditore
+                          {rivenditoreEditEsterno
                             ? 'Puoi aggiornare espositori e box di questo rivenditore. Gli altri dati del profilo restano in sola lettura.'
                             : 'Puoi aggiornare strumenti lavoro agente, cataloghi, espositori e box. Gli altri dati del profilo restano in sola lettura.'}
                         </p>
@@ -663,7 +677,7 @@ export default function AdminProfiliPanel({
                               }}
                             />
                           ) : null}
-                          {!agenziaEditRivenditore && p.ruolo === 'agenzia' ? (
+                          {!rivenditoreEditEsterno && p.ruolo === 'agenzia' ? (
                             <AgenziaProfiloCampi
                               profilo={{
                                 agenzia_campione_1: p.agenzia_campione_1 ?? null,
@@ -692,7 +706,7 @@ export default function AdminProfiliPanel({
                               type="submit"
                               className="h-9 rounded-md bg-[#060d41] text-white px-3 text-sm font-semibold hover:bg-[#0a155a] disabled:opacity-50"
                             >
-                              {agenziaEditRivenditore ? 'Salva espositori e box' : 'Salva specializzazione'}
+                              {rivenditoreEditEsterno ? 'Salva espositori e box' : 'Salva specializzazione'}
                             </button>
                           </div>
                         </form>
