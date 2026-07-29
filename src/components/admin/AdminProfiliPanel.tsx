@@ -143,6 +143,8 @@ type Props = {
   agenziaRivenditoriMode?: boolean
   /** L'agenzia può aggiornare espositori e box dei rivenditori collegati. */
   canEditRivenditoreAsAgenzia?: boolean
+  /** Apre di default i profili nell'elenco (details espansi). */
+  apriProfiliDiDefault?: boolean
 }
 
 export default function AdminProfiliPanel({
@@ -159,6 +161,7 @@ export default function AdminProfiliPanel({
   canCreateAssociati = false,
   agenziaRivenditoriMode = false,
   canEditRivenditoreAsAgenzia = false,
+  apriProfiliDiDefault = false,
 }: Props) {
   const router = useRouter()
   const [message, setMessage] = useState<string | null>(null)
@@ -602,7 +605,7 @@ export default function AdminProfiliPanel({
             const editSpecializzazione = managerEditSpecializzazione || agenziaEditRivenditore
             return (
               <li key={p.id} className="rounded-xl border border-black bg-zinc-50/80">
-                <details className="group">
+                <details className="group" open={apriProfiliDiDefault || undefined}>
                   <summary className="cursor-pointer list-none px-4 py-3 flex flex-wrap items-center justify-between gap-2">
                     <span className="font-medium text-zinc-900">
                       {p.societa ? (

@@ -23,11 +23,13 @@ import CreateCatalogForm from '@/components/admin/CreateCatalogForm'
 import InvitaUtente from '@/components/InvitaUtente'
 import ContattoDirettoCard from '@/components/dashboard/ContattoDirettoCard'
 import GerarchiaUtentiTree from '@/components/admin/GerarchiaUtentiTree'
+import AdminProfiliPanel, { type ProfiloGestioneRow } from '@/components/admin/AdminProfiliPanel'
 import CreaAssociatoManuale from '@/components/admin/CreaAssociatoManuale'
 import AssociatiPiattiPanel from '@/components/dashboard/AssociatiPiattiPanel'
 import {
   profiloToGerarchiaRow,
   filterProfiliInHierarchySubtree,
+  getDescendantsByRole,
   resolveAgenziaParentForAgent,
   resolveFlatListOwnerProfile,
   type ProfiloGerarchiaRow,
@@ -351,6 +353,7 @@ export default async function Dashboard(props: {
 
   let gerarchiaOwnerProfile: ProfiloGerarchiaRow | undefined
   let associatiPiattiOwnerProfile: ProfiloGerarchiaRow | undefined
+  let profiliGestioneAgenziaRivenditori: ProfiloGestioneRow[] = []
   if (user && profilo && profiliGerarchiaDashboard.length > 0) {
     const selfRow = profiloToGerarchiaRow(
       { ...profilo, email: user.email ?? null },
@@ -367,6 +370,15 @@ export default async function Dashboard(props: {
         resolveAgenziaParentForAgent(selfRow, profiliGerarchiaDashboard, linksDashboard) ?? selfRow
     } else {
       gerarchiaOwnerProfile = selfRow
+    }
+    if (isAgenzia) {
+      profiliGestioneAgenziaRivenditori = getDescendantsByRole(
+        user.id,
+        selfRow,
+        'rivenditore',
+        profiliGerarchiaDashboard,
+        linksDashboard,
+      ) as unknown as ProfiloGestioneRow[]
     }
   }
 
@@ -457,6 +469,22 @@ export default async function Dashboard(props: {
           </section>
         )}
 
+        {showFullDashboard && isAgenzia && !isManager && user && (
+          <AdminProfiliPanel
+            currentUserId={user.id}
+            profiliPendenti={[]}
+            profiliLista={profiliGestioneAgenziaRivenditori}
+            profiliGerarchia={profiliGerarchiaDashboard}
+            profiliAssociazione={[]}
+            links={linksDashboard}
+            allCataloghi={[]}
+            readOnly
+            agenziaRivenditoriMode
+            canEditRivenditoreAsAgenzia
+            apriProfiliDiDefault
+          />
+        )}
+
         {showFullDashboard && !isManager && (isVenditoreLikeRole || isPartnerDipendente || isAgenzia || isAgente) && (
           <section className="border border-black rounded-2xl bg-white p-6">
             <h2 className="text-xl text-zinc-900 font-medium mb-1">Invita utenti</h2>
@@ -542,32 +570,6 @@ export default async function Dashboard(props: {
                 </Link>
               )}
             </div>
-          </section>
-        )}
-
-        {showFullDashboard && isAgenzia && !isManager && (
-          <section>
-            <div className="mb-6 border-b border-black pb-4">
-              <h2 className="text-2xl text-zinc-900 font-semibold tracking-tight">Gestione</h2>
-              <p className="text-sm text-zinc-600 mt-1">Aggiorna i dati dei tuoi rivenditori associati.</p>
-            </div>
-            <Link
-              href="/dashboard/gestione-utenti"
-              className="group flex flex-col justify-between rounded-2xl border border-black bg-white p-8 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#060d41] max-w-md"
-            >
-              <div>
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[#060d41] text-white mb-5">
-                  <Users size={24} />
-                </div>
-                <h3 className="text-xl font-semibold text-zinc-900 mb-2">Gestione Rivenditori</h3>
-                <p className="text-sm text-zinc-500 leading-relaxed">
-                  Modifica espositori e box dei rivenditori collegati alla tua agenzia.
-                </p>
-              </div>
-              <div className="mt-6 flex items-center gap-1 text-xs font-semibold text-white uppercase tracking-wide group-hover:gap-2 transition-all">
-                Apri <span aria-hidden>→</span>
-              </div>
-            </Link>
           </section>
         )}
 

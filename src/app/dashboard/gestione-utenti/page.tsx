@@ -220,6 +220,7 @@ export default async function GestioneUtentiPage(props: {
             readOnly
             agenziaRivenditoriMode
             canEditRivenditoreAsAgenzia
+            apriProfiliDiDefault
           />
         ) : (
           <>

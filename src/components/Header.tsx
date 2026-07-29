@@ -154,9 +154,11 @@ export default function Header() {
     : menuItemsBase
   const menuItems: MenuItem[] = [catalogMenuItem, ...visibleBaseItems]
   const gestioneUtentiHref =
-    profiloRuolo === 'admin' || profiloRuolo === 'manager' || profiloRuolo === 'agenzia'
-      ? '/dashboard/gestione-utenti'
-      : '/dashboard'
+    profiloRuolo === 'agenzia'
+      ? '/dashboard#gestione-utenti'
+      : profiloRuolo === 'admin' || profiloRuolo === 'manager'
+        ? '/dashboard/gestione-utenti'
+        : '/dashboard'
   const mostraGestioneUtenti =
     profiloRuolo === 'admin' || profiloRuolo === 'manager' || profiloRuolo === 'agenzia'
 
