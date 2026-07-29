@@ -138,6 +138,28 @@ export default function AgenziaProfiloCampi({
             dataName="agenzia_catalogo_2_data"
             dataValue={profilo.agenzia_catalogo_2_data ?? null}
           />
+          <SelectCampo
+            name="agenzia_catalogo_3"
+            label="Catalogo"
+            value={profilo.agenzia_catalogo_3}
+            options={CATALOGO_AGENZIA_OPTIONS}
+            inputClassName={inputClassName}
+            qtaName="agenzia_catalogo_3_qta"
+            qtaValue={profilo.agenzia_catalogo_3_qta ?? null}
+            dataName="agenzia_catalogo_3_data"
+            dataValue={profilo.agenzia_catalogo_3_data ?? null}
+          />
+          <SelectCampo
+            name="agenzia_catalogo_4"
+            label="Catalogo"
+            value={profilo.agenzia_catalogo_4}
+            options={CATALOGO_AGENZIA_OPTIONS}
+            inputClassName={inputClassName}
+            qtaName="agenzia_catalogo_4_qta"
+            qtaValue={profilo.agenzia_catalogo_4_qta ?? null}
+            dataName="agenzia_catalogo_4_data"
+            dataValue={profilo.agenzia_catalogo_4_data ?? null}
+          />
         </div>
       </div>
     </div>

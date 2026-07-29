@@ -51,10 +51,16 @@ const CAMPIONI_FIELDS = [
 const CATALOGHI_FIELDS = [
   'agenzia_catalogo_1',
   'agenzia_catalogo_2',
+  'agenzia_catalogo_3',
+  'agenzia_catalogo_4',
   'agenzia_catalogo_1_qta',
   'agenzia_catalogo_2_qta',
+  'agenzia_catalogo_3_qta',
+  'agenzia_catalogo_4_qta',
   'agenzia_catalogo_1_data',
   'agenzia_catalogo_2_data',
+  'agenzia_catalogo_3_data',
+  'agenzia_catalogo_4_data',
 ] as const
 
 const ESPOSITORE_QTA_FIELDS = ['espositore_1_qta', 'espositore_2_qta'] as const
@@ -65,7 +71,12 @@ const BOX_QTA_FIELDS = [
   'box_show_room_4_qta',
 ] as const
 const CAMPIONE_QTA_FIELDS = ['agenzia_campione_1_qta', 'agenzia_campione_2_qta'] as const
-const CATALOGO_QTA_FIELDS = ['agenzia_catalogo_1_qta', 'agenzia_catalogo_2_qta'] as const
+const CATALOGO_QTA_FIELDS = [
+  'agenzia_catalogo_1_qta',
+  'agenzia_catalogo_2_qta',
+  'agenzia_catalogo_3_qta',
+  'agenzia_catalogo_4_qta',
+] as const
 
 const ESPOSITORE_DATA_FIELDS = ['espositore_1_data', 'espositore_2_data'] as const
 const BOX_DATA_FIELDS = [
@@ -75,7 +86,12 @@ const BOX_DATA_FIELDS = [
   'box_show_room_4_data',
 ] as const
 const CAMPIONE_DATA_FIELDS = ['agenzia_campione_1_data', 'agenzia_campione_2_data'] as const
-const CATALOGO_DATA_FIELDS = ['agenzia_catalogo_1_data', 'agenzia_catalogo_2_data'] as const
+const CATALOGO_DATA_FIELDS = [
+  'agenzia_catalogo_1_data',
+  'agenzia_catalogo_2_data',
+  'agenzia_catalogo_3_data',
+  'agenzia_catalogo_4_data',
+] as const
 
 const RUOLI_OK = new Set(['admin', 'manager', 'agenzia', 'agente', 'fornitore', 'rivenditore', 'distributore', 'free', 'studio', 'partner_dipendente'])
 
@@ -103,6 +119,8 @@ type Body = {
   agenzia_campione_2?: string | null
   agenzia_catalogo_1?: string | null
   agenzia_catalogo_2?: string | null
+  agenzia_catalogo_3?: string | null
+  agenzia_catalogo_4?: string | null
   espositore_1_qta?: number | string | null
   espositore_2_qta?: number | string | null
   box_show_room_1_qta?: number | string | null
@@ -123,6 +141,10 @@ type Body = {
   agenzia_campione_2_data?: string | null
   agenzia_catalogo_1_data?: string | null
   agenzia_catalogo_2_data?: string | null
+  agenzia_catalogo_3_qta?: number | string | null
+  agenzia_catalogo_4_qta?: number | string | null
+  agenzia_catalogo_3_data?: string | null
+  agenzia_catalogo_4_data?: string | null
 }
 
 const ESPOSITORE_SET = new Set<string>(ESPOSITORE_OPTIONS)
@@ -231,7 +253,7 @@ export async function POST(request: NextRequest) {
   const { data: profiloEsistente } = await supabase
     .from('profili')
     .select(
-      'ruolo, espositore_1, espositore_2, box_show_room_1, box_show_room_2, box_show_room_3, box_show_room_4, agenzia_campione_1, agenzia_campione_2, agenzia_catalogo_1, agenzia_catalogo_2, espositore_1_qta, espositore_2_qta, box_show_room_1_qta, box_show_room_2_qta, box_show_room_3_qta, box_show_room_4_qta, agenzia_campione_1_qta, agenzia_campione_2_qta, agenzia_catalogo_1_qta, agenzia_catalogo_2_qta, espositore_1_data, espositore_2_data, box_show_room_1_data, box_show_room_2_data, box_show_room_3_data, box_show_room_4_data, agenzia_campione_1_data, agenzia_campione_2_data, agenzia_catalogo_1_data, agenzia_catalogo_2_data, agenzia_campioni_aggiornato_il, agenzia_cataloghi_aggiornato_il, espositori_aggiornato_il, box_aggiornato_il',
+      'ruolo, espositore_1, espositore_2, box_show_room_1, box_show_room_2, box_show_room_3, box_show_room_4, agenzia_campione_1, agenzia_campione_2, agenzia_catalogo_1, agenzia_catalogo_2, espositore_1_qta, espositore_2_qta, box_show_room_1_qta, box_show_room_2_qta, box_show_room_3_qta, box_show_room_4_qta, agenzia_campione_1_qta, agenzia_campione_2_qta, agenzia_catalogo_1_qta, agenzia_catalogo_2_qta, espositore_1_data, espositore_2_data, box_show_room_1_data, box_show_room_2_data, box_show_room_3_data, box_show_room_4_data, agenzia_campione_1_data, agenzia_campione_2_data, agenzia_catalogo_1_data, agenzia_catalogo_2_data, agenzia_catalogo_3, agenzia_catalogo_4, agenzia_catalogo_3_qta, agenzia_catalogo_4_qta, agenzia_catalogo_3_data, agenzia_catalogo_4_data, agenzia_campioni_aggiornato_il, agenzia_cataloghi_aggiornato_il, espositori_aggiornato_il, box_aggiornato_il',
     )
     .eq('id', profiloId)
     .maybeSingle()
@@ -270,7 +292,7 @@ export async function POST(request: NextRequest) {
       const err = applySelectPatch(patch, body, field, CAMPIONE_SET)
       if (err) return jsonResponse(false, err, 400)
     }
-    for (const field of ['agenzia_catalogo_1', 'agenzia_catalogo_2'] as const) {
+    for (const field of ['agenzia_catalogo_1', 'agenzia_catalogo_2', 'agenzia_catalogo_3', 'agenzia_catalogo_4'] as const) {
       const err = applySelectPatch(patch, body, field, CATALOGO_AGENZIA_SET)
       if (err) return jsonResponse(false, err, 400)
     }

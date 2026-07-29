@@ -26,6 +26,8 @@ function useAgenziaColonne(profilo: Partial<AgenziaProfiloCampi>) {
   const cataloghi = [
     componiValoreConQuantitaEData(campi.agenzia_catalogo_1, campi.agenzia_catalogo_1_qta, campi.agenzia_catalogo_1_data),
     componiValoreConQuantitaEData(campi.agenzia_catalogo_2, campi.agenzia_catalogo_2_qta, campi.agenzia_catalogo_2_data),
+    componiValoreConQuantitaEData(campi.agenzia_catalogo_3, campi.agenzia_catalogo_3_qta, campi.agenzia_catalogo_3_data),
+    componiValoreConQuantitaEData(campi.agenzia_catalogo_4, campi.agenzia_catalogo_4_qta, campi.agenzia_catalogo_4_data),
   ].filter((v): v is string => Boolean(v))
   return { campi, campioni, cataloghi }
 }

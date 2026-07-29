@@ -14,7 +14,7 @@ export const SEZIONE_STORICO_LABEL: Record<SezioneStorico, string> = {
 /** Campi base (senza suffissi _qta/_data) di ogni voce per sezione. */
 export const SEZIONE_CAMPI_BASE: Record<SezioneStorico, readonly string[]> = {
   campioni: ['agenzia_campione_1', 'agenzia_campione_2'],
-  cataloghi: ['agenzia_catalogo_1', 'agenzia_catalogo_2'],
+  cataloghi: ['agenzia_catalogo_1', 'agenzia_catalogo_2', 'agenzia_catalogo_3', 'agenzia_catalogo_4'],
   espositori: ['espositore_1', 'espositore_2'],
   box: ['box_show_room_1', 'box_show_room_2', 'box_show_room_3', 'box_show_room_4'],
 }

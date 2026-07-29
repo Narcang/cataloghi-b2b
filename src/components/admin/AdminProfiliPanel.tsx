@@ -40,6 +40,8 @@ export type ProfiloGestioneRow = {
   agenzia_campione_2?: string | null
   agenzia_catalogo_1?: string | null
   agenzia_catalogo_2?: string | null
+  agenzia_catalogo_3?: string | null
+  agenzia_catalogo_4?: string | null
   espositore_1_qta?: number | null
   espositore_2_qta?: number | null
   box_show_room_1_qta?: number | null
@@ -60,6 +62,10 @@ export type ProfiloGestioneRow = {
   agenzia_campione_2_data?: string | null
   agenzia_catalogo_1_data?: string | null
   agenzia_catalogo_2_data?: string | null
+  agenzia_catalogo_3_qta?: number | null
+  agenzia_catalogo_4_qta?: number | null
+  agenzia_catalogo_3_data?: string | null
+  agenzia_catalogo_4_data?: string | null
 }
 
 export type OperatoreAssociazione = {
@@ -443,14 +449,20 @@ export default function AdminProfiliPanel({
                           agenzia_campione_2: p.agenzia_campione_2 ?? null,
                           agenzia_catalogo_1: p.agenzia_catalogo_1 ?? null,
                           agenzia_catalogo_2: p.agenzia_catalogo_2 ?? null,
+                          agenzia_catalogo_3: p.agenzia_catalogo_3 ?? null,
+                          agenzia_catalogo_4: p.agenzia_catalogo_4 ?? null,
                           agenzia_campione_1_qta: p.agenzia_campione_1_qta ?? null,
                           agenzia_campione_2_qta: p.agenzia_campione_2_qta ?? null,
                           agenzia_catalogo_1_qta: p.agenzia_catalogo_1_qta ?? null,
                           agenzia_catalogo_2_qta: p.agenzia_catalogo_2_qta ?? null,
+                          agenzia_catalogo_3_qta: p.agenzia_catalogo_3_qta ?? null,
+                          agenzia_catalogo_4_qta: p.agenzia_catalogo_4_qta ?? null,
                           agenzia_campione_1_data: p.agenzia_campione_1_data ?? null,
                           agenzia_campione_2_data: p.agenzia_campione_2_data ?? null,
                           agenzia_catalogo_1_data: p.agenzia_catalogo_1_data ?? null,
                           agenzia_catalogo_2_data: p.agenzia_catalogo_2_data ?? null,
+                          agenzia_catalogo_3_data: p.agenzia_catalogo_3_data ?? null,
+                          agenzia_catalogo_4_data: p.agenzia_catalogo_4_data ?? null,
                         }}
                         inputClassName="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
                       />
@@ -673,14 +685,20 @@ export default function AdminProfiliPanel({
                                 agenzia_campione_2: p.agenzia_campione_2 ?? null,
                                 agenzia_catalogo_1: p.agenzia_catalogo_1 ?? null,
                                 agenzia_catalogo_2: p.agenzia_catalogo_2 ?? null,
+                                agenzia_catalogo_3: p.agenzia_catalogo_3 ?? null,
+                                agenzia_catalogo_4: p.agenzia_catalogo_4 ?? null,
                                 agenzia_campione_1_qta: p.agenzia_campione_1_qta ?? null,
                                 agenzia_campione_2_qta: p.agenzia_campione_2_qta ?? null,
                                 agenzia_catalogo_1_qta: p.agenzia_catalogo_1_qta ?? null,
                                 agenzia_catalogo_2_qta: p.agenzia_catalogo_2_qta ?? null,
+                                agenzia_catalogo_3_qta: p.agenzia_catalogo_3_qta ?? null,
+                                agenzia_catalogo_4_qta: p.agenzia_catalogo_4_qta ?? null,
                                 agenzia_campione_1_data: p.agenzia_campione_1_data ?? null,
                                 agenzia_campione_2_data: p.agenzia_campione_2_data ?? null,
                                 agenzia_catalogo_1_data: p.agenzia_catalogo_1_data ?? null,
                                 agenzia_catalogo_2_data: p.agenzia_catalogo_2_data ?? null,
+                                agenzia_catalogo_3_data: p.agenzia_catalogo_3_data ?? null,
+                                agenzia_catalogo_4_data: p.agenzia_catalogo_4_data ?? null,
                               }}
                             />
                           ) : null}

@@ -18,6 +18,8 @@ export type ProfiloGerarchiaRow = {
   agenzia_campione_2?: string | null
   agenzia_catalogo_1?: string | null
   agenzia_catalogo_2?: string | null
+  agenzia_catalogo_3?: string | null
+  agenzia_catalogo_4?: string | null
   espositore_1_qta?: number | null
   espositore_2_qta?: number | null
   box_show_room_1_qta?: number | null
@@ -28,6 +30,8 @@ export type ProfiloGerarchiaRow = {
   agenzia_campione_2_qta?: number | null
   agenzia_catalogo_1_qta?: number | null
   agenzia_catalogo_2_qta?: number | null
+  agenzia_catalogo_3_qta?: number | null
+  agenzia_catalogo_4_qta?: number | null
   espositore_1_data?: string | null
   espositore_2_data?: string | null
   box_show_room_1_data?: string | null
@@ -38,6 +42,8 @@ export type ProfiloGerarchiaRow = {
   agenzia_campione_2_data?: string | null
   agenzia_catalogo_1_data?: string | null
   agenzia_catalogo_2_data?: string | null
+  agenzia_catalogo_3_data?: string | null
+  agenzia_catalogo_4_data?: string | null
   agenzia_campioni_aggiornato_il?: string | null
   agenzia_cataloghi_aggiornato_il?: string | null
   espositori_aggiornato_il?: string | null
