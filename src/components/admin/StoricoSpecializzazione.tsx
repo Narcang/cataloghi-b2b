@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { History, ChevronDown, ChevronRight } from 'lucide-react'
+import { History, ChevronDown, ChevronRight, X } from 'lucide-react'
 import {
   formatVoceStorico,
   SEZIONE_STORICO_LABEL,
@@ -20,6 +20,8 @@ type StoricoRiga = {
 type Props = {
   profiloId: string
   sezione: SezioneStorico
+  /** Admin e manager possono rimuovere singole voci errate. */
+  canEliminareVoci?: boolean
 }
 
 function formatQuando(value: string | null | undefined): string | null {
@@ -35,12 +37,17 @@ function formatQuando(value: string | null | undefined): string | null {
   })
 }
 
-export default function StoricoSpecializzazione({ profiloId, sezione }: Props) {
+export default function StoricoSpecializzazione({
+  profiloId,
+  sezione,
+  canEliminareVoci = false,
+}: Props) {
   const [aperto, setAperto] = useState(false)
   const [caricato, setCaricato] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [righe, setRighe] = useState<StoricoRiga[]>([])
+  const [eliminazione, setEliminazione] = useState<string | null>(null)
 
   async function carica() {
     setLoading(true)
@@ -69,6 +76,48 @@ export default function StoricoSpecializzazione({ profiloId, sezione }: Props) {
     setAperto(next)
     if (next && !caricato && !loading) {
       void carica()
+    }
+  }
+
+  async function eliminaVoce(rigaId: string, voceIndex: number, etichetta: string) {
+    if (
+      !window.confirm(
+        `Eliminare "${etichetta}" dallo storico?\n\nL'operazione non modifica i dati attuali del profilo.`,
+      )
+    ) {
+      return
+    }
+
+    const key = `${rigaId}:${voceIndex}`
+    setEliminazione(key)
+    setError(null)
+    try {
+      const res = await fetch(
+        `/api/admin/profili/storico?storico_id=${encodeURIComponent(rigaId)}&voce_index=${voceIndex}`,
+        { method: 'DELETE', credentials: 'same-origin' },
+      )
+      const data = (await res.json().catch(() => null)) as
+        | { ok?: boolean; message?: string; rimossaRiga?: boolean }
+        | null
+      if (!res.ok || !data?.ok) {
+        setError(data?.message ?? 'Eliminazione non riuscita')
+        return
+      }
+
+      setRighe((prev) => {
+        if (data.rimossaRiga) {
+          return prev.filter((riga) => riga.id !== rigaId)
+        }
+        return prev.map((riga) => {
+          if (riga.id !== rigaId) return riga
+          return {
+            ...riga,
+            voci: riga.voci.filter((_, index) => index !== voceIndex),
+          }
+        })
+      })
+    } finally {
+      setEliminazione(null)
     }
   }
 
@@ -102,11 +151,35 @@ export default function StoricoSpecializzazione({ profiloId, sezione }: Props) {
                       <p className="text-[10px] font-semibold text-zinc-600">{quando}</p>
                     ) : null}
                     <div className="mt-0.5 space-y-0.5">
-                      {riga.voci.map((voce, index) => (
-                        <p key={`${riga.id}-${index}`} className="text-[11px] text-zinc-700 leading-snug">
-                          {formatVoceStorico(voce)}
-                        </p>
-                      ))}
+                      {riga.voci.map((voce, index) => {
+                        const etichetta = formatVoceStorico(voce)
+                        const eliminando = eliminazione === `${riga.id}:${index}`
+                        return (
+                          <div
+                            key={`${riga.id}-${index}`}
+                            className="flex items-start gap-1 min-w-0 group"
+                          >
+                            <p className="text-[11px] text-zinc-700 leading-snug flex-1 min-w-0">
+                              {etichetta}
+                            </p>
+                            {canEliminareVoci ? (
+                              <button
+                                type="button"
+                                onClick={() => void eliminaVoce(riga.id, index, etichetta)}
+                                disabled={Boolean(eliminazione)}
+                                className="shrink-0 inline-flex h-4 w-4 items-center justify-center rounded text-zinc-400 hover:text-red-600 hover:bg-red-50 disabled:opacity-40"
+                                aria-label={`Elimina ${etichetta} dallo storico`}
+                                title="Elimina voce dallo storico"
+                              >
+                                <X size={12} aria-hidden />
+                              </button>
+                            ) : null}
+                            {eliminando ? (
+                              <span className="sr-only">Eliminazione in corso</span>
+                            ) : null}
+                          </div>
+                        )
+                      })}
                     </div>
                   </li>
                 )

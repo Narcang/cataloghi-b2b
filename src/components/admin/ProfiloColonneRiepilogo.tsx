@@ -11,6 +11,8 @@ type ColonnaProps = ColonnaRiepilogo & {
   className?: string
   /** Se true, con profiloId e sezione mostra il pulsante "Storico". */
   mostraDateAggiornamento?: boolean
+  /** Admin/manager: X per rimuovere voci errate dallo storico. */
+  canEliminareVociStorico?: boolean
   profiloId?: string
   sezione?: SezioneStorico
 }
@@ -32,6 +34,7 @@ export function ProfiloSpecializzazioneColonna({
   valori,
   className = '',
   mostraDateAggiornamento = false,
+  canEliminareVociStorico = false,
   profiloId,
   sezione,
 }: ColonnaProps) {
@@ -54,7 +57,11 @@ export function ProfiloSpecializzazioneColonna({
         </div>
       ) : null}
       {mostraDateAggiornamento && profiloId && sezione ? (
-        <StoricoSpecializzazione profiloId={profiloId} sezione={sezione} />
+        <StoricoSpecializzazione
+          profiloId={profiloId}
+          sezione={sezione}
+          canEliminareVoci={canEliminareVociStorico}
+        />
       ) : null}
     </div>
   )

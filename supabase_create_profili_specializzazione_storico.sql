@@ -27,7 +27,7 @@ ALTER TABLE public.profili_specializzazione_storico ENABLE ROW LEVEL SECURITY;
 -- Permessi di tabella. Le tabelle nuove su Supabase non ereditano i grant:
 -- il service_role (API server) e le sessioni autenticate devono riceverli esplicitamente.
 GRANT ALL ON public.profili_specializzazione_storico TO service_role;
-GRANT SELECT, INSERT ON public.profili_specializzazione_storico TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.profili_specializzazione_storico TO authenticated;
 
 DROP POLICY IF EXISTS "storico_select_admin_manager" ON public.profili_specializzazione_storico;
 DROP POLICY IF EXISTS "storico_select_admin_manager_agenzia_agente" ON public.profili_specializzazione_storico;
@@ -52,5 +52,33 @@ CREATE POLICY "storico_insert_admin_manager_agenzia_agente"
     EXISTS (
       SELECT 1 FROM public.profili p
       WHERE p.id = auth.uid() AND p.ruolo IN ('admin', 'manager', 'agenzia', 'agente')
+    )
+  );
+
+DROP POLICY IF EXISTS "storico_update_admin_manager" ON public.profili_specializzazione_storico;
+CREATE POLICY "storico_update_admin_manager"
+  ON public.profili_specializzazione_storico
+  FOR UPDATE
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.profili p
+      WHERE p.id = auth.uid() AND p.ruolo IN ('admin', 'manager')
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.profili p
+      WHERE p.id = auth.uid() AND p.ruolo IN ('admin', 'manager')
+    )
+  );
+
+DROP POLICY IF EXISTS "storico_delete_admin_manager" ON public.profili_specializzazione_storico;
+CREATE POLICY "storico_delete_admin_manager"
+  ON public.profili_specializzazione_storico
+  FOR DELETE
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.profili p
+      WHERE p.id = auth.uid() AND p.ruolo IN ('admin', 'manager')
     )
   );

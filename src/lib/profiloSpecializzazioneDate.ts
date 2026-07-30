@@ -7,6 +7,10 @@ export function canViewProfiloSpecializzazioneAggiornato(viewerRole: string): bo
   )
 }
 
+export function canDeleteProfiloSpecializzazioneStoricoVoce(viewerRole: string): boolean {
+  return viewerRole === 'admin' || viewerRole === 'manager'
+}
+
 export function normalizeProfiloCampoValue(value: unknown): string | null {
   if (value === null || value === undefined) return null
   const trimmed = String(value).trim()

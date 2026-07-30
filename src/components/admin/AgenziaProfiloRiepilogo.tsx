@@ -13,6 +13,8 @@ type Props = {
   profilo: Partial<AgenziaProfiloCampi>
   className?: string
   mostraDateAggiornamento?: boolean
+  /** Admin/manager: elimina voci errate dallo storico. */
+  canEliminareVociStorico?: boolean
   /** Id del profilo: se presente insieme a mostraDateAggiornamento abilita lo storico. */
   profiloId?: string
 }
@@ -36,6 +38,7 @@ export function AgenziaCampioniColonna({
   profilo,
   className = '',
   mostraDateAggiornamento = false,
+  canEliminareVociStorico = false,
   profiloId,
 }: Props) {
   const { campi, campioni } = useAgenziaColonne(profilo)
@@ -43,6 +46,7 @@ export function AgenziaCampioniColonna({
     <ProfiloSpecializzazioneColonna
       className={className}
       mostraDateAggiornamento={mostraDateAggiornamento}
+      canEliminareVociStorico={canEliminareVociStorico}
       profiloId={profiloId}
       sezione="campioni"
       label="Strumenti lavoro agente"
@@ -56,6 +60,7 @@ export function AgenziaCataloghiColonna({
   profilo,
   className = '',
   mostraDateAggiornamento = false,
+  canEliminareVociStorico = false,
   profiloId,
 }: Props) {
   const { campi, cataloghi } = useAgenziaColonne(profilo)
@@ -63,6 +68,7 @@ export function AgenziaCataloghiColonna({
     <ProfiloSpecializzazioneColonna
       className={className}
       mostraDateAggiornamento={mostraDateAggiornamento}
+      canEliminareVociStorico={canEliminareVociStorico}
       profiloId={profiloId}
       sezione="cataloghi"
       label="Cataloghi"

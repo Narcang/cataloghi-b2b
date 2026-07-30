@@ -13,6 +13,8 @@ type Props = {
   profilo: Partial<RivenditoreProfiloCampi>
   className?: string
   mostraDateAggiornamento?: boolean
+  /** Admin/manager: elimina voci errate dallo storico. */
+  canEliminareVociStorico?: boolean
   /** Id del profilo: se presente insieme a mostraDateAggiornamento abilita lo storico. */
   profiloId?: string
 }
@@ -36,6 +38,7 @@ export function RivenditoreEspositoriColonna({
   profilo,
   className = '',
   mostraDateAggiornamento = false,
+  canEliminareVociStorico = false,
   profiloId,
 }: Props) {
   const { campi, espositori } = useRivenditoreColonne(profilo)
@@ -43,6 +46,7 @@ export function RivenditoreEspositoriColonna({
     <ProfiloSpecializzazioneColonna
       className={className}
       mostraDateAggiornamento={mostraDateAggiornamento}
+      canEliminareVociStorico={canEliminareVociStorico}
       profiloId={profiloId}
       sezione="espositori"
       label="Espositori"
@@ -56,6 +60,7 @@ export function RivenditoreBoxColonna({
   profilo,
   className = '',
   mostraDateAggiornamento = false,
+  canEliminareVociStorico = false,
   profiloId,
 }: Props) {
   const { campi, box } = useRivenditoreColonne(profilo)
@@ -63,6 +68,7 @@ export function RivenditoreBoxColonna({
     <ProfiloSpecializzazioneColonna
       className={className}
       mostraDateAggiornamento={mostraDateAggiornamento}
+      canEliminareVociStorico={canEliminareVociStorico}
       profiloId={profiloId}
       sezione="box"
       label="Box"

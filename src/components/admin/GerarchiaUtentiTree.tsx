@@ -27,7 +27,7 @@ import {
   RivenditoreBoxColonna,
   RivenditoreEspositoriColonna,
 } from '@/components/admin/RivenditoreProfiloRiepilogo'
-import { canViewProfiloSpecializzazioneAggiornato } from '@/lib/profiloSpecializzazioneDate'
+import { canViewProfiloSpecializzazioneAggiornato, canDeleteProfiloSpecializzazioneStoricoVoce } from '@/lib/profiloSpecializzazioneDate'
 import {
   canViewerSeeUltimoAccessoForProfile,
   formatUltimoAccessoRiga,
@@ -98,6 +98,7 @@ function HierarchyNode({
     )
   }, [profile.id, profile.ruolo, breakdownBadges, profili, links])
   const mostraDateAggiornamento = canViewProfiloSpecializzazioneAggiornato(viewerRole)
+  const canEliminareVociStorico = canDeleteProfiloSpecializzazioneStoricoVoce(viewerRole)
   const seguitoDa =
     profile.ruolo === 'rivenditore' ? profile.seguito_da?.trim() || null : null
   const mostraUltimoAccesso = canViewerSeeUltimoAccessoForProfile(viewerRole, profile.ruolo)
@@ -215,11 +216,13 @@ function HierarchyNode({
                   profilo={profile}
                   profiloId={profile.id}
                   mostraDateAggiornamento={mostraDateAggiornamento}
+                  canEliminareVociStorico={canEliminareVociStorico}
                 />
                 <AgenziaCataloghiColonna
                   profilo={profile}
                   profiloId={profile.id}
                   mostraDateAggiornamento={mostraDateAggiornamento}
+                  canEliminareVociStorico={canEliminareVociStorico}
                 />
               </>
             ) : profile.ruolo === 'rivenditore' ? (
@@ -228,11 +231,13 @@ function HierarchyNode({
                   profilo={profile}
                   profiloId={profile.id}
                   mostraDateAggiornamento={mostraDateAggiornamento}
+                  canEliminareVociStorico={canEliminareVociStorico}
                 />
                 <RivenditoreBoxColonna
                   profilo={profile}
                   profiloId={profile.id}
                   mostraDateAggiornamento={mostraDateAggiornamento}
+                  canEliminareVociStorico={canEliminareVociStorico}
                 />
               </>
             ) : (
