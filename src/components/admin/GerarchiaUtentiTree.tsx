@@ -61,9 +61,11 @@ type HierarchyNodeProps = {
 /** Indentazione orizzontale per livello (matrioska). */
 const DEPTH_INDENT_REM = 1
 const NESTED_BRANCH_OFFSET_REM = 1
-/** Griglia card: identità più compatta, colonne specializzazione più a sinistra. */
+/** Griglia card: identità compatta; col. ruolo un po' più larga per centrare strumenti/cataloghi. */
 const CARD_GRID_CLASS =
-  'grid gap-2 items-start grid-cols-1 md:grid-cols-[minmax(0,0.9fr)_minmax(0,0.62fr)_minmax(0,0.92fr)_minmax(0,0.92fr)]'
+  'grid gap-2 items-start grid-cols-1 md:grid-cols-[minmax(0,0.85fr)_minmax(0,0.72fr)_minmax(0,0.88fr)_minmax(0,0.88fr)]'
+/** Offset colonna centrale (strumenti / espositori) verso destra. */
+const COLONNA_CENTRALE_CLASS = 'md:pl-3'
 
 function HierarchyNode({
   profile,
@@ -220,6 +222,7 @@ function HierarchyNode({
             {profile.ruolo === 'agenzia' ? (
               <>
                 <AgenziaCampioniColonna
+                  className={COLONNA_CENTRALE_CLASS}
                   profilo={profile}
                   profiloId={profile.id}
                   mostraDateAggiornamento={mostraDateAggiornamento}
@@ -235,6 +238,7 @@ function HierarchyNode({
             ) : profile.ruolo === 'rivenditore' ? (
               <>
                 <RivenditoreEspositoriColonna
+                  className={COLONNA_CENTRALE_CLASS}
                   profilo={profile}
                   profiloId={profile.id}
                   mostraDateAggiornamento={mostraDateAggiornamento}
