@@ -20,7 +20,7 @@ type StoricoRiga = {
 type Props = {
   profiloId: string
   sezione: SezioneStorico
-  /** Admin e manager possono rimuovere singole voci errate. */
+  /** Admin, manager e agenzia (su rivenditori) possono rimuovere singole voci errate. */
   canEliminareVoci?: boolean
 }
 

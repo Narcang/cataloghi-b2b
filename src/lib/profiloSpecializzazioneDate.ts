@@ -12,7 +12,7 @@ export function canDeleteProfiloSpecializzazioneStoricoVoce(
   targetProfiloRuolo: string,
 ): boolean {
   if (viewerRole === 'admin' || viewerRole === 'manager') return true
-  if (viewerRole === 'agente' && targetProfiloRuolo === 'rivenditore') return true
+  if (viewerRole === 'agenzia' && targetProfiloRuolo === 'rivenditore') return true
   return false
 }
 
