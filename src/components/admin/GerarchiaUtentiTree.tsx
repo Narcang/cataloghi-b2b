@@ -61,6 +61,9 @@ type HierarchyNodeProps = {
 /** Indentazione orizzontale per livello (matrioska). */
 const DEPTH_INDENT_REM = 1
 const NESTED_BRANCH_OFFSET_REM = 1
+/** Griglia card: identità più compatta, colonne specializzazione più a sinistra. */
+const CARD_GRID_CLASS =
+  'grid gap-2 items-start grid-cols-1 md:grid-cols-[minmax(0,0.9fr)_minmax(0,0.62fr)_minmax(0,0.92fr)_minmax(0,0.92fr)]'
 
 function HierarchyNode({
   profile,
@@ -150,7 +153,7 @@ function HierarchyNode({
               : undefined
           }
         >
-          <div className="grid gap-3 items-start grid-cols-1 md:grid-cols-[minmax(0,1.35fr)_minmax(0,0.85fr)_minmax(0,1fr)_minmax(0,1fr)]">
+          <div className={CARD_GRID_CLASS}>
             <div className="min-w-0">
               <h4 className="text-base font-semibold text-zinc-900 flex items-center gap-2">
                 {roleDotClass ? (
