@@ -7,8 +7,13 @@ export function canViewProfiloSpecializzazioneAggiornato(viewerRole: string): bo
   )
 }
 
-export function canDeleteProfiloSpecializzazioneStoricoVoce(viewerRole: string): boolean {
-  return viewerRole === 'admin' || viewerRole === 'manager'
+export function canDeleteProfiloSpecializzazioneStoricoVoce(
+  viewerRole: string,
+  targetProfiloRuolo: string,
+): boolean {
+  if (viewerRole === 'admin' || viewerRole === 'manager') return true
+  if (viewerRole === 'agente' && targetProfiloRuolo === 'rivenditore') return true
+  return false
 }
 
 export function normalizeProfiloCampoValue(value: unknown): string | null {

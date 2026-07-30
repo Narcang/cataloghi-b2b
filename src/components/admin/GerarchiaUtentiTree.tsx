@@ -98,7 +98,11 @@ function HierarchyNode({
     )
   }, [profile.id, profile.ruolo, breakdownBadges, profili, links])
   const mostraDateAggiornamento = canViewProfiloSpecializzazioneAggiornato(viewerRole)
-  const canEliminareVociStorico = canDeleteProfiloSpecializzazioneStoricoVoce(viewerRole)
+  const canEliminareVociStoricoAgenzia = canDeleteProfiloSpecializzazioneStoricoVoce(viewerRole, 'agenzia')
+  const canEliminareVociStoricoRivenditore = canDeleteProfiloSpecializzazioneStoricoVoce(
+    viewerRole,
+    'rivenditore',
+  )
   const seguitoDa =
     profile.ruolo === 'rivenditore' ? profile.seguito_da?.trim() || null : null
   const mostraUltimoAccesso = canViewerSeeUltimoAccessoForProfile(viewerRole, profile.ruolo)
@@ -216,13 +220,13 @@ function HierarchyNode({
                   profilo={profile}
                   profiloId={profile.id}
                   mostraDateAggiornamento={mostraDateAggiornamento}
-                  canEliminareVociStorico={canEliminareVociStorico}
+                  canEliminareVociStorico={canEliminareVociStoricoAgenzia}
                 />
                 <AgenziaCataloghiColonna
                   profilo={profile}
                   profiloId={profile.id}
                   mostraDateAggiornamento={mostraDateAggiornamento}
-                  canEliminareVociStorico={canEliminareVociStorico}
+                  canEliminareVociStorico={canEliminareVociStoricoAgenzia}
                 />
               </>
             ) : profile.ruolo === 'rivenditore' ? (
@@ -231,13 +235,13 @@ function HierarchyNode({
                   profilo={profile}
                   profiloId={profile.id}
                   mostraDateAggiornamento={mostraDateAggiornamento}
-                  canEliminareVociStorico={canEliminareVociStorico}
+                  canEliminareVociStorico={canEliminareVociStoricoRivenditore}
                 />
                 <RivenditoreBoxColonna
                   profilo={profile}
                   profiloId={profile.id}
                   mostraDateAggiornamento={mostraDateAggiornamento}
-                  canEliminareVociStorico={canEliminareVociStorico}
+                  canEliminareVociStorico={canEliminareVociStoricoRivenditore}
                 />
               </>
             ) : (
