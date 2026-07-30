@@ -48,7 +48,6 @@ export function AgenziaCampioniColonna({
       label="Strumenti lavoro agente"
       compilato={hasAgenziaCampioni(campi)}
       valori={campioni}
-      aggiornatoIl={campi.agenzia_campioni_aggiornato_il}
     />
   )
 }
@@ -69,7 +68,6 @@ export function AgenziaCataloghiColonna({
       label="Cataloghi"
       compilato={hasAgenziaCataloghi(campi)}
       valori={cataloghi}
-      aggiornatoIl={campi.agenzia_cataloghi_aggiornato_il}
     />
   )
 }
@@ -90,13 +88,11 @@ export default function AgenziaProfiloRiepilogo({
           label: 'Strumenti lavoro agente',
           compilato: hasAgenziaCampioni(campi),
           valori: campioni,
-          aggiornatoIl: campi.agenzia_campioni_aggiornato_il,
         },
         {
           label: 'Cataloghi',
           compilato: hasAgenziaCataloghi(campi),
           valori: cataloghi,
-          aggiornatoIl: campi.agenzia_cataloghi_aggiornato_il,
         },
       ]}
     />

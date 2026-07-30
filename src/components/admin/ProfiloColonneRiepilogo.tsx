@@ -1,4 +1,3 @@
-import { formatProfiloAggiornatoIl } from '@/lib/profiloSpecializzazioneDate'
 import StoricoSpecializzazione from '@/components/admin/StoricoSpecializzazione'
 import type { SezioneStorico } from '@/lib/profiloSpecializzazioneStorico'
 
@@ -6,13 +5,12 @@ export type ColonnaRiepilogo = {
   label: string
   compilato: boolean
   valori: string[]
-  aggiornatoIl?: string | null
 }
 
 type ColonnaProps = ColonnaRiepilogo & {
   className?: string
+  /** Se true, con profiloId e sezione mostra il pulsante "Storico". */
   mostraDateAggiornamento?: boolean
-  /** Se valorizzati insieme a mostraDateAggiornamento, mostra il pulsante "Storico". */
   profiloId?: string
   sezione?: SezioneStorico
 }
@@ -32,14 +30,11 @@ export function ProfiloSpecializzazioneColonna({
   label,
   compilato,
   valori,
-  aggiornatoIl,
   className = '',
   mostraDateAggiornamento = false,
   profiloId,
   sezione,
 }: ColonnaProps) {
-  const dataLabel = formatProfiloAggiornatoIl(aggiornatoIl)
-
   return (
     <div className={`min-w-0 text-left ${className}`.trim()}>
       <p className="text-xs font-semibold uppercase tracking-wide text-zinc-700 flex items-center gap-1.5">
@@ -57,9 +52,6 @@ export function ProfiloSpecializzazioneColonna({
             </p>
           ))}
         </div>
-      ) : null}
-      {mostraDateAggiornamento && dataLabel ? (
-        <p className="text-[10px] text-zinc-400 mt-1.5 leading-snug">Agg. {dataLabel}</p>
       ) : null}
       {mostraDateAggiornamento && profiloId && sezione ? (
         <StoricoSpecializzazione profiloId={profiloId} sezione={sezione} />

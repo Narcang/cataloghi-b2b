@@ -7,17 +7,6 @@ export function canViewProfiloSpecializzazioneAggiornato(viewerRole: string): bo
   )
 }
 
-export function formatProfiloAggiornatoIl(value: string | null | undefined): string | null {
-  if (!value?.trim()) return null
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return null
-  return date.toLocaleDateString('it-IT', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  })
-}
-
 export function normalizeProfiloCampoValue(value: unknown): string | null {
   if (value === null || value === undefined) return null
   const trimmed = String(value).trim()

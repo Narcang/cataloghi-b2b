@@ -48,7 +48,6 @@ export function RivenditoreEspositoriColonna({
       label="Espositori"
       compilato={hasRivenditoreEspositori(campi)}
       valori={espositori}
-      aggiornatoIl={campi.espositori_aggiornato_il}
     />
   )
 }
@@ -69,7 +68,6 @@ export function RivenditoreBoxColonna({
       label="Box"
       compilato={hasRivenditoreBoxShowRoom(campi)}
       valori={box}
-      aggiornatoIl={campi.box_aggiornato_il}
     />
   )
 }
@@ -90,13 +88,11 @@ export default function RivenditoreProfiloRiepilogo({
           label: 'Espositori',
           compilato: hasRivenditoreEspositori(campi),
           valori: espositori,
-          aggiornatoIl: campi.espositori_aggiornato_il,
         },
         {
           label: 'Box',
           compilato: hasRivenditoreBoxShowRoom(campi),
           valori: box,
-          aggiornatoIl: campi.box_aggiornato_il,
         },
       ]}
     />
