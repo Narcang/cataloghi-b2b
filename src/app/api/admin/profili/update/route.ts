@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
+import { loadProfiloSpecializzazioneOpzioni } from '@/lib/loadProfiloSpecializzazioneOpzioni'
 import {
-  CAMPIONE_OPTIONS,
-  CATALOGO_AGENZIA_OPTIONS,
-} from '@/lib/agenziaProfiloOptions'
+  opzioniToAllowedSet,
+  isValoreSelectConsentito,
+} from '@/lib/profiloSpecializzazioneOpzioni'
 import { profiloSezioneCampiModificati } from '@/lib/profiloSpecializzazioneDate'
 import { normalizeQuantita, normalizeDataTesto } from '@/lib/profiloQuantita'
 import {
@@ -13,8 +14,6 @@ import {
   type SezioneStorico,
 } from '@/lib/profiloSpecializzazioneStorico'
 import {
-  BOX_SHOW_ROOM_OPTIONS,
-  ESPOSITORE_OPTIONS,
   AGENZIA_RIVENDITORE_PATCH_KEY_SET,
   readRivenditoreCampiFromBody,
 } from '@/lib/rivenditoreProfiloOptions'
@@ -161,16 +160,12 @@ type Body = {
   agenzia_catalogo_4_data?: string | null
 }
 
-const ESPOSITORE_SET = new Set<string>(ESPOSITORE_OPTIONS)
-const SHOW_ROOM_SET = new Set<string>(BOX_SHOW_ROOM_OPTIONS)
-const CAMPIONE_SET = new Set<string>(CAMPIONE_OPTIONS)
-const CATALOGO_AGENZIA_SET = new Set<string>(CATALOGO_AGENZIA_OPTIONS)
-
 function applySelectPatch(
   patch: Record<string, unknown>,
   body: Body,
   field: string,
   allowed: Set<string>,
+  existing?: Record<string, unknown> | null,
 ): string | null {
   if (!(field in body)) return null
   const raw = body[field as keyof Body]
@@ -184,7 +179,8 @@ function applySelectPatch(
     patch[field] = null
     return null
   }
-  if (!allowed.has(trimmed)) {
+  const existingValue = existing?.[field]
+  if (!isValoreSelectConsentito(trimmed, allowed, existingValue as string | null | undefined)) {
     return `Valore non valido per ${field}`
   }
   patch[field] = trimmed
@@ -280,13 +276,28 @@ export async function POST(request: NextRequest) {
   const ruoloEffettivo =
     typeof patch.ruolo === 'string' ? patch.ruolo : (profiloEsistente?.ruolo ?? null)
 
+  const opzioniClient = svc ?? supabase
+  const opzioniSpecializzazione = await loadProfiloSpecializzazioneOpzioni(opzioniClient)
+  const allowedSelect = {
+    campioni: opzioniToAllowedSet(opzioniSpecializzazione.campioni),
+    cataloghi: opzioniToAllowedSet(opzioniSpecializzazione.cataloghi),
+    espositori: opzioniToAllowedSet(opzioniSpecializzazione.espositori),
+    box: opzioniToAllowedSet(opzioniSpecializzazione.box),
+  }
+
   if (ruoloEffettivo === 'rivenditore') {
     const rivenditoreCampi = readRivenditoreCampiFromBody(body as Record<string, unknown>)
     if ('seguito_da' in rivenditoreCampi) {
       patch.seguito_da = rivenditoreCampi.seguito_da ?? null
     }
     for (const field of ['espositore_1', 'espositore_2'] as const) {
-      const err = applySelectPatch(patch, body, field, ESPOSITORE_SET)
+      const err = applySelectPatch(
+        patch,
+        body,
+        field,
+        allowedSelect.espositori,
+        profiloEsistente,
+      )
       if (err) return jsonResponse(false, err, 400)
     }
     for (const field of [
@@ -295,7 +306,7 @@ export async function POST(request: NextRequest) {
       'box_show_room_3',
       'box_show_room_4',
     ] as const) {
-      const err = applySelectPatch(patch, body, field, SHOW_ROOM_SET)
+      const err = applySelectPatch(patch, body, field, allowedSelect.box, profiloEsistente)
       if (err) return jsonResponse(false, err, 400)
     }
     for (const field of [...ESPOSITORE_QTA_FIELDS, ...BOX_QTA_FIELDS]) {
@@ -308,11 +319,23 @@ export async function POST(request: NextRequest) {
 
   if (ruoloEffettivo === 'agenzia') {
     for (const field of ['agenzia_campione_1', 'agenzia_campione_2'] as const) {
-      const err = applySelectPatch(patch, body, field, CAMPIONE_SET)
+      const err = applySelectPatch(
+        patch,
+        body,
+        field,
+        allowedSelect.campioni,
+        profiloEsistente,
+      )
       if (err) return jsonResponse(false, err, 400)
     }
     for (const field of ['agenzia_catalogo_1', 'agenzia_catalogo_2', 'agenzia_catalogo_3', 'agenzia_catalogo_4'] as const) {
-      const err = applySelectPatch(patch, body, field, CATALOGO_AGENZIA_SET)
+      const err = applySelectPatch(
+        patch,
+        body,
+        field,
+        allowedSelect.cataloghi,
+        profiloEsistente,
+      )
       if (err) return jsonResponse(false, err, 400)
     }
     for (const field of [...CAMPIONE_QTA_FIELDS, ...CATALOGO_QTA_FIELDS]) {

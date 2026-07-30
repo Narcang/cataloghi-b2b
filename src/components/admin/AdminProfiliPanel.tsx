@@ -11,6 +11,10 @@ import AgenziaProfiloCampi from '@/components/admin/AgenziaProfiloCampi'
 import { readRivenditoreCampiFromFormData } from '@/lib/rivenditoreProfiloOptions'
 import { readAgenziaCampiFromFormData } from '@/lib/agenziaProfiloOptions'
 import {
+  buildOpzioniSpecializzazioneMap,
+  type OpzioniSpecializzazioneMap,
+} from '@/lib/profiloSpecializzazioneOpzioni'
+import {
   associatiAggiungiSectionLabel,
   associatiDirettiSectionLabel,
   getCandidateAssociatiProfiles,
@@ -148,7 +152,11 @@ type Props = {
   canEditRivenditoreAsAgente?: boolean
   /** Apre di default i profili nell'elenco (details espansi). */
   apriProfiliDiDefault?: boolean
+  /** Admin: aggiunge/rimuove voci nei menu a tendina specializzazione. */
+  canManageSpecializzazioneOpzioni?: boolean
 }
+
+const DEFAULT_SPECIALIZZAZIONE_OPZIONI = buildOpzioniSpecializzazioneMap([])
 
 export default function AdminProfiliPanel({
   currentUserId,
@@ -166,20 +174,53 @@ export default function AdminProfiliPanel({
   canEditRivenditoreAsAgenzia = false,
   canEditRivenditoreAsAgente = false,
   apriProfiliDiDefault = false,
+  canManageSpecializzazioneOpzioni = false,
 }: Props) {
   const router = useRouter()
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [specializzazioneOpzioni, setSpecializzazioneOpzioni] =
+    useState<OpzioniSpecializzazioneMap>(DEFAULT_SPECIALIZZAZIONE_OPZIONI)
   const [ruoloAttivo, setRuoloAttivo] = useState<RuoloTabId>(
     agenziaRivenditoriMode ? 'rivenditore' : 'admin',
   )
+
+  const specializzazioneOpzioniFormProps = {
+    opzioni: specializzazioneOpzioni,
+    canManageOpzioni: canManageSpecializzazioneOpzioni,
+    onOpzioniChange: canManageSpecializzazioneOpzioni
+      ? setSpecializzazioneOpzioni
+      : undefined,
+  }
 
   const ruoliTab = agenziaRivenditoriMode
     ? RUOLI_TAB.filter((tab) => tab.id === 'rivenditore')
     : RUOLI_TAB
 
   const profiliPendentiOrdinati = useMemo(() => sortProfiliAlfabetico(profiliPendenti), [profiliPendenti])
+
+  useEffect(() => {
+    let cancelled = false
+    void (async () => {
+      try {
+        const res = await fetch('/api/admin/profili/specializzazione-opzioni', {
+          credentials: 'same-origin',
+        })
+        const data = (await res.json().catch(() => null)) as
+          | { ok?: boolean; opzioni?: OpzioniSpecializzazioneMap }
+          | null
+        if (!cancelled && res.ok && data?.ok && data.opzioni) {
+          setSpecializzazioneOpzioni(data.opzioni)
+        }
+      } catch {
+        /* fallback: opzioni predefinite */
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const profiliListaGestione = useMemo(
     () => profiliLista.filter((p) => p.ruolo !== 'free'),
@@ -475,6 +516,7 @@ export default function AdminProfiliPanel({
                           box_show_room_3_data: p.box_show_room_3_data ?? null,
                           box_show_room_4_data: p.box_show_room_4_data ?? null,
                         }}
+                        {...specializzazioneOpzioniFormProps}
                         inputClassName="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
                       />
                     ) : null}
@@ -500,6 +542,7 @@ export default function AdminProfiliPanel({
                           agenzia_catalogo_3_data: p.agenzia_catalogo_3_data ?? null,
                           agenzia_catalogo_4_data: p.agenzia_catalogo_4_data ?? null,
                         }}
+                        {...specializzazioneOpzioniFormProps}
                         inputClassName="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
                       />
                     ) : null}
@@ -675,6 +718,7 @@ export default function AdminProfiliPanel({
                                 box_show_room_3_data: p.box_show_room_3_data ?? null,
                                 box_show_room_4_data: p.box_show_room_4_data ?? null,
                               }}
+                              {...specializzazioneOpzioniFormProps}
                             />
                           ) : null}
                           {!rivenditoreEditEsterno && p.ruolo === 'agenzia' ? (
@@ -699,6 +743,7 @@ export default function AdminProfiliPanel({
                                 agenzia_catalogo_3_data: p.agenzia_catalogo_3_data ?? null,
                                 agenzia_catalogo_4_data: p.agenzia_catalogo_4_data ?? null,
                               }}
+                              {...specializzazioneOpzioniFormProps}
                             />
                           ) : null}
                           <div className="md:col-span-2">
@@ -822,6 +867,7 @@ export default function AdminProfiliPanel({
                                 box_show_room_3_data: p.box_show_room_3_data ?? null,
                                 box_show_room_4_data: p.box_show_room_4_data ?? null,
                               }}
+                              {...specializzazioneOpzioniFormProps}
                             />
                           ) : null}
                           {p.ruolo === 'agenzia' ? (
@@ -846,6 +892,7 @@ export default function AdminProfiliPanel({
                                 agenzia_catalogo_3_data: p.agenzia_catalogo_3_data ?? null,
                                 agenzia_catalogo_4_data: p.agenzia_catalogo_4_data ?? null,
                               }}
+                              {...specializzazioneOpzioniFormProps}
                             />
                           ) : null}
                           <label className="md:col-span-2 flex items-center gap-2 text-sm text-zinc-800">

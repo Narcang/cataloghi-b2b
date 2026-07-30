@@ -281,6 +281,7 @@ export default async function GestioneUtentiPage(props: {
           canEditSpecializzazione={isManager}
           canManageCataloghi={isManager}
           canCreateAssociati={isManager}
+          canManageSpecializzazioneOpzioni={isAdmin}
         />
 
         {/* Invita utenti */}
