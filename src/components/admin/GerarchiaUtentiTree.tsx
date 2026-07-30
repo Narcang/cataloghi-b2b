@@ -58,6 +58,10 @@ type HierarchyNodeProps = {
   onToggle: (id: string) => void
 }
 
+/** Indentazione orizzontale per livello (matrioska). */
+const DEPTH_INDENT_REM = 1
+const NESTED_BRANCH_OFFSET_REM = 1
+
 function HierarchyNode({
   profile,
   depth,
@@ -104,25 +108,25 @@ function HierarchyNode({
   return (
     <li className="list-none">
       <div
-        className="flex items-stretch gap-2"
-        style={{ paddingLeft: `${depth * 1.25}rem` }}
+        className="flex items-stretch gap-1"
+        style={{ paddingLeft: `${depth * DEPTH_INDENT_REM}rem` }}
       >
         {expandable ? (
           <button
             type="button"
             onClick={() => onToggle(profile.id)}
-            className="mt-3 shrink-0 inline-flex h-8 w-8 items-center justify-center rounded-lg border border-black/15 bg-zinc-50 text-zinc-700 hover:bg-zinc-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#060d41]"
+            className="mt-2.5 shrink-0 inline-flex h-7 w-7 items-center justify-center rounded-lg border border-black/15 bg-zinc-50 text-zinc-700 hover:bg-zinc-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#060d41]"
             aria-expanded={expanded}
             aria-label={expanded ? 'Comprimi' : 'Espandi'}
           >
-            {expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+            {expanded ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
           </button>
         ) : (
-          <span className="mt-3 inline-flex h-8 w-8 shrink-0" aria-hidden />
+          <span className="mt-2.5 inline-flex h-7 w-7 shrink-0" aria-hidden />
         )}
 
         <div
-          className={`mb-2 flex-1 rounded-xl border p-4 transition-colors ${
+          className={`mb-2 flex-1 rounded-xl border p-3 transition-colors ${
             expandable
               ? 'border-black bg-white shadow-sm cursor-pointer hover:border-[#060d41]'
               : 'border-black/10 bg-zinc-50'
@@ -243,8 +247,8 @@ function HierarchyNode({
 
       {expandable && expanded ? (
         <div
-          className="border-l-2 border-[#060d41]/20 ml-6 pl-3"
-          style={{ marginLeft: `${depth * 1.25 + 1.5}rem` }}
+          className="border-l-2 border-[#060d41]/20 ml-3 pl-2"
+          style={{ marginLeft: `${depth * DEPTH_INDENT_REM + NESTED_BRANCH_OFFSET_REM}rem` }}
         >
           {nestedLabel ? (
             <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500 mb-2 mt-1">
@@ -357,7 +361,7 @@ export default function GerarchiaUtentiTree({
     }
 
     return (
-      <section id="struttura-organizzativa" className="border border-black rounded-2xl bg-white p-6 space-y-6">
+      <section id="struttura-organizzativa" className="border border-black rounded-2xl bg-white p-4 md:p-5 space-y-5">
         <div>
           <h2 className="text-xl text-zinc-900 font-medium flex items-center gap-2">
             <Users size={20} className="text-[#060d41]" />
@@ -417,7 +421,7 @@ export default function GerarchiaUtentiTree({
 
   // --- Modalità admin/manager: filtro per ruolo ---
   return (
-    <section id="struttura-organizzativa" className="border border-black rounded-2xl bg-white p-6 space-y-6">
+    <section id="struttura-organizzativa" className="border border-black rounded-2xl bg-white p-4 md:p-5 space-y-5">
       <div>
         <h2 className="text-xl text-zinc-900 font-medium flex items-center gap-2">
           <Users size={20} className="text-[#060d41]" />
