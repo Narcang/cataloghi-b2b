@@ -63,11 +63,11 @@ const DEPTH_INDENT_REM = 1
 const NESTED_BRANCH_OFFSET_REM = 1
 /** Griglia card: identità compatta; colonne specializzazione più larghe a destra. */
 const CARD_GRID_CLASS =
-  'grid gap-2 items-start grid-cols-1 md:grid-cols-[minmax(0,0.72fr)_minmax(0,0.58fr)_minmax(0,0.95fr)_minmax(0,1.25fr)]'
+  'grid gap-2 items-start grid-cols-1 md:grid-cols-[minmax(0,0.65fr)_minmax(0,0.52fr)_minmax(0,1fr)_minmax(0,1.35fr)]'
 /** Offset colonna centrale (strumenti / espositori) verso destra. */
-const COLONNA_CENTRALE_CLASS = 'md:pl-3'
+const COLONNA_CENTRALE_CLASS = 'md:pl-6'
 /** Ultima colonna (cataloghi / box) più a destra e più larga. */
-const COLONNA_DESTRA_CLASS = 'md:pl-5'
+const COLONNA_DESTRA_CLASS = 'md:pl-8'
 
 function HierarchyNode({
   profile,

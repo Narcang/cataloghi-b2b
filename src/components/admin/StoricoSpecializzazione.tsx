@@ -134,7 +134,7 @@ export default function StoricoSpecializzazione({
       </button>
 
       {aperto ? (
-        <div className="mt-1 rounded-md border border-black/10 bg-zinc-50 p-2 max-w-[22rem]">
+        <div className="mt-1 rounded-md border border-black/10 bg-zinc-50 p-2 w-fit max-w-full">
           {loading ? (
             <p className="text-[10px] text-zinc-500">Caricamento…</p>
           ) : error ? (
@@ -157,17 +157,17 @@ export default function StoricoSpecializzazione({
                         return (
                           <div
                             key={`${riga.id}-${index}`}
-                            className="flex items-start gap-1 min-w-0 group"
+                            className="inline-flex items-center gap-0.5 max-w-full group"
                           >
-                            <p className="text-[11px] text-zinc-700 leading-snug flex-1 min-w-0 md:whitespace-nowrap">
+                            <span className="text-[11px] text-zinc-700 leading-snug md:whitespace-nowrap">
                               {etichetta}
-                            </p>
+                            </span>
                             {canEliminareVoci ? (
                               <button
                                 type="button"
                                 onClick={() => void eliminaVoce(riga.id, index, etichetta)}
                                 disabled={Boolean(eliminazione)}
-                                className="shrink-0 inline-flex h-4 w-4 items-center justify-center rounded text-zinc-400 hover:text-red-600 hover:bg-red-50 disabled:opacity-40"
+                                className="shrink-0 inline-flex h-4 w-4 items-center justify-center rounded text-zinc-400 hover:text-red-600 hover:bg-red-50 disabled:opacity-40 -mr-0.5"
                                 aria-label={`Elimina ${etichetta} dallo storico`}
                                 title="Elimina voce dallo storico"
                               >
