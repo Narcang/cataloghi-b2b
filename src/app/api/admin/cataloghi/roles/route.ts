@@ -1,32 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
 import { RUOLI_CATALOGO } from '@/lib/catalogRoles'
+import { requireAdminCatalogContext, redirectAdminCatalogMessage } from '@/lib/adminCatalogRoute'
 
 const RUOLI_VALIDI = new Set<string>(RUOLI_CATALOGO.map((r) => r.value))
 
 
 function redirectWithMessage(request: NextRequest, message: string) {
-  const url = new URL(`/dashboard?message=${encodeURIComponent(message)}`, request.url)
-  return NextResponse.redirect(url, { status: 303 })
+  return redirectAdminCatalogMessage(request, message)
 }
 
 export async function POST(request: NextRequest) {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) return NextResponse.redirect(new URL('/login', request.url), { status: 303 })
-
-  const { data: profiloUtente } = await supabase
-    .from('profili')
-    .select('ruolo')
-    .eq('id', user.id)
-    .single()
-
-  if (profiloUtente?.ruolo !== 'admin') {
-    return redirectWithMessage(request, 'Operazione non consentita')
-  }
+  const resolved = await requireAdminCatalogContext()
+  if (!resolved.ok) return resolved.response
+  const { dataClient: supabase } = resolved.ctx
 
   const formData = await request.formData()
   const catalogoId = String(formData.get('catalogo_id') ?? '').trim()

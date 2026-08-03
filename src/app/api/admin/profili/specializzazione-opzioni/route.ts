@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
+import { getAdminDataSupabase } from '@/lib/mercatoServer'
 import { loadProfiloSpecializzazioneOpzioniRows } from '@/lib/loadProfiloSpecializzazioneOpzioni'
 import {
   buildOpzioniSpecializzazioneMap,
@@ -35,7 +36,10 @@ export async function GET() {
     return jsonResponse(false, 'Operazione non consentita', 403)
   }
 
-  const svc = createServiceRoleSupabase() ?? supabase
+  const isAdmin = ruolo === 'admin'
+  const svc = isAdmin
+    ? (await getAdminDataSupabase()).client
+    : createServiceRoleSupabase() ?? supabase
   const rows = await loadProfiloSpecializzazioneOpzioniRows(svc)
   const opzioni = buildOpzioniSpecializzazioneMap(rows)
 
@@ -89,7 +93,7 @@ export async function POST(request: NextRequest) {
     return jsonResponse(false, 'Azione non valida', 400)
   }
 
-  const svc = createServiceRoleSupabase() ?? supabase
+  const svc = (await getAdminDataSupabase()).client
   const baseSet = new Set(OPZIONE_CATEGORIA_BASE[categoria as OpzioneCategoria])
 
   if (azione === 'aggiungi') {

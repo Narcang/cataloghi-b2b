@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
+import { requireAdminCatalogContext, redirectAdminCatalogMessage } from '@/lib/adminCatalogRoute'
 
 function redirectWithMessage(request: NextRequest, message: string) {
-  const url = new URL(`/dashboard?message=${encodeURIComponent(message)}`, request.url)
-  return NextResponse.redirect(url, { status: 303 })
+  return redirectAdminCatalogMessage(request, message)
 }
 
 function getStoragePathFromPublicUrl(url: string): string | null {
@@ -14,22 +13,9 @@ function getStoragePathFromPublicUrl(url: string): string | null {
 }
 
 export async function POST(request: NextRequest) {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) return NextResponse.redirect(new URL('/login', request.url), { status: 303 })
-
-  const { data: profiloUtente } = await supabase
-    .from('profili')
-    .select('ruolo')
-    .eq('id', user.id)
-    .single()
-
-  if (profiloUtente?.ruolo !== 'admin') {
-    return redirectWithMessage(request, 'Operazione non consentita')
-  }
+  const resolved = await requireAdminCatalogContext()
+  if (!resolved.ok) return resolved.response
+  const { dataClient: supabase } = resolved.ctx
 
   const formData = await request.formData()
   const catalogoId = String(formData.get('catalogo_id') ?? '')

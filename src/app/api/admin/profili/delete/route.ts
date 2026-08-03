@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
+import { getAdminDataSupabase } from '@/lib/mercatoServer'
 
 function jsonResponse(ok: boolean, message: string, status: number) {
   return NextResponse.json({ ok, message }, { status })
@@ -45,7 +46,9 @@ export async function POST(request: NextRequest) {
     return jsonResponse(false, 'Non puoi eliminare il tuo stesso account da qui', 400)
   }
 
-  const { data: target, error: targetErr } = await supabase.from('profili').select('id, ruolo').eq('id', profiloId).maybeSingle()
+  const { client: db } = await getAdminDataSupabase()
+
+  const { data: target, error: targetErr } = await db.from('profili').select('id, ruolo').eq('id', profiloId).maybeSingle()
 
   if (targetErr || !target) {
     return jsonResponse(false, 'Profilo non trovato', 404)
@@ -57,7 +60,7 @@ export async function POST(request: NextRequest) {
 
   // DELETE su `profili`: usa la sessione admin (RLS "Admin gestisce tutti i profili"), non il service role.
   // Su molti progetti il service_role non ha GRANT DELETE su `profili` → "permission denied for table profili".
-  const { data: deletedRows, error: delProfErr } = await supabase.from('profili').delete().eq('id', profiloId).select('id')
+  const { data: deletedRows, error: delProfErr } = await db.from('profili').delete().eq('id', profiloId).select('id')
 
   if (delProfErr) {
     console.error('admin profili delete: profili', delProfErr)
@@ -73,7 +76,7 @@ export async function POST(request: NextRequest) {
     return jsonResponse(false, 'Impossibile eliminare il profilo (nessuna riga aggiornata).', 409)
   }
 
-  const svc = createServiceRoleSupabase()
+  const svc = db
   if (!svc) {
     return jsonResponse(
       true,

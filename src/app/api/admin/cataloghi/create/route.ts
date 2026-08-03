@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { createClient } from '@/utils/supabase/server'
+import { requireAdminCatalogContext } from '@/lib/adminCatalogRoute'
 import { CATALOG_CATEGORIES } from '@/lib/catalogCategories'
 import {
   isValidUserCoverStoragePath,
@@ -57,24 +57,13 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    return jsonResponse(false, 'Sessione scaduta o non autenticato', 401)
+  const resolved = await requireAdminCatalogContext()
+  if (!resolved.ok) {
+    const status = resolved.response.status
+    const payload = (await resolved.response.json().catch(() => null)) as { message?: string } | null
+    return jsonResponse(false, payload?.message ?? 'Operazione non consentita', status)
   }
-
-  const { data: profiloUtente } = await supabase
-    .from('profili')
-    .select('ruolo')
-    .eq('id', user.id)
-    .single()
-
-  if (profiloUtente?.ruolo !== 'admin') {
-    return jsonResponse(false, 'Operazione non consentita', 403)
-  }
+  const { dataClient: supabase, user } = resolved.ctx
 
   let body: CreateCatalogJsonBody
   try {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
+import { getAdminDataSupabase } from '@/lib/mercatoServer'
 import { loadProfiloSpecializzazioneOpzioni } from '@/lib/loadProfiloSpecializzazioneOpzioni'
 import {
   opzioniToAllowedSet,
@@ -234,7 +235,9 @@ export async function POST(request: NextRequest) {
     return jsonResponse(false, 'Non puoi modificare il tuo stesso profilo da questo modulo', 400)
   }
 
-  const svc = createServiceRoleSupabase()
+  const adminData = isAdmin ? await getAdminDataSupabase() : null
+  const db = adminData?.client ?? supabase
+  const svc = isAdmin ? adminData!.client : createServiceRoleSupabase()
 
   const patch: Record<string, unknown> = {}
 
@@ -265,7 +268,7 @@ export async function POST(request: NextRequest) {
     patch.registrazione_approvata = body.registrazione_approvata
   }
 
-  const { data: profiloEsistente } = await supabase
+  const { data: profiloEsistente } = await db
     .from('profili')
     .select(
       'ruolo, espositore_1, espositore_2, box_show_room_1, box_show_room_2, box_show_room_3, box_show_room_4, agenzia_campione_1, agenzia_campione_2, agenzia_catalogo_1, agenzia_catalogo_2, espositore_1_qta, espositore_2_qta, box_show_room_1_qta, box_show_room_2_qta, box_show_room_3_qta, box_show_room_4_qta, agenzia_campione_1_qta, agenzia_campione_2_qta, agenzia_catalogo_1_qta, agenzia_catalogo_2_qta, espositore_1_data, espositore_2_data, box_show_room_1_data, box_show_room_2_data, box_show_room_3_data, box_show_room_4_data, agenzia_campione_1_data, agenzia_campione_2_data, agenzia_catalogo_1_data, agenzia_catalogo_2_data, agenzia_catalogo_3, agenzia_catalogo_4, agenzia_catalogo_3_qta, agenzia_catalogo_4_qta, agenzia_catalogo_3_data, agenzia_catalogo_4_data, agenzia_campioni_aggiornato_il, agenzia_cataloghi_aggiornato_il, espositori_aggiornato_il, box_aggiornato_il',
@@ -417,7 +420,7 @@ export async function POST(request: NextRequest) {
   }
 
   // UPDATE con sessione admin (RLS), non service role: spesso manca GRANT UPDATE al service_role.
-  const { data: updatedRows, error } = await supabase
+  const { data: updatedRows, error } = await db
     .from('profili')
     .update(patch)
     .eq('id', profiloId)

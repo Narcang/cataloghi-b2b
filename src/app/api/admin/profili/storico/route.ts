@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
+import { getAdminDataSupabase } from '@/lib/mercatoServer'
 import { canReadRivenditoreSpecializzazioneStorico } from '@/lib/agenziaRivenditoreAccess'
 import { SEZIONI_STORICO, type SezioneStorico, type VoceStorico } from '@/lib/profiloSpecializzazioneStorico'
 
@@ -56,7 +57,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ ok: false, message: 'Sezione non valida' }, { status: 400 })
   }
 
-  const svc = createServiceRoleSupabase() ?? supabase
+  const svc =
+    ruolo === 'admin'
+      ? (await getAdminDataSupabase()).client
+      : createServiceRoleSupabase() ?? supabase
 
   if (ruolo === 'agenzia' || ruolo === 'agente') {
     if (sezione !== 'espositori' && sezione !== 'box') {
@@ -117,7 +121,7 @@ export async function DELETE(request: NextRequest) {
     return jsonResponse(false, 'voce_index non valido', 400)
   }
 
-  const svc = createServiceRoleSupabase() ?? supabase
+  const svc = (await getAdminDataSupabase()).client
 
   const { data: row, error: fetchErr } = await svc
     .from('profili_specializzazione_storico')

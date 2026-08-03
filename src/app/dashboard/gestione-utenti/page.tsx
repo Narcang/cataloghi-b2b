@@ -1,5 +1,8 @@
 import { createClient } from '@/utils/supabase/server'
 import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
+import { getAdminMercato, getAdminDataSupabase } from '@/lib/mercatoServer'
+import { MERCATO_LABEL } from '@/lib/mercato'
+import AdminMercatoSwitcher from '@/components/admin/AdminMercatoSwitcher'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
@@ -60,10 +63,14 @@ export default async function GestioneUtentiPage(props: {
 
   if (!isManager && !isAgenzia) redirect('/dashboard')
 
+  const mercatoAttivo = isAdmin ? await getAdminMercato() : 'it'
+  const adminDataClient = isAdmin ? (await getAdminDataSupabase()).client : null
+  const dataSource = adminDataClient ?? supabase
+
   const profiloSel =
     'id, nome_completo, email, telefono, societa, area_geografica, ruolo, registrazione_approvata, creato_il, seguito_da, espositore_1, espositore_2, box_show_room_1, box_show_room_2, box_show_room_3, box_show_room_4, agenzia_campione_1, agenzia_campione_2, agenzia_catalogo_1, agenzia_catalogo_2, espositore_1_qta, espositore_2_qta, box_show_room_1_qta, box_show_room_2_qta, box_show_room_3_qta, box_show_room_4_qta, agenzia_campione_1_qta, agenzia_campione_2_qta, agenzia_catalogo_1_qta, agenzia_catalogo_2_qta, espositore_1_data, espositore_2_data, box_show_room_1_data, box_show_room_2_data, box_show_room_3_data, box_show_room_4_data, agenzia_campione_1_data, agenzia_campione_2_data, agenzia_catalogo_1_data, agenzia_catalogo_2_data, agenzia_catalogo_3, agenzia_catalogo_4, agenzia_catalogo_3_qta, agenzia_catalogo_4_qta, agenzia_catalogo_3_data, agenzia_catalogo_4_data, agenzia_campioni_aggiornato_il, agenzia_cataloghi_aggiornato_il, espositori_aggiornato_il, box_aggiornato_il'
 
-  let listaQuery = supabase
+  let listaQuery = dataSource
     .from('profili')
     .select(profiloSel)
     .neq('ruolo', 'free')
@@ -74,7 +81,7 @@ export default async function GestioneUtentiPage(props: {
   if (ruoloFilter !== 'all') listaQuery = listaQuery.eq('ruolo', ruoloFilter)
   if (nomeFilter.length > 0) listaQuery = listaQuery.ilike('nome_completo', `%${escapeIlikePattern(nomeFilter)}%`)
 
-  const pendQuery = supabase
+  const pendQuery = dataSource
     .from('profili')
     .select(profiloSel)
     .eq('registrazione_approvata', false)
@@ -82,7 +89,7 @@ export default async function GestioneUtentiPage(props: {
 
   // Per la struttura organizzativa usiamo il service role per bypassare la RLS e
   // vedere tutte le connessioni/profili indipendentemente dal ruolo del viewer.
-  const svc = createServiceRoleSupabase() ?? supabase
+  const svc = adminDataClient ?? createServiceRoleSupabase() ?? supabase
 
   const linksQuery = svc
     .from('connessioni_utente_operatore')
@@ -109,8 +116,8 @@ export default async function GestioneUtentiPage(props: {
     .order('nome_completo', { ascending: true, nullsFirst: false })
     .limit(500)
 
-  /** Cataloghi attivi per permessi per-utente (sessione admin/manager, non service role). */
-  const cataloghiQuery = supabase
+  /** Cataloghi attivi per permessi per-utente. */
+  const cataloghiQuery = dataSource
     .from('cataloghi')
     .select('id, titolo, categoria, ruoli_visibili')
     .eq('stato_pubblicazione', 'attivo')
@@ -199,8 +206,14 @@ export default async function GestioneUtentiPage(props: {
             <p className="text-sm text-zinc-600 mt-2 max-w-2xl">
               Aggiorna espositori e box dei rivenditori collegati alla tua agenzia.
             </p>
+          ) : isAdmin ? (
+            <p className="text-sm text-zinc-600 mt-2 max-w-2xl">
+              Monitoraggio mercato: <strong>{MERCATO_LABEL[mercatoAttivo]}</strong>
+            </p>
           ) : null}
         </div>
+
+        {isAdmin ? <AdminMercatoSwitcher /> : null}
 
         {actionMessage ? (
           <div className="rounded-xl border border-black bg-white px-4 py-3 text-sm text-[#060d41]">

@@ -1,4 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
+import { getAdminMercato, getAdminDataSupabase } from '@/lib/mercatoServer'
+import { MERCATO_LABEL } from '@/lib/mercato'
+import AdminMercatoSwitcher from '@/components/admin/AdminMercatoSwitcher'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -59,8 +62,11 @@ export default async function GestioneCataloghiPage(props: {
 
   if (!isManager) redirect('/dashboard')
 
+  const mercatoAttivo = isAdmin ? await getAdminMercato() : 'it'
+  const dataSupabase = isAdmin ? (await getAdminDataSupabase()).client : supabase
+
   // Fetch cataloghi (admin/manager vedono anche le bozze)
-  let cataloghiQuery = supabase
+  let cataloghiQuery = dataSupabase
     .from('cataloghi')
     .select('*')
     .order('creato_il', { ascending: false })
@@ -92,7 +98,14 @@ export default async function GestioneCataloghiPage(props: {
           <h1 className="text-3xl md:text-4xl font-semibold text-zinc-900 tracking-tight mt-3">
             Gestione Cataloghi
           </h1>
+          {isAdmin ? (
+            <p className="text-sm text-zinc-600 mt-2 max-w-2xl">
+              Monitoraggio mercato: <strong>{MERCATO_LABEL[mercatoAttivo]}</strong>
+            </p>
+          ) : null}
         </div>
+
+        {isAdmin ? <AdminMercatoSwitcher /> : null}
 
         {actionMessage ? (
           <div className="rounded-xl border border-black bg-white px-4 py-3 text-sm text-[#060d41]">
