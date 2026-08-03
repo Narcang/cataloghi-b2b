@@ -13,7 +13,7 @@ type Props = {
   profilo: Partial<RivenditoreProfiloCampi>
   className?: string
   mostraDateAggiornamento?: boolean
-  /** Admin/manager: elimina voci errate dallo storico. */
+  /** Solo admin: elimina voci errate dallo storico. */
   canEliminareVociStorico?: boolean
   /** Id del profilo: se presente insieme a mostraDateAggiornamento abilita lo storico. */
   profiloId?: string

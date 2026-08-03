@@ -11,7 +11,7 @@ type ColonnaProps = ColonnaRiepilogo & {
   className?: string
   /** Se true, con profiloId e sezione mostra il pulsante "Storico". */
   mostraDateAggiornamento?: boolean
-  /** Admin/manager: X per rimuovere voci errate dallo storico. */
+  /** Solo admin: X per rimuovere voci errate dallo storico. */
   canEliminareVociStorico?: boolean
   profiloId?: string
   sezione?: SezioneStorico

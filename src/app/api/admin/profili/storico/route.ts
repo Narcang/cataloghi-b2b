@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({ ok: true, storico: data ?? [] }, { status: 200 })
 }
 
-/** Rimuove una voce da uno snapshot storico (admin/manager; agenzia su rivenditori associati). */
+/** Rimuove una voce da uno snapshot storico (solo admin). */
 export async function DELETE(request: NextRequest) {
   const supabase = await createClient()
   const {
@@ -101,11 +101,7 @@ export async function DELETE(request: NextRequest) {
     .eq('id', user.id)
     .single()
 
-  const ruolo = profiloUtente?.ruolo ?? ''
-  const isAdminManager = ruolo === 'admin' || ruolo === 'manager'
-  const isAgenzia = ruolo === 'agenzia'
-
-  if (!isAdminManager && !isAgenzia) {
+  if (profiloUtente?.ruolo !== 'admin') {
     return jsonResponse(false, 'Operazione non consentita', 403)
   }
 
@@ -135,22 +131,6 @@ export async function DELETE(request: NextRequest) {
   }
   if (!row) {
     return jsonResponse(false, 'Voce storico non trovata', 404)
-  }
-
-  if (isAgenzia) {
-    const sezione = String(row.sezione ?? '') as SezioneStorico
-    if (sezione !== 'espositori' && sezione !== 'box') {
-      return jsonResponse(false, 'Sezione non consentita', 403)
-    }
-    const allowed = await canReadRivenditoreSpecializzazioneStorico(
-      svc,
-      ruolo,
-      user.id,
-      String(row.profilo_id),
-    )
-    if (!allowed) {
-      return jsonResponse(false, 'Rivenditore non associato', 403)
-    }
   }
 
   const voci = parseVociStorico(row.voci)

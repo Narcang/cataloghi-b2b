@@ -55,95 +55,30 @@ CREATE POLICY "storico_insert_admin_manager_agenzia_agente"
     )
   );
 
-DROP POLICY IF EXISTS "storico_update_admin_manager" ON public.profili_specializzazione_storico;
-CREATE POLICY "storico_update_admin_manager"
+DROP POLICY IF EXISTS "storico_update_admin" ON public.profili_specializzazione_storico;
+CREATE POLICY "storico_update_admin"
   ON public.profili_specializzazione_storico
   FOR UPDATE
   USING (
     EXISTS (
       SELECT 1 FROM public.profili p
-      WHERE p.id = auth.uid() AND p.ruolo IN ('admin', 'manager')
+      WHERE p.id = auth.uid() AND p.ruolo = 'admin'
     )
   )
   WITH CHECK (
     EXISTS (
       SELECT 1 FROM public.profili p
-      WHERE p.id = auth.uid() AND p.ruolo IN ('admin', 'manager')
+      WHERE p.id = auth.uid() AND p.ruolo = 'admin'
     )
   );
 
-DROP POLICY IF EXISTS "storico_delete_admin_manager" ON public.profili_specializzazione_storico;
-CREATE POLICY "storico_delete_admin_manager"
+DROP POLICY IF EXISTS "storico_delete_admin" ON public.profili_specializzazione_storico;
+CREATE POLICY "storico_delete_admin"
   ON public.profili_specializzazione_storico
   FOR DELETE
   USING (
     EXISTS (
       SELECT 1 FROM public.profili p
-      WHERE p.id = auth.uid() AND p.ruolo IN ('admin', 'manager')
-    )
-  );
-
-DROP POLICY IF EXISTS "storico_update_agenzia_rivenditore" ON public.profili_specializzazione_storico;
-CREATE POLICY "storico_update_agenzia_rivenditore"
-  ON public.profili_specializzazione_storico
-  FOR UPDATE
-  USING (
-    sezione IN ('espositori', 'box')
-    AND EXISTS (
-      SELECT 1 FROM public.profili p
-      WHERE p.id = auth.uid() AND p.ruolo = 'agenzia'
-    )
-    AND EXISTS (
-      SELECT 1 FROM public.profili r
-      WHERE r.id = profili_specializzazione_storico.profilo_id
-        AND r.ruolo = 'rivenditore'
-        AND (
-          r.invitato_da = auth.uid()
-          OR r.invitato_da IN (
-            SELECT id FROM public.profili
-            WHERE invitato_da = auth.uid() AND ruolo = 'agente'
-          )
-          OR EXISTS (
-            SELECT 1 FROM public.connessioni_utente_operatore c
-            WHERE (c.utente_id = r.id AND c.operatore_id = auth.uid())
-               OR (c.operatore_id = r.id AND c.utente_id = auth.uid())
-          )
-        )
-    )
-  )
-  WITH CHECK (
-    sezione IN ('espositori', 'box')
-    AND EXISTS (
-      SELECT 1 FROM public.profili p
-      WHERE p.id = auth.uid() AND p.ruolo = 'agenzia'
-    )
-  );
-
-DROP POLICY IF EXISTS "storico_delete_agenzia_rivenditore" ON public.profili_specializzazione_storico;
-CREATE POLICY "storico_delete_agenzia_rivenditore"
-  ON public.profili_specializzazione_storico
-  FOR DELETE
-  USING (
-    sezione IN ('espositori', 'box')
-    AND EXISTS (
-      SELECT 1 FROM public.profili p
-      WHERE p.id = auth.uid() AND p.ruolo = 'agenzia'
-    )
-    AND EXISTS (
-      SELECT 1 FROM public.profili r
-      WHERE r.id = profili_specializzazione_storico.profilo_id
-        AND r.ruolo = 'rivenditore'
-        AND (
-          r.invitato_da = auth.uid()
-          OR r.invitato_da IN (
-            SELECT id FROM public.profili
-            WHERE invitato_da = auth.uid() AND ruolo = 'agente'
-          )
-          OR EXISTS (
-            SELECT 1 FROM public.connessioni_utente_operatore c
-            WHERE (c.utente_id = r.id AND c.operatore_id = auth.uid())
-               OR (c.operatore_id = r.id AND c.utente_id = auth.uid())
-          )
-        )
+      WHERE p.id = auth.uid() AND p.ruolo = 'admin'
     )
   );
