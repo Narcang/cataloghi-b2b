@@ -49,7 +49,7 @@ export function ProfiloSpecializzazioneColonna({
           {valori.map((value, index) => (
             <p
               key={`${label}-${index}-${value}`}
-              className="text-xs text-zinc-500 leading-snug max-w-[10rem]"
+              className="text-xs text-zinc-500 leading-snug md:whitespace-nowrap"
             >
               {value}
             </p>

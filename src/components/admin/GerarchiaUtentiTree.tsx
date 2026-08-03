@@ -61,11 +61,13 @@ type HierarchyNodeProps = {
 /** Indentazione orizzontale per livello (matrioska). */
 const DEPTH_INDENT_REM = 1
 const NESTED_BRANCH_OFFSET_REM = 1
-/** Griglia card: identità compatta; col. ruolo un po' più larga per centrare strumenti/cataloghi. */
+/** Griglia card: identità compatta; colonne specializzazione più larghe a destra. */
 const CARD_GRID_CLASS =
-  'grid gap-2 items-start grid-cols-1 md:grid-cols-[minmax(0,0.85fr)_minmax(0,0.72fr)_minmax(0,0.88fr)_minmax(0,0.88fr)]'
+  'grid gap-2 items-start grid-cols-1 md:grid-cols-[minmax(0,0.72fr)_minmax(0,0.58fr)_minmax(0,0.95fr)_minmax(0,1.25fr)]'
 /** Offset colonna centrale (strumenti / espositori) verso destra. */
 const COLONNA_CENTRALE_CLASS = 'md:pl-3'
+/** Ultima colonna (cataloghi / box) più a destra e più larga. */
+const COLONNA_DESTRA_CLASS = 'md:pl-5'
 
 function HierarchyNode({
   profile,
@@ -225,6 +227,7 @@ function HierarchyNode({
                   canEliminareVociStorico={canEliminareVociStorico}
                 />
                 <AgenziaCataloghiColonna
+                  className={COLONNA_DESTRA_CLASS}
                   profilo={profile}
                   profiloId={profile.id}
                   mostraDateAggiornamento={mostraDateAggiornamento}
@@ -241,6 +244,7 @@ function HierarchyNode({
                   canEliminareVociStorico={canEliminareVociStorico}
                 />
                 <RivenditoreBoxColonna
+                  className={COLONNA_DESTRA_CLASS}
                   profilo={profile}
                   profiloId={profile.id}
                   mostraDateAggiornamento={mostraDateAggiornamento}

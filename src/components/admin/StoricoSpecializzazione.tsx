@@ -134,7 +134,7 @@ export default function StoricoSpecializzazione({
       </button>
 
       {aperto ? (
-        <div className="mt-1 rounded-md border border-black/10 bg-zinc-50 p-2 max-w-[16rem]">
+        <div className="mt-1 rounded-md border border-black/10 bg-zinc-50 p-2 max-w-[22rem]">
           {loading ? (
             <p className="text-[10px] text-zinc-500">Caricamento…</p>
           ) : error ? (
@@ -159,7 +159,7 @@ export default function StoricoSpecializzazione({
                             key={`${riga.id}-${index}`}
                             className="flex items-start gap-1 min-w-0 group"
                           >
-                            <p className="text-[11px] text-zinc-700 leading-snug flex-1 min-w-0">
+                            <p className="text-[11px] text-zinc-700 leading-snug flex-1 min-w-0 md:whitespace-nowrap">
                               {etichetta}
                             </p>
                             {canEliminareVoci ? (
