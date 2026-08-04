@@ -66,7 +66,7 @@ export default function AdminMercatoSwitcher({ className = '' }: Props) {
 
   return (
     <div
-      className={`rounded-xl border border-white/15 bg-[#060d41] px-4 py-3 ${className}`.trim()}
+      className={`ladiva-mercato-switch-bar rounded-xl border border-white/15 bg-[#060d41] px-4 py-3 ${className}`.trim()}
     >
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-center gap-2 text-sm text-white">
@@ -86,10 +86,8 @@ export default function AdminMercatoSwitcher({ className = '' }: Props) {
                 type="button"
                 disabled={disabled}
                 onClick={() => void seleziona(key)}
-                className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
-                  active
-                    ? 'bg-white text-[#060d41]'
-                    : 'text-white hover:bg-white hover:text-black disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-white'
+                className={`ladiva-mercato-switch-btn rounded-md px-3 py-1.5 text-xs font-semibold transition-colors disabled:opacity-40 disabled:hover:!bg-transparent disabled:hover:!text-white ${
+                  active ? 'ladiva-mercato-switch-btn-active' : 'ladiva-mercato-switch-btn-inactive'
                 }`}
                 title={key === 'ru' && !ruConfigured ? 'Configura Supabase RU nelle env' : undefined}
               >
