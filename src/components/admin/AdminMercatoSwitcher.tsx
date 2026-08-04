@@ -66,17 +66,17 @@ export default function AdminMercatoSwitcher({ className = '' }: Props) {
 
   return (
     <div
-      className={`rounded-xl border border-[#060d41]/20 bg-[#060d41]/5 px-4 py-3 ${className}`.trim()}
+      className={`rounded-xl border border-white/15 bg-[#060d41] px-4 py-3 ${className}`.trim()}
     >
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div className="flex items-center gap-2 text-sm text-zinc-800">
-          <Globe size={16} className="shrink-0 text-[#060d41]" aria-hidden />
+        <div className="flex items-center gap-2 text-sm text-white">
+          <Globe size={16} className="shrink-0 text-white" aria-hidden />
           <span>
             Versione monitorata:{' '}
-            <strong className="font-semibold text-[#060d41]">{MERCATO_LABEL[mercato]}</strong>
+            <strong className="font-semibold text-white">{MERCATO_LABEL[mercato]}</strong>
           </span>
         </div>
-        <div className="inline-flex rounded-lg border border-black/15 bg-white p-0.5">
+        <div className="inline-flex rounded-lg border border-white/20 bg-[#060d41] p-0.5">
           {(['it', 'ru'] as const).map((key) => {
             const active = mercato === key
             const disabled = saving || (key === 'ru' && !ruConfigured)
@@ -88,8 +88,8 @@ export default function AdminMercatoSwitcher({ className = '' }: Props) {
                 onClick={() => void seleziona(key)}
                 className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
                   active
-                    ? 'bg-[#060d41] text-white'
-                    : 'text-zinc-700 hover:bg-zinc-100 disabled:opacity-40 disabled:hover:bg-transparent'
+                    ? 'bg-white text-[#060d41]'
+                    : 'text-white hover:bg-white hover:text-black disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-white'
                 }`}
                 title={key === 'ru' && !ruConfigured ? 'Configura Supabase RU nelle env' : undefined}
               >
@@ -100,12 +100,12 @@ export default function AdminMercatoSwitcher({ className = '' }: Props) {
         </div>
       </div>
       {!ruConfigured ? (
-        <p className="mt-2 text-xs text-zinc-600">
-          Versione Russia: collegare <code className="text-[11px]">NEXT_PUBLIC_SUPABASE_URL_RU</code>{' '}
-          e <code className="text-[11px]">SUPABASE_SERVICE_ROLE_KEY_RU</code> su Vercel.
+        <p className="mt-2 text-xs text-white/75">
+          Versione Russia: collegare <code className="text-[11px] text-white/90">NEXT_PUBLIC_SUPABASE_URL_RU</code>{' '}
+          e <code className="text-[11px] text-white/90">SUPABASE_SERVICE_ROLE_KEY_RU</code> su Vercel.
         </p>
       ) : null}
-      {error ? <p className="mt-2 text-xs text-red-600">{error}</p> : null}
+      {error ? <p className="mt-2 text-xs text-red-300">{error}</p> : null}
     </div>
   )
 }
