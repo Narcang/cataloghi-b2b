@@ -12,7 +12,7 @@ function json(ok: boolean, message: string, status: number, extra?: object) {
   return NextResponse.json({ ok, message, ...extra }, { status })
 }
 
-const ALLOWED_ROLES = new Set(['admin', 'manager', 'agenzia', 'agente', 'rivenditore', 'distributore'])
+const ALLOWED_ROLES = new Set(['admin', 'manager', 'agenzia', 'agente', 'back_office', 'rivenditore', 'distributore'])
 
 async function getRequester() {
   const supabase = await createClient()

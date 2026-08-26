@@ -19,6 +19,7 @@ import {
   type HierarchyRootRole,
   type ProfiloGerarchiaRow,
 } from '@/lib/userHierarchy'
+import { isAgenteLike } from '@/lib/catalogRoles'
 import {
   AgenziaCampioniColonna,
   AgenziaCataloghiColonna,
@@ -313,7 +314,7 @@ export default function GerarchiaUtentiTree({
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set())
 
   const agentViewsAgenzia = Boolean(
-    ownerProfile && viewerRole === 'agente' && ownerProfile.ruolo === 'agenzia',
+    ownerProfile && isAgenteLike(viewerRole) && ownerProfile.ruolo === 'agenzia',
   )
 
   useEffect(() => {
@@ -369,11 +370,12 @@ export default function GerarchiaUtentiTree({
     const childLabel = nestedAssociatiLabel(ownerProfile.ruolo) ?? 'Associati'
     const descByRole: Record<string, string> = {
       agente: 'I rivenditori collegati al tuo profilo e i loro associati.',
+      back_office: 'I rivenditori collegati al tuo profilo e i loro associati.',
       rivenditore: 'I venditori, promoter e studi collegati al tuo profilo.',
       distributore: 'I promoter e gli studi collegati al tuo profilo.',
       agenzia: agentViewsAgenzia
-        ? 'La tua agenzia: prima gli agenti, poi i rivenditori collegati all\'agenzia (non sotto il singolo agente).'
-        : 'Gli agenti, i rivenditori e i loro associati collegati al tuo profilo.',
+        ? 'La tua agenzia: prima gli agenti e il back-office, poi i rivenditori collegati all\'agenzia (non sotto il singolo agente).'
+        : 'Gli agenti, il back-office, i rivenditori e i loro associati collegati al tuo profilo.',
     }
 
     return (

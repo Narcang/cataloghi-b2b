@@ -3,7 +3,7 @@ import {
   isCatalogCategoryAllowedForStudioRole,
   isLoginOnlyCatalogCategory,
 } from '@/lib/catalogCategories'
-import { isVenditoreLike } from '@/lib/catalogRoles'
+import { isVenditoreLike, isAgenteLike } from '@/lib/catalogRoles'
 
 export const STUDIO_LIKE_ROLES = ['studio', 'partner_dipendente'] as const
 
@@ -46,12 +46,14 @@ export function getCatalogAccessDenial(
     const ruoloEffettivo = options.isAuthenticated ? ruolo : 'free'
     const ruoliAccettati =
       ruoloEffettivo === 'agenzia'
-        ? ['agenzia', 'agente']
-        : ruoloEffettivo === 'partner_dipendente'
-          ? ['partner_dipendente', 'studio']
-          : isVenditoreLike(ruoloEffettivo)
-            ? ['distributore', 'rivenditore']
-            : [ruoloEffettivo]
+        ? ['agenzia', 'agente', 'back_office']
+        : isAgenteLike(ruoloEffettivo)
+          ? ['back_office', 'agente']
+          : ruoloEffettivo === 'partner_dipendente'
+            ? ['partner_dipendente', 'studio']
+            : isVenditoreLike(ruoloEffettivo)
+              ? ['distributore', 'rivenditore']
+              : [ruoloEffettivo]
     if (!ruoliAccettati.some(r => rv.includes(r))) {
       return options.isAuthenticated
         ? { status: 403, message: 'Accesso non consentito per il tuo ruolo' }

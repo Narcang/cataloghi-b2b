@@ -27,7 +27,7 @@ type BeforeInstallPrompt = Event & {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
 }
 
-type ProfiloRuolo = 'admin' | 'manager' | 'agenzia' | 'agente' | 'rivenditore' | 'distributore' | 'studio' | 'partner_dipendente' | 'free' | 'fornitore'
+type ProfiloRuolo = 'admin' | 'manager' | 'agenzia' | 'agente' | 'back_office' | 'rivenditore' | 'distributore' | 'studio' | 'partner_dipendente' | 'free' | 'fornitore'
 
 type MenuItem = {
   label: string
@@ -154,7 +154,7 @@ export default function Header() {
     : menuItemsBase
   const menuItems: MenuItem[] = [catalogMenuItem, ...visibleBaseItems]
   const gestioneUtentiHref =
-    profiloRuolo === 'agenzia' || profiloRuolo === 'agente'
+    profiloRuolo === 'agenzia' || profiloRuolo === 'agente' || profiloRuolo === 'back_office'
       ? '/dashboard#gestione-utenti'
       : profiloRuolo === 'admin' || profiloRuolo === 'manager'
         ? '/dashboard/gestione-utenti'
@@ -163,7 +163,8 @@ export default function Header() {
     profiloRuolo === 'admin' ||
     profiloRuolo === 'manager' ||
     profiloRuolo === 'agenzia' ||
-    profiloRuolo === 'agente'
+    profiloRuolo === 'agente' ||
+    profiloRuolo === 'back_office'
 
   return (
     <header className="ladiva-header">

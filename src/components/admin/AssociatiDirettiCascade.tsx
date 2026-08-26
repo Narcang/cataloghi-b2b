@@ -163,10 +163,10 @@ function CascadeNode({
 }
 
 /** Ordine canonico dei ruoli nei tab del selettore di associazione. */
-const RUOLO_TAB_ORDER = ['agente', 'rivenditore', 'distributore', 'partner_dipendente', 'studio', 'agenzia', 'manager']
+const RUOLO_TAB_ORDER = ['agente', 'back_office', 'rivenditore', 'distributore', 'partner_dipendente', 'studio', 'agenzia', 'manager']
 
 /** Ruoli "persona" che raggruppiamo per entità di appartenenza (agenzia / rivenditore). */
-const RUOLI_CON_GRUPPO = new Set(['agente', 'distributore', 'partner_dipendente'])
+const RUOLI_CON_GRUPPO = new Set(['agente', 'back_office', 'distributore', 'partner_dipendente'])
 
 const SENZA_GRUPPO_ID = '__senza_gruppo__'
 
@@ -251,14 +251,14 @@ function AssociaCandidatiPicker({
 
   const usaGruppi = ruoloCorrente ? RUOLI_CON_GRUPPO.has(ruoloCorrente) : false
 
-  const gruppoRuolo = ruoloCorrente === 'agente' ? 'agenzia' : 'rivenditore'
+  const gruppoRuolo = ruoloCorrente === 'agente' || ruoloCorrente === 'back_office' ? 'agenzia' : 'rivenditore'
 
   const gruppi = useMemo(() => {
     if (!usaGruppi || !ruoloCorrente) return []
     const map = new Map<string, { id: string; label: string; items: ProfiloGerarchiaRow[] }>()
     for (const candidate of candidatiRuolo) {
       const parent =
-        ruoloCorrente === 'agente'
+        ruoloCorrente === 'agente' || ruoloCorrente === 'back_office'
           ? resolveAgenziaParentForAgent(candidate, profiliGerarchia, links)
           : resolveRivenditoreParentForDistributore(candidate, profiliGerarchia, links)
       const id = parent?.id ?? SENZA_GRUPPO_ID
@@ -370,7 +370,7 @@ function AssociaCandidatiPicker({
             </div>
           ) : (
             <p className="text-xs text-zinc-500">
-              Seleziona {ruoloCorrente === 'agente' ? 'un’agenzia' : 'un rivenditore'} per vedere i profili da associare.
+              Seleziona {ruoloCorrente === 'agente' || ruoloCorrente === 'back_office' ? 'un’agenzia' : 'un rivenditore'} per vedere i profili da associare.
             </p>
           )}
         </div>

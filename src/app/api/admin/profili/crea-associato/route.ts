@@ -19,6 +19,7 @@ type Body = {
 /** Ruoli creabili manualmente e ruolo dell'entità genitore richiesta. */
 const RUOLO_GENITORE: Record<string, string> = {
   agente: 'agenzia',
+  back_office: 'agenzia',
   distributore: 'rivenditore',
 }
 
@@ -39,8 +40,8 @@ function callerPuoCreare(
   parentId: string,
 ): boolean {
   if (callerRuolo === 'admin') return true
-  if (callerRuolo === 'manager') return ruoloNuovo === 'agente' || ruoloNuovo === 'distributore'
-  if (callerRuolo === 'agenzia') return ruoloNuovo === 'agente' && parentId === callerId
+  if (callerRuolo === 'manager') return ruoloNuovo === 'agente' || ruoloNuovo === 'back_office' || ruoloNuovo === 'distributore'
+  if (callerRuolo === 'agenzia') return (ruoloNuovo === 'agente' || ruoloNuovo === 'back_office') && parentId === callerId
   if (callerRuolo === 'rivenditore') return ruoloNuovo === 'distributore' && parentId === callerId
   return false
 }
@@ -161,7 +162,8 @@ export async function POST(request: NextRequest) {
     console.error('crea-associato connessioni', linkErr)
   }
 
-  const etichettaRuolo = ruoloNuovo === 'agente' ? 'Agente' : 'Venditore'
+  const etichettaRuolo =
+    ruoloNuovo === 'agente' ? 'Agente' : ruoloNuovo === 'back_office' ? 'Back-Office' : 'Venditore'
   return jsonResponse(
     true,
     emailReale

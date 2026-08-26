@@ -6,6 +6,7 @@ export const RUOLI_CATALOGO = [
   { value: 'distributore',       label: 'Venditori' },
   { value: 'rivenditore',        label: 'Rivenditori' },
   { value: 'agente',             label: 'Agente' },
+  { value: 'back_office',        label: 'Back-Office' },
   { value: 'agenzia',            label: 'Agenzia' },
   { value: 'manager',            label: 'Manager' },
 ] as const
@@ -21,7 +22,14 @@ export function isVenditoreLike(ruolo: string | null | undefined): boolean {
   return ruolo === 'distributore' || ruolo === 'rivenditore'
 }
 
+/** Agente e Back-Office: stessi poteri, entrambi sotto agenzia. */
+export const AGENTE_LIKE_ROLES = ['agente', 'back_office'] as const
+
+export function isAgenteLike(ruolo: string | null | undefined): boolean {
+  return ruolo === 'agente' || ruolo === 'back_office'
+}
+
 /** Ruoli di default per un nuovo catalogo (tutti tranne free/pubblico). */
 export const RUOLI_CATALOGO_DEFAULT: RuoloCatalogo[] = [
-  'agente', 'agenzia', 'distributore', 'rivenditore', 'studio', 'partner_dipendente', 'manager',
+  'agente', 'back_office', 'agenzia', 'distributore', 'rivenditore', 'studio', 'partner_dipendente', 'manager',
 ]

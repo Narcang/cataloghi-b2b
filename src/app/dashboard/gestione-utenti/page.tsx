@@ -30,6 +30,7 @@ const RUOLO_FILTER_OPTIONS = [
   { value: 'manager',           label: 'Manager' },
   { value: 'agenzia',           label: 'Agenzia' },
   { value: 'agente',            label: 'Agente' },
+  { value: 'back_office',       label: 'Back-Office' },
   { value: 'rivenditore',       label: 'Rivenditore' },
   { value: 'distributore',      label: 'Venditore' },
   { value: 'partner_dipendente',label: 'Promoter' },

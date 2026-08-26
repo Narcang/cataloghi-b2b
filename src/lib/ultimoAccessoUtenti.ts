@@ -2,6 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 
 export const RUOLI_CON_ULTIMO_ACCESSO = new Set([
   'agente',
+  'back_office',
   'distributore',
   'partner_dipendente',
   'studio',
@@ -15,7 +16,7 @@ export function profiloMostraUltimoAccesso(ruolo: string): boolean {
 export function canViewerSeeUltimoAccessoForProfile(viewerRole: string, targetRuolo: string): boolean {
   if (!profiloMostraUltimoAccesso(targetRuolo)) return false
   if (viewerRole === 'admin' || viewerRole === 'manager') return true
-  if (viewerRole === 'agenzia') return targetRuolo === 'agente'
+  if (viewerRole === 'agenzia') return targetRuolo === 'agente' || targetRuolo === 'back_office'
   if (viewerRole === 'rivenditore') {
     return targetRuolo === 'distributore' || targetRuolo === 'partner_dipendente' || targetRuolo === 'studio'
   }

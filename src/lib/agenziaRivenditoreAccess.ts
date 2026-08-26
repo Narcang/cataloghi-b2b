@@ -4,6 +4,7 @@ import {
   isRivenditoreManagedByAgente,
   type ProfiloGerarchiaRow,
 } from '@/lib/userHierarchy'
+import { isAgenteLike } from '@/lib/catalogRoles'
 
 type OperatoreLink = { utente_id: string; operatore_id: string }
 
@@ -104,7 +105,7 @@ export async function canReadRivenditoreSpecializzazioneStorico(
   if (callerRuolo === 'agenzia') {
     return agenziaCanEditRivenditoreSpecializzazione(client, callerId, rivenditoreId)
   }
-  if (callerRuolo === 'agente') {
+  if (isAgenteLike(callerRuolo)) {
     return agenteCanEditRivenditoreSpecializzazione(client, callerId, rivenditoreId)
   }
   return false

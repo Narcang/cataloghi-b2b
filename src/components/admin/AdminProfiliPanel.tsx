@@ -83,10 +83,12 @@ export type OperatoreAssociazione = {
   area_geografica: string | null
 }
 
-const RUOLI_OPTIONS = ['admin', 'manager', 'agenzia', 'agente', 'rivenditore', 'distributore', 'partner_dipendente', 'studio', 'free'] as const
+const RUOLI_OPTIONS = ['admin', 'manager', 'agenzia', 'agente', 'back_office', 'rivenditore', 'distributore', 'partner_dipendente', 'studio', 'free'] as const
 
 const RUOLO_LABEL: Record<string, string> = {
   agenzia:            'Agenzia',
+  agente:             'Agente',
+  back_office:        'Back-Office',
   rivenditore:        'Rivenditori',
   distributore:       'Venditori',
   partner_dipendente: 'Promoter',
@@ -103,13 +105,14 @@ function puoPersonalizzareCataloghi(ruolo: string): boolean {
 
 type RuoloOption = (typeof RUOLI_OPTIONS)[number]
 
-type RuoloTabId = 'admin' | 'manager' | 'agenzia' | 'agente' | 'rivenditore' | 'distributore' | 'studio' | 'partner_dipendente'
+type RuoloTabId = 'admin' | 'manager' | 'agenzia' | 'agente' | 'back_office' | 'rivenditore' | 'distributore' | 'studio' | 'partner_dipendente'
 
 const RUOLI_TAB: { id: RuoloTabId; label: string }[] = [
   { id: 'admin', label: 'Admin' },
   { id: 'manager', label: 'Manager' },
   { id: 'agenzia', label: 'Agenzia' },
   { id: 'agente', label: 'Agente' },
+  { id: 'back_office', label: 'Back-Office' },
   { id: 'rivenditore', label: 'Rivenditori' },
   { id: 'distributore', label: 'Venditori' },
   { id: 'partner_dipendente', label: 'Promoter' },
@@ -952,11 +955,18 @@ export default function AdminProfiliPanel({
                     )}
 
                     {canCreateAssociati && p.ruolo === 'agenzia' ? (
-                      <CreaAssociatoManuale
-                        parentId={p.id}
-                        parentLabel={p.societa || p.nome_completo || p.email || 'questa agenzia'}
-                        ruoloNuovo="agente"
-                      />
+                      <>
+                        <CreaAssociatoManuale
+                          parentId={p.id}
+                          parentLabel={p.societa || p.nome_completo || p.email || 'questa agenzia'}
+                          ruoloNuovo="agente"
+                        />
+                        <CreaAssociatoManuale
+                          parentId={p.id}
+                          parentLabel={p.societa || p.nome_completo || p.email || 'questa agenzia'}
+                          ruoloNuovo="back_office"
+                        />
+                      </>
                     ) : null}
                     {canCreateAssociati && p.ruolo === 'rivenditore' ? (
                       <CreaAssociatoManuale

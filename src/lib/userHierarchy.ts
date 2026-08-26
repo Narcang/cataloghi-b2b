@@ -1,3 +1,5 @@
+import { isAgenteLike } from '@/lib/catalogRoles'
+
 export type ProfiloGerarchiaRow = {
   id: string
   nome_completo: string | null
@@ -52,13 +54,14 @@ export type ProfiloGerarchiaRow = {
 
 type OperatoreLink = { utente_id: string; operatore_id: string }
 
-const OPERATOR_ROLES = new Set(['agenzia', 'agente', 'rivenditore', 'distributore', 'studio', 'partner_dipendente'])
+const OPERATOR_ROLES = new Set(['agenzia', 'agente', 'back_office', 'rivenditore', 'distributore', 'studio', 'partner_dipendente'])
 
 export const CHILD_ROLES_BY_PARENT: Record<string, string[]> = {
   admin: ['manager'],
-  manager: ['agenzia', 'agente'],
-  agenzia: ['agente', 'rivenditore'],
+  manager: ['agenzia', 'agente', 'back_office'],
+  agenzia: ['agente', 'back_office', 'rivenditore'],
   agente: ['studio'],
+  back_office: ['studio'],
   rivenditore: ['distributore', 'partner_dipendente', 'studio'],
   distributore: ['partner_dipendente', 'studio'],
   partner_dipendente: ['studio'],
@@ -101,6 +104,8 @@ export function ruoloGerarchiaLabel(ruolo: string): string {
   if (ruolo === 'distributore') return 'Venditori'
   if (ruolo === 'partner_dipendente') return 'Promoter'
   if (ruolo === 'agenzia') return 'Agenzia'
+  if (ruolo === 'agente') return 'Agente'
+  if (ruolo === 'back_office') return 'Back-Office'
   return ruolo.charAt(0).toUpperCase() + ruolo.slice(1)
 }
 
@@ -113,6 +118,8 @@ export function ruoloGerarchiaDotClass(ruolo: string): string | null {
       return 'bg-blue-500'
     case 'agente':
       return 'bg-blue-400'
+    case 'back_office':
+      return 'bg-sky-400'
     case 'rivenditore':
       return 'bg-green-500'
     case 'studio':
@@ -125,6 +132,7 @@ export function ruoloGerarchiaDotClass(ruolo: string): string | null {
 /** Pallino per i badge di riepilogo (include ruoli secondari come agente). */
 export function ruoloBreakdownDotClass(ruolo: string): string | null {
   if (ruolo === 'agente') return 'bg-blue-400'
+  if (ruolo === 'back_office') return 'bg-sky-400'
   if (ruolo === 'distributore') return 'bg-violet-500'
   if (ruolo === 'partner_dipendente') return 'bg-fuchsia-500'
   return ruoloGerarchiaDotClass(ruolo)
@@ -143,10 +151,13 @@ export function roleBreakdownBadgesForNode(ruolo: string): RoleBreakdownBadge[] 
       ]
     case 'agenzia':
       return [
+        { ruolo: 'agente', label: 'Agenti' },
+        { ruolo: 'back_office', label: 'Back-Office' },
         { ruolo: 'rivenditore', label: 'Rivenditori' },
         { ruolo: 'studio', label: 'Studi' },
       ]
     case 'agente':
+    case 'back_office':
       return [{ ruolo: 'studio', label: 'Studi' }]
     case 'rivenditore':
       return [{ ruolo: 'studio', label: 'Studi' }]
@@ -270,26 +281,35 @@ export function resolveAgenziaParentForAgent(
   }
 
   const inviter = byId.get(agentProfile.invitato_da ?? '')
-  if (inviter?.ruolo === 'agente') {
+  if (inviter && isAgenteLike(inviter.ruolo)) {
     return agenziaFromId(inviter.invitato_da)
   }
 
   return null
 }
 
-export type FlatListViewerRole = 'agenzia' | 'agente' | 'rivenditore' | 'distributore'
+export type FlatListViewerRole = 'agenzia' | 'agente' | 'back_office' | 'rivenditore' | 'distributore'
 
 export type FlatListTab = { id: string; label: string; ruolo: string }
 
 const FLAT_LIST_TABS_BY_VIEWER: Record<FlatListViewerRole, FlatListTab[]> = {
   agenzia: [
     { id: 'agente', label: 'Agenti', ruolo: 'agente' },
+    { id: 'back_office', label: 'Back-Office', ruolo: 'back_office' },
     { id: 'distributore', label: 'Venditori', ruolo: 'distributore' },
     { id: 'rivenditore', label: 'Rivenditori', ruolo: 'rivenditore' },
     { id: 'studio', label: 'Studi', ruolo: 'studio' },
   ],
   agente: [
     { id: 'agente', label: 'Agenti', ruolo: 'agente' },
+    { id: 'back_office', label: 'Back-Office', ruolo: 'back_office' },
+    { id: 'distributore', label: 'Venditori', ruolo: 'distributore' },
+    { id: 'rivenditore', label: 'Rivenditori', ruolo: 'rivenditore' },
+    { id: 'studio', label: 'Studi', ruolo: 'studio' },
+  ],
+  back_office: [
+    { id: 'agente', label: 'Agenti', ruolo: 'agente' },
+    { id: 'back_office', label: 'Back-Office', ruolo: 'back_office' },
     { id: 'distributore', label: 'Venditori', ruolo: 'distributore' },
     { id: 'rivenditore', label: 'Rivenditori', ruolo: 'rivenditore' },
     { id: 'studio', label: 'Studi', ruolo: 'studio' },
@@ -368,7 +388,7 @@ export function resolveAgenziaParentForRivenditore(
   if (fromInvito) return fromInvito
 
   const inviter = byId.get(rivenditoreProfile.invitato_da ?? '')
-  if (inviter?.ruolo === 'agente') {
+  if (inviter && isAgenteLike(inviter.ruolo)) {
     const agenziaViaAgente = agenziaFromId(inviter.invitato_da)
     if (agenziaViaAgente) return agenziaViaAgente
     return resolveAgenziaParentForAgent(inviter, profili, links)
@@ -431,10 +451,10 @@ function findAgenteParentForRivenditore(
 ): ProfiloGerarchiaRow | null {
   const byId = new Map(profili.map((p) => [p.id, p]))
   const fromInvito = byId.get(rivenditoreProfile.invitato_da ?? '')
-  if (fromInvito?.ruolo === 'agente') return fromInvito
+  if (fromInvito && isAgenteLike(fromInvito.ruolo)) return fromInvito
 
   const parent = findDirectParentProfile(rivenditoreProfile, profili, links)
-  return parent?.ruolo === 'agente' ? parent : null
+  return parent && isAgenteLike(parent.ruolo) ? parent : null
 }
 
 function getAgentiInCompanyScope(
@@ -472,7 +492,7 @@ export function resolveFlatListOwnerProfile(
   profili: ProfiloGerarchiaRow[],
   links: OperatoreLink[],
 ): ProfiloGerarchiaRow {
-  if (viewerRole === 'agente') {
+  if (isAgenteLike(viewerRole)) {
     return resolveAgenziaParentForAgent(selfProfile, profili, links) ?? selfProfile
   }
   if (viewerRole === 'distributore') {
@@ -527,9 +547,10 @@ export function filterProfiliInHierarchySubtree(
 export function flatListSectionDescription(viewerRole: FlatListViewerRole): string {
   switch (viewerRole) {
     case 'agenzia':
-      return 'Vista rapida di agenti, venditori, rivenditori e studi collegati alla tua agenzia, con il referente di riferimento.'
+      return 'Vista rapida di agenti, back-office, venditori, rivenditori e studi collegati alla tua agenzia, con il referente di riferimento.'
     case 'agente':
-      return 'Vista rapida di agenti, venditori, rivenditori e studi della tua compagnia, con il referente di riferimento.'
+    case 'back_office':
+      return 'Vista rapida di agenti, back-office, venditori, rivenditori e studi della tua compagnia, con il referente di riferimento.'
     case 'rivenditore':
       return 'Vista rapida di venditori, promoter e studi collegati al tuo rivenditore, con il referente di riferimento.'
     case 'distributore':
@@ -568,10 +589,11 @@ export function associatiDirettiSectionLabel(ruolo: string): string | null {
     case 'admin':
       return 'Associati diretti (manager)'
     case 'manager':
-      return 'Associati diretti (agenzie / agenti)'
+      return 'Associati diretti (agenzie / agenti / back-office)'
     case 'agenzia':
-      return 'Associati diretti (agenti / rivenditori)'
+      return 'Associati diretti (agenti / back-office / rivenditori)'
     case 'agente':
+    case 'back_office':
       return 'Associati diretti (studi)'
     case 'rivenditore':
       return 'Associati diretti (venditori / promoter / studi)'
@@ -591,10 +613,11 @@ export function associatiAggiungiSectionLabel(ruolo: string): string | null {
     case 'admin':
       return 'Associa manager'
     case 'manager':
-      return 'Associa agenzia / agente'
+      return 'Associa agenzia / agente / back-office'
     case 'agenzia':
-      return 'Associa agente / rivenditore'
+      return 'Associa agente / back-office / rivenditore'
     case 'agente':
+    case 'back_office':
       return 'Associa studio'
     case 'rivenditore':
       return 'Associa venditore / promoter / studio'
@@ -661,8 +684,8 @@ function isDirectChild(
 ): boolean {
   const expectedRoles = CHILD_ROLES_BY_PARENT[parentProfile.ruolo] ?? []
   if (!expectedRoles.includes(child.ruolo)) return false
-  if (parentProfile.ruolo === 'agente' && child.ruolo === 'rivenditore') return false
-  if (parentProfile.ruolo === 'agenzia' && child.ruolo === 'agente') {
+  if (isAgenteLike(parentProfile.ruolo) && child.ruolo === 'rivenditore') return false
+  if (parentProfile.ruolo === 'agenzia' && isAgenteLike(child.ruolo)) {
     const agenzia = resolveAgenziaParentForAgent(child, profili, links)
     if (agenzia?.id === parentId) return true
   }
@@ -708,8 +731,9 @@ export function resolveFlatListReferent(
   links: OperatoreLink[],
 ): ProfiloGerarchiaRow | null {
   const stopRolesByOwner: Record<string, string[]> = {
-    agenzia: ['agente', 'agenzia'],
-    agente: ['agente', 'agenzia'],
+    agenzia: ['agente', 'back_office', 'agenzia'],
+    agente: ['agente', 'back_office', 'agenzia'],
+    back_office: ['agente', 'back_office', 'agenzia'],
     rivenditore: ['distributore', 'rivenditore', 'partner_dipendente'],
     distributore: ['partner_dipendente', 'distributore', 'rivenditore'],
   }
@@ -717,14 +741,15 @@ export function resolveFlatListReferent(
   let stopRoles: string[]
   switch (child.ruolo) {
     case 'agente':
-      stopRoles = ['agente', 'agenzia']
+    case 'back_office':
+      stopRoles = ['agente', 'back_office', 'agenzia']
       break
     case 'distributore':
     case 'partner_dipendente':
       stopRoles = ['partner_dipendente', 'distributore', 'rivenditore']
       break
     case 'rivenditore':
-      stopRoles = ['agente', 'agenzia']
+      stopRoles = ['agente', 'back_office', 'agenzia']
       break
     default:
       stopRoles = stopRolesByOwner[ownerProfile.ruolo] ?? []
@@ -866,10 +891,11 @@ export function nestedAssociatiLabel(ruolo: string): string | null {
   if (!childRoles?.length) return null
   switch (ruolo) {
     case 'manager':
-      return 'Agenzie / agenti associati'
+      return 'Agenzie / agenti / back-office associati'
     case 'agenzia':
-      return 'Agenti / rivenditori associati'
+      return 'Agenti / back-office / rivenditori associati'
     case 'agente':
+    case 'back_office':
       return 'Studi associati'
     case 'rivenditore':
       return 'Venditori / promoter / studi associati'
@@ -896,6 +922,8 @@ export function livelloGerarchiaLabel(
         return 'Agenzie associate'
       case 'agente':
         return 'Agenti associati'
+      case 'back_office':
+        return 'Back-Office associati'
       case 'rivenditore':
         return 'Rivenditori associati'
       case 'distributore':

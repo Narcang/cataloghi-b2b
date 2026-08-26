@@ -3,7 +3,8 @@ export function canViewProfiloSpecializzazioneAggiornato(viewerRole: string): bo
     viewerRole === 'admin' ||
     viewerRole === 'manager' ||
     viewerRole === 'agenzia' ||
-    viewerRole === 'agente'
+    viewerRole === 'agente' ||
+    viewerRole === 'back_office'
   )
 }
 

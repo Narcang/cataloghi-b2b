@@ -1,4 +1,4 @@
-import { isVenditoreLike } from '@/lib/catalogRoles'
+import { isVenditoreLike, isAgenteLike } from '@/lib/catalogRoles'
 import {
   categoriesVisibleOnDashboard,
   isAgentOnlyCatalogCategory,
@@ -15,7 +15,8 @@ export type CatalogoPermessoRow = {
 
 /** Ruoli equivalenti per la visibilità cataloghi (es. agenzia → agente). */
 export function ruoliEquivalentiPerCatalogo(ruolo: string): string[] {
-  if (ruolo === 'agenzia') return ['agenzia', 'agente']
+  if (ruolo === 'agenzia') return ['agenzia', 'agente', 'back_office']
+  if (isAgenteLike(ruolo)) return ['agente', 'back_office']
   if (ruolo === 'partner_dipendente') return ['partner_dipendente', 'studio']
   if (isVenditoreLike(ruolo)) return ['distributore', 'rivenditore']
   return [ruolo]
@@ -27,7 +28,7 @@ function categoriaConsentitaLegacy(categoria: string | null, ruolo: string): boo
   if (portale.length > 0) {
     return portale.includes(categoria as CatalogCategory)
   }
-  if (isAgentOnlyCatalogCategory(categoria) && ruolo !== 'agente' && ruolo !== 'agenzia' && ruolo !== 'manager') {
+  if (isAgentOnlyCatalogCategory(categoria) && ruolo !== 'agente' && ruolo !== 'back_office' && ruolo !== 'agenzia' && ruolo !== 'manager') {
     return false
   }
   const allowed = new Set(categoriesVisibleOnDashboard(ruolo, true))

@@ -8,6 +8,7 @@ import {
   agenteReservedDashboardCategories,
   isAgenteReservedCategory,
 } from '@/lib/catalogCategories'
+import { isAgenteLike } from '@/lib/catalogRoles'
 
 export default async function DocumentazioneAgentePage() {
   const supabase = await createClient()
@@ -25,7 +26,7 @@ export default async function DocumentazioneAgentePage() {
     .eq('id', user.id)
     .single()
 
-  if (profilo?.ruolo !== 'agente') {
+  if (!profilo || !isAgenteLike(profilo.ruolo)) {
     redirect('/dashboard')
   }
 
@@ -58,7 +59,7 @@ export default async function DocumentazioneAgentePage() {
           </h1>
           <p className="text-zinc-600 max-w-2xl text-lg">
             {profilo.nome_completo ? `Bentornato ${profilo.nome_completo}. ` : ''}
-            Qui trovi documentazione, listini e materiali merchandising riservati al tuo profilo agente.
+            Qui trovi documentazione, listini e materiali merchandising riservati al tuo profilo.
           </p>
         </div>
 

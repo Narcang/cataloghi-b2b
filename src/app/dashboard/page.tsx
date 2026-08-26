@@ -17,7 +17,7 @@ import {
 } from '@/lib/catalogCategories'
 import { catalogPdfHref, dashboardCatalogReturnTo } from '@/lib/catalogNavigation'
 import { compareCatalogTitoli } from '@/lib/catalogSorting'
-import { RUOLI_CATALOGO, isVenditoreLike } from '@/lib/catalogRoles'
+import { RUOLI_CATALOGO, isAgenteLike, isVenditoreLike } from '@/lib/catalogRoles'
 import { isStudioLike } from '@/lib/catalogAccess'
 import CreateCatalogForm from '@/components/admin/CreateCatalogForm'
 import InvitaUtente from '@/components/InvitaUtente'
@@ -115,7 +115,8 @@ export default async function Dashboard(props: {
   const isVenditoreLikeRole = isVenditoreLike(ruoloCorrente)
   const isPartner = ruoloCorrente === 'distributore'
   const isRivenditore = ruoloCorrente === 'rivenditore'
-  const isAgente = ruoloCorrente === 'agente'
+  const isAgente = isAgenteLike(ruoloCorrente)
+  const isBackOffice = ruoloCorrente === 'back_office'
   const isAgenzia = ruoloCorrente === 'agenzia'
   const isStudio = ruoloCorrente === 'studio'
   const isPartnerDipendente = ruoloCorrente === 'partner_dipendente'
@@ -270,7 +271,7 @@ export default async function Dashboard(props: {
     const { data: agentiData } = await supabase
       .from('profili')
       .select('id, nome_completo, telefono, email')
-      .eq('ruolo', 'agente')
+      .in('ruolo', ['agente', 'back_office'])
       .eq('area_geografica', profilo.area_geografica)
     
     if (agentiData) {
@@ -424,7 +425,8 @@ export default async function Dashboard(props: {
                 {isPartner ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Venditore</span> : null}
                 {isRivenditore ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Rivenditore</span> : null}
                 {isAgenzia ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Agenzia</span> : null}
-                {isAgente ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Agente</span> : null}
+                {isAgente && !isBackOffice ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Agente</span> : null}
+                {isBackOffice ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Back-Office</span> : null}
                 {isStudio ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Studio</span> : null}
                 {isPartnerDipendente ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Promoter</span> : null}
                 {user && profilo?.registrazione_approvata === false ? (
@@ -450,7 +452,7 @@ export default async function Dashboard(props: {
           <AssociatiPiattiPanel
             ownerProfile={associatiPiattiOwnerProfile}
             viewerRole={
-              isAgenzia ? 'agenzia' : isAgente ? 'agente' : isPartner ? 'distributore' : 'rivenditore'
+              isAgenzia ? 'agenzia' : isAgente ? (isBackOffice ? 'back_office' : 'agente') : isPartner ? 'distributore' : 'rivenditore'
             }
             profili={profiliGerarchiaDashboard}
             links={linksDashboard}
@@ -469,20 +471,38 @@ export default async function Dashboard(props: {
         )}
 
         {showFullDashboard && !isManager && (isAgenzia || isRivenditore) && user && (
-          <section className="border border-black rounded-2xl bg-white p-6">
-            <h2 className="text-xl text-zinc-900 font-medium mb-1">
-              {isAgenzia ? 'Inserisci agente manualmente' : 'Inserisci venditore manualmente'}
-            </h2>
-            <p className="text-sm text-zinc-500 mb-4">
-              Aggiungi manualmente {isAgenzia ? 'un agente' : 'un venditore'} non ancora registrato: comparirà subito
-              nella tua struttura organizzativa.
-            </p>
-            <CreaAssociatoManuale
-              parentId={user.id}
-              parentLabel={profilo?.societa || profilo?.nome_completo || 'il tuo profilo'}
-              ruoloNuovo={isAgenzia ? 'agente' : 'distributore'}
-              societaBloccata={profilo?.societa ?? undefined}
-            />
+          <section className="border border-black rounded-2xl bg-white p-6 space-y-8">
+            <div>
+              <h2 className="text-xl text-zinc-900 font-medium mb-1">
+                {isAgenzia ? 'Inserisci agente manualmente' : 'Inserisci venditore manualmente'}
+              </h2>
+              <p className="text-sm text-zinc-500 mb-4">
+                Aggiungi manualmente {isAgenzia ? 'un agente' : 'un venditore'} non ancora registrato: comparirà subito
+                nella tua struttura organizzativa.
+              </p>
+              <CreaAssociatoManuale
+                parentId={user.id}
+                parentLabel={profilo?.societa || profilo?.nome_completo || 'il tuo profilo'}
+                ruoloNuovo={isAgenzia ? 'agente' : 'distributore'}
+                societaBloccata={profilo?.societa ?? undefined}
+              />
+            </div>
+            {isAgenzia ? (
+              <div>
+                <h2 className="text-xl text-zinc-900 font-medium mb-1">
+                  Inserisci back-office manualmente
+                </h2>
+                <p className="text-sm text-zinc-500 mb-4">
+                  Aggiungi manualmente un profilo back-office (stessi poteri dell&apos;agente) non ancora registrato.
+                </p>
+                <CreaAssociatoManuale
+                  parentId={user.id}
+                  parentLabel={profilo?.societa || profilo?.nome_completo || 'il tuo profilo'}
+                  ruoloNuovo="back_office"
+                  societaBloccata={profilo?.societa ?? undefined}
+                />
+              </div>
+            ) : null}
           </section>
         )}
 

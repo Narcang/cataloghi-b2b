@@ -32,7 +32,7 @@ export async function GET() {
     .single()
 
   const ruolo = profiloUtente?.ruolo ?? ''
-  if (!['admin', 'manager', 'agenzia', 'agente'].includes(ruolo)) {
+  if (!['admin', 'manager', 'agenzia', 'agente', 'back_office'].includes(ruolo)) {
     return jsonResponse(false, 'Operazione non consentita', 403)
   }
 

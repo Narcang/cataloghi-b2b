@@ -19,6 +19,7 @@ import {
   readRivenditoreCampiFromBody,
 } from '@/lib/rivenditoreProfiloOptions'
 import { agenziaCanEditRivenditoreSpecializzazione, agenteCanEditRivenditoreSpecializzazione } from '@/lib/agenziaRivenditoreAccess'
+import { isAgenteLike } from '@/lib/catalogRoles'
 
 const ESPOSITORI_FIELDS = [
   'espositore_1',
@@ -107,7 +108,7 @@ const MANAGER_PATCH_KEYS = new Set<string>([
   'box_aggiornato_il',
 ])
 
-const RUOLI_OK = new Set(['admin', 'manager', 'agenzia', 'agente', 'fornitore', 'rivenditore', 'distributore', 'free', 'studio', 'partner_dipendente'])
+const RUOLI_OK = new Set(['admin', 'manager', 'agenzia', 'agente', 'back_office', 'fornitore', 'rivenditore', 'distributore', 'free', 'studio', 'partner_dipendente'])
 
 function jsonResponse(ok: boolean, message: string, status: number) {
   return NextResponse.json({ ok, message }, { status })
@@ -213,7 +214,7 @@ export async function POST(request: NextRequest) {
   const isAdmin = callerRuolo === 'admin'
   const isManager = callerRuolo === 'manager'
   const isAgenzia = callerRuolo === 'agenzia'
-  const isAgente = callerRuolo === 'agente'
+  const isAgente = isAgenteLike(callerRuolo)
 
   if (!isAdmin && !isManager && !isAgenzia && !isAgente) {
     return jsonResponse(false, 'Operazione non consentita', 403)
@@ -401,12 +402,12 @@ export async function POST(request: NextRequest) {
 
   if (isAgente && !isAdmin && !isManager && !isAgenzia) {
     if (ruoloEffettivo !== 'rivenditore') {
-      return jsonResponse(false, 'L\'agente può modificare solo i rivenditori associati', 403)
+      return jsonResponse(false, 'Puoi modificare solo i rivenditori associati al tuo profilo', 403)
     }
     const authClient = svc ?? supabase
     const allowed = await agenteCanEditRivenditoreSpecializzazione(authClient, user.id, profiloId)
     if (!allowed) {
-      return jsonResponse(false, 'Rivenditore non associato al tuo profilo agente', 403)
+      return jsonResponse(false, 'Rivenditore non associato al tuo profilo', 403)
     }
     for (const key of Object.keys(patch)) {
       if (!AGENZIA_RIVENDITORE_PATCH_KEY_SET.has(key)) {
@@ -490,7 +491,7 @@ export async function POST(request: NextRequest) {
       const invitantId = profiloApprovato?.invitato_da
       const ruoloNuovoUtente = profiloApprovato?.ruolo
 
-      const RUOLI_CONNESSIONE = new Set(['agenzia', 'agente', 'rivenditore', 'distributore', 'studio', 'partner_dipendente'])
+      const RUOLI_CONNESSIONE = new Set(['agenzia', 'agente', 'back_office', 'rivenditore', 'distributore', 'studio', 'partner_dipendente'])
 
       if (invitantId && RUOLI_CONNESSIONE.has(ruoloNuovoUtente)) {
         const { data: profiloInvitante } = await svc

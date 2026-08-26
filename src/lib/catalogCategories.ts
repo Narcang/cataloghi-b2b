@@ -1,4 +1,4 @@
-import { isVenditoreLike } from '@/lib/catalogRoles'
+import { isAgenteLike, isVenditoreLike } from '@/lib/catalogRoles'
 
 export const CATALOG_CATEGORIES = [
   'Family 15',
@@ -184,7 +184,7 @@ export function categoriesVisibleOnDashboard(
   if (ruoloProfilo === 'studio' || ruoloProfilo === 'partner_dipendente') {
     return CATALOG_CATEGORIES.filter((c) => STUDIO_ROLE_ALLOWED.has(c) && !UI_HIDDEN_CATEGORIES.has(c))
   }
-  if (isVenditoreLike(ruoloProfilo) || ruoloProfilo === 'agente' || ruoloProfilo === 'agenzia') {
+  if (isVenditoreLike(ruoloProfilo) || isAgenteLike(ruoloProfilo) || ruoloProfilo === 'agenzia') {
     return [...PUBLIC_CATALOG_CATEGORIES]
   }
   return CATALOG_CATEGORIES.filter((c) => !UI_HIDDEN_CATEGORIES.has(c))
@@ -264,6 +264,7 @@ export const PORTALE_TILES_PER_RUOLO: Record<string, PortaleTile[]> = {
   distributore: VENDITORE_TILES,
   rivenditore: VENDITORE_TILES,
   agente: AGENTE_TILES,
+  back_office: AGENTE_TILES,
   agenzia: AGENTE_TILES,
   manager: AGENTE_TILES,
   admin: AGENTE_TILES,

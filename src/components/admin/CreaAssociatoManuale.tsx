@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { UserPlus } from 'lucide-react'
 
-type RuoloNuovo = 'agente' | 'distributore'
+type RuoloNuovo = 'agente' | 'back_office' | 'distributore'
 
 type Props = {
   parentId: string
@@ -23,6 +23,12 @@ const CONFIG: Record<
     persona: 'agente',
     nomePlaceholder: 'Es. Mario Rossi',
     button: 'Crea e associa agente',
+  },
+  back_office: {
+    titolo: 'Inserisci back-office manualmente',
+    persona: 'back-office',
+    nomePlaceholder: 'Es. Mario Rossi',
+    button: 'Crea e associa back-office',
   },
   distributore: {
     titolo: 'Inserisci venditore manualmente',

@@ -40,7 +40,8 @@ export async function GET(request: NextRequest) {
     ruolo === 'admin' ||
     ruolo === 'manager' ||
     ruolo === 'agenzia' ||
-    ruolo === 'agente'
+    ruolo === 'agente' ||
+    ruolo === 'back_office'
 
   if (!isPrivileged) {
     return NextResponse.json({ ok: false, message: 'Operazione non consentita' }, { status: 403 })
@@ -62,7 +63,7 @@ export async function GET(request: NextRequest) {
       ? (await getAdminDataSupabase()).client
       : createServiceRoleSupabase() ?? supabase
 
-  if (ruolo === 'agenzia' || ruolo === 'agente') {
+  if (ruolo === 'agenzia' || ruolo === 'agente' || ruolo === 'back_office') {
     if (sezione !== 'espositori' && sezione !== 'box') {
       return NextResponse.json({ ok: false, message: 'Sezione non consentita' }, { status: 403 })
     }

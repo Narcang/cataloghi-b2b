@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
+import { isAgenteLike } from '@/lib/catalogRoles'
 
 function sanitize(s: unknown): string {
   return String(s ?? '').trim()
@@ -58,7 +59,7 @@ export async function register(formData: FormData) {
             .eq('id', invitoDa)
             .single()
 
-          if (invitante?.ruolo === 'agente' && invitante.invitato_da) {
+          if (invitante && isAgenteLike(invitante.ruolo) && invitante.invitato_da) {
             const { data: agenziaParent } = await svc
               .from('profili')
               .select('id, ruolo')
@@ -131,7 +132,7 @@ export async function register(formData: FormData) {
 
       // Crea la connessione con l'invitante
       if (invitoDa) {
-        const RUOLI_CONNESSIONE = new Set(['agenzia', 'agente', 'rivenditore', 'distributore', 'studio', 'partner_dipendente'])
+        const RUOLI_CONNESSIONE = new Set(['agenzia', 'agente', 'back_office', 'rivenditore', 'distributore', 'studio', 'partner_dipendente'])
         if (RUOLI_CONNESSIONE.has(invitoRuolo)) {
           const { data: profiloInvitante } = await svc
             .from('profili')
