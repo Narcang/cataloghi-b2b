@@ -23,8 +23,11 @@ export async function getAdminMercato(): Promise<Mercato> {
 }
 
 /**
- * Client Supabase per i dati del mercato selezionato (service role se disponibile).
- * L'autenticazione dell'admin resta sempre sul progetto IT.
+ * Client dati per il mercato scelto dall'admin.
+ * Auth sempre sul progetto IT.
+ * Italia: sessione admin (RLS). Evita service_role: su molti progetti manca
+ * GRANT su `cataloghi` → "permission denied for table cataloghi".
+ * Russia: service role del progetto RU (il JWT IT non vale lì).
  */
 export async function getAdminDataSupabase(): Promise<{
   mercato: Mercato
@@ -32,9 +35,12 @@ export async function getAdminDataSupabase(): Promise<{
 }> {
   const mercato = await getAdminMercato()
   const authClient = await createClient()
-  const svc = createServiceRoleSupabaseForMercato(mercato)
+  if (mercato === 'it') {
+    return { mercato, client: authClient }
+  }
+  const svc = createServiceRoleSupabaseForMercato('ru')
   return {
     mercato,
-    client: svc ?? getDataSupabaseForMercato(mercato, authClient),
+    client: svc ?? getDataSupabaseForMercato('ru', authClient),
   }
 }
