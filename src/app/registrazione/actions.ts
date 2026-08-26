@@ -118,8 +118,15 @@ export async function register(formData: FormData) {
     newUserId = adminUserData?.user?.id ?? null
 
     if (newUserId) {
-      // Approva automaticamente (email già confermata dall'admin API)
-      await svc.from('profili').update({ registrazione_approvata: true }).eq('id', newUserId)
+      // Approva e applica il ruolo dell'invito (il trigger potrebbe aver messo 'free')
+      await svc
+        .from('profili')
+        .update({
+          registrazione_approvata: true,
+          ruolo: invitoRuolo,
+          ...(invitoDa ? { invitato_da: invitoDa } : {}),
+        })
+        .eq('id', newUserId)
 
       // Marca il token come usato (solo se monouso)
       if (invitoToken && !invitoMultiUso) {
