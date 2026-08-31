@@ -24,7 +24,7 @@ function categoryDisplayLabel(cat: CatalogCategory): string {
 }
 import { catalogPdfHref, dashboardCatalogReturnTo } from '@/lib/catalogNavigation'
 import { compareCatalogTitoli } from '@/lib/catalogSorting'
-import { getAppLocale } from '@/lib/locale'
+import { getAppLocale } from '@/lib/localeServer'
 
 export const dynamic = 'force-dynamic'
 

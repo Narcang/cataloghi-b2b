@@ -1,5 +1,3 @@
-import { cookies } from 'next/headers'
-
 export const APP_LOCALES = ['it', 'ru', 'en'] as const
 export type AppLocale = (typeof APP_LOCALES)[number]
 
@@ -27,14 +25,4 @@ export function isAppLocale(value: string | null | undefined): value is AppLocal
 
 export function parseAppLocale(value: string | null | undefined): AppLocale {
   return isAppLocale(value) ? value : DEFAULT_LOCALE
-}
-
-export async function getLocaleCookie(): Promise<AppLocale | null> {
-  const store = await cookies()
-  const raw = store.get(LOCALE_COOKIE)?.value
-  return isAppLocale(raw) ? raw : null
-}
-
-export async function getAppLocale(): Promise<AppLocale> {
-  return (await getLocaleCookie()) ?? DEFAULT_LOCALE
 }

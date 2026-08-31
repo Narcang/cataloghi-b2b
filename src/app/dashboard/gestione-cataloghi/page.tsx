@@ -28,7 +28,8 @@ import { compareCatalogTitoli } from '@/lib/catalogSorting'
 import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
 import CatalogLinguaTabs from '@/components/admin/CatalogLinguaTabs'
 import { parseCatalogLingua } from '@/lib/catalogLingua'
-import { getAppLocale, LOCALE_LABEL, type AppLocale } from '@/lib/locale'
+import { LOCALE_LABEL, type AppLocale } from '@/lib/locale'
+import { getAppLocale } from '@/lib/localeServer'
 
 export const dynamic = 'force-dynamic'
 

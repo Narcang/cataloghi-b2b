@@ -36,7 +36,7 @@ import {
   type ProfiloGerarchiaRow,
 } from '@/lib/userHierarchy'
 import { fetchUltimoAccessoMap, ultimoAccessoMapToRecord } from '@/lib/ultimoAccessoUtenti'
-import { getAppLocale } from '@/lib/locale'
+import { getAppLocale } from '@/lib/localeServer'
 
 const ASSISTENZA_LADIVA_TELEFONO = '+39 0536 185 6217'
 const ASSISTENZA_LADIVA_EMAIL = 'info@ladiva-fpd.com'

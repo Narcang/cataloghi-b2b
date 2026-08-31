@@ -13,7 +13,7 @@ import {
   type CatalogCategory,
 } from '@/lib/catalogCategories'
 import { isVenditoreLike } from '@/lib/catalogRoles'
-import { getAppLocale } from '@/lib/locale'
+import { getAppLocale } from '@/lib/localeServer'
 
 export const dynamic = 'force-dynamic'
 

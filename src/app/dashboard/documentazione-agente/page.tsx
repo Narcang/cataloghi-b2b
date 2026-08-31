@@ -9,7 +9,7 @@ import {
   isAgenteReservedCategory,
 } from '@/lib/catalogCategories'
 import { isAgenteLike } from '@/lib/catalogRoles'
-import { getAppLocale } from '@/lib/locale'
+import { getAppLocale } from '@/lib/localeServer'
 
 export const dynamic = 'force-dynamic'
 

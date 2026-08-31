@@ -7,7 +7,7 @@ import { createClient } from '@/utils/supabase/server'
 import { categoryFromSlug, isLoginOnlyCatalogCategory } from '@/lib/catalogCategories'
 import { catalogPdfHref, safeCatalogReturnTo, CATALOG_RETURN_TO_PARAM } from '@/lib/catalogNavigation'
 import { compareCatalogTitoli } from '@/lib/catalogSorting'
-import { getAppLocale } from '@/lib/locale'
+import { getAppLocale } from '@/lib/localeServer'
 
 /** Elenco cataloghi pubblici: sempre dati aggiornati da Supabase. */
 export const dynamic = 'force-dynamic'

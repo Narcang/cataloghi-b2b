@@ -10,7 +10,7 @@ import {
   type CatalogCategory,
 } from '@/lib/catalogCategories'
 import { tHome } from '@/lib/i18n'
-import { getAppLocale, getLocaleCookie } from '@/lib/locale'
+import { getAppLocale, getLocaleCookie } from '@/lib/localeServer'
 import { createClient } from '@/utils/supabase/server'
 
 const HIDDEN_HOME_CATEGORIES = new Set([

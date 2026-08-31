@@ -10,7 +10,7 @@ import {
   type PortaleTile,
 } from '@/lib/catalogCategories'
 import { CATALOG_RETURN_TO_PARAM, catalogPdfHref } from '@/lib/catalogNavigation'
-import { getAppLocale } from '@/lib/locale'
+import { getAppLocale } from '@/lib/localeServer'
 
 /** Categorie che aprono direttamente il PDF (nessuna lista intermedia). */
 const DIRECT_OPEN_CATEGORIES = new Set<string>(['Scontistiche', 'Listini', 'Power Point'])
