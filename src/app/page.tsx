@@ -52,6 +52,9 @@ function decodeFlashMessage(raw: string): string {
   }
 }
 
+/** Prima visita: selettore lingua. Non prerenderizzare, dipende dal cookie. */
+export const dynamic = 'force-dynamic'
+
 export default async function LandingPage(props: { searchParams?: Promise<{ message?: string }> }) {
   const localeCookie = await getLocaleCookie()
   if (!localeCookie) {

@@ -8,6 +8,8 @@ import Header from '@/components/Header'
 import { tHome, tLogin } from '@/lib/i18n'
 import { getAppLocale } from '@/lib/locale'
 
+export const dynamic = 'force-dynamic'
+
 export default async function LoginPage(props: { searchParams: Promise<{ message: string }> }) {
   const searchParams = await props.searchParams
   const locale = await getAppLocale()

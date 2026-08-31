@@ -11,6 +11,8 @@ import {
 import { isAgenteLike } from '@/lib/catalogRoles'
 import { getAppLocale } from '@/lib/locale'
 
+export const dynamic = 'force-dynamic'
+
 export default async function DocumentazioneAgentePage() {
   const supabase = await createClient()
   const {
