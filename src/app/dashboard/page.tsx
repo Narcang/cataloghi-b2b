@@ -36,6 +36,7 @@ import {
   type ProfiloGerarchiaRow,
 } from '@/lib/userHierarchy'
 import { fetchUltimoAccessoMap, ultimoAccessoMapToRecord } from '@/lib/ultimoAccessoUtenti'
+import { getAppLocale } from '@/lib/locale'
 
 const ASSISTENZA_LADIVA_TELEFONO = '+39 0536 185 6217'
 const ASSISTENZA_LADIVA_EMAIL = 'info@ladiva-fpd.com'
@@ -95,6 +96,7 @@ export default async function Dashboard(props: {
   const searchParams = await props.searchParams
   const nomeFilter = (searchParams?.nome ?? '').trim()
   const actionMessage = searchParams?.message ?? ''
+  const locale = await getAppLocale()
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -127,6 +129,7 @@ export default async function Dashboard(props: {
   let cataloghiQuery = supabase
     .from('cataloghi')
     .select('*')
+    .eq('lingua', locale)
     .order('creato_il', { ascending: false })
 
   if (isManager && nomeFilter.length > 0) {

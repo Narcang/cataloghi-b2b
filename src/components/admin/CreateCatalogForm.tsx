@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { buildCoverStoragePath, buildPdfStoragePath, buildZipStoragePath } from '@/lib/catalogStoragePaths'
 import {
@@ -20,15 +20,25 @@ function categoryDisplayLabel(cat: CatalogCategory): string {
 }
 import { isZipDownloadCategory } from '@/lib/catalogFileKind'
 import { RUOLI_CATALOGO, RUOLI_CATALOGO_DEFAULT, type RuoloCatalogo } from '@/lib/catalogRoles'
+import { tCatalogAdmin } from '@/lib/i18n'
+import { APP_LOCALES, LOCALE_LABEL, type AppLocale } from '@/lib/locale'
+import { useAppLocale } from '@/lib/useAppLocale'
 
 type Props = { categories: readonly CatalogCategory[] }
 
 export default function CreateCatalogForm({ categories }: Props) {
   const router = useRouter()
+  const uiLocale = useAppLocale()
+  const copy = tCatalogAdmin(uiLocale)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [categoriaSelezionata, setCategoriaSelezionata] = useState('')
+  const [linguaSelezionata, setLinguaSelezionata] = useState<AppLocale>('it')
   const [ruoliSelezionati, setRuoliSelezionati] = useState<RuoloCatalogo[]>(RUOLI_CATALOGO_DEFAULT)
+
+  useEffect(() => {
+    setLinguaSelezionata(uiLocale)
+  }, [uiLocale])
 
   const isZipCategory = isZipDownloadCategory(categoriaSelezionata)
   const maxMainFileBytes = isZipCategory ? MAX_CATALOG_STUDIO_ZIP_BYTES : MAX_CATALOG_PDF_BYTES
@@ -156,6 +166,7 @@ export default function CreateCatalogForm({ categories }: Props) {
         body: JSON.stringify({
           titolo,
           categoria,
+          lingua: linguaSelezionata,
           ruoli_visibili: ruoliSelezionati,
           stato_pubblicazione,
           file_pdf_storage_path: mainPath,
@@ -228,6 +239,28 @@ export default function CreateCatalogForm({ categories }: Props) {
             Carica un archivio ZIP (max {maxMainFileMb} MB) scaricabile dagli utenti autorizzati.
           </p>
         ) : null}
+      </div>
+
+      <div className="space-y-2">
+        <label htmlFor="lingua" className="block text-xs text-zinc-600 font-medium uppercase tracking-wide">
+          {copy.linguaFile}
+        </label>
+        <select
+          id="lingua"
+          name="lingua"
+          required
+          disabled={submitting}
+          value={linguaSelezionata}
+          onChange={(e) => setLinguaSelezionata(e.target.value as AppLocale)}
+          className="w-full h-10 rounded-md border border-black bg-zinc-50 px-3 text-sm text-zinc-900 disabled:opacity-60"
+        >
+          {APP_LOCALES.map((key) => (
+            <option key={key} value={key}>
+              {key.toUpperCase()} · {LOCALE_LABEL[key]}
+            </option>
+          ))}
+        </select>
+        <p className="text-xs text-zinc-600">{copy.linguaHelp}</p>
       </div>
 
       <div className="space-y-2 md:col-span-2">

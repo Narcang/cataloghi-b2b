@@ -9,6 +9,7 @@ import {
 } from '@/lib/catalogStoragePaths'
 import { MAX_CATALOG_COVER_BYTES } from '@/lib/catalogUploadLimits'
 import { isZipDownloadCategory, isZipStoragePath } from '@/lib/catalogFileKind'
+import { parseAppLocale } from '@/lib/locale'
 
 /** Categorie per cui esiste sempre un solo file attivo: il nuovo sostituisce il vecchio. */
 const SINGLE_FILE_CATEGORIES = new Set(['Scontistiche', 'Listini', 'Power Point'])
@@ -33,6 +34,7 @@ async function assertStorageFileExists(
 type CreateCatalogJsonBody = {
   titolo?: string
   categoria?: string
+  lingua?: string
   /** Ruoli che possono vedere il catalogo (es. ['agente', 'distributore']). */
   ruoli_visibili?: string[]
   stato_pubblicazione?: string
@@ -74,6 +76,7 @@ export async function POST(request: NextRequest) {
 
   const titolo = String(body.titolo ?? '').trim()
   const categoria = String(body.categoria ?? '').trim()
+  const lingua = parseAppLocale(body.lingua)
   const ruoliVisibili = Array.isArray(body.ruoli_visibili)
     ? body.ruoli_visibili.map((r) => String(r).trim()).filter(Boolean)
     : []
@@ -150,12 +153,13 @@ export async function POST(request: NextRequest) {
   const statoValido =
     statoPubblicazione === 'attivo' || statoPubblicazione === 'bozza' ? statoPubblicazione : 'bozza'
 
-  // Per le categorie single-file, elimina i vecchi cataloghi prima di inserire il nuovo
+  // Per le categorie single-file, elimina i vecchi cataloghi della stessa lingua
   if (SINGLE_FILE_CATEGORIES.has(categoria)) {
     const { data: vecchi } = await supabase
       .from('cataloghi')
       .select('id, url_file, url_immagine')
       .eq('categoria', categoria)
+      .eq('lingua', lingua)
 
     if (vecchi && vecchi.length > 0) {
       const pathsDaEliminare: string[] = []
@@ -170,13 +174,14 @@ export async function POST(request: NextRequest) {
       if (pathsDaEliminare.length > 0) {
         await supabase.storage.from('cataloghi').remove(pathsDaEliminare)
       }
-      await supabase.from('cataloghi').delete().eq('categoria', categoria)
+      await supabase.from('cataloghi').delete().eq('categoria', categoria).eq('lingua', lingua)
     }
   }
 
   const { error: insertError } = await supabase.from('cataloghi').insert({
     titolo,
     categoria,
+    lingua,
     ruoli_visibili: ruoliVisibili,
     area_geografica_target: ['MONDO'],
     stato_pubblicazione: statoValido,
@@ -191,6 +196,9 @@ export async function POST(request: NextRequest) {
 
     if (insertError.message.includes('categoria')) {
       return jsonResponse(false, 'DB non aggiornato: esegui script categoria/aree su Supabase', 500)
+    }
+    if (insertError.message.includes('lingua')) {
+      return jsonResponse(false, 'DB non aggiornato: esegui supabase_alter_cataloghi_lingua.sql su Supabase', 500)
     }
     if (insertError.message.toLowerCase().includes('row-level security')) {
       return jsonResponse(

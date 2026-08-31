@@ -5,9 +5,14 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import Header from '@/components/Header'
+import { tHome, tLogin } from '@/lib/i18n'
+import { getAppLocale } from '@/lib/locale'
 
 export default async function LoginPage(props: { searchParams: Promise<{ message: string }> }) {
   const searchParams = await props.searchParams
+  const locale = await getAppLocale()
+  const copy = tLogin(locale)
+  const homeCopy = tHome(locale)
 
   return (
     <div className="min-h-screen flex flex-col bg-white text-neutral-900">
@@ -17,9 +22,9 @@ export default async function LoginPage(props: { searchParams: Promise<{ message
         <Card className="w-full max-w-sm border border-black bg-white shadow-sm">
           <form action={login}>
             <CardHeader>
-              <CardTitle className="text-2xl text-zinc-900 text-center">Accesso Ladiva</CardTitle>
+              <CardTitle className="text-2xl text-zinc-900 text-center">{copy.titolo}</CardTitle>
               <CardDescription className="text-zinc-600">
-                Inserisci le tue credenziali per visualizzare i cataloghi B2B e gestire i fornitori.
+                {copy.descrizione}
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4">
@@ -46,19 +51,19 @@ export default async function LoginPage(props: { searchParams: Promise<{ message
             </CardContent>
             <CardFooter className="flex flex-col gap-2">
               <Button className="w-full bg-[#060d41] text-white hover:bg-[#0a155a]" type="submit">
-                Accedi al Portale
+                {copy.accedi}
               </Button>
               <Link
                 href="/registrazione"
                 className="w-full h-9 inline-flex items-center justify-center rounded-lg border border-zinc-300 text-sm font-medium text-zinc-800 hover:bg-zinc-50 transition-colors"
               >
-                Richiedi registrazione portale
+                {copy.registrazione}
               </Link>
               <Link
                 href="/recupero-password"
                 className="w-full h-8 inline-flex items-center justify-center rounded-lg border border-[#060d41] text-sm font-medium text-[#060d41] hover:bg-[#060d41]/5 transition-colors"
               >
-                Recupera password
+                {copy.recupero}
               </Link>
             </CardFooter>
           </form>
@@ -68,11 +73,11 @@ export default async function LoginPage(props: { searchParams: Promise<{ message
       <footer className="ladiva-footer ladiva-footer--compact ladiva-footer-home-strip">
         <div className="ladiva-home-footer-inner">
           <p className="text-sm max-w-3xl mx-auto text-center mb-1">
-            <Link href="/privacy" className="underline hover:text-zinc-800 transition-colors whitespace-nowrap">Privacy Policy</Link>
-            {' · '}
-            <Link href="/termini" className="underline hover:text-zinc-800 transition-colors whitespace-nowrap">Termini e Condizioni</Link>
-            {' · '}
-            <Link href="/cookie" className="underline hover:text-zinc-800 transition-colors whitespace-nowrap">Cookie Policy</Link>
+            <Link href="/privacy" className="underline hover:text-zinc-800 transition-colors whitespace-nowrap">{homeCopy.privacy}</Link>
+              {' · '}
+              <Link href="/termini" className="underline hover:text-zinc-800 transition-colors whitespace-nowrap">{homeCopy.termini}</Link>
+              {' · '}
+              <Link href="/cookie" className="underline hover:text-zinc-800 transition-colors whitespace-nowrap">{homeCopy.cookie}</Link>
           </p>
           <p className="text-sm max-w-3xl mx-auto text-center">
             © {new Date().getFullYear()} Ladiva Ceramica · Carpineti (RE), Italia

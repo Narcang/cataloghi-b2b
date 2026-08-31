@@ -21,6 +21,9 @@ import {
 import { createClient } from '@/utils/supabase/client'
 import { User } from '@supabase/supabase-js'
 import { PORTALE_TILES_PER_RUOLO } from '@/lib/catalogCategories'
+import LocaleSwitcher from '@/components/LocaleSwitcher'
+import { tHeader } from '@/lib/i18n'
+import { useAppLocale } from '@/lib/useAppLocale'
 
 type BeforeInstallPrompt = Event & {
   prompt: () => Promise<void>
@@ -35,37 +38,45 @@ type MenuItem = {
   icon: LucideIcon
 }
 
-const menuItemsBase: MenuItem[] = [
-  {
-    label: 'Contatti Diretti',
-    href: '/dashboard#contatti',
-    icon: Phone,
-  },
-  {
-    label: 'Dove Siamo',
-    href: '/dove-siamo',
-    icon: MapPin,
-  },
-  {
-    label: 'Registrazione',
-    href: '/registrazione',
-    icon: UserPlus,
-  },
-]
+function menuItemsBase(labels: ReturnType<typeof tHeader>): MenuItem[] {
+  return [
+    {
+      label: labels.contatti,
+      href: '/dashboard#contatti',
+      icon: Phone,
+    },
+    {
+      label: labels.doveSiamo,
+      href: '/dove-siamo',
+      icon: MapPin,
+    },
+    {
+      label: labels.registrazione,
+      href: '/registrazione',
+      icon: UserPlus,
+    },
+  ]
+}
 
-function catalogMenuItemForRole(ruolo: string | null, loggedIn: boolean): MenuItem {
+function catalogMenuItemForRole(
+  ruolo: string | null,
+  loggedIn: boolean,
+  labels: ReturnType<typeof tHeader>,
+): MenuItem {
   if (!loggedIn) {
-    return { label: 'Cataloghi', href: '/dashboard#cataloghi', icon: BookOpen }
+    return { label: labels.cataloghi, href: '/dashboard#cataloghi', icon: BookOpen }
   }
   const hasPortale = Boolean(ruolo && (PORTALE_TILES_PER_RUOLO[ruolo]?.length ?? 0) > 0)
   return {
-    label: 'Dashboard',
+    label: labels.dashboard,
     href: hasPortale ? '/portale' : '/dashboard',
     icon: LayoutDashboard,
   }
 }
 
 export default function Header() {
+  const locale = useAppLocale()
+  const labels = tHeader(locale)
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [accountMenuOpen, setAccountMenuOpen] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -140,18 +151,18 @@ export default function Header() {
       /iPad|iPhone|iPod/.test(ua) || (ua.includes('Mac') && 'ontouchend' in document)
 
     if (isIOS) {
-      window.alert('Per installare: tocca Condividi e poi "Aggiungi alla schermata Home".')
+      window.alert(labels.installIos)
     } else {
-      window.alert('Per installare: apri il menu del browser (⋮) e scegli "Installa app".')
+      window.alert(labels.installOther)
     }
     setDropdownOpen(false)
     setMobileOpen(false)
   }
 
-  const catalogMenuItem = catalogMenuItemForRole(profiloRuolo, Boolean(user))
+  const catalogMenuItem = catalogMenuItemForRole(profiloRuolo, Boolean(user), labels)
   const visibleBaseItems = user
-    ? menuItemsBase.filter((item) => item.href !== '/registrazione')
-    : menuItemsBase
+    ? menuItemsBase(labels).filter((item) => item.href !== '/registrazione')
+    : menuItemsBase(labels)
   const menuItems: MenuItem[] = [catalogMenuItem, ...visibleBaseItems]
   const gestioneUtentiHref =
     profiloRuolo === 'agenzia' || profiloRuolo === 'agente' || profiloRuolo === 'back_office'
@@ -186,7 +197,7 @@ export default function Header() {
                 }}
                 aria-expanded={dropdownOpen}
               >
-                Menu <ChevronDown size={16} className={`ladiva-chevron ${dropdownOpen ? 'open' : ''}`} />
+                {labels.menu} <ChevronDown size={16} className={`ladiva-chevron ${dropdownOpen ? 'open' : ''}`} />
               </button>
 
               {dropdownOpen && (
@@ -208,12 +219,14 @@ export default function Header() {
                     onClick={handleInstallApp}
                   >
                     <Download size={16} />
-                    Installa app
+                    {labels.installa}
                   </button>
                 </div>
               )}
             </div>
           </nav>
+
+          <LocaleSwitcher />
 
           <div className="ladiva-header-auth">
             {user ? (
@@ -228,7 +241,7 @@ export default function Header() {
                     }}
                   >
                     <LayoutDashboard size={16} aria-hidden />
-                    Area Riservata
+                    {labels.areaRiservata}
                   </Link>
                   <button
                     type="button"
@@ -240,7 +253,7 @@ export default function Header() {
                     aria-expanded={accountMenuOpen}
                     aria-haspopup="menu"
                     aria-controls="ladiva-account-menu-panel"
-                    aria-label="Apri menu per uscire"
+                    aria-label={labels.apriMenuEsci}
                   >
                     <ChevronDown size={16} className={`ladiva-chevron ${accountMenuOpen ? 'open' : ''}`} />
                   </button>
@@ -259,7 +272,7 @@ export default function Header() {
                         onClick={() => setAccountMenuOpen(false)}
                       >
                         <Users size={16} aria-hidden />
-                        Gestione Utenti
+                        {labels.gestioneUtenti}
                       </Link>
                     ) : null}
                     {profiloRuolo === 'admin' && (
@@ -270,13 +283,13 @@ export default function Header() {
                         onClick={() => setAccountMenuOpen(false)}
                       >
                         <BookOpen size={16} aria-hidden />
-                        Gestione Cataloghi
+                        {labels.gestioneCataloghi}
                       </Link>
                     )}
                     <form action="/auth/signout" method="post" className="m-0 block w-full p-0">
                       <button type="submit" className="ladiva-dropdown-item w-full text-left text-[#060d41]" role="menuitem">
                         <LogOut size={16} aria-hidden />
-                        Esci
+                        {labels.esci}
                       </button>
                     </form>
                   </div>
@@ -285,7 +298,7 @@ export default function Header() {
             ) : (
               <Link href="/login" className="ladiva-header-auth-link ladiva-header-auth-link--primary">
                 <LogIn size={16} aria-hidden />
-                Accedi
+                {labels.accedi}
               </Link>
             )}
           </div>
@@ -321,8 +334,11 @@ export default function Header() {
             onClick={handleInstallApp}
           >
             <Download size={18} />
-            Installa app
+            {labels.installa}
           </button>
+          <div className="px-4 py-3">
+            <LocaleSwitcher />
+          </div>
         </div>
       )}
     </header>

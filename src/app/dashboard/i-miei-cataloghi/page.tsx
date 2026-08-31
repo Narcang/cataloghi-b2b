@@ -24,6 +24,7 @@ function categoryDisplayLabel(cat: CatalogCategory): string {
 }
 import { catalogPdfHref, dashboardCatalogReturnTo } from '@/lib/catalogNavigation'
 import { compareCatalogTitoli } from '@/lib/catalogSorting'
+import { getAppLocale } from '@/lib/locale'
 
 export const dynamic = 'force-dynamic'
 
@@ -67,11 +68,14 @@ export default async function IMieiCataloghiPage() {
   }[] = []
   let cataloghiError: { message: string } | null = null
 
+  const locale = await getAppLocale()
+
   if (!inAttesaApprovazione) {
     let query = supabase
       .from('cataloghi')
       .select('id, titolo, categoria, url_immagine, stato_pubblicazione')
       .eq('stato_pubblicazione', 'attivo')
+      .eq('lingua', locale)
       .order('creato_il', { ascending: false })
 
     const { data, error } = await query

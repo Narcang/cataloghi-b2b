@@ -19,12 +19,16 @@ const CATEGORY_DISPLAY_LABEL: Partial<Record<CatalogCategory, string>> = {
   Scontistiche: 'Merchandising',
 }
 
-function categoryDisplayLabel(cat: CatalogCategory): string {
-  return CATEGORY_DISPLAY_LABEL[cat] ?? cat
+function categoryDisplayLabel(cat: string): string {
+  return CATEGORY_DISPLAY_LABEL[cat as CatalogCategory] ?? cat
 }
 import { RUOLI_CATALOGO } from '@/lib/catalogRoles'
 import { catalogPdfHref, reservedAreaCatalogReturnTo } from '@/lib/catalogNavigation'
 import { compareCatalogTitoli } from '@/lib/catalogSorting'
+import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
+import CatalogLinguaTabs from '@/components/admin/CatalogLinguaTabs'
+import { parseCatalogLingua } from '@/lib/catalogLingua'
+import { getAppLocale, LOCALE_LABEL, type AppLocale } from '@/lib/locale'
 
 export const dynamic = 'force-dynamic'
 
@@ -39,11 +43,17 @@ function escapeIlikePattern(value: string): string {
 const RETURN_BASE = '/dashboard/gestione-cataloghi'
 
 export default async function GestioneCataloghiPage(props: {
-  searchParams: Promise<{ nome?: string; message?: string }>
+  searchParams: Promise<{ nome?: string; message?: string; lingua?: string }>
 }) {
   const searchParams = await props.searchParams
   const nomeFilter = (searchParams?.nome ?? '').trim()
   const actionMessage = searchParams?.message ?? ''
+  const uiLocale = await getAppLocale()
+  const linguaTabRaw = (searchParams?.lingua ?? '').trim()
+  const linguaTab: AppLocale | 'all' =
+    linguaTabRaw === 'all' || linguaTabRaw === 'it' || linguaTabRaw === 'ru' || linguaTabRaw === 'en'
+      ? linguaTabRaw
+      : uiLocale
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -63,7 +73,13 @@ export default async function GestioneCataloghiPage(props: {
   if (!isManager) redirect('/dashboard')
 
   const mercatoAttivo = isAdmin ? await getAdminMercato() : 'it'
-  const dataSupabase = isAdmin ? (await getAdminDataSupabase()).client : supabase
+  // Italia: sessione admin (GRANT authenticated + RLS). Il service_role su IT
+  // spesso non ha GRANT su `cataloghi` → "permission denied for table cataloghi".
+  // Russia: client service role del progetto RU (l'admin IT non ha sessione lì).
+  const dataSupabase =
+    isAdmin && mercatoAttivo === 'ru'
+      ? (await getAdminDataSupabase()).client
+      : supabase
 
   // Fetch cataloghi (admin/manager vedono anche le bozze)
   let cataloghiQuery = dataSupabase
@@ -79,7 +95,28 @@ export default async function GestioneCataloghiPage(props: {
 
   const categorieDashboard = categoriesVisibleOnDashboard(ruoloCorrente, true)
 
-  const cataloghiPerVista = (cataloghi ?? [])
+  const cataloghiTutti = cataloghi ?? []
+  const linguaCounts = {
+    all: cataloghiTutti.length,
+    it: cataloghiTutti.filter((c) => parseCatalogLingua(c.lingua) === 'it').length,
+    ru: cataloghiTutti.filter((c) => parseCatalogLingua(c.lingua) === 'ru').length,
+    en: cataloghiTutti.filter((c) => parseCatalogLingua(c.lingua) === 'en').length,
+  }
+  const cataloghiPerVista =
+    linguaTab === 'all'
+      ? cataloghiTutti
+      : cataloghiTutti.filter((c) => parseCatalogLingua(c.lingua) === linguaTab)
+  const categorieVistaSet = new Set<string>(categorieDashboard)
+  const cataloghiSenzaCategoriaVista = cataloghiPerVista.filter(
+    (c) => !c.categoria || !categorieVistaSet.has(c.categoria as string),
+  )
+
+  let cataloghiItaliaCount: number | null = null
+  if (isAdmin && mercatoAttivo === 'ru' && cataloghiPerVista.length === 0 && !cataloghiError) {
+    const itClient = createServiceRoleSupabase() ?? supabase
+    const { count } = await itClient.from('cataloghi').select('id', { count: 'exact', head: true })
+    cataloghiItaliaCount = count ?? 0
+  }
 
   return (
     <div className="ladiva-root ladiva-root-app-dark min-h-screen flex flex-col">
@@ -121,6 +158,7 @@ export default async function GestioneCataloghiPage(props: {
               <p className="text-sm text-zinc-600 mt-1">Cerca per titolo catalogo.</p>
             </div>
             <form className="flex flex-wrap items-center gap-3" method="get">
+              <input type="hidden" name="lingua" value={linguaTab} />
               <input
                 type="search"
                 name="nome"
@@ -157,18 +195,68 @@ export default async function GestioneCataloghiPage(props: {
           <div className="flex items-center justify-between mb-8 border-b border-black pb-4">
             <h2 className="text-3xl md:text-4xl font-sans tracking-tight text-zinc-100 flex items-center gap-3">
               <FileText className="text-white" /> Cataloghi
+              <span className="text-base font-sans font-medium tracking-normal text-zinc-400">
+                {MERCATO_LABEL[mercatoAttivo]} · {cataloghiPerVista.length}
+              </span>
             </h2>
+          </div>
+
+          <div className="mb-8">
+            <CatalogLinguaTabs active={linguaTab} counts={linguaCounts} nome={nomeFilter} />
           </div>
 
           {cataloghiError ? (
             <div className="text-red-700 p-4 border border-red-300 bg-red-50 rounded-xl">
               Errore nel caricamento: {cataloghiError.message}
             </div>
+          ) : cataloghiPerVista.length === 0 ? (
+            <div className="rounded-2xl border border-amber-300 bg-amber-50 px-6 py-10 text-center">
+              {mercatoAttivo === 'ru' && cataloghiTutti.length === 0 ? (
+                <>
+                  <p className="text-lg font-medium text-amber-950">
+                    Nessun catalogo sul mercato {MERCATO_LABEL[mercatoAttivo]}.
+                  </p>
+                  <p className="mt-3 text-sm text-amber-900 max-w-xl mx-auto">
+                    Stai monitorando la versione Russia, il cui archivio è separato da quello italiano.
+                    {cataloghiItaliaCount && cataloghiItaliaCount > 0
+                      ? ` Sul mercato Italia risultano ${cataloghiItaliaCount} cataloghi: seleziona Italia nello switcher in alto per vederli.`
+                      : ' Seleziona Italia nello switcher in alto per vedere i cataloghi del portale italiano.'}
+                  </p>
+                </>
+              ) : linguaTab !== 'all' && cataloghiTutti.length > 0 ? (
+                <>
+                  <p className="text-lg font-medium text-amber-950">
+                    Nessun catalogo in {LOCALE_LABEL[linguaTab]}.
+                  </p>
+                  <p className="mt-3 text-sm text-amber-900">
+                    Carica un file in questa lingua dalla sezione Nuovo Catalogo, oppure apri la scheda Tutte.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-lg font-medium text-amber-950">
+                    Nessun catalogo sul mercato {MERCATO_LABEL[mercatoAttivo]}.
+                  </p>
+                  <p className="mt-3 text-sm text-amber-900">
+                    Non risulta nessun file in archivio. Puoi caricarne uno dalla sezione Nuovo Catalogo.
+                  </p>
+                </>
+              )}
+            </div>
           ) : (
             <div className="space-y-10">
-              {categorieDashboard.map((categoria) => {
+              {[
+                ...categorieDashboard,
+                ...Array.from(
+                  new Set(
+                    cataloghiSenzaCategoriaVista
+                      .map((c) => (typeof c.categoria === 'string' ? c.categoria.trim() : ''))
+                      .filter((cat) => cat.length > 0),
+                  ),
+                ),
+              ].map((categoria) => {
                 const items = cataloghiPerVista
-                  .filter((c) => c.categoria === categoria)
+                  .filter((c) => String(c.categoria ?? '').trim() === categoria)
                   .sort((a, b) => {
                     const byTitle = compareCatalogTitoli(a.titolo, b.titolo)
                     if (byTitle !== 0) return byTitle
@@ -225,7 +313,12 @@ export default async function GestioneCataloghiPage(props: {
                                   <h3 className="text-2xl text-zinc-900 font-medium uppercase tracking-wide leading-tight mb-1">
                                     {catalogo.titolo}
                                   </h3>
-                                  <div className="mb-2">
+                                  <div className="mb-2 flex flex-wrap gap-1.5">
+                                    <span className="inline-flex items-center rounded-full border border-black px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-700">
+                                      {parseCatalogLingua(catalogo.lingua).toUpperCase()}
+                                      {' · '}
+                                      {LOCALE_LABEL[parseCatalogLingua(catalogo.lingua)]}
+                                    </span>
                                     <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${
                                       catalogo.stato_pubblicazione === 'attivo'
                                         ? 'bg-emerald-50 text-emerald-900 border-emerald-200'

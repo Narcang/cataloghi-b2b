@@ -10,6 +10,7 @@ import {
   type PortaleTile,
 } from '@/lib/catalogCategories'
 import { CATALOG_RETURN_TO_PARAM, catalogPdfHref } from '@/lib/catalogNavigation'
+import { getAppLocale } from '@/lib/locale'
 
 /** Categorie che aprono direttamente il PDF (nessuna lista intermedia). */
 const DIRECT_OPEN_CATEGORIES = new Set<string>(['Scontistiche', 'Listini', 'Power Point'])
@@ -42,6 +43,7 @@ function tileAccentColor(categoria: CatalogCategory): string {
 }
 
 export default async function PortalePage() {
+  const locale = await getAppLocale()
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -72,6 +74,7 @@ export default async function PortalePage() {
     .select('id, categoria')
     .in('categoria', categorie)
     .eq('stato_pubblicazione', 'attivo')
+    .eq('lingua', locale)
     .order('creato_il', { ascending: false })
 
   const countPerCategoria: Record<string, number> = {}

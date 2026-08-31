@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import PwaInstallBanner from "@/components/PwaInstallBanner";
+import { getAppLocale } from "@/lib/locale";
 import { SITE_ICON_SEARCH } from "@/lib/siteIconVersion";
 import "./globals.css";
 
@@ -50,16 +51,17 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getAppLocale()
   const iconHref = `/icon.png?${SITE_ICON_SEARCH}`
   const appleHref = `/apple-icon.png?${SITE_ICON_SEARCH}`
 
   return (
-    <html lang="it">
+    <html lang={locale}>
       <head>
         {/* Link espliciti: app/icon.png faceva iniettare anche /icon.png senza query (cache / favicon sbagliata). */}
         <link rel="icon" href={iconHref} type="image/png" sizes="32x32" />

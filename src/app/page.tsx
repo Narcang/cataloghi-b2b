@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import Header from '@/components/Header'
+import LanguageChooser from '@/components/LanguageChooser'
 import {
   CATALOG_CATEGORIES,
   CATEGORY_TILE_IMAGE,
@@ -8,6 +9,8 @@ import {
   categoryToSlug,
   type CatalogCategory,
 } from '@/lib/catalogCategories'
+import { tHome } from '@/lib/i18n'
+import { getAppLocale, getLocaleCookie } from '@/lib/locale'
 import { createClient } from '@/utils/supabase/server'
 
 const HIDDEN_HOME_CATEGORIES = new Set([
@@ -50,6 +53,13 @@ function decodeFlashMessage(raw: string): string {
 }
 
 export default async function LandingPage(props: { searchParams?: Promise<{ message?: string }> }) {
+  const localeCookie = await getLocaleCookie()
+  if (!localeCookie) {
+    return <LanguageChooser />
+  }
+
+  const locale = await getAppLocale()
+  const copy = tHome(locale)
   const searchParams = props.searchParams ? await props.searchParams : {}
   const flashRaw = searchParams?.message?.trim()
   const flashMessage = flashRaw ? decodeFlashMessage(flashRaw) : null
@@ -63,6 +73,7 @@ export default async function LandingPage(props: { searchParams?: Promise<{ mess
     .select('id, categoria')
     .in('categoria', directLinkCategorie)
     .eq('stato_pubblicazione', 'attivo')
+    .eq('lingua', locale)
     .order('creato_il', { ascending: false })
     .limit(15)
 
@@ -130,7 +141,7 @@ export default async function LandingPage(props: { searchParams?: Promise<{ mess
                     {categoryDisplayName(cat)}
                   </p>
                   <p className="shrink-0 text-sm sm:text-base lg:text-lg xl:text-xl uppercase leading-snug text-red-600" style={{ fontFamily: 'var(--font-sans)', fontWeight: 400 }}>
-                    Cataloghi Tecnici
+                    {copy.tecnici}
                   </p>
                 </div>
               </Link>
@@ -165,7 +176,7 @@ export default async function LandingPage(props: { searchParams?: Promise<{ mess
                       {categoryDisplayName(cat)}
                     </p>
                     <p className="mt-0.5 text-red-600 font-normal uppercase tracking-widest text-xs md:text-sm leading-snug">
-                      Catalogo Fotografico
+                      {copy.fotografico}
                     </p>
                   </div>
                 </Link>
@@ -179,17 +190,17 @@ export default async function LandingPage(props: { searchParams?: Promise<{ mess
         <footer className="ladiva-footer ladiva-footer--compact ladiva-footer-home-strip">
           <div className="ladiva-home-footer-inner">
             <p className="text-sm max-w-3xl mx-auto text-center mb-1">
-              <Link href="/privacy" className="underline hover:text-zinc-800 transition-colors whitespace-nowrap">Privacy Policy</Link>
+              <Link href="/privacy" className="underline hover:text-zinc-800 transition-colors whitespace-nowrap">{copy.privacy}</Link>
               {' · '}
-              <Link href="/termini" className="underline hover:text-zinc-800 transition-colors whitespace-nowrap">Termini e Condizioni</Link>
+              <Link href="/termini" className="underline hover:text-zinc-800 transition-colors whitespace-nowrap">{copy.termini}</Link>
               {' · '}
-              <Link href="/cookie" className="underline hover:text-zinc-800 transition-colors whitespace-nowrap">Cookie Policy</Link>
+              <Link href="/cookie" className="underline hover:text-zinc-800 transition-colors whitespace-nowrap">{copy.cookie}</Link>
             </p>
             <p className="text-sm max-w-3xl mx-auto text-center">
               © {new Date().getFullYear()} Ladiva Ceramica · Carpineti (RE), Italia
               {' · '}
               <Link href="/login" className="ladiva-footer-link whitespace-nowrap">
-                Accedi al Portale Agenti →
+                {copy.accediPortale}
               </Link>
             </p>
           </div>

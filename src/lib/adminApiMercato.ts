@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
-import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
 import { getAdminDataSupabase } from '@/lib/mercatoServer'
 import type { Mercato } from '@/lib/mercato'
 import type { SupabaseClient } from '@supabase/supabase-js'
@@ -57,9 +56,10 @@ export async function resolveAdminDataContext(options?: {
   if (isAdmin) {
     const adminData = await getAdminDataSupabase()
     mercato = adminData.mercato
-    dataClient = adminData.client
+    // Italia: sessione autenticata. Russia: service role del progetto RU.
+    dataClient = mercato === 'ru' ? adminData.client : authClient
   } else {
-    dataClient = createServiceRoleSupabase() ?? authClient
+    dataClient = authClient
   }
 
   return {

@@ -13,6 +13,7 @@ import {
   type CatalogCategory,
 } from '@/lib/catalogCategories'
 import { isVenditoreLike } from '@/lib/catalogRoles'
+import { getAppLocale } from '@/lib/locale'
 
 export default async function ListiniPartnerPage() {
   const supabase = await createClient()
@@ -42,10 +43,12 @@ export default async function ListiniPartnerPage() {
     redirect('/dashboard')
   }
 
+  const locale = await getAppLocale()
   const { data: cataloghi, error: cataloghiError } = await supabase
     .from('cataloghi')
     .select('id, titolo, categoria, url_immagine, stato_pubblicazione, area_geografica_target')
     .eq('stato_pubblicazione', 'attivo')
+    .eq('lingua', locale)
     .order('creato_il', { ascending: false })
 
   const cataloghiListini = (cataloghi ?? []).filter((c) => {

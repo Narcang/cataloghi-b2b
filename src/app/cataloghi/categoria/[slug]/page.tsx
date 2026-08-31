@@ -7,6 +7,7 @@ import { createClient } from '@/utils/supabase/server'
 import { categoryFromSlug, isLoginOnlyCatalogCategory } from '@/lib/catalogCategories'
 import { catalogPdfHref, safeCatalogReturnTo, CATALOG_RETURN_TO_PARAM } from '@/lib/catalogNavigation'
 import { compareCatalogTitoli } from '@/lib/catalogSorting'
+import { getAppLocale } from '@/lib/locale'
 
 /** Elenco cataloghi pubblici: sempre dati aggiornati da Supabase. */
 export const dynamic = 'force-dynamic'
@@ -46,6 +47,7 @@ export default async function CataloghiPerCategoriaPage({
   const categoria = categoryFromSlug(slug)
   if (!categoria) notFound()
 
+  const locale = await getAppLocale()
   const supabase = await createClient()
   const {
     data: { user },
@@ -60,6 +62,7 @@ export default async function CataloghiPerCategoriaPage({
     .select('*')
     .eq('categoria', categoria)
     .eq('stato_pubblicazione', 'attivo')
+    .eq('lingua', locale)
 
   if (error) {
     return (
