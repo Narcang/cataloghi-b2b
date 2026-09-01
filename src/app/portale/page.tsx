@@ -12,6 +12,7 @@ import {
 import { CATALOG_RETURN_TO_PARAM, catalogPdfHref } from '@/lib/catalogNavigation'
 import { getAppLocale } from '@/lib/localeServer'
 import { catalogLingueForLocale, preferCatalogLingua, pickCatalogForLocale } from '@/lib/catalogLingua'
+import { tDashboard } from '@/lib/i18n'
 
 /** Categorie che aprono direttamente il PDF (nessuna lista intermedia). */
 const DIRECT_OPEN_CATEGORIES = new Set<string>(['Scontistiche', 'Listini', 'Power Point'])
@@ -45,6 +46,7 @@ function tileAccentColor(categoria: CatalogCategory): string {
 
 export default async function PortalePage() {
   const locale = await getAppLocale()
+  const copy = tDashboard(locale)
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -104,10 +106,10 @@ export default async function PortalePage() {
       <main className="w-full max-w-[1200px] mx-auto px-6 py-10 md:py-14 flex-1">
         <div className="mb-10">
           <h1 className="text-3xl md:text-4xl font-sans uppercase tracking-tight text-zinc-900">
-            {nomeUtente ? `Benvenuto, ${nomeUtente}` : 'Area Riservata'}
+            {nomeUtente ? `${copy.portaleBenvenuto}, ${nomeUtente}` : copy.portaleTitolo}
           </h1>
           <p className="mt-2 text-sm text-zinc-500 uppercase tracking-wide">
-            Seleziona la sezione che vuoi consultare
+            {copy.portaleHelp}
           </p>
         </div>
 
@@ -147,7 +149,7 @@ export default async function PortalePage() {
                         {count} {count === 1 ? 'file' : 'file'}
                       </span>
                       <span className="flex items-center gap-1 text-xs font-medium text-zinc-400 group-hover:text-zinc-700 transition-colors uppercase tracking-wide">
-                        Apri <ChevronRight size={14} />
+                        {copy.apri} <ChevronRight size={14} />
                       </span>
                     </div>
                   </div>

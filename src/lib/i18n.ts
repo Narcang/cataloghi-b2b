@@ -129,6 +129,138 @@ const login = {
   },
 } as const
 
+const dashboard = {
+  it: {
+    kicker: 'Dashboard Riservata',
+    kickerPublic: 'Accesso pubblico',
+    titolo: 'La tua Area Riservata',
+    titoloPublic: 'Cataloghi e contatti',
+    welcomePublic:
+      'Sfoglia i cataloghi pubblicati, consulta Dove siamo e i contatti diretti. Per aree riservate agenti/partner accedi al portale.',
+    bentornato: 'Bentornato',
+    utenteFree: 'Utente Free',
+    inAttesa: 'In attesa di approvazione',
+    gestione: 'Gestione',
+    gestioneHelp: 'Seleziona la sezione che vuoi gestire.',
+    gestioneUtenti: 'Gestione Utenti',
+    gestioneUtentiHelp:
+      'Approva registrazioni, gestisci profili, invita nuovi utenti e consulta gli operatori abilitati.',
+    gestioneCataloghi: 'Gestione Cataloghi',
+    gestioneCataloghiHelp:
+      'Carica nuovi PDF, modifica stato e visibilità, aggiorna copertine ed elimina cataloghi.',
+    apri: 'Apri',
+    contattiDiretti: 'I Tuoi Contatti Diretti',
+    nessunContatto: 'Non hai ancora nessun contatto diretto assegnato in rubrica.',
+    assistenzaLadiva: 'Assistenza Ladiva',
+    chiama: 'Chiama',
+    scrivi: 'Scrivi',
+    contattoSenzaNome: 'Contatto Senza Nome',
+    tornaHome: '← Torna alla Home Pubblica',
+    invitaUtenti: 'Invita utenti',
+    invitaHelp:
+      'Genera un link di registrazione per il ruolo scelto. Il nuovo utente sarà collegato al tuo profilo dopo l’approvazione.',
+    inserisciAgente: 'Inserisci agente manualmente',
+    inserisciVenditore: 'Inserisci venditore manualmente',
+    inserisciAgenteHelp:
+      'Aggiungi manualmente un agente non ancora registrato: comparirà subito nella tua struttura organizzativa.',
+    inserisciVenditoreHelp:
+      'Aggiungi manualmente un venditore non ancora registrato: comparirà subito nella tua struttura organizzativa.',
+    inserisciBackOffice: 'Inserisci back-office manualmente',
+    inserisciBackOfficeHelp:
+      'Aggiungi manualmente un profilo back-office (stessi poteri dell’agente) non ancora registrato.',
+    ilTuoProfilo: 'il tuo profilo',
+    portaleBenvenuto: 'Benvenuto',
+    portaleTitolo: 'Area Riservata',
+    portaleHelp: 'Seleziona la sezione che vuoi consultare',
+  },
+  ru: {
+    kicker: 'Закрытая панель',
+    kickerPublic: 'Публичный доступ',
+    titolo: 'Ваш закрытый раздел',
+    titoloPublic: 'Каталоги и контакты',
+    welcomePublic:
+      'Просматривайте опубликованные каталоги, раздел «Где мы» и прямые контакты. Для разделов агентов и партнёров войдите в портал.',
+    bentornato: 'С возвращением',
+    utenteFree: 'Пользователь Free',
+    inAttesa: 'Ожидает одобрения',
+    gestione: 'Управление',
+    gestioneHelp: 'Выберите раздел, которым хотите управлять.',
+    gestioneUtenti: 'Управление пользователями',
+    gestioneUtentiHelp:
+      'Одобряйте регистрации, управляйте профилями, приглашайте пользователей и смотрите назначенных операторов.',
+    gestioneCataloghi: 'Управление каталогами',
+    gestioneCataloghiHelp:
+      'Загружайте PDF, меняйте статус и видимость, обновляйте обложки и удаляйте каталоги.',
+    apri: 'Открыть',
+    contattiDiretti: 'Ваши прямые контакты',
+    nessunContatto: 'В справочнике пока нет назначенных прямых контактов.',
+    assistenzaLadiva: 'Поддержка Ladiva',
+    chiama: 'Позвонить',
+    scrivi: 'Написать',
+    contattoSenzaNome: 'Контакт без имени',
+    tornaHome: '← На публичную главную',
+    invitaUtenti: 'Пригласить пользователей',
+    invitaHelp:
+      'Создайте ссылку регистрации для выбранной роли. Новый пользователь будет связан с вашим профилем после одобрения.',
+    inserisciAgente: 'Добавить агента вручную',
+    inserisciVenditore: 'Добавить продавца вручную',
+    inserisciAgenteHelp:
+      'Добавьте агента, который ещё не зарегистрирован: он сразу появится в вашей структуре.',
+    inserisciVenditoreHelp:
+      'Добавьте продавца, который ещё не зарегистрирован: он сразу появится в вашей структуре.',
+    inserisciBackOffice: 'Добавить back-office вручную',
+    inserisciBackOfficeHelp:
+      'Добавьте профиль back-office (те же права, что у агента), который ещё не зарегистрирован.',
+    ilTuoProfilo: 'ваш профиль',
+    portaleBenvenuto: 'Добро пожаловать',
+    portaleTitolo: 'Закрытый раздел',
+    portaleHelp: 'Выберите раздел для просмотра',
+  },
+  en: {
+    kicker: 'Reserved dashboard',
+    kickerPublic: 'Public access',
+    titolo: 'Your reserved area',
+    titoloPublic: 'Catalogs and contacts',
+    welcomePublic:
+      'Browse published catalogs, Where we are and direct contacts. Sign in to the portal for agent and partner areas.',
+    bentornato: 'Welcome back',
+    utenteFree: 'Free user',
+    inAttesa: 'Pending approval',
+    gestione: 'Management',
+    gestioneHelp: 'Select the section you want to manage.',
+    gestioneUtenti: 'User management',
+    gestioneUtentiHelp:
+      'Approve registrations, manage profiles, invite new users and view authorized operators.',
+    gestioneCataloghi: 'Catalog management',
+    gestioneCataloghiHelp:
+      'Upload new PDFs, change status and visibility, update covers and delete catalogs.',
+    apri: 'Open',
+    contattiDiretti: 'Your direct contacts',
+    nessunContatto: 'You do not have any direct contacts assigned in the directory yet.',
+    assistenzaLadiva: 'Ladiva support',
+    chiama: 'Call',
+    scrivi: 'Email',
+    contattoSenzaNome: 'Unnamed contact',
+    tornaHome: '← Back to the public home',
+    invitaUtenti: 'Invite users',
+    invitaHelp:
+      'Generate a registration link for the selected role. The new user will be linked to your profile after approval.',
+    inserisciAgente: 'Add an agent manually',
+    inserisciVenditore: 'Add a seller manually',
+    inserisciAgenteHelp:
+      'Manually add an agent who is not registered yet: they will appear immediately in your organization tree.',
+    inserisciVenditoreHelp:
+      'Manually add a seller who is not registered yet: they will appear immediately in your organization tree.',
+    inserisciBackOffice: 'Add back-office manually',
+    inserisciBackOfficeHelp:
+      'Manually add a back-office profile (same powers as an agent) who is not registered yet.',
+    ilTuoProfilo: 'your profile',
+    portaleBenvenuto: 'Welcome',
+    portaleTitolo: 'Reserved area',
+    portaleHelp: 'Select the section you want to open',
+  },
+} as const
+
 export function tHeader(locale: AppLocale) {
   return header[locale]
 }
@@ -143,4 +275,8 @@ export function tCatalogAdmin(locale: AppLocale) {
 
 export function tLogin(locale: AppLocale) {
   return login[locale]
+}
+
+export function tDashboard(locale: AppLocale) {
+  return dashboard[locale]
 }

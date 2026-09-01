@@ -38,6 +38,8 @@ import {
 import { fetchUltimoAccessoMap, ultimoAccessoMapToRecord } from '@/lib/ultimoAccessoUtenti'
 import { getAppLocale } from '@/lib/localeServer'
 import { catalogLingueForLocale, preferCatalogLingua } from '@/lib/catalogLingua'
+import { tDashboard } from '@/lib/i18n'
+import { tRuolo } from '@/lib/i18nAdmin'
 
 const ASSISTENZA_LADIVA_TELEFONO = '+39 0536 185 6217'
 const ASSISTENZA_LADIVA_EMAIL = 'info@ladiva-fpd.com'
@@ -98,6 +100,7 @@ export default async function Dashboard(props: {
   const nomeFilter = (searchParams?.nome ?? '').trim()
   const actionMessage = searchParams?.message ?? ''
   const locale = await getAppLocale()
+  const copy = tDashboard(locale)
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -413,29 +416,29 @@ export default async function Dashboard(props: {
         
         {/* Welcome Section */}
         <div className="mt-4 mb-12">
-          <span className="ladiva-label text-sm">{!user ? 'Accesso pubblico' : 'Dashboard Riservata'}</span>
+          <span className="ladiva-label text-sm">{!user ? copy.kickerPublic : copy.kicker}</span>
           <h1 className="text-3xl md:text-4xl font-semibold text-zinc-900 tracking-tight mt-1 mb-2">
-            {!user ? 'Cataloghi e contatti' : 'La tua Area Riservata'}
+            {!user ? copy.titoloPublic : copy.titolo}
           </h1>
           <p className="text-zinc-600 max-w-2xl text-lg">
             {!user
-              ? 'Sfoglia i cataloghi pubblicati, consulta Dove siamo e i contatti diretti. Per aree riservate agenti/partner accedi al portale.'
-              : <>Bentornato {profilo?.nome_completo || user?.email || 'Utente Free'}</>
+              ? copy.welcomePublic
+              : <>{copy.bentornato} {profilo?.nome_completo || user?.email || copy.utenteFree}</>
             }
             {user ? (
               <>
-                {isAdmin ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Admin</span> : null}
-                {ruoloCorrente === 'manager' ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Manager</span> : null}
-                {isPartner ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Venditore</span> : null}
-                {isRivenditore ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Rivenditore</span> : null}
-                {isAgenzia ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Agenzia</span> : null}
-                {isAgente && !isBackOffice ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Agente</span> : null}
-                {isBackOffice ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Back-Office</span> : null}
-                {isStudio ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Studio</span> : null}
-                {isPartnerDipendente ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">Promoter</span> : null}
+                {isAdmin ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">{tRuolo(locale, 'admin')}</span> : null}
+                {ruoloCorrente === 'manager' ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">{tRuolo(locale, 'manager')}</span> : null}
+                {isPartner ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">{tRuolo(locale, 'distributore')}</span> : null}
+                {isRivenditore ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">{tRuolo(locale, 'rivenditore')}</span> : null}
+                {isAgenzia ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">{tRuolo(locale, 'agenzia')}</span> : null}
+                {isAgente && !isBackOffice ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">{tRuolo(locale, 'agente')}</span> : null}
+                {isBackOffice ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">{tRuolo(locale, 'back_office')}</span> : null}
+                {isStudio ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">{tRuolo(locale, 'studio')}</span> : null}
+                {isPartnerDipendente ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">{tRuolo(locale, 'partner_dipendente')}</span> : null}
                 {user && profilo?.registrazione_approvata === false ? (
                   <span className="ml-3 inline-flex items-center rounded-full border border-amber-300 px-2.5 py-0.5 text-xs font-semibold bg-amber-50 text-amber-900">
-                    In attesa di approvazione
+                    {copy.inAttesa}
                   </span>
                 ) : null}
                 {isFree && !isManager && !isVenditoreLikeRole && !isAgenzia && !isAgente && !isStudio && !isPartnerDipendente && profilo?.registrazione_approvata !== false ? (
@@ -478,15 +481,14 @@ export default async function Dashboard(props: {
           <section className="border border-black rounded-2xl bg-white p-6 space-y-8">
             <div>
               <h2 className="text-xl text-zinc-900 font-medium mb-1">
-                {isAgenzia ? 'Inserisci agente manualmente' : 'Inserisci venditore manualmente'}
+                {isAgenzia ? copy.inserisciAgente : copy.inserisciVenditore}
               </h2>
               <p className="text-sm text-zinc-500 mb-4">
-                Aggiungi manualmente {isAgenzia ? 'un agente' : 'un venditore'} non ancora registrato: comparirà subito
-                nella tua struttura organizzativa.
+                {isAgenzia ? copy.inserisciAgenteHelp : copy.inserisciVenditoreHelp}
               </p>
               <CreaAssociatoManuale
                 parentId={user.id}
-                parentLabel={profilo?.societa || profilo?.nome_completo || 'il tuo profilo'}
+                parentLabel={profilo?.societa || profilo?.nome_completo || copy.ilTuoProfilo}
                 ruoloNuovo={isAgenzia ? 'agente' : 'distributore'}
                 societaBloccata={profilo?.societa ?? undefined}
               />
@@ -494,14 +496,14 @@ export default async function Dashboard(props: {
             {isAgenzia ? (
               <div>
                 <h2 className="text-xl text-zinc-900 font-medium mb-1">
-                  Inserisci back-office manualmente
+                  {copy.inserisciBackOffice}
                 </h2>
                 <p className="text-sm text-zinc-500 mb-4">
-                  Aggiungi manualmente un profilo back-office (stessi poteri dell&apos;agente) non ancora registrato.
+                  {copy.inserisciBackOfficeHelp}
                 </p>
                 <CreaAssociatoManuale
                   parentId={user.id}
-                  parentLabel={profilo?.societa || profilo?.nome_completo || 'il tuo profilo'}
+                  parentLabel={profilo?.societa || profilo?.nome_completo || copy.ilTuoProfilo}
                   ruoloNuovo="back_office"
                   societaBloccata={profilo?.societa ?? undefined}
                 />
@@ -531,9 +533,9 @@ export default async function Dashboard(props: {
 
         {showFullDashboard && !isManager && (isVenditoreLikeRole || isPartnerDipendente || isAgenzia || isAgente) && (
           <section className="border border-black rounded-2xl bg-white p-6">
-            <h2 className="text-xl text-zinc-900 font-medium mb-1">Invita utenti</h2>
+            <h2 className="text-xl text-zinc-900 font-medium mb-1">{copy.invitaUtenti}</h2>
             <p className="text-sm text-zinc-500 mb-4">
-              Genera un link di registrazione per il ruolo scelto. Il nuovo utente sarà collegato al tuo profilo dopo l&apos;approvazione.
+              {copy.invitaHelp}
             </p>
             <InvitaUtente ruoloCorrente={ruoloCorrente} />
           </section>
@@ -543,7 +545,7 @@ export default async function Dashboard(props: {
           <section id="contatti">
             <div className="flex items-center justify-between mb-8 border-b border-black pb-4">
               <h2 className="text-3xl md:text-4xl tracking-tight text-zinc-100 flex items-center gap-3 font-sans">
-                <Phone className="text-white" /> I Tuoi Contatti Diretti
+                <Phone className="text-white" /> {copy.contattiDiretti}
               </h2>
             </div>
             {contattiDiretti && contattiDiretti.length > 0 ? (
@@ -555,13 +557,14 @@ export default async function Dashboard(props: {
                     email={fornitore.email}
                     telefono={fornitore.telefono}
                     ruolo={fornitore.ruolo}
+                    locale={locale}
                   />
                 ))}
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center p-10 text-center border rounded-2xl border-black bg-white">
                 <p className="text-lg text-zinc-500">
-                  Non hai ancora nessun contatto diretto assegnato in rubrica.
+                  {copy.nessunContatto}
                 </p>
               </div>
             )}
@@ -572,8 +575,8 @@ export default async function Dashboard(props: {
         {showFullDashboard && isManager && (
           <section>
             <div className="mb-6 border-b border-black pb-4">
-              <h2 className="text-2xl text-zinc-900 font-semibold tracking-tight">Gestione</h2>
-              <p className="text-sm text-zinc-600 mt-1">Seleziona la sezione che vuoi gestire.</p>
+              <h2 className="text-2xl text-zinc-900 font-semibold tracking-tight">{copy.gestione}</h2>
+              <p className="text-sm text-zinc-600 mt-1">{copy.gestioneHelp}</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <Link
@@ -584,13 +587,13 @@ export default async function Dashboard(props: {
                   <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[#060d41] text-white mb-5">
                     <Users size={24} />
                   </div>
-                  <h3 className="text-xl font-semibold text-zinc-900 mb-2">Gestione Utenti</h3>
+                  <h3 className="text-xl font-semibold text-zinc-900 mb-2">{copy.gestioneUtenti}</h3>
                   <p className="text-sm text-zinc-500 leading-relaxed">
-                    Approva registrazioni, gestisci profili, invita nuovi utenti e consulta gli operatori abilitati.
+                    {copy.gestioneUtentiHelp}
                   </p>
                 </div>
                 <div className="mt-6 flex items-center gap-1 text-xs font-semibold text-white uppercase tracking-wide group-hover:gap-2 transition-all">
-                  Apri <span aria-hidden>→</span>
+                  {copy.apri} <span aria-hidden>→</span>
                 </div>
               </Link>
 
@@ -603,13 +606,13 @@ export default async function Dashboard(props: {
                     <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[#060d41] text-white mb-5">
                       <FileText size={24} />
                     </div>
-                    <h3 className="text-xl font-semibold text-zinc-900 mb-2">Gestione Cataloghi</h3>
+                    <h3 className="text-xl font-semibold text-zinc-900 mb-2">{copy.gestioneCataloghi}</h3>
                     <p className="text-sm text-zinc-500 leading-relaxed">
-                      Carica nuovi PDF, modifica stato e visibilità, aggiorna copertine ed elimina cataloghi.
+                      {copy.gestioneCataloghiHelp}
                     </p>
                   </div>
                   <div className="mt-6 flex items-center gap-1 text-xs font-semibold text-white uppercase tracking-wide group-hover:gap-2 transition-all">
-                    Apri <span aria-hidden>→</span>
+                    {copy.apri} <span aria-hidden>→</span>
                   </div>
                 </Link>
               )}
@@ -622,7 +625,7 @@ export default async function Dashboard(props: {
           <section id="contatti">
             <div className="flex items-center justify-between mb-8 border-b border-black pb-4">
               <h2 className="text-3xl md:text-4xl tracking-tight text-zinc-100 flex items-center gap-3 font-sans">
-                <Phone className="text-white" /> I Tuoi Contatti Diretti
+                <Phone className="text-white" /> {copy.contattiDiretti}
               </h2>
             </div>
             {contattiDiretti && contattiDiretti.length > 0 ? (
@@ -634,13 +637,14 @@ export default async function Dashboard(props: {
                     email={fornitore.email}
                     telefono={fornitore.telefono}
                     ruolo={fornitore.ruolo}
+                    locale={locale}
                   />
                 ))}
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center p-10 text-center border rounded-2xl border-black bg-white">
                 <p className="text-lg text-zinc-500">
-                  Non hai ancora nessun contatto diretto assegnato in rubrica.
+                  {copy.nessunContatto}
                 </p>
               </div>
             )}
@@ -655,7 +659,7 @@ export default async function Dashboard(props: {
           <p className="text-sm max-w-3xl mx-auto text-center">
             © {new Date().getFullYear()} Ladiva Ceramica · Carpineti (RE), Italia
             {' · '}
-            <Link href="/" className="ladiva-footer-link whitespace-nowrap">← Torna alla Home Pubblica</Link>
+            <Link href="/" className="ladiva-footer-link whitespace-nowrap">{copy.tornaHome}</Link>
           </p>
         </div>
       </footer>

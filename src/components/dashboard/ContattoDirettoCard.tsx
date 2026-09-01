@@ -1,15 +1,7 @@
 import { Phone, MessageCircle, Mail } from 'lucide-react'
-
-const RUOLO_LABEL: Record<string, string> = {
-  agenzia:            'Agenzia',
-  agente:             'Agente',
-  rivenditore:        'Rivenditore',
-  distributore:       'Venditore',
-  studio:             'Studio',
-  partner_dipendente: 'Promoter',
-  manager:            'Manager',
-  admin:              'Admin',
-}
+import type { AppLocale } from '@/lib/locale'
+import { tDashboard } from '@/lib/i18n'
+import { tRuolo } from '@/lib/i18nAdmin'
 
 const RUOLO_BADGE_CLASS: Record<string, string> = {
   agenzia:            'bg-amber-50 text-amber-800 border-amber-200',
@@ -26,9 +18,24 @@ type Props = {
   email: string | null
   telefono: string | null
   ruolo?: string | null
+  locale?: AppLocale
 }
 
-export default function ContattoDirettoCard({ nome, email, telefono, ruolo }: Props) {
+function displayNome(nome: string | null, contattoSenzaNome: string, assistenzaLadiva: string): string {
+  const trimmed = nome?.trim() || ''
+  if (!trimmed) return contattoSenzaNome
+  if (trimmed === 'Assistenza Ladiva' || trimmed === 'Assistenza cataloghi') return assistenzaLadiva
+  return trimmed
+}
+
+export default function ContattoDirettoCard({
+  nome,
+  email,
+  telefono,
+  ruolo,
+  locale = 'it',
+}: Props) {
+  const copy = tDashboard(locale)
   const tel = telefono?.trim() || null
   const mail = email?.trim() || null
   const badgeClass = ruolo ? (RUOLO_BADGE_CLASS[ruolo] ?? 'bg-zinc-100 text-zinc-700 border-zinc-300') : null
@@ -37,10 +44,12 @@ export default function ContattoDirettoCard({ nome, email, telefono, ruolo }: Pr
     <div className="bg-white border border-black rounded-2xl p-6 pb-8 flex flex-col h-full shadow-lg">
       <div className="mb-4 space-y-1">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="text-lg font-medium text-zinc-900">{nome || 'Contatto Senza Nome'}</h3>
+          <h3 className="text-lg font-medium text-zinc-900">
+            {displayNome(nome, copy.contattoSenzaNome, copy.assistenzaLadiva)}
+          </h3>
           {ruolo && badgeClass ? (
             <span className={`shrink-0 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${badgeClass}`}>
-              {RUOLO_LABEL[ruolo] ?? ruolo}
+              {tRuolo(locale, ruolo)}
             </span>
           ) : null}
         </div>
@@ -54,7 +63,7 @@ export default function ContattoDirettoCard({ nome, email, telefono, ruolo }: Pr
               href={`tel:${tel}`}
               className="flex-1 min-w-[7rem] flex justify-center items-center gap-2 bg-[#060d41] text-white hover:bg-[#0a155a] py-2.5 px-4 rounded-lg text-sm font-semibold transition-colors"
             >
-              <Phone size={16} /> Chiama
+              <Phone size={16} /> {copy.chiama}
             </a>
             <a
               href={`https://wa.me/${tel.replace(/\D/g, '')}`}
@@ -71,13 +80,13 @@ export default function ContattoDirettoCard({ nome, email, telefono, ruolo }: Pr
             href={`mailto:${mail}`}
             className="ladiva-dashboard-btn-light flex-1 min-w-[7rem] flex justify-center items-center gap-2 border border-black bg-white text-black hover:bg-zinc-100 py-2.5 px-4 rounded-lg text-sm font-semibold transition-colors"
           >
-            <Mail size={16} /> Scrivi
+            <Mail size={16} /> {copy.scrivi}
           </a>
         ) : null}
         {!tel && !mail ? (
           <>
             <span className="flex-1 flex justify-center items-center gap-2 bg-zinc-100 text-zinc-600 opacity-50 py-2.5 px-4 rounded-lg text-sm font-semibold cursor-not-allowed">
-              <Phone size={16} /> Chiama
+              <Phone size={16} /> {copy.chiama}
             </span>
             <span className="flex-1 flex justify-center items-center gap-2 border border-black text-zinc-600 opacity-50 bg-zinc-50 py-2.5 px-4 rounded-lg text-sm font-medium cursor-not-allowed">
               <MessageCircle size={16} /> WhatsApp
