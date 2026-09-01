@@ -93,7 +93,7 @@ const home = {
 const catalogAdmin = {
   it: {
     linguaFile: 'Lingua del file',
-    linguaHelp: 'Il PDF sarà visibile solo quando l’utente seleziona questa lingua.',
+    linguaHelp: 'Il PDF è visibile in questa lingua. English, se manca un file EN, usa automaticamente i PDF italiani.',
   },
   ru: {
     linguaFile: 'Язык файла',
@@ -101,7 +101,7 @@ const catalogAdmin = {
   },
   en: {
     linguaFile: 'File language',
-    linguaHelp: 'This PDF shows only when the user selects this language.',
+    linguaHelp: 'If no English file exists, English users see the Italian PDF.',
   },
 } as const
 

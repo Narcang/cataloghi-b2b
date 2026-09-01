@@ -37,6 +37,7 @@ import {
 } from '@/lib/userHierarchy'
 import { fetchUltimoAccessoMap, ultimoAccessoMapToRecord } from '@/lib/ultimoAccessoUtenti'
 import { getAppLocale } from '@/lib/localeServer'
+import { catalogLingueForLocale, preferCatalogLingua } from '@/lib/catalogLingua'
 
 const ASSISTENZA_LADIVA_TELEFONO = '+39 0536 185 6217'
 const ASSISTENZA_LADIVA_EMAIL = 'info@ladiva-fpd.com'
@@ -129,7 +130,7 @@ export default async function Dashboard(props: {
   let cataloghiQuery = supabase
     .from('cataloghi')
     .select('*')
-    .eq('lingua', locale)
+    .in('lingua', catalogLingueForLocale(locale))
     .order('creato_il', { ascending: false })
 
   if (isManager && nomeFilter.length > 0) {
@@ -143,7 +144,7 @@ export default async function Dashboard(props: {
 
   const { data: cataloghi, error: cataloghiError } = await cataloghiQuery
 
-  const cataloghiPerVista = (cataloghi ?? []).filter((c) => {
+  const cataloghiPerVista = preferCatalogLingua(cataloghi ?? [], locale).filter((c) => {
     if (!user && isLoginOnlyCatalogCategory(c.categoria as string | null)) return false
     if (isVenditoreLikeRole && isAgentOnlyCatalogCategory(c.categoria as string | null)) return false
     if (isStudioLikeRole && !isCatalogCategoryAllowedForStudioRole(c.categoria as string | null)) return false

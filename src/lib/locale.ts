@@ -1,8 +1,8 @@
 export const APP_LOCALES = ['it', 'ru', 'en'] as const
 export type AppLocale = (typeof APP_LOCALES)[number]
 
-/** Bandiere in home: IT e RU. EN si attiva dopo, ma i cataloghi si possono già caricare. */
-export const CHOOSER_LOCALES = ['it', 'ru'] as const satisfies readonly AppLocale[]
+/** Selettore pubblico: IT, RU, EN. */
+export const CHOOSER_LOCALES = ['it', 'ru', 'en'] as const satisfies readonly AppLocale[]
 
 export const DEFAULT_LOCALE: AppLocale = 'it'
 export const LOCALE_COOKIE = 'ladiva_locale'
@@ -17,6 +17,18 @@ export const LOCALE_NATIVE: Record<AppLocale, string> = {
   it: 'Italia',
   ru: 'Россия',
   en: 'English',
+}
+
+export const LOCALE_SHORT: Record<AppLocale, string> = {
+  it: 'IT',
+  ru: 'RU',
+  en: 'EN',
+}
+
+export const LOCALE_FLAG: Record<AppLocale, string> = {
+  it: '🇮🇹',
+  ru: '🇷🇺',
+  en: '🇬🇧',
 }
 
 export function isAppLocale(value: string | null | undefined): value is AppLocale {

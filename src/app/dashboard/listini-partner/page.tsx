@@ -14,6 +14,7 @@ import {
 } from '@/lib/catalogCategories'
 import { isVenditoreLike } from '@/lib/catalogRoles'
 import { getAppLocale } from '@/lib/localeServer'
+import { catalogLingueForLocale, preferCatalogLingua } from '@/lib/catalogLingua'
 
 export const dynamic = 'force-dynamic'
 
@@ -48,12 +49,12 @@ export default async function ListiniPartnerPage() {
   const locale = await getAppLocale()
   const { data: cataloghi, error: cataloghiError } = await supabase
     .from('cataloghi')
-    .select('id, titolo, categoria, url_immagine, stato_pubblicazione, area_geografica_target')
+    .select('id, titolo, categoria, url_immagine, stato_pubblicazione, area_geografica_target, lingua')
     .eq('stato_pubblicazione', 'attivo')
-    .eq('lingua', locale)
+    .in('lingua', catalogLingueForLocale(locale))
     .order('creato_il', { ascending: false })
 
-  const cataloghiListini = (cataloghi ?? []).filter((c) => {
+  const cataloghiListini = preferCatalogLingua(cataloghi ?? [], locale).filter((c) => {
     if (isAgentOnlyCatalogCategory(c.categoria as string | null)) return false
     if (!isPartnerListiniCategory(c.categoria as string | null)) return false
     if (isStudioLikeRole) return c.categoria === STUDIO_CATALOG_CATEGORY

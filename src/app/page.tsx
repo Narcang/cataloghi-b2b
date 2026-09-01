@@ -10,6 +10,7 @@ import {
   type CatalogCategory,
 } from '@/lib/catalogCategories'
 import { tHome } from '@/lib/i18n'
+import { catalogLingueForLocale, pickCatalogForLocale } from '@/lib/catalogLingua'
 import { getAppLocale, getLocaleCookie } from '@/lib/localeServer'
 import { createClient } from '@/utils/supabase/server'
 
@@ -73,19 +74,25 @@ export default async function LandingPage(props: { searchParams?: Promise<{ mess
   const directLinkCategorie: CatalogCategory[] = [...fotoCategorie, 'Bricks']
   const { data: directCataloghi } = await supabase
     .from('cataloghi')
-    .select('id, categoria')
+    .select('id, categoria, lingua')
     .in('categoria', directLinkCategorie)
     .eq('stato_pubblicazione', 'attivo')
-    .eq('lingua', locale)
+    .in('lingua', catalogLingueForLocale(locale))
     .order('creato_il', { ascending: false })
-    .limit(15)
+    .limit(40)
 
-  // Mappa categoria → id catalogo (ultimo attivo caricato per categoria)
+  // Mappa categoria → id catalogo (EN dedicato, altrimenti italiano)
   const directCatalogoIdMap: Partial<Record<CatalogCategory, string>> = {}
+  const byCategoria = new Map<CatalogCategory, { id: string; lingua?: unknown }[]>()
   for (const row of directCataloghi ?? []) {
-    if (!directCatalogoIdMap[row.categoria as CatalogCategory]) {
-      directCatalogoIdMap[row.categoria as CatalogCategory] = row.id
-    }
+    const cat = row.categoria as CatalogCategory
+    const list = byCategoria.get(cat) ?? []
+    list.push(row)
+    byCategoria.set(cat, list)
+  }
+  for (const [cat, list] of byCategoria) {
+    const picked = pickCatalogForLocale(list, locale)
+    if (picked) directCatalogoIdMap[cat] = picked.id
   }
 
   // Restituisce l'href diretto al PDF se esiste (accesso RLS verificato lato server),

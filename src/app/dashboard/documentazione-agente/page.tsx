@@ -10,6 +10,7 @@ import {
 } from '@/lib/catalogCategories'
 import { isAgenteLike } from '@/lib/catalogRoles'
 import { getAppLocale } from '@/lib/localeServer'
+import { catalogLingueForLocale, preferCatalogLingua } from '@/lib/catalogLingua'
 
 export const dynamic = 'force-dynamic'
 
@@ -40,12 +41,12 @@ export default async function DocumentazioneAgentePage() {
   const locale = await getAppLocale()
   const { data: cataloghi, error: cataloghiError } = await supabase
     .from('cataloghi')
-    .select('id, titolo, categoria, url_immagine, stato_pubblicazione, area_geografica_target')
+    .select('id, titolo, categoria, url_immagine, stato_pubblicazione, area_geografica_target, lingua')
     .eq('stato_pubblicazione', 'attivo')
-    .eq('lingua', locale)
+    .in('lingua', catalogLingueForLocale(locale))
     .order('creato_il', { ascending: false })
 
-  const cataloghiAgente = (cataloghi ?? []).filter((c) =>
+  const cataloghiAgente = preferCatalogLingua(cataloghi ?? [], locale).filter((c) =>
     isAgenteReservedCategory(c.categoria as string | null),
   )
 

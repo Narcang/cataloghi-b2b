@@ -1,6 +1,6 @@
 'use client'
 
-import { CHOOSER_LOCALES, type AppLocale } from '@/lib/locale'
+import { CHOOSER_LOCALES, LOCALE_SHORT, type AppLocale } from '@/lib/locale'
 import { tHeader } from '@/lib/i18n'
 import { useAppLocale } from '@/lib/useAppLocale'
 
@@ -32,7 +32,7 @@ export default function LocaleSwitcher() {
               active ? 'bg-[#060d41] text-white' : 'bg-white text-[#060d41] hover:bg-zinc-100'
             }`}
           >
-            {key === 'it' ? 'IT' : 'RU'}
+            {LOCALE_SHORT[key]}
           </button>
         )
       })}

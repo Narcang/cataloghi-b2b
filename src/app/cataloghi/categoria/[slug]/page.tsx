@@ -8,6 +8,7 @@ import { categoryFromSlug, isLoginOnlyCatalogCategory } from '@/lib/catalogCateg
 import { catalogPdfHref, safeCatalogReturnTo, CATALOG_RETURN_TO_PARAM } from '@/lib/catalogNavigation'
 import { compareCatalogTitoli } from '@/lib/catalogSorting'
 import { getAppLocale } from '@/lib/localeServer'
+import { catalogLingueForLocale, preferCatalogLingua } from '@/lib/catalogLingua'
 
 /** Elenco cataloghi pubblici: sempre dati aggiornati da Supabase. */
 export const dynamic = 'force-dynamic'
@@ -62,7 +63,7 @@ export default async function CataloghiPerCategoriaPage({
     .select('*')
     .eq('categoria', categoria)
     .eq('stato_pubblicazione', 'attivo')
-    .eq('lingua', locale)
+    .in('lingua', catalogLingueForLocale(locale))
 
   if (error) {
     return (
@@ -75,7 +76,7 @@ export default async function CataloghiPerCategoriaPage({
     )
   }
 
-  const cataloghi = (rows ?? []).sort((a, b) => {
+  const cataloghi = preferCatalogLingua(rows ?? [], locale).sort((a, b) => {
     const byTitle = compareCatalogTitoli(a.titolo, b.titolo)
     if (byTitle !== 0) return byTitle
     return a.id.localeCompare(b.id)

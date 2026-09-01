@@ -205,8 +205,11 @@ export default async function GestioneCataloghiPage(props: {
             </h2>
           </div>
 
-          <div className="mb-8">
+          <div className="mb-8 space-y-3">
             <CatalogLinguaTabs active={linguaTab} counts={linguaCounts} nome={nomeFilter} />
+            <p className="text-sm text-zinc-400">
+              Gli utenti English vedono i PDF italiani se non esiste una versione EN dedicata dello stesso catalogo.
+            </p>
           </div>
 
           {cataloghiError ? (

@@ -25,6 +25,7 @@ function categoryDisplayLabel(cat: CatalogCategory): string {
 import { catalogPdfHref, dashboardCatalogReturnTo } from '@/lib/catalogNavigation'
 import { compareCatalogTitoli } from '@/lib/catalogSorting'
 import { getAppLocale } from '@/lib/localeServer'
+import { catalogLingueForLocale, preferCatalogLingua } from '@/lib/catalogLingua'
 
 export const dynamic = 'force-dynamic'
 
@@ -65,6 +66,7 @@ export default async function IMieiCataloghiPage() {
     categoria: string | null
     url_immagine: string | null
     stato_pubblicazione: string | null
+    lingua?: string | null
   }[] = []
   let cataloghiError: { message: string } | null = null
 
@@ -73,13 +75,13 @@ export default async function IMieiCataloghiPage() {
   if (!inAttesaApprovazione) {
     let query = supabase
       .from('cataloghi')
-      .select('id, titolo, categoria, url_immagine, stato_pubblicazione')
+      .select('id, titolo, categoria, url_immagine, stato_pubblicazione, lingua')
       .eq('stato_pubblicazione', 'attivo')
-      .eq('lingua', locale)
+      .in('lingua', catalogLingueForLocale(locale))
       .order('creato_il', { ascending: false })
 
     const { data, error } = await query
-    cataloghi = data ?? []
+    cataloghi = preferCatalogLingua(data ?? [], locale)
     cataloghiError = error
   }
 

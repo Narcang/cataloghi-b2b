@@ -11,6 +11,7 @@ import {
 } from '@/lib/catalogCategories'
 import { CATALOG_RETURN_TO_PARAM, catalogPdfHref } from '@/lib/catalogNavigation'
 import { getAppLocale } from '@/lib/localeServer'
+import { catalogLingueForLocale, preferCatalogLingua, pickCatalogForLocale } from '@/lib/catalogLingua'
 
 /** Categorie che aprono direttamente il PDF (nessuna lista intermedia). */
 const DIRECT_OPEN_CATEGORIES = new Set<string>(['Scontistiche', 'Listini', 'Power Point'])
@@ -71,21 +72,27 @@ export default async function PortalePage() {
   const categorie = tiles.map((t) => t.categoria)
   const { data: catalogRows } = await supabase
     .from('cataloghi')
-    .select('id, categoria')
+    .select('id, categoria, titolo, lingua')
     .in('categoria', categorie)
     .eq('stato_pubblicazione', 'attivo')
-    .eq('lingua', locale)
+    .in('lingua', catalogLingueForLocale(locale))
     .order('creato_il', { ascending: false })
 
+  const visibili = preferCatalogLingua(catalogRows ?? [], locale)
   const countPerCategoria: Record<string, number> = {}
   const directOpenIdPerCategoria: Record<string, string> = {}
-  for (const row of catalogRows ?? []) {
+  const byCategoria = new Map<string, typeof visibili>()
+  for (const row of visibili) {
     const cat = row.categoria as string
     countPerCategoria[cat] = (countPerCategoria[cat] ?? 0) + 1
-    // Tieni solo il primo (più recente) per le categorie direct-open
-    if (DIRECT_OPEN_CATEGORIES.has(cat) && !directOpenIdPerCategoria[cat]) {
-      directOpenIdPerCategoria[cat] = row.id as string
-    }
+    const list = byCategoria.get(cat) ?? []
+    list.push(row)
+    byCategoria.set(cat, list)
+  }
+  for (const [cat, list] of byCategoria) {
+    if (!DIRECT_OPEN_CATEGORIES.has(cat)) continue
+    const picked = pickCatalogForLocale(list, locale)
+    if (picked) directOpenIdPerCategoria[cat] = picked.id as string
   }
 
   const nomeUtente = profilo?.nome_completo?.split(' ')[0] ?? ''
