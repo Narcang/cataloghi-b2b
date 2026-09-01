@@ -245,6 +245,30 @@
   stroke: #000 !important;
 }
 
+/* Switcher lingua in header: non ereditare il tema dark (bg-white → #111) */
+.ladiva-locale-switch {
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  background: #fff;
+}
+
+.ladiva-locale-switch-btn-inactive,
+.ladiva-root-app-dark .ladiva-locale-switch-btn-inactive {
+  background-color: #fff !important;
+  color: #000 !important;
+}
+
+.ladiva-locale-switch-btn-inactive:hover,
+.ladiva-root-app-dark .ladiva-locale-switch-btn-inactive:hover {
+  background-color: #f4f4f5 !important;
+  color: #000 !important;
+}
+
+.ladiva-locale-switch-btn-active,
+.ladiva-root-app-dark .ladiva-locale-switch-btn-active {
+  background-color: #060d41 !important;
+  color: #fff !important;
+}
+
 /* Switch mercato admin: bg-white del tema dark lo forza a #111 */
 .ladiva-mercato-switch-bar,
 .ladiva-mercato-switch-bar strong,
