@@ -9,9 +9,6 @@ import {
   getChildrenProfiles,
   getHierarchyRootProfiles,
   HIERARCHY_ROOT_ROLE_OPTIONS,
-  hierarchyRootRoleLabel,
-  nestedAssociatiLabel,
-  ruoloGerarchiaLabel,
   ruoloGerarchiaDotClass,
   ruoloBreakdownDotClass,
   roleBreakdownBadgesForNode,
@@ -33,6 +30,14 @@ import {
   canViewerSeeUltimoAccessoForProfile,
   formatUltimoAccessoRiga,
 } from '@/lib/ultimoAccessoUtenti'
+import { useAppLocale } from '@/lib/useAppLocale'
+import {
+  tAdmin,
+  tAssociatiCount,
+  tHierarchyRootHeading,
+  tNestedAssociati,
+  tRuolo,
+} from '@/lib/i18nAdmin'
 
 type Props = {
   currentUserId: string
@@ -81,6 +86,8 @@ function HierarchyNode({
   expandedIds,
   onToggle,
 }: HierarchyNodeProps) {
+  const locale = useAppLocale()
+  const copy = tAdmin(locale)
   const children = getChildrenProfiles(
     profile.id,
     profile,
@@ -92,7 +99,7 @@ function HierarchyNode({
   const childCount = countChildrenProfiles(profile.id, profile, profili, links)
   const expandable = canHaveHierarchyChildren(profile.ruolo)
   const expanded = expandedIds.has(profile.id)
-  const nestedLabel = nestedAssociatiLabel(profile.ruolo)
+  const nestedLabel = tNestedAssociati(locale, profile.ruolo)
   const roleDotClass = ruoloGerarchiaDotClass(profile.ruolo)
   const breakdownBadges = roleBreakdownBadgesForNode(profile.ruolo)
   const breakdownCounts = useMemo(() => {
@@ -126,7 +133,7 @@ function HierarchyNode({
             onClick={() => onToggle(profile.id)}
             className="mt-2.5 shrink-0 inline-flex h-7 w-7 items-center justify-center rounded-lg border border-black/15 bg-zinc-50 text-zinc-700 hover:bg-zinc-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#060d41]"
             aria-expanded={expanded}
-            aria-label={expanded ? 'Comprimi' : 'Espandi'}
+            aria-label={expanded ? copy.comprimi : copy.espandi}
           >
             {expanded ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
           </button>
@@ -170,46 +177,46 @@ function HierarchyNode({
                       <span className="ml-2 text-sm font-normal text-zinc-400">{profile.nome_completo || ''}</span>
                     </>
                   ) : (
-                    profile.nome_completo || 'Utente senza nome'
+                    profile.nome_completo || copy.utenteSenzaNome
                   )}
                 </span>
               </h4>
               <p className="text-sm text-zinc-600 mt-0.5">{profile.email}</p>
               <p className="text-xs text-zinc-500 mt-1">
-                {profile.area_geografica || 'Area non indicata'}
+                {profile.area_geografica || copy.areaNonIndicata}
               </p>
               {ultimoAccessoRiga ? (
                 <p className="text-xs text-zinc-500 mt-1">{ultimoAccessoRiga}</p>
               ) : null}
               {seguitoDa ? (
                 <p className="text-xs text-zinc-600 mt-1">
-                  Seguito da: <span className="font-medium text-zinc-800">{seguitoDa}</span>
+                  {copy.seguitoDa}: <span className="font-medium text-zinc-800">{seguitoDa}</span>
                 </p>
               ) : null}
             </div>
 
             <div className="flex flex-col items-start gap-1 min-w-0">
               <span className="text-xs font-semibold uppercase tracking-wide text-zinc-700">
-                {ruoloGerarchiaLabel(profile.ruolo)}
+                {tRuolo(locale, profile.ruolo)}
               </span>
               {expandable ? (
                 <span className="text-xs font-medium text-zinc-500">
-                  {childCount} associat{childCount === 1 ? 'o' : 'i'}
+                  {tAssociatiCount(locale, childCount)}
                 </span>
               ) : null}
               {breakdownCounts && breakdownBadges.length > 0 ? (
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-0.5">
-                  {breakdownBadges.map(({ ruolo, label }) => {
+                  {breakdownBadges.map(({ ruolo }) => {
                     const dotClass = ruoloBreakdownDotClass(ruolo)
                     if (!dotClass) return null
                     return (
                       <span
                         key={ruolo}
-                        title={label}
+                        title={tRuolo(locale, ruolo)}
                         className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-600"
                       >
                         <span className={`h-2 w-2 shrink-0 rounded-full ${dotClass}`} aria-hidden />
-                        <span>{ruoloGerarchiaLabel(ruolo)}</span>
+                        <span>{tRuolo(locale, ruolo)}</span>
                         <span className="font-semibold text-zinc-800">{breakdownCounts[ruolo] ?? 0}</span>
                       </span>
                     )
@@ -274,7 +281,7 @@ function HierarchyNode({
           ) : null}
           {children.length === 0 ? (
             <p className="text-sm text-zinc-500 mb-3 py-2">
-              Nessun associato a questo livello.
+              {copy.nessunAssociatoLivello}
             </p>
           ) : (
             <ul className="m-0 p-0 space-y-1">
@@ -308,6 +315,8 @@ export default function GerarchiaUtentiTree({
   ownerProfile,
   ultimoAccessoByProfiloId = {},
 }: Props) {
+  const locale = useAppLocale()
+  const copy = tAdmin(locale)
   const [rootRole, setRootRole] = useState<HierarchyRootRole>(() =>
     defaultHierarchyRootRole(viewerRole),
   )
@@ -367,15 +376,13 @@ export default function GerarchiaUtentiTree({
   // --- Modalità propria gerarchia (agente / rivenditore / venditore / agenzia) ---
   if (ownerProfile) {
     const showOwnerAsRootNode = agentViewsAgenzia
-    const childLabel = nestedAssociatiLabel(ownerProfile.ruolo) ?? 'Associati'
+    const childLabel = tNestedAssociati(locale, ownerProfile.ruolo) ?? copy.nestedDefault
     const descByRole: Record<string, string> = {
-      agente: 'I rivenditori collegati al tuo profilo e i loro associati.',
-      back_office: 'I rivenditori collegati al tuo profilo e i loro associati.',
-      rivenditore: 'I venditori, promoter e studi collegati al tuo profilo.',
-      distributore: 'I promoter e gli studi collegati al tuo profilo.',
-      agenzia: agentViewsAgenzia
-        ? 'La tua agenzia: prima gli agenti e il back-office, poi i rivenditori collegati all\'agenzia (non sotto il singolo agente).'
-        : 'Gli agenti, il back-office, i rivenditori e i loro associati collegati al tuo profilo.',
+      agente: copy.descAgente,
+      back_office: copy.descBackOffice,
+      rivenditore: copy.descRivenditore,
+      distributore: copy.descDistributore,
+      agenzia: agentViewsAgenzia ? copy.descAgenziaAgent : copy.descAgenziaOwner,
     }
 
     return (
@@ -383,10 +390,10 @@ export default function GerarchiaUtentiTree({
         <div>
           <h2 className="text-xl text-zinc-900 font-medium flex items-center gap-2">
             <Users size={20} className="text-[#060d41]" />
-            {agentViewsAgenzia ? 'Struttura Agenzia' : 'I Tuoi Associati'}
+            {agentViewsAgenzia ? copy.strutturaAgenzia : copy.tuoiAssociati}
           </h2>
           <p className="text-sm text-zinc-600 mt-1">
-            {descByRole[agentViewsAgenzia ? 'agenzia' : ownerProfile.ruolo] ?? 'Gli associati collegati al tuo profilo.'}
+            {descByRole[agentViewsAgenzia ? 'agenzia' : ownerProfile.ruolo] ?? copy.descAssociatiDefault}
           </p>
         </div>
 
@@ -412,7 +419,7 @@ export default function GerarchiaUtentiTree({
             </ul>
           ) : (ownedRootNodes ?? []).length === 0 ? (
             <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-6 text-center text-sm text-zinc-600">
-              Nessun associato collegato al tuo profilo.
+              {copy.nessunAssociatoProfilo}
             </div>
           ) : (
             <ul className="m-0 p-0 space-y-1">
@@ -443,14 +450,14 @@ export default function GerarchiaUtentiTree({
       <div>
         <h2 className="text-xl text-zinc-900 font-medium flex items-center gap-2">
           <Users size={20} className="text-[#060d41]" />
-          Struttura Organizzativa
+          {copy.struttura}
         </h2>
         <p className="text-sm text-zinc-600 mt-1">
-          Scegli il ruolo di partenza e clicca su un profilo per espandere gli associati a cascata.
+          {copy.strutturaHelp}
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-2" role="tablist" aria-label="Filtra struttura per ruolo">
+      <div className="flex flex-wrap gap-2" role="tablist" aria-label={copy.filtraStruttura}>
         {HIERARCHY_ROOT_ROLE_OPTIONS.map((option) => {
           const active = rootRole === option.id
           const count = rootCounts?.get(option.id) ?? 0
@@ -468,7 +475,7 @@ export default function GerarchiaUtentiTree({
                   : 'border-black/20 bg-zinc-50 text-zinc-800 hover:bg-zinc-100'
               }`}
             >
-              {option.label}
+              {tRuolo(locale, option.id)}
               <span
                 className={`rounded-full min-w-[1.5rem] px-2 py-0.5 text-xs font-semibold text-center ${
                   roleDotClass
@@ -487,12 +494,12 @@ export default function GerarchiaUtentiTree({
 
       <div>
         <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-500 mb-4">
-          {hierarchyRootRoleLabel(rootRole)}
+          {tHierarchyRootHeading(locale, rootRole)}
         </h3>
 
         {(rootNodes ?? []).length === 0 ? (
           <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-6 text-center text-sm text-zinc-600">
-            Nessun utente con ruolo {hierarchyRootRoleLabel(rootRole).toLowerCase()} nel filtro corrente.
+            {copy.nessunUtenteRuolo} {tHierarchyRootHeading(locale, rootRole).toLowerCase()} {copy.nelFiltroCorrente}
           </div>
         ) : (
           <ul className="m-0 p-0 space-y-1">

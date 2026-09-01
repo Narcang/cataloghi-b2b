@@ -21,6 +21,7 @@ function categoryDisplayLabel(cat: CatalogCategory): string {
 import { isZipDownloadCategory } from '@/lib/catalogFileKind'
 import { RUOLI_CATALOGO, RUOLI_CATALOGO_DEFAULT, type RuoloCatalogo } from '@/lib/catalogRoles'
 import { tCatalogAdmin } from '@/lib/i18n'
+import { tAdmin, tCatalogRole } from '@/lib/i18nAdmin'
 import { APP_LOCALES, LOCALE_LABEL, type AppLocale } from '@/lib/locale'
 import { useAppLocale } from '@/lib/useAppLocale'
 
@@ -30,6 +31,7 @@ export default function CreateCatalogForm({ categories }: Props) {
   const router = useRouter()
   const uiLocale = useAppLocale()
   const copy = tCatalogAdmin(uiLocale)
+  const adminCopy = tAdmin(uiLocale)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [categoriaSelezionata, setCategoriaSelezionata] = useState('')
@@ -64,7 +66,7 @@ export default function CreateCatalogForm({ categories }: Props) {
       return
     }
     if (ruoliSelezionati.length === 0) {
-      setError('Seleziona almeno un ruolo che può vedere questo catalogo')
+      setError(adminCopy.almenoUnRuolo)
       return
     }
     if (!categories.includes(categoria as CatalogCategory)) {
@@ -200,7 +202,7 @@ export default function CreateCatalogForm({ categories }: Props) {
 
       <div className="space-y-2">
         <label htmlFor="titolo" className="block text-xs text-zinc-600 font-medium uppercase tracking-wide">
-          Titolo Catalogo
+          {adminCopy.titoloCatalogo}
         </label>
         <input
           id="titolo"
@@ -214,7 +216,7 @@ export default function CreateCatalogForm({ categories }: Props) {
 
       <div className="space-y-2">
         <label htmlFor="categoria" className="block text-xs text-zinc-600 font-medium uppercase tracking-wide">
-          Categoria
+          {adminCopy.categoria}
         </label>
         <select
           id="categoria"
@@ -226,7 +228,7 @@ export default function CreateCatalogForm({ categories }: Props) {
           className="w-full h-10 rounded-md border border-black bg-zinc-50 px-3 text-sm text-zinc-900 disabled:opacity-60"
         >
           <option value="" disabled>
-            Seleziona categoria
+            {adminCopy.selezionaCategoria}
           </option>
           {categories.map((cat) => (
             <option key={cat} value={cat}>
@@ -265,7 +267,7 @@ export default function CreateCatalogForm({ categories }: Props) {
 
       <div className="space-y-2 md:col-span-2">
         <p className="block text-xs text-zinc-600 font-medium uppercase tracking-wide">
-          Chi può vedere questo catalogo
+          {adminCopy.chiPuoVedere}
         </p>
         <div className="flex flex-wrap gap-x-5 gap-y-2">
           {RUOLI_CATALOGO.map((r) => (
@@ -281,12 +283,12 @@ export default function CreateCatalogForm({ categories }: Props) {
                 }
                 className="rounded border-black accent-[#060d41]"
               />
-              {r.label}
+              {tCatalogRole(uiLocale, r.value)}
             </label>
           ))}
         </div>
         {ruoliSelezionati.length === 0 ? (
-          <p className="text-xs text-red-600">Seleziona almeno un ruolo.</p>
+          <p className="text-xs text-red-600">{adminCopy.almenoUnRuolo}</p>
         ) : null}
       </div>
 
@@ -295,7 +297,7 @@ export default function CreateCatalogForm({ categories }: Props) {
           htmlFor="stato_pubblicazione"
           className="block text-xs text-zinc-600 font-medium uppercase tracking-wide"
         >
-          Stato
+          {adminCopy.stato}
         </label>
         <select
           id="stato_pubblicazione"
@@ -304,8 +306,8 @@ export default function CreateCatalogForm({ categories }: Props) {
           disabled={submitting}
           className="w-full h-10 rounded-md border border-black bg-zinc-50 px-3 text-sm text-zinc-900 disabled:opacity-60"
         >
-          <option value="bozza">Bozza</option>
-          <option value="attivo">Attivo</option>
+          <option value="bozza">{adminCopy.bozza}</option>
+          <option value="attivo">{adminCopy.attivo}</option>
         </select>
       </div>
 
@@ -339,7 +341,7 @@ export default function CreateCatalogForm({ categories }: Props) {
 
       <div className="space-y-2 md:col-span-2">
         <label htmlFor="file_copertina_nuovo" className="block text-xs text-zinc-600 font-medium uppercase tracking-wide">
-          Copertina (immagine A4 verticale, opzionale) — max {MAX_CATALOG_COVER_BYTES / (1024 * 1024)} MB
+          {adminCopy.copertina} — max {MAX_CATALOG_COVER_BYTES / (1024 * 1024)} MB
         </label>
         <input
           id="file_copertina_nuovo"
@@ -357,7 +359,7 @@ export default function CreateCatalogForm({ categories }: Props) {
           disabled={submitting}
           className="h-10 rounded-md bg-[#060d41] text-white px-5 text-sm font-semibold hover:bg-[#0a155a] transition-colors disabled:opacity-60"
         >
-          {submitting ? 'Caricamento…' : 'Crea Catalogo'}
+          {submitting ? adminCopy.caricamento : adminCopy.creaCatalogo}
         </button>
       </div>
     </form>

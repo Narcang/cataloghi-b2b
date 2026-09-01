@@ -1,7 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
 import { getAdminMercato, getAdminDataSupabase } from '@/lib/mercatoServer'
-import { MERCATO_LABEL } from '@/lib/mercato'
 import AdminMercatoSwitcher from '@/components/admin/AdminMercatoSwitcher'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -13,6 +12,8 @@ import InvitaUtente from '@/components/InvitaUtente'
 import type { ProfiloGerarchiaRow } from '@/lib/userHierarchy'
 import { getDescendantsByRole, profiloToGerarchiaRow } from '@/lib/userHierarchy'
 import { fetchUltimoAccessoMap, ultimoAccessoMapToRecord } from '@/lib/ultimoAccessoUtenti'
+import { getAppLocale } from '@/lib/localeServer'
+import { tAdmin, tRuolo, tVersioneMonitorataValue } from '@/lib/i18nAdmin'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,19 +25,19 @@ function escapeIlikePattern(value: string): string {
   return value.replace(/[%_\\]/g, '\\$&')
 }
 
-const RUOLO_FILTER_OPTIONS = [
-  { value: 'all',               label: 'Tutti i ruoli' },
-  { value: 'admin',             label: 'Admin' },
-  { value: 'manager',           label: 'Manager' },
-  { value: 'agenzia',           label: 'Agenzia' },
-  { value: 'agente',            label: 'Agente' },
-  { value: 'back_office',       label: 'Back-Office' },
-  { value: 'rivenditore',       label: 'Rivenditore' },
-  { value: 'distributore',      label: 'Venditore' },
-  { value: 'partner_dipendente',label: 'Promoter' },
-  { value: 'studio',            label: 'Studio' },
-  { value: 'free',              label: 'Free' },
-]
+const RUOLO_FILTER_VALUES = [
+  'all',
+  'admin',
+  'manager',
+  'agenzia',
+  'agente',
+  'back_office',
+  'rivenditore',
+  'distributore',
+  'partner_dipendente',
+  'studio',
+  'free',
+] as const
 
 export default async function GestioneUtentiPage(props: {
   searchParams: Promise<{ ruolo?: string; nome?: string; message?: string }>
@@ -45,6 +46,8 @@ export default async function GestioneUtentiPage(props: {
   const ruoloFilter = searchParams?.ruolo ?? 'all'
   const nomeFilter = (searchParams?.nome ?? '').trim()
   const actionMessage = searchParams?.message ?? ''
+  const locale = await getAppLocale()
+  const copy = tAdmin(locale)
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -201,15 +204,16 @@ export default async function GestioneUtentiPage(props: {
             <ArrowLeft size={15} /> Dashboard
           </Link>
           <h1 className="text-3xl md:text-4xl font-semibold text-zinc-900 tracking-tight mt-3">
-            {isAgenzia ? 'Gestione Rivenditori' : 'Gestione Utenti'}
+            {isAgenzia ? copy.gestioneRivenditori : copy.gestioneUtenti}
           </h1>
           {isAgenzia ? (
             <p className="text-sm text-zinc-600 mt-2 max-w-2xl">
-              Aggiorna espositori e box dei rivenditori collegati alla tua agenzia.
+              {copy.gestioneRivenditoriHelp}
             </p>
           ) : isAdmin ? (
             <p className="text-sm text-zinc-600 mt-2 max-w-2xl">
-              Monitoraggio mercato: <strong>{MERCATO_LABEL[mercatoAttivo]}</strong>
+              {copy.monitoraggioMercato}:{' '}
+              <strong>{tVersioneMonitorataValue(locale, mercatoAttivo)}</strong>
             </p>
           ) : null}
         </div>
@@ -242,16 +246,16 @@ export default async function GestioneUtentiPage(props: {
         <section id="filtro-utenti" className="border border-black rounded-2xl bg-white p-5">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             <div>
-              <h2 className="text-xl text-zinc-900 font-medium">Filtra utenti</h2>
-              <p className="text-sm text-zinc-600 mt-1">Filtra per ruolo e/o per nome.</p>
+              <h2 className="text-xl text-zinc-900 font-medium">{copy.filtraUtenti}</h2>
+              <p className="text-sm text-zinc-600 mt-1">{copy.filtraUtentiHelp}</p>
             </div>
             <form className="flex flex-wrap items-center gap-3" method="get">
               <input
                 type="search"
                 name="nome"
                 defaultValue={nomeFilter}
-                placeholder="Es. Fabio"
-                aria-label="Cerca per nome"
+                placeholder={copy.placeholderNome}
+                aria-label={copy.cercaNome}
                 className="h-10 min-w-[10rem] flex-1 rounded-lg border border-black bg-zinc-50 px-3 text-sm text-zinc-900 placeholder:text-zinc-500"
               />
               <select
@@ -259,15 +263,15 @@ export default async function GestioneUtentiPage(props: {
                 defaultValue={ruoloFilter}
                 className="h-10 rounded-lg border border-black bg-zinc-50 px-3 text-sm text-zinc-900"
               >
-                {RUOLO_FILTER_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                {RUOLO_FILTER_VALUES.map((value) => (
+                  <option key={value} value={value}>{tRuolo(locale, value)}</option>
                 ))}
               </select>
               <button
                 type="submit"
                 className="h-10 rounded-lg bg-[#060d41] text-white px-4 text-sm font-semibold hover:bg-[#0a155a] transition-colors"
               >
-                Applica
+                {copy.applica}
               </button>
             </form>
           </div>
@@ -300,9 +304,9 @@ export default async function GestioneUtentiPage(props: {
 
         {/* Invita utenti */}
         <section className="border border-black rounded-2xl bg-white p-6">
-          <h2 className="text-xl text-zinc-900 font-medium mb-1">Invita utenti</h2>
+          <h2 className="text-xl text-zinc-900 font-medium mb-1">{copy.invitaUtenti}</h2>
           <p className="text-sm text-zinc-500 mb-4">
-            Genera un link di registrazione per il ruolo scelto. Il nuovo utente sarà collegato al tuo profilo dopo l&apos;approvazione.
+            {copy.invitaHelp}
           </p>
           <InvitaUtente ruoloCorrente={ruoloCorrente} />
         </section>

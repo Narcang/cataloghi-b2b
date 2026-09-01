@@ -1,25 +1,28 @@
 import Link from 'next/link'
 import { APP_LOCALES, LOCALE_LABEL, type AppLocale } from '@/lib/locale'
+import { tAdmin } from '@/lib/i18nAdmin'
 
 type Tab = AppLocale | 'all'
-
-const TAB_LABEL: Record<Tab, string> = {
-  all: 'Tutte',
-  it: LOCALE_LABEL.it,
-  ru: LOCALE_LABEL.ru,
-  en: LOCALE_LABEL.en,
-}
 
 export default function CatalogLinguaTabs({
   active,
   counts,
   nome,
+  locale,
 }: {
   active: Tab
   counts: Record<Tab, number>
   nome: string
+  locale: AppLocale
 }) {
+  const copy = tAdmin(locale)
   const tabs: Tab[] = ['all', ...APP_LOCALES]
+  const tabLabel: Record<Tab, string> = {
+    all: copy.tutteLingue,
+    it: LOCALE_LABEL.it,
+    ru: LOCALE_LABEL.ru,
+    en: LOCALE_LABEL.en,
+  }
 
   function href(tab: Tab) {
     const params = new URLSearchParams()
@@ -29,7 +32,7 @@ export default function CatalogLinguaTabs({
   }
 
   return (
-    <div className="flex flex-wrap gap-2" role="tablist" aria-label="Lingua cataloghi">
+    <div className="flex flex-wrap gap-2" role="tablist" aria-label={copy.linguaCataloghi}>
       {tabs.map((tab) => {
         const selected = active === tab
         return (
@@ -44,7 +47,7 @@ export default function CatalogLinguaTabs({
                 : 'border-black bg-white text-[#060d41] hover:bg-zinc-100'
             }`}
           >
-            {TAB_LABEL[tab]}
+            {tabLabel[tab]}
             <span className={selected ? 'text-white/80' : 'text-zinc-500'}>{counts[tab]}</span>
           </Link>
         )

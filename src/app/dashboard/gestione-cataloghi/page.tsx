@@ -1,6 +1,5 @@
 import { createClient } from '@/utils/supabase/server'
 import { getAdminMercato, getAdminDataSupabase } from '@/lib/mercatoServer'
-import { MERCATO_LABEL } from '@/lib/mercato'
 import AdminMercatoSwitcher from '@/components/admin/AdminMercatoSwitcher'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -31,6 +30,7 @@ import CatalogLinguaTabs from '@/components/admin/CatalogLinguaTabs'
 import { parseCatalogLingua } from '@/lib/catalogLingua'
 import { LOCALE_LABEL, type AppLocale } from '@/lib/locale'
 import { getAppLocale } from '@/lib/localeServer'
+import { tAdmin, tCatalogCount, tCatalogRole, tVersioneMonitorataValue } from '@/lib/i18nAdmin'
 
 export const dynamic = 'force-dynamic'
 
@@ -51,6 +51,7 @@ export default async function GestioneCataloghiPage(props: {
   const nomeFilter = (searchParams?.nome ?? '').trim()
   const actionMessage = searchParams?.message ?? ''
   const uiLocale = await getAppLocale()
+  const copy = tAdmin(uiLocale)
   const linguaTabRaw = (searchParams?.lingua ?? '').trim()
   const linguaTab: AppLocale | 'all' =
     linguaTabRaw === 'all' || linguaTabRaw === 'it' || linguaTabRaw === 'ru' || linguaTabRaw === 'en'
@@ -135,11 +136,12 @@ export default async function GestioneCataloghiPage(props: {
             <ArrowLeft size={15} /> Dashboard
           </Link>
           <h1 className="text-3xl md:text-4xl font-semibold text-zinc-900 tracking-tight mt-3">
-            Gestione Cataloghi
+            {copy.gestioneCataloghi}
           </h1>
           {isAdmin ? (
             <p className="text-sm text-zinc-600 mt-2 max-w-2xl">
-              Monitoraggio mercato: <strong>{MERCATO_LABEL[mercatoAttivo]}</strong>
+              {copy.monitoraggioMercato}:{' '}
+              <strong>{tVersioneMonitorataValue(uiLocale, mercatoAttivo)}</strong>
             </p>
           ) : null}
         </div>
@@ -156,8 +158,8 @@ export default async function GestioneCataloghiPage(props: {
         <section className="border border-black rounded-2xl bg-white p-5">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             <div>
-              <h2 className="text-xl text-zinc-900 font-medium">Filtra cataloghi</h2>
-              <p className="text-sm text-zinc-600 mt-1">Cerca per titolo catalogo.</p>
+              <h2 className="text-xl text-zinc-900 font-medium">{copy.filtraCataloghi}</h2>
+              <p className="text-sm text-zinc-600 mt-1">{copy.filtraCataloghiHelp}</p>
             </div>
             <form className="flex flex-wrap items-center gap-3" method="get">
               <input type="hidden" name="lingua" value={linguaTab} />
@@ -165,15 +167,15 @@ export default async function GestioneCataloghiPage(props: {
                 type="search"
                 name="nome"
                 defaultValue={nomeFilter}
-                placeholder="Es. Family 15"
-                aria-label="Cerca per nome catalogo"
+                placeholder={copy.placeholderCatalogo}
+                aria-label={copy.cercaCatalogo}
                 className="h-10 min-w-[12rem] flex-1 rounded-lg border border-black bg-zinc-50 px-3 text-sm text-zinc-900 placeholder:text-zinc-500"
               />
               <button
                 type="submit"
                 className="h-10 rounded-lg bg-[#060d41] text-white px-4 text-sm font-semibold hover:bg-[#0a155a] transition-colors"
               >
-                Cerca
+                {copy.cerca}
               </button>
             </form>
           </div>
@@ -183,9 +185,9 @@ export default async function GestioneCataloghiPage(props: {
         {isAdmin && (
           <section id="crea-catalogo" className="border border-black rounded-2xl bg-white p-6 space-y-5">
             <div>
-              <h2 className="text-xl text-zinc-900 font-medium">Nuovo Catalogo</h2>
+              <h2 className="text-xl text-zinc-900 font-medium">{copy.nuovoCatalogo}</h2>
               <p className="text-sm text-zinc-600 mt-1">
-                Carica il PDF del catalogo e definisci i ruoli e lo stato di pubblicazione.
+                {copy.nuovoCatalogoHelp}
               </p>
             </div>
             <CreateCatalogForm categories={CATALOG_CATEGORIES_FOR_UPLOAD} />
@@ -198,54 +200,54 @@ export default async function GestioneCataloghiPage(props: {
         <section id="cataloghi">
           <div className="flex items-center justify-between mb-8 border-b border-black pb-4">
             <h2 className="text-3xl md:text-4xl font-sans tracking-tight text-zinc-100 flex items-center gap-3">
-              <FileText className="text-white" /> Cataloghi
+              <FileText className="text-white" /> {copy.cataloghi}
               <span className="text-base font-sans font-medium tracking-normal text-zinc-400">
-                {MERCATO_LABEL[mercatoAttivo]} · {cataloghiPerVista.length}
+                {tVersioneMonitorataValue(uiLocale, mercatoAttivo)} · {cataloghiPerVista.length}
               </span>
             </h2>
           </div>
 
           <div className="mb-8 space-y-3">
-            <CatalogLinguaTabs active={linguaTab} counts={linguaCounts} nome={nomeFilter} />
+            <CatalogLinguaTabs active={linguaTab} counts={linguaCounts} nome={nomeFilter} locale={uiLocale} />
             <p className="text-sm text-zinc-400">
-              Gli utenti English vedono i PDF italiani se non esiste una versione EN dedicata dello stesso catalogo.
+              {copy.enVedeIt}
             </p>
           </div>
 
           {cataloghiError ? (
             <div className="text-red-700 p-4 border border-red-300 bg-red-50 rounded-xl">
-              Errore nel caricamento: {cataloghiError.message}
+              {copy.erroreCaricamento}: {cataloghiError.message}
             </div>
           ) : cataloghiPerVista.length === 0 ? (
             <div className="rounded-2xl border border-amber-300 bg-amber-50 px-6 py-10 text-center">
               {mercatoAttivo === 'ru' && cataloghiTutti.length === 0 ? (
                 <>
                   <p className="text-lg font-medium text-amber-950">
-                    Nessun catalogo sul mercato {MERCATO_LABEL[mercatoAttivo]}.
+                    {copy.nessunCatalogoMercato} {tVersioneMonitorataValue(uiLocale, mercatoAttivo)}.
                   </p>
                   <p className="mt-3 text-sm text-amber-900 max-w-xl mx-auto">
-                    Stai monitorando la versione Russia, il cui archivio è separato da quello italiano.
+                    {copy.staiMonitorandoRu}
                     {cataloghiItaliaCount && cataloghiItaliaCount > 0
-                      ? ` Sul mercato Italia risultano ${cataloghiItaliaCount} cataloghi: seleziona Italia nello switcher in alto per vederli.`
-                      : ' Seleziona Italia nello switcher in alto per vedere i cataloghi del portale italiano.'}
+                      ? ` ${copy.cataloghiItaliaSwitch.replace('{n}', String(cataloghiItaliaCount))}`
+                      : ` ${copy.selezionaItalia}`}
                   </p>
                 </>
               ) : linguaTab !== 'all' && cataloghiTutti.length > 0 ? (
                 <>
                   <p className="text-lg font-medium text-amber-950">
-                    Nessun catalogo in {LOCALE_LABEL[linguaTab]}.
+                    {copy.nessunCatalogoLingua} {LOCALE_LABEL[linguaTab]}.
                   </p>
                   <p className="mt-3 text-sm text-amber-900">
-                    Carica un file in questa lingua dalla sezione Nuovo Catalogo, oppure apri la scheda Tutte.
+                    {copy.caricaOppureTutte}
                   </p>
                 </>
               ) : (
                 <>
                   <p className="text-lg font-medium text-amber-950">
-                    Nessun catalogo sul mercato {MERCATO_LABEL[mercatoAttivo]}.
+                    {copy.nessunCatalogoMercato} {tVersioneMonitorataValue(uiLocale, mercatoAttivo)}.
                   </p>
                   <p className="mt-3 text-sm text-amber-900">
-                    Non risulta nessun file in archivio. Puoi caricarne uno dalla sezione Nuovo Catalogo.
+                    {copy.nessunFileArchivio}
                   </p>
                 </>
               )}
@@ -282,11 +284,11 @@ export default async function GestioneCataloghiPage(props: {
                     <div className="flex items-center gap-3">
                       <h3 className="text-3xl md:text-4xl text-zinc-100 font-semibold tracking-wide">{categoryDisplayLabel(categoria)}</h3>
                       <span className="text-xs rounded-full border border-black px-2 py-0.5 text-zinc-600">
-                        {items.length} catalogh{items.length === 1 ? 'o' : 'i'}
+                        {tCatalogCount(uiLocale, items.length)}
                       </span>
                     </div>
                     {items.length === 0 ? (
-                      <p className="text-lg text-zinc-500 py-2">Nessun catalogo in questa categoria.</p>
+                      <p className="text-lg text-zinc-500 py-2">{copy.nessunCatalogoCategoria}</p>
                     ) : (
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {items.map((catalogo) => (
@@ -312,7 +314,7 @@ export default async function GestioneCataloghiPage(props: {
                                   ) : (
                                     <div className="absolute inset-0 flex flex-col items-center justify-center text-zinc-600 bg-zinc-50/50">
                                       <FileText size={48} className="mb-3 text-[#060d41] opacity-40" />
-                                      <span className="text-xs font-medium tracking-widest uppercase">Nessuna Immagine</span>
+                                      <span className="text-xs font-medium tracking-widest uppercase">{copy.nessunaImmagine}</span>
                                     </div>
                                   )}
                                 </div>
@@ -331,11 +333,11 @@ export default async function GestioneCataloghiPage(props: {
                                         ? 'bg-emerald-50 text-emerald-900 border-emerald-200'
                                         : 'bg-amber-50 text-amber-900 border-amber-200'
                                     }`}>
-                                      {catalogo.stato_pubblicazione === 'attivo' ? 'Pubblicato' : 'Bozza / Nascosto'}
+                                      {catalogo.stato_pubblicazione === 'attivo' ? copy.pubblicato : copy.bozzaNascosto}
                                     </span>
                                   </div>
                                   <p className="text-zinc-600 text-base">
-                                    {(catalogo.categoria as string | null) || 'Senza categoria'}
+                                    {(catalogo.categoria as string | null) || copy.senzaCategoria}
                                   </p>
                                 </div>
                               </div>
@@ -350,21 +352,21 @@ export default async function GestioneCataloghiPage(props: {
                                 >
                                   <input type="hidden" name="catalogo_id" value={catalogo.id} />
                                   <label className="block text-xs text-zinc-600 font-medium uppercase tracking-wide">
-                                    Stato Visibilità
+                                    {copy.statoVisibilita}
                                   </label>
                                   <select
                                     name="stato_pubblicazione"
                                     defaultValue={catalogo.stato_pubblicazione ?? 'bozza'}
                                     className="w-full h-9 rounded-md border border-black bg-zinc-50 px-3 text-sm text-zinc-900"
                                   >
-                                    <option value="bozza">Bozza / Nascosto</option>
-                                    <option value="attivo">Pubblicato</option>
+                                    <option value="bozza">{copy.bozzaNascosto}</option>
+                                    <option value="attivo">{copy.pubblicato}</option>
                                   </select>
                                   <button
                                     type="submit"
                                     className="w-full h-9 rounded-md bg-[#060d41] text-white text-sm font-semibold hover:bg-[#0a155a] transition-colors"
                                   >
-                                    Salva Stato
+                                    {copy.salvaStato}
                                   </button>
                                 </form>
 
@@ -376,7 +378,7 @@ export default async function GestioneCataloghiPage(props: {
                                 >
                                   <input type="hidden" name="catalogo_id" value={catalogo.id} />
                                   <label className="block text-xs text-zinc-600 font-medium uppercase tracking-wide">
-                                    Aggiorna copertina (A4 verticale)
+                                    {copy.aggiornaCopertina}
                                   </label>
                                   <input
                                     name="file_copertina"
@@ -386,13 +388,13 @@ export default async function GestioneCataloghiPage(props: {
                                   />
                                   <label className="flex items-center gap-2 text-xs text-zinc-600">
                                     <input type="checkbox" name="rimuovi_copertina" />
-                                    Rimuovi copertina attuale
+                                    {copy.rimuoviCopertina}
                                   </label>
                                   <button
                                     type="submit"
                                     className="w-full h-9 rounded-md bg-[#060d41] text-white text-sm font-semibold hover:bg-[#0a155a] transition-colors"
                                   >
-                                    Salva Copertina
+                                    {copy.salvaCopertina}
                                   </button>
                                 </form>
 
@@ -403,7 +405,7 @@ export default async function GestioneCataloghiPage(props: {
                                 >
                                   <input type="hidden" name="catalogo_id" value={catalogo.id} />
                                   <p className="block text-xs text-zinc-600 font-medium uppercase tracking-wide">
-                                    Chi può vedere questo catalogo
+                                    {copy.chiPuoVedere}
                                   </p>
                                   <div className="flex flex-col gap-1.5">
                                     {RUOLI_CATALOGO.map((r) => {
@@ -417,7 +419,7 @@ export default async function GestioneCataloghiPage(props: {
                                             defaultChecked={rv.includes(r.value)}
                                             className="rounded border-black accent-[#060d41]"
                                           />
-                                          {r.label}
+                                          {tCatalogRole(uiLocale, r.value)}
                                         </label>
                                       )
                                     })}
@@ -426,7 +428,7 @@ export default async function GestioneCataloghiPage(props: {
                                     type="submit"
                                     className="w-full h-9 rounded-md bg-[#060d41] text-white text-sm font-semibold hover:bg-[#0a155a] transition-colors"
                                   >
-                                    Salva Visibilità
+                                    {copy.salvaVisibilita}
                                   </button>
                                 </form>
 
@@ -436,12 +438,12 @@ export default async function GestioneCataloghiPage(props: {
                                   className="bg-white border border-red-400 rounded-xl p-3 space-y-2"
                                 >
                                   <input type="hidden" name="catalogo_id" value={catalogo.id} />
-                                  <p className="text-xs text-red-700">Elimina catalogo (azione irreversibile)</p>
+                                  <p className="text-xs text-red-700">{copy.eliminaCatalogo}</p>
                                   <button
                                     type="submit"
                                     className="w-full h-9 rounded-md bg-red-600 text-white text-sm font-semibold hover:bg-red-500 transition-colors"
                                   >
-                                    Elimina Catalogo
+                                    {copy.eliminaCatalogoBtn}
                                   </button>
                                 </form>
                               </>

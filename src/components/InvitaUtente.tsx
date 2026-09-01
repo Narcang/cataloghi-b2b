@@ -2,12 +2,16 @@
 
 import { useState } from 'react'
 import { ruoliInvitabili } from '@/lib/inviteHierarchy'
+import { useAppLocale } from '@/lib/useAppLocale'
+import { tAdmin, tRuolo } from '@/lib/i18nAdmin'
 
 type Props = {
   ruoloCorrente: string
 }
 
 export default function InvitaUtente({ ruoloCorrente }: Props) {
+  const locale = useAppLocale()
+  const copy = tAdmin(locale)
   const opzioni = ruoliInvitabili(ruoloCorrente)
   const [ruoloSelezionato, setRuoloSelezionato] = useState('')
   const [multiUso, setMultiUso] = useState(false)
@@ -57,23 +61,22 @@ export default function InvitaUtente({ ruoloCorrente }: Props) {
 
   return (
     <div className="rounded-xl border border-black/10 bg-zinc-50 p-5 space-y-4">
-      <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-700">Invita un utente</h3>
+      <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-700">{copy.invitaUnUtente}</h3>
       <p className="text-xs text-zinc-500">
-        Genera un link monouso. Chi si registra tramite questo link ottiene il ruolo selezionato e viene
-        collegato automaticamente al tuo profilo dopo l&apos;approvazione.
+        {copy.invitaFormHelp}
       </p>
 
       <div className="flex flex-wrap items-end gap-3">
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium text-zinc-600 uppercase tracking-wide">Ruolo</label>
+          <label className="text-xs font-medium text-zinc-600 uppercase tracking-wide">{copy.campoRuolo}</label>
           <select
             value={ruoloSelezionato}
             onChange={(e) => { setRuoloSelezionato(e.target.value); setLink(null) }}
             className="h-9 rounded-md border border-black/20 bg-white px-3 text-sm text-zinc-900 min-w-[140px]"
           >
-            <option value="" disabled>— Seleziona ruolo —</option>
+            <option value="" disabled>{copy.selezionaRuolo}</option>
             {opzioni.map((op) => (
-              <option key={op.value} value={op.value}>{op.label}</option>
+              <option key={op.value} value={op.value}>{tRuolo(locale, op.value)}</option>
             ))}
           </select>
         </div>
@@ -83,7 +86,7 @@ export default function InvitaUtente({ ruoloCorrente }: Props) {
           disabled={loading || !ruoloSelezionato}
           className="h-9 px-4 rounded-md bg-[#060d41] text-white text-sm font-medium hover:bg-[#0a155a] disabled:opacity-60 transition-colors"
         >
-          {loading ? 'Generazione…' : 'Genera link'}
+          {loading ? copy.generazione : copy.generaLink}
         </button>
       </div>
 
@@ -96,7 +99,7 @@ export default function InvitaUtente({ ruoloCorrente }: Props) {
           className="h-4 w-4 rounded border-zinc-300 accent-[#060d41]"
         />
         <label htmlFor="multi-uso" className="text-xs text-zinc-600">
-          Link permanente — può essere usato da più persone (non si disattiva)
+          {copy.linkPermanente}
         </label>
       </div>
 
@@ -106,7 +109,7 @@ export default function InvitaUtente({ ruoloCorrente }: Props) {
 
       {link && (
         <div className="space-y-2">
-          <label className="text-xs font-medium text-zinc-600 uppercase tracking-wide">Link di invito</label>
+          <label className="text-xs font-medium text-zinc-600 uppercase tracking-wide">{copy.linkInvito}</label>
           <div className="flex items-center gap-2">
             <input
               readOnly
@@ -119,13 +122,11 @@ export default function InvitaUtente({ ruoloCorrente }: Props) {
               onClick={handleCopia}
               className="h-9 px-3 rounded-md border border-black/20 bg-white text-xs font-medium text-zinc-700 hover:bg-zinc-100 transition-colors whitespace-nowrap"
             >
-              {copiato ? 'Copiato!' : 'Copia'}
+              {copiato ? copy.copiato : copy.copia}
             </button>
           </div>
           <p className="text-xs text-zinc-400">
-            {multiUso
-              ? 'Link permanente: può essere usato da più persone.'
-              : 'Link monouso: si disattiva dopo la prima registrazione.'}
+            {multiUso ? copy.linkPermanenteHint : copy.linkMonousoHint}
           </p>
         </div>
       )}

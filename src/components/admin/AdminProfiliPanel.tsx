@@ -25,6 +25,9 @@ import {
   type ProfiloGerarchiaRow,
 } from '@/lib/userHierarchy'
 
+import { useAppLocale } from '@/lib/useAppLocale'
+import { tAdmin, tRuolo, tRivenditoriCount } from '@/lib/i18nAdmin'
+
 export type ProfiloGestioneRow = {
   id: string
   nome_completo: string | null
@@ -85,19 +88,6 @@ export type OperatoreAssociazione = {
 
 const RUOLI_OPTIONS = ['admin', 'manager', 'agenzia', 'agente', 'back_office', 'rivenditore', 'distributore', 'partner_dipendente', 'studio', 'free'] as const
 
-const RUOLO_LABEL: Record<string, string> = {
-  agenzia:            'Agenzia',
-  agente:             'Agente',
-  back_office:        'Back-Office',
-  rivenditore:        'Rivenditori',
-  distributore:       'Venditori',
-  partner_dipendente: 'Promoter',
-}
-
-function ruoloLabel(r: string): string {
-  return RUOLO_LABEL[r] ?? r
-}
-
 /** Ruoli per cui ha senso personalizzare la dashboard portale per singolo utente. */
 function puoPersonalizzareCataloghi(ruolo: string): boolean {
   return !['admin', 'free', 'manager'].includes(ruolo)
@@ -107,16 +97,16 @@ type RuoloOption = (typeof RUOLI_OPTIONS)[number]
 
 type RuoloTabId = 'admin' | 'manager' | 'agenzia' | 'agente' | 'back_office' | 'rivenditore' | 'distributore' | 'studio' | 'partner_dipendente'
 
-const RUOLI_TAB: { id: RuoloTabId; label: string }[] = [
-  { id: 'admin', label: 'Admin' },
-  { id: 'manager', label: 'Manager' },
-  { id: 'agenzia', label: 'Agenzia' },
-  { id: 'agente', label: 'Agente' },
-  { id: 'back_office', label: 'Back-Office' },
-  { id: 'rivenditore', label: 'Rivenditori' },
-  { id: 'distributore', label: 'Venditori' },
-  { id: 'partner_dipendente', label: 'Promoter' },
-  { id: 'studio', label: 'Studio' },
+const RUOLI_TAB: { id: RuoloTabId }[] = [
+  { id: 'admin' },
+  { id: 'manager' },
+  { id: 'agenzia' },
+  { id: 'agente' },
+  { id: 'back_office' },
+  { id: 'rivenditore' },
+  { id: 'distributore' },
+  { id: 'partner_dipendente' },
+  { id: 'studio' },
 ]
 
 function profiloSortKey(p: ProfiloGestioneRow): string {
@@ -180,6 +170,8 @@ export default function AdminProfiliPanel({
   canManageSpecializzazioneOpzioni = false,
 }: Props) {
   const router = useRouter()
+  const locale = useAppLocale()
+  const copy = tAdmin(locale)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
@@ -292,9 +284,7 @@ export default function AdminProfiliPanel({
     setError(null)
     setMessage(null)
     if (
-      !window.confirm(
-        'Eliminare definitivamente questo utente? Verranno rimossi profilo, accesso al portale e collegamenti in rubrica. L’operazione non è annullabile.'
-      )
+      !window.confirm(copy.eliminaConfirm)
     ) {
       return false
     }
@@ -383,11 +373,11 @@ export default function AdminProfiliPanel({
       <div className="flex items-center gap-3 border-b border-black pb-4">
         <Users className="text-[#060d41]" size={28} aria-hidden />
         <div>
-          <h2 className="text-2xl font-medium text-zinc-900">Gestione utenti</h2>
+          <h2 className="text-2xl font-medium text-zinc-900">{copy.gestioneUtentiPanel}</h2>
           <p className="text-sm text-zinc-600 mt-1">
             {agenziaRivenditoriMode
-              ? 'Aggiorna espositori e box dei rivenditori collegati alla tua agenzia. Gli altri dati del profilo restano in sola lettura.'
-              : 'Approva le registrazioni, aggiorna i dati o elimina account, associa i contatti (agenti, partner e studio) visibili nella rubrica: email e telefono del profilo compaiono per chi è collegato, in entrambe le direzioni tra questi ruoli.'}
+              ? copy.gestioneUtentiPanelHelpAgenzia
+              : copy.gestioneUtentiPanelHelp}
           </p>
         </div>
       </div>
@@ -403,14 +393,14 @@ export default function AdminProfiliPanel({
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-zinc-900 flex items-center gap-2">
             <UserCheck size={20} aria-hidden />
-            Registrazioni in attesa ({profiliPendentiOrdinati.length})
+            {copy.registrazioniAttesa} ({profiliPendentiOrdinati.length})
           </h3>
           <ul className="space-y-4 list-none p-0 m-0">
             {profiliPendentiOrdinati.map((p) => (
               <li key={p.id} className="rounded-xl border border-amber-200 bg-amber-50/60 p-4">
                 <p className="text-sm text-zinc-700 mb-3">
-                  <strong>{p.nome_completo || 'Senza nome'}</strong> · {p.email} · {p.societa || '—'} · Tel.{' '}
-                  {p.telefono || '—'} · Ruolo: {ruoloLabel(p.ruolo)} · Area: {p.area_geografica || '—'}
+                  <strong>{p.nome_completo || copy.senzaNome}</strong> · {p.email} · {p.societa || '—'} · Tel.{' '}
+                  {p.telefono || '—'} · {copy.campoRuolo}: {tRuolo(locale, p.ruolo)} · {copy.campoArea}: {p.area_geografica || '—'}
                 </p>
                 {!readOnly && (
                   <form
@@ -422,7 +412,7 @@ export default function AdminProfiliPanel({
                     }}
                   >
                     <label className="block text-xs font-medium uppercase text-zinc-600">
-                      Nome completo
+                      {copy.campoNome}
                       <input
                         name="nome_completo"
                         type="text"
@@ -431,7 +421,7 @@ export default function AdminProfiliPanel({
                       />
                     </label>
                     <label className="block text-xs font-medium uppercase text-zinc-600">
-                      Email (profilo)
+                      {copy.campoEmail}
                       <input
                         name="email"
                         type="email"
@@ -440,7 +430,7 @@ export default function AdminProfiliPanel({
                       />
                     </label>
                     <label className="block text-xs font-medium uppercase text-zinc-600">
-                      Telefono
+                      {copy.campoTelefono}
                       <input
                         name="telefono"
                         type="tel"
@@ -449,7 +439,7 @@ export default function AdminProfiliPanel({
                       />
                     </label>
                     <label className="block text-xs font-medium uppercase text-zinc-600">
-                      Società
+                      {copy.campoSocieta}
                       <input
                         name="societa"
                         type="text"
@@ -458,17 +448,17 @@ export default function AdminProfiliPanel({
                       />
                     </label>
                     <label className="block text-xs font-medium uppercase text-zinc-600">
-                      Area geografica
+                      {copy.campoArea}
                       <input
                         name="area_geografica"
                         type="text"
-                        placeholder="Es. MONDO, Emilia Romagna"
+                        placeholder={copy.placeholderArea}
                         defaultValue={p.area_geografica ?? ''}
                         className="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
                       />
                     </label>
                     <label className="block text-xs font-medium uppercase text-zinc-600">
-                      Ruolo
+                      {copy.campoRuolo}
                       <select
                         name="ruolo"
                         defaultValue={p.ruolo}
@@ -476,18 +466,18 @@ export default function AdminProfiliPanel({
                       >
                         {RUOLI_OPTIONS.map((r) => (
                           <option key={r} value={r}>
-                            {ruoloLabel(r)}
+                            {tRuolo(locale, r)}
                           </option>
                         ))}
                       </select>
                     </label>
                     {p.ruolo === 'rivenditore' ? (
                       <label className="block text-xs font-medium uppercase text-zinc-600">
-                        Seguito da
+                        {copy.seguitoDa}
                         <input
                           name="seguito_da"
                           type="text"
-                          placeholder="Es. nome agente o referente"
+                          placeholder={copy.placeholderSeguito}
                           defaultValue={p.seguito_da ?? ''}
                           className="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
                         />
@@ -495,7 +485,7 @@ export default function AdminProfiliPanel({
                     ) : null}
                     <label className="md:col-span-2 flex items-center gap-2 text-sm text-zinc-800">
                       <input type="checkbox" name="registrazione_approvata" value="on" defaultChecked={false} className="rounded border-black" />
-                      Approva registrazione (accesso ai cataloghi secondo ruolo e area)
+                      {copy.approvaReg}
                     </label>
                     {p.ruolo === 'rivenditore' ? (
                       <RivenditoreProfiloCampi
@@ -555,7 +545,7 @@ export default function AdminProfiliPanel({
                         disabled={deletingId === p.id}
                         className="h-10 rounded-lg bg-[#060d41] text-white px-4 text-sm font-semibold hover:bg-[#0a155a] disabled:opacity-50"
                       >
-                        Salva e conferma
+                        {copy.salvaConferma}
                       </button>
                       {p.ruolo !== 'admin' && p.id !== currentUserId ? (
                         <button
@@ -564,7 +554,7 @@ export default function AdminProfiliPanel({
                           onClick={() => void postDelete(p.id)}
                           className="h-10 rounded-lg border border-red-600 bg-white px-4 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50"
                         >
-                          {deletingId === p.id ? 'Eliminazione…' : 'Elimina utente'}
+                          {deletingId === p.id ? copy.eliminazione : copy.eliminaUtente}
                         </button>
                       ) : null}
                     </div>
@@ -575,21 +565,21 @@ export default function AdminProfiliPanel({
           </ul>
         </div>
       ) : !agenziaRivenditoriMode ? (
-        <p className="text-sm text-zinc-500">Nessuna registrazione in attesa.</p>
+        <p className="text-sm text-zinc-500">{copy.nessunaAttesa}</p>
       ) : null}
 
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-zinc-900">
-          {agenziaRivenditoriMode ? 'Rivenditori associati' : 'Utenti e operatori associati'}
+          {agenziaRivenditoriMode ? copy.rivenditoriAssociati : copy.utentiAssociati}
         </h3>
         <p className="text-sm text-zinc-600">
           {agenziaRivenditoriMode
-            ? 'Elenco dei rivenditori collegati alla tua agenzia (ordine alfabetico). Apri un profilo per aggiornare espositori e box.'
-            : 'Elenco filtrato come il Filtro Manager (area). Scegli un ruolo per vedere solo quegli utenti (ordine alfabetico). Per ogni profilo puoi modificare i dati e spuntare i contatti in rubrica: tra agente, partner e studio la connessione è reciproca (entrambi vedono nome, email e telefono se presenti).'}
+            ? copy.listaRivenditoriHelp
+            : copy.listaUtentiHelp}
         </p>
 
         {!agenziaRivenditoriMode ? (
-        <div className="flex flex-wrap gap-2" role="tablist" aria-label="Filtra utenti per ruolo">
+        <div className="flex flex-wrap gap-2" role="tablist" aria-label={copy.filtraPerRuolo}>
           {ruoliTab.map((tab) => {
             const count = profiliPerRuolo.get(tab.id)?.length ?? 0
             const active = ruoloAttivo === tab.id
@@ -606,7 +596,7 @@ export default function AdminProfiliPanel({
                     : 'border-black bg-white text-zinc-900 hover:bg-zinc-100'
                 }`}
               >
-                {tab.label}
+                {tRuolo(locale, tab.id)}
                 <span
                   className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                     active ? 'bg-white/20 text-white' : 'bg-zinc-100 text-zinc-700'
@@ -620,7 +610,7 @@ export default function AdminProfiliPanel({
         </div>
         ) : (
           <p className="text-sm font-medium text-zinc-700">
-            {profiliRuoloAttivo.length} rivenditor{profiliRuoloAttivo.length === 1 ? 'e' : 'i'}
+            {tRivenditoriCount(locale, profiliRuoloAttivo.length)}
           </p>
         )}
 
@@ -628,8 +618,8 @@ export default function AdminProfiliPanel({
           {profiliRuoloAttivo.length === 0 ? (
             <li className="rounded-xl border border-dashed border-black/30 bg-zinc-50 px-4 py-6 text-center text-sm text-zinc-600">
               {agenziaRivenditoriMode
-                ? 'Nessun rivenditore collegato alla tua agenzia.'
-                : 'Nessun utente con questo ruolo nel filtro area corrente.'}
+                ? copy.nessunRivenditoreAgenzia
+                : copy.nessunUtenteRuoloFiltro}
             </li>
           ) : null}
           {profiliRuoloAttivo.map((p) => {
@@ -677,19 +667,19 @@ export default function AdminProfiliPanel({
                         p.nome_completo || p.email || p.id
                       )}
                       <span className="ml-2 text-xs font-normal text-zinc-500">
-                        {ruoloLabel(p.ruolo)}
-                        {p.registrazione_approvata === false ? ' · in attesa' : ''}
+                        {tRuolo(locale, p.ruolo)}
+                        {p.registrazione_approvata === false ? ` · ${copy.inAttesa}` : ''}
                       </span>
                     </span>
-                    <span className="text-xs text-zinc-500">{p.area_geografica || 'Area non definita'}</span>
+                    <span className="text-xs text-zinc-500">{p.area_geografica || copy.areaNonDefinita}</span>
                   </summary>
                   <div className="border-t border-black/10 px-4 py-4 space-y-4 bg-white">
                     {editSpecializzazione ? (
                       <>
                         <p className="text-sm text-zinc-600">
                           {rivenditoreEditEsterno
-                            ? 'Puoi aggiornare espositori e box di questo rivenditore. Gli altri dati del profilo restano in sola lettura.'
-                            : 'Puoi aggiornare strumenti lavoro agente, cataloghi, espositori e box. Gli altri dati del profilo restano in sola lettura.'}
+                            ? copy.editRivenditoreHelp
+                            : copy.editAgenziaHelp}
                         </p>
                         <form
                           className="grid grid-cols-1 md:grid-cols-2 gap-3"
@@ -754,7 +744,7 @@ export default function AdminProfiliPanel({
                               type="submit"
                               className="h-9 rounded-md bg-[#060d41] text-white px-3 text-sm font-semibold hover:bg-[#0a155a] disabled:opacity-50"
                             >
-                              {rivenditoreEditEsterno ? 'Salva espositori e box' : 'Salva specializzazione'}
+                              {rivenditoreEditEsterno ? copy.salvaEspositori : copy.salvaSpecializzazione}
                             </button>
                           </div>
                         </form>
@@ -762,10 +752,10 @@ export default function AdminProfiliPanel({
                     ) : profiloReadOnly ? (
                       <p className="text-sm text-zinc-600">
                         {agenziaRivenditoriMode
-                          ? 'Profilo in sola lettura.'
+                          ? copy.profiloSolaLettura
                           : readOnly
-                            ? 'Visualizzazione in sola lettura (ruolo Manager).'
-                            : 'Profilo admin o il tuo account: modifica da Supabase se necessario.'}
+                            ? copy.visualizzazioneManager
+                            : copy.profiloAdminAccount}
                       </p>
                     ) : (
                       <>
@@ -778,7 +768,7 @@ export default function AdminProfiliPanel({
                           }}
                         >
                           <label className="block text-xs font-medium uppercase text-zinc-600">
-                            Nome completo
+                            {copy.campoNome}
                             <input
                               name="nome_completo"
                               type="text"
@@ -787,7 +777,7 @@ export default function AdminProfiliPanel({
                             />
                           </label>
                           <label className="block text-xs font-medium uppercase text-zinc-600">
-                            Email (profilo)
+                            {copy.campoEmail}
                             <input
                               name="email"
                               type="email"
@@ -796,7 +786,7 @@ export default function AdminProfiliPanel({
                             />
                           </label>
                           <label className="block text-xs font-medium uppercase text-zinc-600">
-                            Telefono
+                            {copy.campoTelefono}
                             <input
                               name="telefono"
                               type="tel"
@@ -805,7 +795,7 @@ export default function AdminProfiliPanel({
                             />
                           </label>
                           <label className="block text-xs font-medium uppercase text-zinc-600">
-                            Società
+                            {copy.campoSocieta}
                             <input
                               name="societa"
                               type="text"
@@ -814,7 +804,7 @@ export default function AdminProfiliPanel({
                             />
                           </label>
                           <label className="block text-xs font-medium uppercase text-zinc-600">
-                            Area geografica
+                            {copy.campoArea}
                             <input
                               name="area_geografica"
                               type="text"
@@ -823,7 +813,7 @@ export default function AdminProfiliPanel({
                             />
                           </label>
                           <label className="block text-xs font-medium uppercase text-zinc-600">
-                            Ruolo
+                            {copy.campoRuolo}
                             <select
                               name="ruolo"
                               defaultValue={p.ruolo}
@@ -831,18 +821,18 @@ export default function AdminProfiliPanel({
                             >
                               {RUOLI_OPTIONS.map((r) => (
                                 <option key={r} value={r}>
-                                  {ruoloLabel(r)}
+                                  {tRuolo(locale, r)}
                                 </option>
                               ))}
                             </select>
                           </label>
                           {p.ruolo === 'rivenditore' ? (
                             <label className="block text-xs font-medium uppercase text-zinc-600">
-                              Seguito da
+                              {copy.seguitoDa}
                               <input
                                 name="seguito_da"
                                 type="text"
-                                placeholder="Es. nome agente o referente"
+                                placeholder={copy.placeholderSeguito}
                                 defaultValue={p.seguito_da ?? ''}
                                 className="mt-1 w-full h-9 rounded-md border border-black bg-zinc-50 px-2 text-sm"
                               />
@@ -906,7 +896,7 @@ export default function AdminProfiliPanel({
                               defaultChecked={p.registrazione_approvata !== false}
                               className="rounded border-black"
                             />
-                            Registrazione approvata
+                            {copy.registrazioneApprovata}
                           </label>
                           <div className="md:col-span-2 flex flex-wrap items-center gap-3">
                             <button
@@ -914,7 +904,7 @@ export default function AdminProfiliPanel({
                               disabled={deletingId === p.id}
                               className="h-9 rounded-md bg-[#060d41] text-white px-3 text-sm font-semibold hover:bg-[#0a155a] disabled:opacity-50"
                             >
-                              Salva profilo
+                              {copy.salvaProfilo}
                             </button>
                             {p.ruolo !== 'admin' && p.id !== currentUserId ? (
                               <button
@@ -923,7 +913,7 @@ export default function AdminProfiliPanel({
                                 onClick={() => void postDelete(p.id)}
                                 className="h-9 rounded-md border border-red-600 bg-white px-3 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50"
                               >
-                                {deletingId === p.id ? 'Eliminazione…' : 'Elimina utente'}
+                                {deletingId === p.id ? copy.eliminazione : copy.eliminaUtente}
                               </button>
                             ) : null}
                           </div>
@@ -939,7 +929,7 @@ export default function AdminProfiliPanel({
                                 ownerProfileId={p.id}
                                 roots={directAssociati}
                                 candidates={candidateAssociati}
-                                aggiungiLabel={aggiungiLabel ?? 'Associa profilo'}
+                                aggiungiLabel={aggiungiLabel ?? copy.associaProfilo}
                                 profiliGerarchia={profiliGerarchia}
                                 links={links}
                                 linksByUtente={linksByUtente}
