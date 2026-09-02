@@ -1,43 +1,42 @@
 import Link from 'next/link'
-import { CATALOG_LOCALES, LOCALE_LABEL, type AppLocale, type CatalogLocale } from '@/lib/locale'
+import type { AppLocale } from '@/lib/locale'
 import { tAdmin } from '@/lib/i18nAdmin'
 
-type Tab = CatalogLocale | 'all'
-
-export default function CatalogLinguaTabs({
+export default function CatalogCategoriaTabs({
   active,
+  categories,
   counts,
+  labels,
   nome,
-  categoria,
+  lingua,
   locale,
 }: {
-  active: Tab
-  counts: Record<Tab, number>
+  active: string | 'all'
+  categories: readonly string[]
+  counts: Record<string, number>
+  labels: Record<string, string>
   nome: string
-  categoria?: string
+  lingua: string
   locale: AppLocale
 }) {
   const copy = tAdmin(locale)
-  const tabs: Tab[] = ['all', ...CATALOG_LOCALES]
-  const tabLabel: Record<Tab, string> = {
-    all: copy.tutteLingue,
-    it: LOCALE_LABEL.it,
-    ru: LOCALE_LABEL.ru,
-    en: LOCALE_LABEL.en,
-  }
 
-  function href(tab: Tab) {
+  function href(categoria: string | 'all') {
     const params = new URLSearchParams()
     if (nome) params.set('nome', nome)
-    if (categoria) params.set('categoria', categoria)
-    params.set('lingua', tab)
+    params.set('lingua', lingua)
+    if (categoria !== 'all') params.set('categoria', categoria)
     return `/dashboard/gestione-cataloghi?${params.toString()}`
   }
 
+  const tabs: Array<string | 'all'> = ['all', ...categories]
+
   return (
-    <div className="flex flex-wrap gap-2" role="tablist" aria-label={copy.linguaCataloghi}>
+    <div className="flex flex-wrap gap-2" role="tablist" aria-label={copy.categoria}>
       {tabs.map((tab) => {
         const selected = active === tab
+        const label = tab === 'all' ? copy.tutteLingue : (labels[tab] ?? tab)
+        const count = tab === 'all' ? counts.all : counts[tab]
         return (
           <Link
             key={tab}
@@ -50,8 +49,10 @@ export default function CatalogLinguaTabs({
                 : 'border-black bg-white text-[#060d41] hover:bg-zinc-100'
             }`}
           >
-            {tabLabel[tab]}
-            <span className={selected ? 'text-white/80' : 'text-zinc-500'}>{counts[tab]}</span>
+            {label}
+            {typeof count === 'number' ? (
+              <span className={selected ? 'text-white/80' : 'text-zinc-500'}>{count}</span>
+            ) : null}
           </Link>
         )
       })}

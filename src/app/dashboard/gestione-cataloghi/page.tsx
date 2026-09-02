@@ -10,6 +10,7 @@ import {
   categoriesVisibleOnDashboard,
   categoryToDomId,
   isLanguageSharedCategory,
+  isLanguageSpecificCategory,
   type CatalogCategory,
 } from '@/lib/catalogCategories'
 
@@ -24,6 +25,7 @@ import { RUOLI_CATALOGO } from '@/lib/catalogRoles'
 import { catalogPdfHref, reservedAreaCatalogReturnTo } from '@/lib/catalogNavigation'
 import { compareCatalogTitoli } from '@/lib/catalogSorting'
 import CatalogLinguaTabs from '@/components/admin/CatalogLinguaTabs'
+import CatalogCategoriaTabs from '@/components/admin/CatalogCategoriaTabs'
 import {
   catalogsForAdminLinguaTab,
   defaultCatalogTab,
@@ -47,7 +49,7 @@ function escapeIlikePattern(value: string): string {
 const RETURN_BASE = '/dashboard/gestione-cataloghi'
 
 export default async function GestioneCataloghiPage(props: {
-  searchParams: Promise<{ nome?: string; message?: string; lingua?: string }>
+  searchParams: Promise<{ nome?: string; message?: string; lingua?: string; categoria?: string }>
 }) {
   const searchParams = await props.searchParams
   const nomeFilter = (searchParams?.nome ?? '').trim()
@@ -55,6 +57,7 @@ export default async function GestioneCataloghiPage(props: {
   const uiLocale = await getAppLocale()
   const copy = tAdmin(uiLocale)
   const linguaTabRaw = (searchParams?.lingua ?? '').trim()
+  const categoriaTabRaw = (searchParams?.categoria ?? '').trim()
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -106,6 +109,33 @@ export default async function GestioneCataloghiPage(props: {
   const cataloghiSenzaCategoriaVista = cataloghiPerVista.filter(
     (c) => !c.categoria || !categorieVistaSet.has(c.categoria as string),
   )
+  const categorieExtra = Array.from(
+    new Set(
+      cataloghiSenzaCategoriaVista
+        .map((c) => (typeof c.categoria === 'string' ? c.categoria.trim() : ''))
+        .filter((cat) => cat.length > 0),
+    ),
+  )
+  const categorieSelezionabiliRaw = [...categorieDashboard, ...categorieExtra]
+  const categorieSelezionabili = [
+    ...categorieSelezionabiliRaw.filter((cat) => isLanguageSpecificCategory(cat)),
+    ...categorieSelezionabiliRaw.filter((cat) => !isLanguageSpecificCategory(cat)),
+  ]
+  const categoriaTab =
+    categoriaTabRaw.length > 0 && categorieSelezionabili.includes(categoriaTabRaw)
+      ? categoriaTabRaw
+      : 'all'
+  const categorieDaMostrare =
+    categoriaTab === 'all' ? [...categorieDashboard, ...categorieExtra] : [categoriaTab]
+  const categoriaCounts: Record<string, number> = { all: cataloghiPerVista.length }
+  for (const cat of categorieSelezionabili) {
+    categoriaCounts[cat] = cataloghiPerVista.filter(
+      (c) => String(c.categoria ?? '').trim() === cat,
+    ).length
+  }
+  const categoriaLabels: Record<string, string> = Object.fromEntries(
+    categorieSelezionabili.map((cat) => [cat, categoryDisplayLabel(cat)]),
+  )
 
   return (
     <div className="ladiva-root ladiva-root-app-dark min-h-screen flex flex-col">
@@ -141,6 +171,9 @@ export default async function GestioneCataloghiPage(props: {
             </div>
             <form className="flex flex-wrap items-center gap-3" method="get">
               <input type="hidden" name="lingua" value={linguaTab} />
+              {categoriaTab !== 'all' ? (
+                <input type="hidden" name="categoria" value={categoriaTab} />
+              ) : null}
               <input
                 type="search"
                 name="nome"
@@ -187,7 +220,22 @@ export default async function GestioneCataloghiPage(props: {
           </div>
 
           <div className="mb-8 space-y-3">
-            <CatalogLinguaTabs active={linguaTab} counts={linguaCounts} nome={nomeFilter} locale={uiLocale} />
+            <CatalogLinguaTabs
+              active={linguaTab}
+              counts={linguaCounts}
+              nome={nomeFilter}
+              categoria={categoriaTab === 'all' ? undefined : categoriaTab}
+              locale={uiLocale}
+            />
+            <CatalogCategoriaTabs
+              active={categoriaTab}
+              categories={categorieSelezionabili}
+              counts={categoriaCounts}
+              labels={categoriaLabels}
+              nome={nomeFilter}
+              lingua={linguaTab}
+              locale={uiLocale}
+            />
             <p className="text-sm text-zinc-400">
               {copy.cataloghiCondivisiHelp}
             </p>
@@ -210,16 +258,7 @@ export default async function GestioneCataloghiPage(props: {
             </div>
           ) : (
             <div className="space-y-10">
-              {[
-                ...categorieDashboard,
-                ...Array.from(
-                  new Set(
-                    cataloghiSenzaCategoriaVista
-                      .map((c) => (typeof c.categoria === 'string' ? c.categoria.trim() : ''))
-                      .filter((cat) => cat.length > 0),
-                  ),
-                ),
-              ].map((categoria) => {
+              {categorieDaMostrare.map((categoria) => {
                 const items = cataloghiPerVista
                   .filter((c) => String(c.categoria ?? '').trim() === categoria)
                   .sort((a, b) => {
