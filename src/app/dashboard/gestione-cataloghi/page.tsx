@@ -23,8 +23,13 @@ import { RUOLI_CATALOGO } from '@/lib/catalogRoles'
 import { catalogPdfHref, reservedAreaCatalogReturnTo } from '@/lib/catalogNavigation'
 import { compareCatalogTitoli } from '@/lib/catalogSorting'
 import CatalogLinguaTabs from '@/components/admin/CatalogLinguaTabs'
-import { catalogsForAdminLinguaTab, isEnglishFallbackCatalog, parseCatalogLingua } from '@/lib/catalogLingua'
-import { LOCALE_LABEL, type AppLocale } from '@/lib/locale'
+import {
+  catalogsForAdminLinguaTab,
+  defaultCatalogTab,
+  isEnglishFallbackCatalog,
+  parseCatalogLingua,
+} from '@/lib/catalogLingua'
+import { isCatalogLocale, LOCALE_LABEL, type CatalogLocale } from '@/lib/locale'
 import { getAppLocale } from '@/lib/localeServer'
 import { tAdmin, tCatalogCount, tCatalogRole } from '@/lib/i18nAdmin'
 
@@ -67,12 +72,12 @@ export default async function GestioneCataloghiPage(props: {
 
   if (!isManager) redirect('/dashboard')
 
-  const linguaTab: AppLocale | 'all' =
-    linguaTabRaw === 'all' || linguaTabRaw === 'it' || linguaTabRaw === 'ru' || linguaTabRaw === 'en'
+  const linguaTab: CatalogLocale | 'all' =
+    linguaTabRaw === 'all' || isCatalogLocale(linguaTabRaw)
       ? linguaTabRaw
-      : uiLocale
-  const formDefaultLingua: AppLocale =
-    linguaTab === 'it' || linguaTab === 'ru' || linguaTab === 'en' ? linguaTab : uiLocale
+      : defaultCatalogTab(uiLocale)
+  const formDefaultLingua: CatalogLocale =
+    linguaTab === 'all' ? defaultCatalogTab(uiLocale) : linguaTab
 
   // Fetch cataloghi (admin/manager vedono anche le bozze)
   let cataloghiQuery = supabase

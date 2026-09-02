@@ -1,8 +1,8 @@
 import Link from 'next/link'
-import { APP_LOCALES, LOCALE_LABEL, type AppLocale } from '@/lib/locale'
+import { CATALOG_LOCALES, LOCALE_LABEL, type AppLocale, type CatalogLocale } from '@/lib/locale'
 import { tAdmin } from '@/lib/i18nAdmin'
 
-type Tab = AppLocale | 'all'
+type Tab = CatalogLocale | 'all'
 
 export default function CatalogLinguaTabs({
   active,
@@ -16,7 +16,7 @@ export default function CatalogLinguaTabs({
   locale: AppLocale
 }) {
   const copy = tAdmin(locale)
-  const tabs: Tab[] = ['all', ...APP_LOCALES]
+  const tabs: Tab[] = ['all', ...CATALOG_LOCALES]
   const tabLabel: Record<Tab, string> = {
     all: copy.tutteLingue,
     it: LOCALE_LABEL.it,

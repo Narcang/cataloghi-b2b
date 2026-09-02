@@ -9,7 +9,7 @@ import {
 } from '@/lib/catalogStoragePaths'
 import { MAX_CATALOG_COVER_BYTES } from '@/lib/catalogUploadLimits'
 import { isZipDownloadCategory, isZipStoragePath } from '@/lib/catalogFileKind'
-import { parseAppLocale } from '@/lib/locale'
+import { parseCatalogLocale } from '@/lib/locale'
 
 /** Categorie per cui esiste sempre un solo file attivo: il nuovo sostituisce il vecchio. */
 const SINGLE_FILE_CATEGORIES = new Set(['Scontistiche', 'Listini', 'Power Point'])
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
 
   const titolo = String(body.titolo ?? '').trim()
   const categoria = String(body.categoria ?? '').trim()
-  const lingua = parseAppLocale(body.lingua)
+  const lingua = parseCatalogLocale(body.lingua)
   const ruoliVisibili = Array.isArray(body.ruoli_visibili)
     ? body.ruoli_visibili.map((r) => String(r).trim()).filter(Boolean)
     : []

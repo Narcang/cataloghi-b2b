@@ -22,13 +22,13 @@ import { isZipDownloadCategory } from '@/lib/catalogFileKind'
 import { RUOLI_CATALOGO, RUOLI_CATALOGO_DEFAULT, type RuoloCatalogo } from '@/lib/catalogRoles'
 import { tCatalogAdmin } from '@/lib/i18n'
 import { tAdmin, tCatalogRole } from '@/lib/i18nAdmin'
-import { APP_LOCALES, LOCALE_LABEL, type AppLocale } from '@/lib/locale'
+import { CATALOG_LOCALES, isCatalogLocale, LOCALE_LABEL, type CatalogLocale } from '@/lib/locale'
 import type { Mercato } from '@/lib/mercato'
 import { useAppLocale } from '@/lib/useAppLocale'
 
 type Props = {
   categories: readonly CatalogCategory[]
-  defaultLingua?: AppLocale
+  defaultLingua?: CatalogLocale
   mercato?: Mercato
 }
 
@@ -44,11 +44,11 @@ export default function CreateCatalogForm({
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [categoriaSelezionata, setCategoriaSelezionata] = useState('')
-  const [linguaSelezionata, setLinguaSelezionata] = useState<AppLocale>(defaultLingua ?? 'it')
+  const [linguaSelezionata, setLinguaSelezionata] = useState<CatalogLocale>(defaultLingua ?? 'it')
   const [ruoliSelezionati, setRuoliSelezionati] = useState<RuoloCatalogo[]>(RUOLI_CATALOGO_DEFAULT)
 
   useEffect(() => {
-    setLinguaSelezionata(defaultLingua ?? uiLocale)
+    setLinguaSelezionata(defaultLingua ?? (isCatalogLocale(uiLocale) ? uiLocale : 'it'))
   }, [defaultLingua, uiLocale])
 
   const isZipCategory = isZipDownloadCategory(categoriaSelezionata)
@@ -300,10 +300,10 @@ export default function CreateCatalogForm({
           required
           disabled={submitting}
           value={linguaSelezionata}
-          onChange={(e) => setLinguaSelezionata(e.target.value as AppLocale)}
+          onChange={(e) => setLinguaSelezionata(e.target.value as CatalogLocale)}
           className="w-full h-10 rounded-md border border-black bg-zinc-50 px-3 text-sm text-zinc-900 disabled:opacity-60"
         >
-          {APP_LOCALES.map((key) => (
+          {CATALOG_LOCALES.map((key) => (
             <option key={key} value={key}>
               {key.toUpperCase()} · {LOCALE_LABEL[key]}
             </option>
