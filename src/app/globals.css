@@ -251,6 +251,10 @@
   background: #fff;
 }
 
+.ladiva-locale-switch-btn {
+  cursor: pointer;
+}
+
 .ladiva-locale-switch-btn-inactive,
 .ladiva-root-app-dark .ladiva-locale-switch-btn-inactive {
   background-color: #fff !important;

@@ -31,7 +31,7 @@ export default function LanguageChooser() {
             key={locale}
             type="button"
             onClick={() => void scegli(locale)}
-            className="rounded-2xl border border-black bg-white px-4 py-6 text-base md:text-lg font-semibold text-[#060d41] hover:bg-[#060d41] hover:text-white transition-colors"
+            className="cursor-pointer rounded-2xl border border-black bg-white px-4 py-6 text-base md:text-lg font-semibold text-[#060d41] hover:bg-[#060d41] hover:text-white transition-colors"
           >
             {LOCALE_FLAG[locale]} {LOCALE_NATIVE[locale]}
           </button>

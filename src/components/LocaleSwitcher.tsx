@@ -39,7 +39,7 @@ export default function LocaleSwitcher() {
             key={key}
             type="button"
             onClick={() => void scegli(key)}
-            className="ladiva-locale-switch-btn px-2.5 py-1 text-xs font-semibold uppercase tracking-wide"
+            className="ladiva-locale-switch-btn cursor-pointer px-2.5 py-1 text-xs font-semibold uppercase tracking-wide"
             style={
               active
                 ? { backgroundColor: '#060d41', color: '#fff' }
