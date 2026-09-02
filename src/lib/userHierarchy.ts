@@ -59,7 +59,7 @@ const OPERATOR_ROLES = new Set(['agenzia', 'agente', 'back_office', 'rivenditore
 export const CHILD_ROLES_BY_PARENT: Record<string, string[]> = {
   admin: ['manager'],
   manager: ['agenzia', 'agente', 'back_office'],
-  agenzia: ['agente', 'back_office', 'rivenditore'],
+  agenzia: ['agente', 'back_office', 'rivenditore', 'studio'],
   agente: ['studio'],
   back_office: ['studio'],
   rivenditore: ['distributore', 'partner_dipendente', 'studio'],
@@ -577,7 +577,7 @@ export function associatiDirettiSectionLabel(ruolo: string): string | null {
     case 'manager':
       return 'Associati diretti (agenzie / agenti / back-office)'
     case 'agenzia':
-      return 'Associati diretti (agenti / back-office / rivenditori)'
+      return 'Associati diretti (agenti / back-office / rivenditori / studi)'
     case 'agente':
     case 'back_office':
       return 'Associati diretti (studi)'
@@ -601,7 +601,7 @@ export function associatiAggiungiSectionLabel(ruolo: string): string | null {
     case 'manager':
       return 'Associa agenzia / agente / back-office'
     case 'agenzia':
-      return 'Associa agente / back-office / rivenditore'
+      return 'Associa agente / back-office / rivenditore / studio'
     case 'agente':
     case 'back_office':
       return 'Associa studio'
@@ -679,6 +679,9 @@ function isDirectChild(
     if (child.invitato_da === parentId) return true
     const agenzia = resolveAgenziaParentForRivenditore(child, profili, links)
     if (agenzia?.id === parentId) return true
+  }
+  if (parentProfile.ruolo === 'agenzia' && child.ruolo === 'studio') {
+    if (child.invitato_da === parentId) return true
   }
   if (child.invitato_da === parentId) return true
   if (hasDirectedParentChildLink(
@@ -879,7 +882,7 @@ export function nestedAssociatiLabel(ruolo: string): string | null {
     case 'manager':
       return 'Agenzie / agenti / back-office associati'
     case 'agenzia':
-      return 'Agenti / back-office / rivenditori associati'
+      return 'Agenti / back-office / rivenditori / studi associati'
     case 'agente':
     case 'back_office':
       return 'Studi associati'
