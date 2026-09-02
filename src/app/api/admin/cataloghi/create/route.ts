@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     const payload = (await resolved.response.json().catch(() => null)) as { message?: string } | null
     return jsonResponse(false, payload?.message ?? 'Operazione non consentita', status)
   }
-  const { dataClient: supabase, user } = resolved.ctx
+  const { dataClient: supabase, user, mercato } = resolved.ctx
 
   let body: CreateCatalogJsonBody
   try {
@@ -178,7 +178,7 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const { error: insertError } = await supabase.from('cataloghi').insert({
+  const insertPayload = {
     titolo,
     categoria,
     lingua,
@@ -187,7 +187,23 @@ export async function POST(request: NextRequest) {
     stato_pubblicazione: statoValido,
     url_file: filePdfStoragePath,
     url_immagine: urlImmagine,
-  })
+  }
+
+  let { error: insertError } = await supabase.from('cataloghi').insert(insertPayload)
+
+  // Il progetto Russia può non avere ancora la colonna lingua: riprova senza.
+  if (insertError && mercato === 'ru' && insertError.message.toLowerCase().includes('lingua')) {
+    const retry = await supabase.from('cataloghi').insert({
+      titolo,
+      categoria,
+      ruoli_visibili: ruoliVisibili,
+      area_geografica_target: ['MONDO'],
+      stato_pubblicazione: statoValido,
+      url_file: filePdfStoragePath,
+      url_immagine: urlImmagine,
+    })
+    insertError = retry.error
+  }
 
   if (insertError) {
     console.error('Catalog insert error:', insertError)

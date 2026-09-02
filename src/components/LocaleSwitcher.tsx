@@ -16,6 +16,12 @@ export default function LocaleSwitcher() {
       credentials: 'same-origin',
       body: JSON.stringify({ locale: next }),
     })
+    const url = new URL(window.location.href)
+    if (url.pathname.includes('gestione-cataloghi')) {
+      url.searchParams.set('lingua', next)
+      window.location.assign(url.toString())
+      return
+    }
     window.location.reload()
   }
 

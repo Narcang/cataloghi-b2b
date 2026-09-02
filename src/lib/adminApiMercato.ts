@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
-import { getAdminDataSupabase } from '@/lib/mercatoServer'
 import type { Mercato } from '@/lib/mercato'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { User } from '@supabase/supabase-js'
@@ -24,8 +23,7 @@ function deny(message: string, status: number) {
 }
 
 /**
- * Autenticazione sempre sul progetto IT; dati sul mercato scelto dall'admin (cookie).
- * Manager e agenzia operano sempre sul mercato IT.
+ * Auth e dati sul progetto IT. La lingua dei cataloghi segue il menu IT/RU/EN.
  */
 export async function resolveAdminDataContext(options?: {
   requireAdmin?: boolean
@@ -50,18 +48,6 @@ export async function resolveAdminDataContext(options?: {
   if (options?.requireAdmin && !isAdmin) return deny('Operazione non consentita', 403)
   if (options?.requireManager && !isManager) return deny('Operazione non consentita', 403)
 
-  let mercato: Mercato = 'it'
-  let dataClient: SupabaseClient
-
-  if (isAdmin) {
-    const adminData = await getAdminDataSupabase()
-    mercato = adminData.mercato
-    // Italia: sessione autenticata. Russia: service role del progetto RU.
-    dataClient = mercato === 'ru' ? adminData.client : authClient
-  } else {
-    dataClient = authClient
-  }
-
   return {
     ok: true,
     ctx: {
@@ -69,9 +55,9 @@ export async function resolveAdminDataContext(options?: {
       ruolo,
       isAdmin,
       isManager,
-      mercato,
+      mercato: 'it',
       authClient,
-      dataClient,
+      dataClient: authClient,
     },
   }
 }

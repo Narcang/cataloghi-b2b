@@ -1,6 +1,4 @@
 import { createClient } from '@/utils/supabase/server'
-import { getAdminMercato, getAdminDataSupabase } from '@/lib/mercatoServer'
-import AdminMercatoSwitcher from '@/components/admin/AdminMercatoSwitcher'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -25,12 +23,11 @@ function categoryDisplayLabel(cat: string): string {
 import { RUOLI_CATALOGO } from '@/lib/catalogRoles'
 import { catalogPdfHref, reservedAreaCatalogReturnTo } from '@/lib/catalogNavigation'
 import { compareCatalogTitoli } from '@/lib/catalogSorting'
-import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
 import CatalogLinguaTabs from '@/components/admin/CatalogLinguaTabs'
 import { catalogsForAdminLinguaTab, isEnglishFallbackCatalog, parseCatalogLingua } from '@/lib/catalogLingua'
 import { LOCALE_LABEL, type AppLocale } from '@/lib/locale'
 import { getAppLocale } from '@/lib/localeServer'
-import { tAdmin, tCatalogCount, tCatalogRole, tVersioneMonitorataValue } from '@/lib/i18nAdmin'
+import { tAdmin, tCatalogCount, tCatalogRole } from '@/lib/i18nAdmin'
 
 export const dynamic = 'force-dynamic'
 
@@ -53,10 +50,6 @@ export default async function GestioneCataloghiPage(props: {
   const uiLocale = await getAppLocale()
   const copy = tAdmin(uiLocale)
   const linguaTabRaw = (searchParams?.lingua ?? '').trim()
-  const linguaTab: AppLocale | 'all' =
-    linguaTabRaw === 'all' || linguaTabRaw === 'it' || linguaTabRaw === 'ru' || linguaTabRaw === 'en'
-      ? linguaTabRaw
-      : uiLocale
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -75,17 +68,15 @@ export default async function GestioneCataloghiPage(props: {
 
   if (!isManager) redirect('/dashboard')
 
-  const mercatoAttivo = isAdmin ? await getAdminMercato() : 'it'
-  // Italia: sessione admin (GRANT authenticated + RLS). Il service_role su IT
-  // spesso non ha GRANT su `cataloghi` → "permission denied for table cataloghi".
-  // Russia: client service role del progetto RU (l'admin IT non ha sessione lì).
-  const dataSupabase =
-    isAdmin && mercatoAttivo === 'ru'
-      ? (await getAdminDataSupabase()).client
-      : supabase
+  const linguaTab: AppLocale | 'all' =
+    linguaTabRaw === 'all' || linguaTabRaw === 'it' || linguaTabRaw === 'ru' || linguaTabRaw === 'en'
+      ? linguaTabRaw
+      : uiLocale
+  const formDefaultLingua: AppLocale =
+    linguaTab === 'it' || linguaTab === 'ru' || linguaTab === 'en' ? linguaTab : uiLocale
 
   // Fetch cataloghi (admin/manager vedono anche le bozze)
-  let cataloghiQuery = dataSupabase
+  let cataloghiQuery = supabase
     .from('cataloghi')
     .select('*')
     .order('creato_il', { ascending: false })
@@ -112,13 +103,6 @@ export default async function GestioneCataloghiPage(props: {
     (c) => !c.categoria || !categorieVistaSet.has(c.categoria as string),
   )
 
-  let cataloghiItaliaCount: number | null = null
-  if (isAdmin && mercatoAttivo === 'ru' && cataloghiPerVista.length === 0 && !cataloghiError) {
-    const itClient = createServiceRoleSupabase() ?? supabase
-    const { count } = await itClient.from('cataloghi').select('id', { count: 'exact', head: true })
-    cataloghiItaliaCount = count ?? 0
-  }
-
   return (
     <div className="ladiva-root ladiva-root-app-dark min-h-screen flex flex-col">
       <Header />
@@ -136,15 +120,7 @@ export default async function GestioneCataloghiPage(props: {
           <h1 className="text-3xl md:text-4xl font-semibold text-zinc-900 tracking-tight mt-3">
             {copy.gestioneCataloghi}
           </h1>
-          {isAdmin ? (
-            <p className="text-sm text-zinc-600 mt-2 max-w-2xl">
-              {copy.monitoraggioMercato}:{' '}
-              <strong>{tVersioneMonitorataValue(uiLocale, mercatoAttivo)}</strong>
-            </p>
-          ) : null}
         </div>
-
-        {isAdmin ? <AdminMercatoSwitcher /> : null}
 
         {actionMessage ? (
           <div className="rounded-xl border border-black bg-white px-4 py-3 text-sm text-[#060d41]">
@@ -188,7 +164,10 @@ export default async function GestioneCataloghiPage(props: {
                 {copy.nuovoCatalogoHelp}
               </p>
             </div>
-            <CreateCatalogForm categories={CATALOG_CATEGORIES_FOR_UPLOAD} />
+            <CreateCatalogForm
+              categories={CATALOG_CATEGORIES_FOR_UPLOAD}
+              defaultLingua={formDefaultLingua}
+            />
           </section>
         )}
 
@@ -218,19 +197,7 @@ export default async function GestioneCataloghiPage(props: {
             </div>
           ) : cataloghiPerVista.length === 0 ? (
             <div className="rounded-2xl border border-amber-300 bg-amber-50 px-6 py-10 text-center">
-              {mercatoAttivo === 'ru' && cataloghiTutti.length === 0 ? (
-                <>
-                  <p className="text-lg font-medium text-amber-950">
-                    {copy.nessunCatalogoMercato} {tVersioneMonitorataValue(uiLocale, mercatoAttivo)}.
-                  </p>
-                  <p className="mt-3 text-sm text-amber-900 max-w-xl mx-auto">
-                    {copy.staiMonitorandoRu}
-                    {cataloghiItaliaCount && cataloghiItaliaCount > 0
-                      ? ` ${copy.cataloghiItaliaSwitch.replace('{n}', String(cataloghiItaliaCount))}`
-                      : ` ${copy.selezionaItalia}`}
-                  </p>
-                </>
-              ) : linguaTab !== 'all' && cataloghiTutti.length > 0 ? (
+              {linguaTab !== 'all' && cataloghiTutti.length > 0 ? (
                 <>
                   <p className="text-lg font-medium text-amber-950">
                     {copy.nessunCatalogoLingua} {LOCALE_LABEL[linguaTab]}.
@@ -242,9 +209,6 @@ export default async function GestioneCataloghiPage(props: {
               ) : (
                 <>
                   <p className="text-lg font-medium text-amber-950">
-                    {copy.nessunCatalogoMercato} {tVersioneMonitorataValue(uiLocale, mercatoAttivo)}.
-                  </p>
-                  <p className="mt-3 text-sm text-amber-900">
                     {copy.nessunFileArchivio}
                   </p>
                 </>

@@ -269,24 +269,6 @@
   color: #fff !important;
 }
 
-/* Switch mercato admin: bg-white del tema dark lo forza a #111 */
-.ladiva-mercato-switch-bar,
-.ladiva-mercato-switch-bar strong,
-.ladiva-mercato-switch-bar svg {
-  color: #fff !important;
-}
-
-.ladiva-root-app-dark .ladiva-mercato-switch-btn-active,
-.ladiva-root-app-dark .ladiva-mercato-switch-btn:hover:not(:disabled) {
-  background-color: #fff !important;
-  color: #000 !important;
-}
-
-.ladiva-root-app-dark .ladiva-mercato-switch-btn-inactive {
-  background-color: transparent !important;
-  color: #fff !important;
-}
-
 /* Dashboard dark: testi leggermente più grandi (area riservata / manager) */
 .ladiva-root-app-dark .text-xs {
   font-size: 0.8125rem;

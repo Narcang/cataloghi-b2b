@@ -120,6 +120,8 @@ const admin = {
     cerca: 'Cerca',
     nuovoCatalogo: 'Nuovo Catalogo',
     nuovoCatalogoHelp: 'Carica il PDF del catalogo e definisci i ruoli e lo stato di pubblicazione.',
+    nuovoCatalogoHelpRu:
+      'Stai monitorando Russia: il file viene salvato sull’archivio Russia. Per il portale ufficiale scegli Italia e imposta la lingua del file su Русский.',
     cataloghi: 'Cataloghi',
     tutteLingue: 'Tutte',
     linguaCataloghi: 'Lingua cataloghi',
@@ -290,6 +292,8 @@ const admin = {
     cerca: 'Искать',
     nuovoCatalogo: 'Новый каталог',
     nuovoCatalogoHelp: 'Загрузите PDF и задайте роли и статус публикации.',
+    nuovoCatalogoHelpRu:
+      'Сейчас открыта версия Россия: файл сохранится в российском архиве. Для официального портала выберите Италия и язык файла Русский.',
     cataloghi: 'Каталоги',
     tutteLingue: 'Все',
     linguaCataloghi: 'Язык каталогов',
@@ -456,6 +460,8 @@ const admin = {
     cerca: 'Search',
     nuovoCatalogo: 'New catalog',
     nuovoCatalogoHelp: 'Upload the catalog PDF and set roles and publication status.',
+    nuovoCatalogoHelpRu:
+      'You are monitoring Russia: the file is saved in the Russia archive. For the official site, choose Italia and set the file language to Русский.',
     cataloghi: 'Catalogs',
     tutteLingue: 'All',
     linguaCataloghi: 'Catalog language',

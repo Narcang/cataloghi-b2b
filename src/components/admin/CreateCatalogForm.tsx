@@ -23,11 +23,20 @@ import { RUOLI_CATALOGO, RUOLI_CATALOGO_DEFAULT, type RuoloCatalogo } from '@/li
 import { tCatalogAdmin } from '@/lib/i18n'
 import { tAdmin, tCatalogRole } from '@/lib/i18nAdmin'
 import { APP_LOCALES, LOCALE_LABEL, type AppLocale } from '@/lib/locale'
+import type { Mercato } from '@/lib/mercato'
 import { useAppLocale } from '@/lib/useAppLocale'
 
-type Props = { categories: readonly CatalogCategory[] }
+type Props = {
+  categories: readonly CatalogCategory[]
+  defaultLingua?: AppLocale
+  mercato?: Mercato
+}
 
-export default function CreateCatalogForm({ categories }: Props) {
+export default function CreateCatalogForm({
+  categories,
+  defaultLingua,
+  mercato = 'it',
+}: Props) {
   const router = useRouter()
   const uiLocale = useAppLocale()
   const copy = tCatalogAdmin(uiLocale)
@@ -35,12 +44,12 @@ export default function CreateCatalogForm({ categories }: Props) {
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [categoriaSelezionata, setCategoriaSelezionata] = useState('')
-  const [linguaSelezionata, setLinguaSelezionata] = useState<AppLocale>('it')
+  const [linguaSelezionata, setLinguaSelezionata] = useState<AppLocale>(defaultLingua ?? 'it')
   const [ruoliSelezionati, setRuoliSelezionati] = useState<RuoloCatalogo[]>(RUOLI_CATALOGO_DEFAULT)
 
   useEffect(() => {
-    setLinguaSelezionata(uiLocale)
-  }, [uiLocale])
+    setLinguaSelezionata(defaultLingua ?? uiLocale)
+  }, [defaultLingua, uiLocale])
 
   const isZipCategory = isZipDownloadCategory(categoriaSelezionata)
   const maxMainFileBytes = isZipCategory ? MAX_CATALOG_STUDIO_ZIP_BYTES : MAX_CATALOG_PDF_BYTES
@@ -127,35 +136,69 @@ export default function CreateCatalogForm({ categories }: Props) {
       return
     }
 
-    const mainPath = studioZip
-      ? buildZipStoragePath(user.id, mainFile.name)
-      : buildPdfStoragePath(user.id, mainFile.name)
-    let coverPath: string | null = null
+    const userId = user.id
     const uploadedPaths: string[] = []
 
-    try {
-      const { error: mainErr } = await supabase.storage.from('cataloghi').upload(mainPath, mainFile, {
-        contentType: studioZip ? 'application/zip' : 'application/pdf',
+    async function uploadCatalogFile(file: File, kind: 'pdf' | 'zip' | 'cover'): Promise<string> {
+      if (mercato === 'ru') {
+        const uploadFd = new FormData()
+        uploadFd.append('file', file)
+        uploadFd.append('kind', kind)
+        const uploadRes = await fetch('/api/admin/cataloghi/storage-upload', {
+          method: 'POST',
+          credentials: 'same-origin',
+          body: uploadFd,
+        })
+        const uploadPayload = (await uploadRes.json().catch(() => null)) as
+          | { ok?: boolean; path?: string; message?: string }
+          | null
+        if (!uploadRes.ok || !uploadPayload?.ok || !uploadPayload.path) {
+          throw new Error(uploadPayload?.message ?? 'Errore upload file')
+        }
+        return uploadPayload.path
+      }
+
+      const path =
+        kind === 'cover'
+          ? buildCoverStoragePath(userId, file.name)
+          : kind === 'zip'
+            ? buildZipStoragePath(userId, file.name)
+            : buildPdfStoragePath(userId, file.name)
+      const contentType =
+        kind === 'cover'
+          ? file.type || 'image/jpeg'
+          : kind === 'zip'
+            ? 'application/zip'
+            : 'application/pdf'
+      const { error: uploadErr } = await supabase.storage.from('cataloghi').upload(path, file, {
+        contentType,
         upsert: false,
       })
+      if (uploadErr) {
+        throw new Error(`Errore upload file: ${uploadErr.message}`)
+      }
+      return path
+    }
 
-      if (mainErr) {
-        console.error('Catalog file upload:', mainErr)
-        setError(`Errore upload file: ${mainErr.message}`)
+    try {
+      let mainPath: string
+      try {
+        mainPath = await uploadCatalogFile(mainFile, studioZip ? 'zip' : 'pdf')
+      } catch (uploadError) {
+        setError(uploadError instanceof Error ? uploadError.message : 'Errore upload file')
         return
       }
       uploadedPaths.push(mainPath)
 
+      let coverPath: string | null = null
       if (coverFile && coverFile.size > 0) {
-        coverPath = buildCoverStoragePath(user.id, coverFile.name)
-        const { error: coverErr } = await supabase.storage.from('cataloghi').upload(coverPath, coverFile, {
-          contentType: coverFile.type || 'image/jpeg',
-          upsert: false,
-        })
-        if (coverErr) {
-          console.error('Cover upload:', coverErr)
-          setError(`Errore upload copertina: ${coverErr.message}`)
-          await supabase.storage.from('cataloghi').remove([mainPath])
+        try {
+          coverPath = await uploadCatalogFile(coverFile, 'cover')
+        } catch (uploadError) {
+          setError(uploadError instanceof Error ? uploadError.message : 'Errore upload copertina')
+          if (mercato !== 'ru') {
+            await supabase.storage.from('cataloghi').remove([mainPath])
+          }
           return
         }
         uploadedPaths.push(coverPath)
@@ -180,12 +223,16 @@ export default function CreateCatalogForm({ categories }: Props) {
       const message = payload?.message ?? 'Risposta non valida dal server'
 
       if (!res.ok || !payload?.ok) {
-        await supabase.storage.from('cataloghi').remove(uploadedPaths)
+        if (mercato !== 'ru') {
+          await supabase.storage.from('cataloghi').remove(uploadedPaths)
+        }
         setError(message)
         return
       }
 
-      router.push(`/dashboard?message=${encodeURIComponent(message)}`)
+      router.push(
+        `/dashboard/gestione-cataloghi?lingua=${linguaSelezionata}&message=${encodeURIComponent(message)}`,
+      )
       router.refresh()
     } finally {
       setSubmitting(false)

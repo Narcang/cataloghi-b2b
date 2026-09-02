@@ -1,7 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
-import { getAdminMercato, getAdminDataSupabase } from '@/lib/mercatoServer'
-import AdminMercatoSwitcher from '@/components/admin/AdminMercatoSwitcher'
+import { getAdminDataSupabase } from '@/lib/mercatoServer'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
@@ -13,7 +12,7 @@ import type { ProfiloGerarchiaRow } from '@/lib/userHierarchy'
 import { getDescendantsByRole, profiloToGerarchiaRow } from '@/lib/userHierarchy'
 import { fetchUltimoAccessoMap, ultimoAccessoMapToRecord } from '@/lib/ultimoAccessoUtenti'
 import { getAppLocale } from '@/lib/localeServer'
-import { tAdmin, tRuolo, tVersioneMonitorataValue } from '@/lib/i18nAdmin'
+import { tAdmin, tRuolo } from '@/lib/i18nAdmin'
 
 export const dynamic = 'force-dynamic'
 
@@ -67,7 +66,6 @@ export default async function GestioneUtentiPage(props: {
 
   if (!isManager && !isAgenzia) redirect('/dashboard')
 
-  const mercatoAttivo = isAdmin ? await getAdminMercato() : 'it'
   const adminDataClient = isAdmin ? (await getAdminDataSupabase()).client : null
   const dataSource = adminDataClient ?? supabase
 
@@ -210,15 +208,8 @@ export default async function GestioneUtentiPage(props: {
             <p className="text-sm text-zinc-600 mt-2 max-w-2xl">
               {copy.gestioneRivenditoriHelp}
             </p>
-          ) : isAdmin ? (
-            <p className="text-sm text-zinc-600 mt-2 max-w-2xl">
-              {copy.monitoraggioMercato}:{' '}
-              <strong>{tVersioneMonitorataValue(locale, mercatoAttivo)}</strong>
-            </p>
           ) : null}
         </div>
-
-        {isAdmin ? <AdminMercatoSwitcher /> : null}
 
         {actionMessage ? (
           <div className="rounded-xl border border-black bg-white px-4 py-3 text-sm text-[#060d41]">
