@@ -27,7 +27,7 @@ import { catalogPdfHref, reservedAreaCatalogReturnTo } from '@/lib/catalogNaviga
 import { compareCatalogTitoli } from '@/lib/catalogSorting'
 import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
 import CatalogLinguaTabs from '@/components/admin/CatalogLinguaTabs'
-import { parseCatalogLingua } from '@/lib/catalogLingua'
+import { catalogsForAdminLinguaTab, isEnglishFallbackCatalog, parseCatalogLingua } from '@/lib/catalogLingua'
 import { LOCALE_LABEL, type AppLocale } from '@/lib/locale'
 import { getAppLocale } from '@/lib/localeServer'
 import { tAdmin, tCatalogCount, tCatalogRole, tVersioneMonitorataValue } from '@/lib/i18nAdmin'
@@ -99,16 +99,14 @@ export default async function GestioneCataloghiPage(props: {
   const categorieDashboard = categoriesVisibleOnDashboard(ruoloCorrente, true)
 
   const cataloghiTutti = cataloghi ?? []
+  const cataloghiEnglishVista = catalogsForAdminLinguaTab(cataloghiTutti, 'en')
   const linguaCounts = {
     all: cataloghiTutti.length,
     it: cataloghiTutti.filter((c) => parseCatalogLingua(c.lingua) === 'it').length,
     ru: cataloghiTutti.filter((c) => parseCatalogLingua(c.lingua) === 'ru').length,
-    en: cataloghiTutti.filter((c) => parseCatalogLingua(c.lingua) === 'en').length,
+    en: cataloghiEnglishVista.length,
   }
-  const cataloghiPerVista =
-    linguaTab === 'all'
-      ? cataloghiTutti
-      : cataloghiTutti.filter((c) => parseCatalogLingua(c.lingua) === linguaTab)
+  const cataloghiPerVista = catalogsForAdminLinguaTab(cataloghiTutti, linguaTab)
   const categorieVistaSet = new Set<string>(categorieDashboard)
   const cataloghiSenzaCategoriaVista = cataloghiPerVista.filter(
     (c) => !c.categoria || !categorieVistaSet.has(c.categoria as string),
@@ -202,7 +200,7 @@ export default async function GestioneCataloghiPage(props: {
             <h2 className="text-3xl md:text-4xl font-sans tracking-tight text-zinc-100 flex items-center gap-3">
               <FileText className="text-white" /> {copy.cataloghi}
               <span className="text-base font-sans font-medium tracking-normal text-zinc-400">
-                {tVersioneMonitorataValue(uiLocale, mercatoAttivo)} · {cataloghiPerVista.length}
+                {linguaTab === 'all' ? copy.tutteLingue : LOCALE_LABEL[linguaTab]} · {cataloghiPerVista.length}
               </span>
             </h2>
           </div>
@@ -291,7 +289,9 @@ export default async function GestioneCataloghiPage(props: {
                       <p className="text-lg text-zinc-500 py-2">{copy.nessunCatalogoCategoria}</p>
                     ) : (
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {items.map((catalogo) => (
+                        {items.map((catalogo) => {
+                          const fallbackEn = isEnglishFallbackCatalog(catalogo, linguaTab)
+                          return (
                           <div key={catalogo.id} className="space-y-3">
                             <Link
                               prefetch={false}
@@ -328,6 +328,11 @@ export default async function GestioneCataloghiPage(props: {
                                       {' · '}
                                       {LOCALE_LABEL[parseCatalogLingua(catalogo.lingua)]}
                                     </span>
+                                    {fallbackEn ? (
+                                      <span className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-sky-900">
+                                        {copy.usaPdfItaliano}
+                                      </span>
+                                    ) : null}
                                     <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${
                                       catalogo.stato_pubblicazione === 'attivo'
                                         ? 'bg-emerald-50 text-emerald-900 border-emerald-200'
@@ -343,7 +348,13 @@ export default async function GestioneCataloghiPage(props: {
                               </div>
                             </Link>
 
-                            {isAdmin && (
+                            {isAdmin && fallbackEn ? (
+                              <p className="rounded-xl border border-black bg-white px-3 py-3 text-xs text-zinc-600">
+                                {copy.caricaEnDedicata}
+                              </p>
+                            ) : null}
+
+                            {isAdmin && !fallbackEn && (
                               <>
                                 <form
                                   action="/api/admin/cataloghi/status"
@@ -449,7 +460,8 @@ export default async function GestioneCataloghiPage(props: {
                               </>
                             )}
                           </div>
-                        ))}
+                          )
+                        })}
                       </div>
                     )}
                   </section>

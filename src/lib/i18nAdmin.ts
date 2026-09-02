@@ -124,7 +124,10 @@ const admin = {
     tutteLingue: 'Tutte',
     linguaCataloghi: 'Lingua cataloghi',
     enVedeIt:
-      'Gli utenti English vedono i PDF italiani se non esiste una versione EN dedicata dello stesso catalogo.',
+      'La lista English mostra i file EN dedicati; se manca la versione EN dello stesso titolo, compare il PDF italiano. In futuro le due liste possono divergere.',
+    usaPdfItaliano: 'Usa il PDF italiano',
+    caricaEnDedicata:
+      'Per gestirlo come catalogo English separato, carica un file con lingua English e lo stesso titolo da Nuovo catalogo.',
     pubblicato: 'Pubblicato',
     bozzaNascosto: 'Bozza / Nascosto',
     senzaCategoria: 'Senza categoria',
@@ -290,7 +293,11 @@ const admin = {
     cataloghi: 'Каталоги',
     tutteLingue: 'Все',
     linguaCataloghi: 'Язык каталогов',
-    enVedeIt: 'Пользователи English видят итальянские PDF, если нет отдельной версии EN.',
+    enVedeIt:
+      'Список English показывает отдельные EN-файлы; если версии EN нет, отображается итальянский PDF с тем же названием. Позже списки могут различаться.',
+    usaPdfItaliano: 'Использует итальянский PDF',
+    caricaEnDedicata:
+      'Чтобы вести отдельный английский каталог, загрузите файл с языком English и тем же названием в «Новый каталог».',
     pubblicato: 'Опубликован',
     bozzaNascosto: 'Черновик / скрыт',
     senzaCategoria: 'Без категории',
@@ -453,7 +460,10 @@ const admin = {
     tutteLingue: 'All',
     linguaCataloghi: 'Catalog language',
     enVedeIt:
-      'English users see Italian PDFs if there is no dedicated EN version of the same catalog.',
+      'The English list shows dedicated EN files; if there is no EN version of the same title, the Italian PDF appears. The two lists can differ later.',
+    usaPdfItaliano: 'Uses the Italian PDF',
+    caricaEnDedicata:
+      'To manage it as a separate English catalog, upload a file with language English and the same title from New catalog.',
     pubblicato: 'Published',
     bozzaNascosto: 'Draft / Hidden',
     senzaCategoria: 'No category',

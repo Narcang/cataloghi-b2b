@@ -51,3 +51,17 @@ export function pickCatalogForLocale<T extends { lingua?: unknown }>(
   }
   return candidates.find((row) => parseCatalogLingua(row.lingua) === locale)
 }
+
+/** Admin tabs: English lists dedicated EN files, otherwise the Italian catalog of the same title. */
+export function catalogsForAdminLinguaTab<T extends CatalogLinguaRow>(
+  rows: T[],
+  tab: AppLocale | 'all',
+): T[] {
+  if (tab === 'all') return rows
+  if (tab === 'en') return preferCatalogLingua(rows, 'en')
+  return rows.filter((row) => parseCatalogLingua(row.lingua) === tab)
+}
+
+export function isEnglishFallbackCatalog(row: CatalogLinguaRow, tab: AppLocale | 'all'): boolean {
+  return tab === 'en' && parseCatalogLingua(row.lingua) === 'it'
+}
