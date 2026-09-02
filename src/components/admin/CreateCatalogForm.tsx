@@ -9,7 +9,7 @@ import {
   MAX_CATALOG_PDF_BYTES,
   MAX_CATALOG_STUDIO_ZIP_BYTES,
 } from '@/lib/catalogUploadLimits'
-import { type CatalogCategory } from '@/lib/catalogCategories'
+import { isLanguageSharedCategory, type CatalogCategory } from '@/lib/catalogCategories'
 
 const CATEGORY_DISPLAY_LABEL: Partial<Record<CatalogCategory, string>> = {
   Scontistiche: 'Merchandising',
@@ -47,9 +47,15 @@ export default function CreateCatalogForm({
   const [linguaSelezionata, setLinguaSelezionata] = useState<CatalogLocale>(defaultLingua ?? 'it')
   const [ruoliSelezionati, setRuoliSelezionati] = useState<RuoloCatalogo[]>(RUOLI_CATALOGO_DEFAULT)
 
+  const sharedAcrossLanguages = isLanguageSharedCategory(categoriaSelezionata)
+
   useEffect(() => {
+    if (isLanguageSharedCategory(categoriaSelezionata)) {
+      setLinguaSelezionata('it')
+      return
+    }
     setLinguaSelezionata(defaultLingua ?? (isCatalogLocale(uiLocale) ? uiLocale : 'it'))
-  }, [defaultLingua, uiLocale])
+  }, [defaultLingua, uiLocale, categoriaSelezionata])
 
   const isZipCategory = isZipDownloadCategory(categoriaSelezionata)
   const maxMainFileBytes = isZipCategory ? MAX_CATALOG_STUDIO_ZIP_BYTES : MAX_CATALOG_PDF_BYTES
@@ -211,7 +217,7 @@ export default function CreateCatalogForm({
         body: JSON.stringify({
           titolo,
           categoria,
-          lingua: linguaSelezionata,
+          lingua: isLanguageSharedCategory(categoria) ? 'it' : linguaSelezionata,
           ruoli_visibili: ruoliSelezionati,
           stato_pubblicazione,
           file_pdf_storage_path: mainPath,
@@ -230,8 +236,9 @@ export default function CreateCatalogForm({
         return
       }
 
+      const linguaSalvata = isLanguageSharedCategory(categoria) ? 'it' : linguaSelezionata
       router.push(
-        `/dashboard/gestione-cataloghi?lingua=${linguaSelezionata}&message=${encodeURIComponent(message)}`,
+        `/dashboard/gestione-cataloghi?lingua=${linguaSalvata}&message=${encodeURIComponent(message)}`,
       )
       router.refresh()
     } finally {
@@ -298,7 +305,7 @@ export default function CreateCatalogForm({
           id="lingua"
           name="lingua"
           required
-          disabled={submitting}
+          disabled={submitting || sharedAcrossLanguages}
           value={linguaSelezionata}
           onChange={(e) => setLinguaSelezionata(e.target.value as CatalogLocale)}
           className="w-full h-10 rounded-md border border-black bg-zinc-50 px-3 text-sm text-zinc-900 disabled:opacity-60"
@@ -309,7 +316,9 @@ export default function CreateCatalogForm({
             </option>
           ))}
         </select>
-        <p className="text-xs text-zinc-600">{copy.linguaHelp}</p>
+        <p className="text-xs text-zinc-600">
+          {sharedAcrossLanguages ? copy.linguaHelpCondiviso : copy.linguaHelp}
+        </p>
       </div>
 
       <div className="space-y-2 md:col-span-2">

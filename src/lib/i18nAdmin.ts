@@ -248,6 +248,11 @@ const admin = {
     enVedeIt:
       'La lista English mostra i file EN dedicati; se manca la versione EN dello stesso titolo, compare il PDF italiano. In futuro le due liste possono divergere.',
     usaPdfItaliano: 'Usa il PDF italiano',
+    cataloghiCondivisiHelp:
+      'Family 15, Family 20, Family Gres, Capsule Collection, Bricks, File 2D, File 3D e i 5 cataloghi fotografici usano lo stesso PDF italiano in tutte le lingue, senza duplicare i file.',
+    stessoPdfTutteLingue: 'Stesso PDF per tutte le lingue',
+    stessoPdfTutteLingueHelp:
+      'Questo catalogo è lo stesso per tutte le lingue. Si gestisce dalla scheda Italiano: non serve una copia RU o EN.',
     caricaEnDedicata:
       'Per gestirlo come catalogo English separato, carica un file con lingua English e lo stesso titolo da Nuovo catalogo.',
     pubblicato: 'Pubblicato',
@@ -411,6 +416,11 @@ const admin = {
     enVedeIt:
       'Список English показывает отдельные EN-файлы; если версии EN нет, отображается итальянский PDF с тем же названием. Позже списки могут различаться.',
     usaPdfItaliano: 'Использует итальянский PDF',
+    cataloghiCondivisiHelp:
+      'Family 15, Family 20, Family Gres, Capsule Collection, Bricks, File 2D, File 3D и 5 фотокаталогов используют один и тот же итальянский PDF на всех языках, без дублирования файлов.',
+    stessoPdfTutteLingue: 'Один PDF для всех языков',
+    stessoPdfTutteLingueHelp:
+      'Этот каталог общий для всех языков. Управляется во вкладке Italiano: отдельная копия RU или EN не нужна.',
     caricaEnDedicata:
       'Чтобы вести отдельный английский каталог, загрузите файл с языком English и тем же названием в «Новый каталог».',
     pubblicato: 'Опубликован',
@@ -572,6 +582,11 @@ const admin = {
     enVedeIt:
       'The English list shows dedicated EN files; if there is no EN version of the same title, the Italian PDF appears. The two lists can differ later.',
     usaPdfItaliano: 'Uses the Italian PDF',
+    cataloghiCondivisiHelp:
+      'Family 15, Family 20, Family Gres, Capsule Collection, Bricks, File 2D, File 3D and the 5 photo catalogs use the same Italian PDF in every language, without duplicating files.',
+    stessoPdfTutteLingue: 'Same PDF for every language',
+    stessoPdfTutteLingueHelp:
+      'This catalog is the same in every language. Manage it from the Italian tab: no separate RU or EN copy is needed.',
     caricaEnDedicata:
       'To manage it as a separate English catalog, upload a file with language English and the same title from New catalog.',
     pubblicato: 'Published',
@@ -738,6 +753,11 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     enVedeIt:
       'La liste English affiche les fichiers EN dédiés ; sinon le PDF italien du même titre. Les listes pourront diverger plus tard.',
     usaPdfItaliano: 'Utilise le PDF italien',
+    cataloghiCondivisiHelp:
+      'Family 15, Family 20, Family Gres, Capsule Collection, Bricks, File 2D, File 3D et les 5 catalogues photo utilisent le même PDF italien dans toutes les langues, sans dupliquer les fichiers.',
+    stessoPdfTutteLingue: 'Même PDF pour toutes les langues',
+    stessoPdfTutteLingueHelp:
+      'Ce catalogue est le même pour toutes les langues. Il se gère dans l’onglet Italiano : pas besoin d’une copie RU ou EN.',
     caricaEnDedicata:
       'Pour un catalogue English séparé, téléchargez un fichier en langue English avec le même titre.',
     pubblicato: 'Publié',
@@ -899,6 +919,11 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     enVedeIt:
       'Die English-Liste zeigt eigene EN-Dateien; fehlt EN, erscheint die italienische PDF desselben Titels.',
     usaPdfItaliano: 'Nutzt die italienische PDF',
+    cataloghiCondivisiHelp:
+      'Family 15, Family 20, Family Gres, Capsule Collection, Bricks, File 2D, File 3D und die 5 Fotokataloge nutzen in allen Sprachen dieselbe italienische PDF, ohne Dateien zu verdoppeln.',
+    stessoPdfTutteLingue: 'Dieselbe PDF für alle Sprachen',
+    stessoPdfTutteLingueHelp:
+      'Dieser Katalog gilt für alle Sprachen. Verwaltung im Reiter Italiano: keine eigene RU- oder EN-Kopie nötig.',
     caricaEnDedicata:
       'Für einen eigenen English-Katalog eine Datei mit Sprache English und demselben Titel hochladen.',
     pubblicato: 'Veröffentlicht',
@@ -1060,6 +1085,11 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     enVedeIt:
       'Η λίστα English δείχνει αρχεία EN· αν λείπει το EN, εμφανίζεται το ιταλικό PDF με τον ίδιο τίτλο.',
     usaPdfItaliano: 'Χρησιμοποιεί το ιταλικό PDF',
+    cataloghiCondivisiHelp:
+      'Τα Family 15, Family 20, Family Gres, Capsule Collection, Bricks, File 2D, File 3D και τα 5 φωτογραφικά χρησιμοποιούν το ίδιο ιταλικό PDF σε όλες τις γλώσσες, χωρίς αντίγραφα αρχείων.',
+    stessoPdfTutteLingue: 'Ίδιο PDF για όλες τις γλώσσες',
+    stessoPdfTutteLingueHelp:
+      'Αυτός ο κατάλογος είναι κοινός για όλες τις γλώσσες. Διαχείριση από την καρτέλα Italiano: δεν χρειάζεται αντίγραφο RU ή EN.',
     caricaEnDedicata:
       'Για ξεχωριστό κατάλογο English, ανεβάστε αρχείο με γλώσσα English και τον ίδιο τίτλο.',
     pubblicato: 'Δημοσιευμένο',
@@ -1221,6 +1251,11 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     enVedeIt:
       'Lista English pokazuje pliki EN; jeśli brak EN, widać włoski PDF o tym samym tytule.',
     usaPdfItaliano: 'Używa włoskiego PDF',
+    cataloghiCondivisiHelp:
+      'Family 15, Family 20, Family Gres, Capsule Collection, Bricks, File 2D, File 3D i 5 katalogów zdjęć używają tego samego włoskiego PDF we wszystkich językach, bez duplikowania plików.',
+    stessoPdfTutteLingue: 'Ten sam PDF dla wszystkich języków',
+    stessoPdfTutteLingueHelp:
+      'Ten katalog jest wspólny dla wszystkich języków. Zarządzasz nim w karcie Italiano: kopia RU lub EN nie jest potrzebna.',
     caricaEnDedicata:
       'Aby mieć osobny katalog English, wgraj plik z językiem English i tym samym tytułem.',
     pubblicato: 'Opublikowany',
@@ -1382,6 +1417,11 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     enVedeIt:
       'Список English показує окремі EN-файли; якщо EN немає, видно італійський PDF з тією самою назвою.',
     usaPdfItaliano: 'Використовує італійський PDF',
+    cataloghiCondivisiHelp:
+      'Family 15, Family 20, Family Gres, Capsule Collection, Bricks, File 2D, File 3D і 5 фотокаталогів використовують той самий італійський PDF усіма мовами, без дублювання файлів.',
+    stessoPdfTutteLingue: 'Той самий PDF для всіх мов',
+    stessoPdfTutteLingueHelp:
+      'Цей каталог спільний для всіх мов. Керуйте ним у вкладці Italiano: окрема копія RU чи EN не потрібна.',
     caricaEnDedicata:
       'Щоб вести окремий каталог English, завантажте файл з мовою English і тією самою назвою.',
     pubblicato: 'Опубліковано',

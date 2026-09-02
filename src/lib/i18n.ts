@@ -234,34 +234,42 @@ const catalogAdmin = {
   it: {
     linguaFile: 'Lingua del file',
     linguaHelp: 'Il PDF è visibile in questa lingua. English, se manca un file EN, usa automaticamente i PDF italiani.',
+    linguaHelpCondiviso: 'Questa categoria usa un solo file italiano, visibile in tutte le lingue.',
   },
   ru: {
     linguaFile: 'Язык файла',
     linguaHelp: 'PDF будет виден только при выборе этого языка.',
+    linguaHelpCondiviso: 'Эта категория использует один итальянский файл, видимый на всех языках.',
   },
   en: {
     linguaFile: 'File language',
     linguaHelp: 'If no English file exists, English users see the Italian PDF.',
+    linguaHelpCondiviso: 'This category uses a single Italian file shown in every language.',
   },
   fr: {
     linguaFile: 'Langue du fichier',
     linguaHelp: 'Pour l’instant les catalogues dédiés n’existent qu’en IT, RU et EN. Les autres langues voient le PDF italien.',
+    linguaHelpCondiviso: 'Cette catégorie utilise un seul fichier italien, visible dans toutes les langues.',
   },
   de: {
     linguaFile: 'Dateisprache',
     linguaHelp: 'Eigene Kataloge gibt es vorerst nur in IT, RU und EN. Andere Sprachen sehen die italienische PDF.',
+    linguaHelpCondiviso: 'Diese Kategorie nutzt eine einzige italienische Datei in allen Sprachen.',
   },
   el: {
     linguaFile: 'Γλώσσα αρχείου',
     linguaHelp: 'Προς το παρόν υπάρχουν ξεχωριστά αρχεία μόνο σε IT, RU και EN. Οι άλλες γλώσσες βλέπουν το ιταλικό PDF.',
+    linguaHelpCondiviso: 'Αυτή η κατηγορία χρησιμοποιεί ένα ιταλικό αρχείο, ορατό σε όλες τις γλώσσες.',
   },
   pl: {
     linguaFile: 'Język pliku',
     linguaHelp: 'Na razie osobne katalogi są tylko w IT, RU i EN. Pozostałe języki widzą włoski PDF.',
+    linguaHelpCondiviso: 'Ta kategoria używa jednego włoskiego pliku, widocznego we wszystkich językach.',
   },
   uk: {
     linguaFile: 'Мова файлу',
     linguaHelp: 'Окремі файли поки є лише для IT, RU та EN. Інші мови бачать італійський PDF.',
+    linguaHelpCondiviso: 'Ця категорія використовує один італійський файл, видимий усіма мовами.',
   },
 } as const
 

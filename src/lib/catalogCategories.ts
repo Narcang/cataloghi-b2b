@@ -292,3 +292,29 @@ export const FOTO_CATEGORY_MAP: Partial<Record<CatalogCategory, CatalogCategory>
   'Family Gres': 'Family Gres Fotografico',
   'Bricks': 'Bricks Fotografico',
 }
+
+/**
+ * Categorie con un solo file italiano visibile in tutte le lingue UI
+ * (niente copie RU/EN: stesso PDF per spazio e comodità).
+ */
+export const LANGUAGE_SHARED_CATEGORIES = [
+  'Family 15',
+  'Family 20',
+  'Family Gres',
+  'Capsule Collection',
+  'Bricks',
+  'File 2D',
+  'File 3D',
+  'Family 15 Fotografico',
+  'Family 20 Fotografico',
+  'Capsule Collection Fotografico',
+  'Family Gres Fotografico',
+  'Bricks Fotografico',
+] as const satisfies readonly CatalogCategory[]
+
+const LANGUAGE_SHARED_SET = new Set<string>(LANGUAGE_SHARED_CATEGORIES)
+
+export function isLanguageSharedCategory(categoria: string | null | undefined): boolean {
+  if (!categoria) return false
+  return LANGUAGE_SHARED_SET.has(categoria)
+}

@@ -9,6 +9,7 @@ import {
   CATALOG_CATEGORIES_FOR_UPLOAD,
   categoriesVisibleOnDashboard,
   categoryToDomId,
+  isLanguageSharedCategory,
   type CatalogCategory,
 } from '@/lib/catalogCategories'
 
@@ -26,7 +27,7 @@ import CatalogLinguaTabs from '@/components/admin/CatalogLinguaTabs'
 import {
   catalogsForAdminLinguaTab,
   defaultCatalogTab,
-  isEnglishFallbackCatalog,
+  isItalianFallbackCatalog,
   parseCatalogLingua,
 } from '@/lib/catalogLingua'
 import { isCatalogLocale, LOCALE_LABEL, type CatalogLocale } from '@/lib/locale'
@@ -94,12 +95,11 @@ export default async function GestioneCataloghiPage(props: {
   const categorieDashboard = categoriesVisibleOnDashboard(ruoloCorrente, true)
 
   const cataloghiTutti = cataloghi ?? []
-  const cataloghiEnglishVista = catalogsForAdminLinguaTab(cataloghiTutti, 'en')
   const linguaCounts = {
     all: cataloghiTutti.length,
     it: cataloghiTutti.filter((c) => parseCatalogLingua(c.lingua) === 'it').length,
-    ru: cataloghiTutti.filter((c) => parseCatalogLingua(c.lingua) === 'ru').length,
-    en: cataloghiEnglishVista.length,
+    ru: catalogsForAdminLinguaTab(cataloghiTutti, 'ru').length,
+    en: catalogsForAdminLinguaTab(cataloghiTutti, 'en').length,
   }
   const cataloghiPerVista = catalogsForAdminLinguaTab(cataloghiTutti, linguaTab)
   const categorieVistaSet = new Set<string>(categorieDashboard)
@@ -189,8 +189,13 @@ export default async function GestioneCataloghiPage(props: {
           <div className="mb-8 space-y-3">
             <CatalogLinguaTabs active={linguaTab} counts={linguaCounts} nome={nomeFilter} locale={uiLocale} />
             <p className="text-sm text-zinc-400">
-              {copy.enVedeIt}
+              {copy.cataloghiCondivisiHelp}
             </p>
+            {linguaTab === 'en' ? (
+              <p className="text-sm text-zinc-400">
+                {copy.enVedeIt}
+              </p>
+            ) : null}
           </div>
 
           {cataloghiError ? (
@@ -256,7 +261,10 @@ export default async function GestioneCataloghiPage(props: {
                     ) : (
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {items.map((catalogo) => {
-                          const fallbackEn = isEnglishFallbackCatalog(catalogo, linguaTab)
+                          const fallbackIt = isItalianFallbackCatalog(catalogo, linguaTab)
+                          const sharedCategory = isLanguageSharedCategory(
+                            typeof catalogo.categoria === 'string' ? catalogo.categoria : null,
+                          )
                           return (
                           <div key={catalogo.id} className="space-y-3">
                             <Link
@@ -294,9 +302,9 @@ export default async function GestioneCataloghiPage(props: {
                                       {' · '}
                                       {LOCALE_LABEL[parseCatalogLingua(catalogo.lingua)]}
                                     </span>
-                                    {fallbackEn ? (
+                                    {fallbackIt ? (
                                       <span className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-sky-900">
-                                        {copy.usaPdfItaliano}
+                                        {sharedCategory ? copy.stessoPdfTutteLingue : copy.usaPdfItaliano}
                                       </span>
                                     ) : null}
                                     <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${
@@ -314,13 +322,13 @@ export default async function GestioneCataloghiPage(props: {
                               </div>
                             </Link>
 
-                            {isAdmin && fallbackEn ? (
+                            {isAdmin && fallbackIt ? (
                               <p className="rounded-xl border border-black bg-white px-3 py-3 text-xs text-zinc-600">
-                                {copy.caricaEnDedicata}
+                                {sharedCategory ? copy.stessoPdfTutteLingueHelp : copy.caricaEnDedicata}
                               </p>
                             ) : null}
 
-                            {isAdmin && !fallbackEn && (
+                            {isAdmin && !fallbackIt && (
                               <>
                                 <form
                                   action="/api/admin/cataloghi/status"

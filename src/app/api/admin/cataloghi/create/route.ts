@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { requireAdminCatalogContext } from '@/lib/adminCatalogRoute'
-import { CATALOG_CATEGORIES } from '@/lib/catalogCategories'
+import { CATALOG_CATEGORIES, isLanguageSharedCategory } from '@/lib/catalogCategories'
 import {
   isValidUserCoverStoragePath,
   isValidUserPdfStoragePath,
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
 
   const titolo = String(body.titolo ?? '').trim()
   const categoria = String(body.categoria ?? '').trim()
-  const lingua = parseCatalogLocale(body.lingua)
+  const lingua = isLanguageSharedCategory(categoria) ? 'it' : parseCatalogLocale(body.lingua)
   const ruoliVisibili = Array.isArray(body.ruoli_visibili)
     ? body.ruoli_visibili.map((r) => String(r).trim()).filter(Boolean)
     : []
