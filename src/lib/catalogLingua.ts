@@ -1,4 +1,4 @@
-import { isLanguageSharedCategory } from '@/lib/catalogCategories'
+import { isLanguageSpecificCategory } from '@/lib/catalogCategories'
 import { isCatalogLocale, parseCatalogLocale, type AppLocale, type CatalogLocale } from '@/lib/locale'
 
 export function parseCatalogLingua(value: unknown): CatalogLocale {
@@ -11,9 +11,9 @@ function rowCategory(row: { categoria?: unknown }): string | null {
 
 /**
  * Quali `lingua` in tabella servono per questa UI.
- * RU: PDF russi + italiani delle categorie condivise.
- * EN: file EN dedicati, altrimenti IT.
- * FR/DE/EL/PL/UK: PDF italiani (file dedicati dopo, tranne le categorie già condivise).
+ * RU/EN: file dedicati + PDF italiani delle categorie condivise (Family, fotografici, File 2D/3D).
+ * Listini / Agenti / Merchandising / Power Point: solo il file della lingua.
+ * FR/DE/EL/PL/UK: PDF italiani (le categorie testuali arriveranno per lingua).
  */
 export function catalogLingueForLocale(locale: AppLocale): CatalogLocale[] {
   if (locale === 'ru') return ['ru', 'it']
@@ -32,32 +32,23 @@ function catalogMatchKey(row: CatalogLinguaRow): string {
   return `${String(row.categoria ?? '').trim()}|${String(row.titolo ?? '').trim()}`
 }
 
-/** Keep locale-specific rows; keep IT rows as fallback when allowed. */
+function dedicatedKeysForLocale<T extends CatalogLinguaRow>(rows: T[], locale: CatalogLocale): Set<string> {
+  return new Set(
+    rows.filter((row) => parseCatalogLingua(row.lingua) === locale).map(catalogMatchKey),
+  )
+}
+
+/** File della lingua; PDF italiani solo per le categorie condivise, se manca il dedicato. */
 export function preferCatalogLingua<T extends CatalogLinguaRow>(rows: T[], locale: AppLocale): T[] {
-  if (locale === 'en') {
-    const enKeys = new Set(
-      rows.filter((row) => parseCatalogLingua(row.lingua) === 'en').map(catalogMatchKey),
-    )
+  if (locale === 'en' || locale === 'ru') {
+    const dedicatedKeys = dedicatedKeysForLocale(rows, locale)
 
     return rows.filter((row) => {
       const lang = parseCatalogLingua(row.lingua)
-      if (lang === 'en') return true
+      if (lang === locale) return true
       if (lang !== 'it') return false
-      return !enKeys.has(catalogMatchKey(row))
-    })
-  }
-
-  if (locale === 'ru') {
-    const ruKeys = new Set(
-      rows.filter((row) => parseCatalogLingua(row.lingua) === 'ru').map(catalogMatchKey),
-    )
-
-    return rows.filter((row) => {
-      const lang = parseCatalogLingua(row.lingua)
-      if (lang === 'ru') return true
-      if (lang !== 'it') return false
-      if (!isLanguageSharedCategory(rowCategory(row))) return false
-      return !ruKeys.has(catalogMatchKey(row))
+      if (isLanguageSpecificCategory(rowCategory(row))) return false
+      return !dedicatedKeys.has(catalogMatchKey(row))
     })
   }
 
@@ -68,40 +59,31 @@ export function pickCatalogForLocale<T extends { lingua?: unknown; categoria?: u
   candidates: T[],
   locale: AppLocale,
 ): T | undefined {
-  if (locale === 'en') {
-    return (
-      candidates.find((row) => parseCatalogLingua(row.lingua) === 'en') ??
-      candidates.find((row) => parseCatalogLingua(row.lingua) === 'it')
-    )
-  }
-  if (locale === 'ru') {
-    const ruHit = candidates.find((row) => parseCatalogLingua(row.lingua) === 'ru')
-    if (ruHit) return ruHit
+  if (locale === 'en' || locale === 'ru') {
+    const dedicated = candidates.find((row) => parseCatalogLingua(row.lingua) === locale)
+    if (dedicated) return dedicated
     const itHit = candidates.find((row) => parseCatalogLingua(row.lingua) === 'it')
-    if (itHit && isLanguageSharedCategory(rowCategory(itHit))) return itHit
+    if (itHit && !isLanguageSpecificCategory(rowCategory(itHit))) return itHit
     return undefined
   }
   return candidates.find((row) => parseCatalogLingua(row.lingua) === 'it')
 }
 
-/** Admin tabs: EN/RU list dedicated files, otherwise the shared Italian PDF. */
+/** Admin: in RU/EN l’elenco Family resta visibile (PDF italiano); le categorie testuali solo se c’è il file dedicato. */
 export function catalogsForAdminLinguaTab<T extends CatalogLinguaRow>(
   rows: T[],
   tab: CatalogLocale | 'all',
 ): T[] {
   if (tab === 'all') return rows
-  if (tab === 'en') return preferCatalogLingua(rows, 'en')
-  if (tab === 'ru') return preferCatalogLingua(rows, 'ru')
+  if (tab === 'en' || tab === 'ru') return preferCatalogLingua(rows, tab)
   return rows.filter((row) => parseCatalogLingua(row.lingua) === tab)
 }
 
-/** Italian PDF shown in a non-Italian admin tab (EN fallback, or shared categories on RU). */
+/** Italian PDF shown in a non-Italian admin tab (categorie condivise). */
 export function isItalianFallbackCatalog(row: CatalogLinguaRow, tab: CatalogLocale | 'all'): boolean {
   if (tab === 'all' || tab === 'it') return false
   if (parseCatalogLingua(row.lingua) !== 'it') return false
-  if (tab === 'en') return true
-  if (tab === 'ru') return isLanguageSharedCategory(rowCategory(row))
-  return false
+  return !isLanguageSpecificCategory(rowCategory(row))
 }
 
 export function isEnglishFallbackCatalog(row: CatalogLinguaRow, tab: CatalogLocale | 'all'): boolean {

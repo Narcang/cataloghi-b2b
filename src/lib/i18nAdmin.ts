@@ -250,6 +250,8 @@ const admin = {
     usaPdfItaliano: 'Usa il PDF italiano',
     cataloghiCondivisiHelp:
       'Family 15, Family 20, Family Gres, Capsule Collection, Bricks, File 2D, File 3D e i 5 cataloghi fotografici usano lo stesso PDF italiano in tutte le lingue, senza duplicare i file.',
+    cataloghiPerLinguaHelp:
+      'Listini, Agenti, Merchandising e Power Point si caricano per ciascuna lingua. In Русский e English restano visibili i cataloghi Family con il PDF italiano; le categorie testuali si riempiono quando carichi il file dedicato.',
     stessoPdfTutteLingue: 'Stesso PDF per tutte le lingue',
     stessoPdfTutteLingueHelp:
       'Questo catalogo è lo stesso per tutte le lingue. Si gestisce dalla scheda Italiano: non serve una copia RU o EN.',
@@ -418,6 +420,8 @@ const admin = {
     usaPdfItaliano: 'Использует итальянский PDF',
     cataloghiCondivisiHelp:
       'Family 15, Family 20, Family Gres, Capsule Collection, Bricks, File 2D, File 3D и 5 фотокаталогов используют один и тот же итальянский PDF на всех языках, без дублирования файлов.',
+    cataloghiPerLinguaHelp:
+      'Прайс-листы, документация агентов, мерчандайзинг и Power Point загружаются для каждого языка. В вкладках Русский и English остаются каталоги Family с итальянским PDF; текстовые категории заполняются после загрузки отдельного файла.',
     stessoPdfTutteLingue: 'Один PDF для всех языков',
     stessoPdfTutteLingueHelp:
       'Этот каталог общий для всех языков. Управляется во вкладке Italiano: отдельная копия RU или EN не нужна.',
@@ -584,6 +588,8 @@ const admin = {
     usaPdfItaliano: 'Uses the Italian PDF',
     cataloghiCondivisiHelp:
       'Family 15, Family 20, Family Gres, Capsule Collection, Bricks, File 2D, File 3D and the 5 photo catalogs use the same Italian PDF in every language, without duplicating files.',
+    cataloghiPerLinguaHelp:
+      'Price lists, agent docs, merchandising and Power Point are uploaded per language. The English and Russian tabs still show Family catalogs with the Italian PDF; text categories fill in when you upload the dedicated file.',
     stessoPdfTutteLingue: 'Same PDF for every language',
     stessoPdfTutteLingueHelp:
       'This catalog is the same in every language. Manage it from the Italian tab: no separate RU or EN copy is needed.',
@@ -755,6 +761,8 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     usaPdfItaliano: 'Utilise le PDF italien',
     cataloghiCondivisiHelp:
       'Family 15, Family 20, Family Gres, Capsule Collection, Bricks, File 2D, File 3D et les 5 catalogues photo utilisent le même PDF italien dans toutes les langues, sans dupliquer les fichiers.',
+    cataloghiPerLinguaHelp:
+      'Listes de prix, docs agents, merchandising et Power Point se chargent par langue. Les onglets English et Русский gardent les catalogues Family en PDF italien ; les catégories textuelles se remplissent après l’upload dédié.',
     stessoPdfTutteLingue: 'Même PDF pour toutes les langues',
     stessoPdfTutteLingueHelp:
       'Ce catalogue est le même pour toutes les langues. Il se gère dans l’onglet Italiano : pas besoin d’une copie RU ou EN.',
@@ -921,6 +929,8 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     usaPdfItaliano: 'Nutzt die italienische PDF',
     cataloghiCondivisiHelp:
       'Family 15, Family 20, Family Gres, Capsule Collection, Bricks, File 2D, File 3D und die 5 Fotokataloge nutzen in allen Sprachen dieselbe italienische PDF, ohne Dateien zu verdoppeln.',
+    cataloghiPerLinguaHelp:
+      'Preislisten, Agentenunterlagen, Merchandising und Power Point werden je Sprache hochgeladen. In English und Русский bleiben die Family-Kataloge mit italienischer PDF sichtbar; Textkategorien füllen sich nach dem eigenen Upload.',
     stessoPdfTutteLingue: 'Dieselbe PDF für alle Sprachen',
     stessoPdfTutteLingueHelp:
       'Dieser Katalog gilt für alle Sprachen. Verwaltung im Reiter Italiano: keine eigene RU- oder EN-Kopie nötig.',
@@ -1087,6 +1097,8 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     usaPdfItaliano: 'Χρησιμοποιεί το ιταλικό PDF',
     cataloghiCondivisiHelp:
       'Τα Family 15, Family 20, Family Gres, Capsule Collection, Bricks, File 2D, File 3D και τα 5 φωτογραφικά χρησιμοποιούν το ίδιο ιταλικό PDF σε όλες τις γλώσσες, χωρίς αντίγραφα αρχείων.',
+    cataloghiPerLinguaHelp:
+      'Τιμοκατάλογοι, έγγραφα πρακτόρων, merchandising και Power Point ανεβαίνουν ανά γλώσσα. Στα English και Русский μένουν οι κατάλογοι Family με το ιταλικό PDF· οι κατηγορίες κειμένου γεμίζουν με το ξεχωριστό αρχείο.',
     stessoPdfTutteLingue: 'Ίδιο PDF για όλες τις γλώσσες',
     stessoPdfTutteLingueHelp:
       'Αυτός ο κατάλογος είναι κοινός για όλες τις γλώσσες. Διαχείριση από την καρτέλα Italiano: δεν χρειάζεται αντίγραφο RU ή EN.',
@@ -1253,6 +1265,8 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     usaPdfItaliano: 'Używa włoskiego PDF',
     cataloghiCondivisiHelp:
       'Family 15, Family 20, Family Gres, Capsule Collection, Bricks, File 2D, File 3D i 5 katalogów zdjęć używają tego samego włoskiego PDF we wszystkich językach, bez duplikowania plików.',
+    cataloghiPerLinguaHelp:
+      'Cenniki, dokumenty agentów, merchandising i Power Point wgrywa się osobno dla każdego języka. W English i Русский zostają katalogi Family z włoskim PDF; kategorie tekstowe wypełniają się po wgraniu pliku.',
     stessoPdfTutteLingue: 'Ten sam PDF dla wszystkich języków',
     stessoPdfTutteLingueHelp:
       'Ten katalog jest wspólny dla wszystkich języków. Zarządzasz nim w karcie Italiano: kopia RU lub EN nie jest potrzebna.',
@@ -1419,6 +1433,8 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     usaPdfItaliano: 'Використовує італійський PDF',
     cataloghiCondivisiHelp:
       'Family 15, Family 20, Family Gres, Capsule Collection, Bricks, File 2D, File 3D і 5 фотокаталогів використовують той самий італійський PDF усіма мовами, без дублювання файлів.',
+    cataloghiPerLinguaHelp:
+      'Прайс-листи, документи агентів, merchandising і Power Point завантажують окремо для кожної мови. У English і Русский лишаються каталоги Family з італійським PDF; текстові категорії заповнюються після окремого файлу.',
     stessoPdfTutteLingue: 'Той самий PDF для всіх мов',
     stessoPdfTutteLingueHelp:
       'Цей каталог спільний для всіх мов. Керуйте ним у вкладці Italiano: окрема копія RU чи EN не потрібна.',

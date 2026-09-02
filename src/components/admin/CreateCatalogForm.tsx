@@ -9,7 +9,7 @@ import {
   MAX_CATALOG_PDF_BYTES,
   MAX_CATALOG_STUDIO_ZIP_BYTES,
 } from '@/lib/catalogUploadLimits'
-import { isLanguageSharedCategory, type CatalogCategory } from '@/lib/catalogCategories'
+import { isLanguageSharedCategory, isLanguageSpecificCategory, type CatalogCategory } from '@/lib/catalogCategories'
 
 const CATEGORY_DISPLAY_LABEL: Partial<Record<CatalogCategory, string>> = {
   Scontistiche: 'Merchandising',
@@ -48,6 +48,7 @@ export default function CreateCatalogForm({
   const [ruoliSelezionati, setRuoliSelezionati] = useState<RuoloCatalogo[]>(RUOLI_CATALOGO_DEFAULT)
 
   const sharedAcrossLanguages = isLanguageSharedCategory(categoriaSelezionata)
+  const perLingua = isLanguageSpecificCategory(categoriaSelezionata)
 
   useEffect(() => {
     if (isLanguageSharedCategory(categoriaSelezionata)) {
@@ -317,7 +318,11 @@ export default function CreateCatalogForm({
           ))}
         </select>
         <p className="text-xs text-zinc-600">
-          {sharedAcrossLanguages ? copy.linguaHelpCondiviso : copy.linguaHelp}
+          {sharedAcrossLanguages
+            ? copy.linguaHelpCondiviso
+            : perLingua
+              ? copy.linguaHelpPerLingua
+              : copy.linguaHelp}
         </p>
       </div>
 

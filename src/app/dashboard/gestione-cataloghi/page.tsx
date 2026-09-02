@@ -191,9 +191,9 @@ export default async function GestioneCataloghiPage(props: {
             <p className="text-sm text-zinc-400">
               {copy.cataloghiCondivisiHelp}
             </p>
-            {linguaTab === 'en' ? (
+            {linguaTab === 'ru' || linguaTab === 'en' ? (
               <p className="text-sm text-zinc-400">
-                {copy.enVedeIt}
+                {copy.cataloghiPerLinguaHelp}
               </p>
             ) : null}
           </div>
@@ -202,24 +202,11 @@ export default async function GestioneCataloghiPage(props: {
             <div className="text-red-700 p-4 border border-red-300 bg-red-50 rounded-xl">
               {copy.erroreCaricamento}: {cataloghiError.message}
             </div>
-          ) : cataloghiPerVista.length === 0 ? (
+          ) : cataloghiTutti.length === 0 ? (
             <div className="rounded-2xl border border-amber-300 bg-amber-50 px-6 py-10 text-center">
-              {linguaTab !== 'all' && cataloghiTutti.length > 0 ? (
-                <>
-                  <p className="text-lg font-medium text-amber-950">
-                    {copy.nessunCatalogoLingua} {LOCALE_LABEL[linguaTab]}.
-                  </p>
-                  <p className="mt-3 text-sm text-amber-900">
-                    {copy.caricaOppureTutte}
-                  </p>
-                </>
-              ) : (
-                <>
-                  <p className="text-lg font-medium text-amber-950">
-                    {copy.nessunFileArchivio}
-                  </p>
-                </>
-              )}
+              <p className="text-lg font-medium text-amber-950">
+                {copy.nessunFileArchivio}
+              </p>
             </div>
           ) : (
             <div className="space-y-10">

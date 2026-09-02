@@ -318,3 +318,20 @@ export function isLanguageSharedCategory(categoria: string | null | undefined): 
   if (!categoria) return false
   return LANGUAGE_SHARED_SET.has(categoria)
 }
+
+/** Categorie testuali: un PDF dedicato per IT, RU e EN. */
+export const LANGUAGE_SPECIFIC_CATEGORIES = [
+  'Listini',
+  'Agenti',
+  'Scontistiche',
+  'Power Point',
+  'Partner',
+  'Listini Netti',
+] as const satisfies readonly CatalogCategory[]
+
+const LANGUAGE_SPECIFIC_SET = new Set<string>(LANGUAGE_SPECIFIC_CATEGORIES)
+
+export function isLanguageSpecificCategory(categoria: string | null | undefined): boolean {
+  if (!categoria) return false
+  return LANGUAGE_SPECIFIC_SET.has(categoria)
+}
