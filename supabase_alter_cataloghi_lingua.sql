@@ -1,4 +1,4 @@
--- Lingua del file catalogo (it / ru / en).
+-- Lingua del file catalogo (tutte le lingue UI).
 -- Non separa gli utenti: login e associati restano unici.
 -- Esegui sul SQL Editor del progetto IT.
 
@@ -19,4 +19,5 @@ ALTER TABLE public.cataloghi
   DROP CONSTRAINT IF EXISTS cataloghi_lingua_check;
 
 ALTER TABLE public.cataloghi
-  ADD CONSTRAINT cataloghi_lingua_check CHECK (lingua IN ('it', 'ru', 'en'));
+  ADD CONSTRAINT cataloghi_lingua_check
+  CHECK (lingua IN ('it', 'ru', 'en', 'fr', 'de', 'el', 'pl', 'uk'));

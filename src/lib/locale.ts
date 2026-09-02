@@ -1,9 +1,9 @@
 export const APP_LOCALES = ['it', 'ru', 'en', 'fr', 'de', 'el', 'pl', 'uk'] as const
 export type AppLocale = (typeof APP_LOCALES)[number]
 
-/** Lingua del file catalogo (i PDF dedicati FR/DE/EL/PL/UK arriveranno dopo). */
-export const CATALOG_LOCALES = ['it', 'ru', 'en'] as const
-export type CatalogLocale = (typeof CATALOG_LOCALES)[number]
+/** Lingua del file in tabella cataloghi: stessa lista della UI. */
+export const CATALOG_LOCALES = APP_LOCALES
+export type CatalogLocale = AppLocale
 
 /** Selettore pubblico: tutte le lingue UI. */
 export const CHOOSER_LOCALES = APP_LOCALES
@@ -148,7 +148,7 @@ export function isAppLocale(value: string | null | undefined): value is AppLocal
 }
 
 export function isCatalogLocale(value: string | null | undefined): value is CatalogLocale {
-  return value === 'it' || value === 'ru' || value === 'en'
+  return isAppLocale(value)
 }
 
 export function parseAppLocale(value: string | null | undefined): AppLocale {

@@ -11,14 +11,12 @@ function rowCategory(row: { categoria?: unknown }): string | null {
 
 /**
  * Quali `lingua` in tabella servono per questa UI.
- * RU/EN: file dedicati + PDF italiani delle categorie condivise (Family, fotografici, File 2D/3D).
- * Listini / Agenti / Merchandising / Power Point: solo il file della lingua.
- * FR/DE/EL/PL/UK: PDF italiani (le categorie testuali arriveranno per lingua).
+ * File dedicato della lingua + PDF italiani delle categorie condivise (Family, fotografici, File 2D/3D).
+ * Listini / Agenti / Merchandising / Power Point: solo il file della lingua scelta.
  */
 export function catalogLingueForLocale(locale: AppLocale): CatalogLocale[] {
-  if (locale === 'ru') return ['ru', 'it']
-  if (locale === 'en') return ['en', 'it']
-  return ['it']
+  if (locale === 'it') return ['it']
+  return [locale, 'it']
 }
 
 type CatalogLinguaRow = {
@@ -39,12 +37,12 @@ export function preferCatalogLingua<T extends CatalogLinguaRow>(rows: T[], local
   }
 
   const dedicatedKeys = new Set(
-    rows.filter((row) => String(row.lingua ?? '') === locale).map(catalogMatchKey),
+    rows.filter((row) => parseCatalogLingua(row.lingua) === locale).map(catalogMatchKey),
   )
 
   return rows.filter((row) => {
     const lang = parseCatalogLingua(row.lingua)
-    if (String(row.lingua ?? '') === locale || lang === locale) return true
+    if (lang === locale) return true
     if (lang !== 'it') return false
     if (isLanguageSpecificCategory(rowCategory(row))) return false
     return !dedicatedKeys.has(catalogMatchKey(row))
@@ -58,10 +56,8 @@ export function pickCatalogForLocale<T extends { lingua?: unknown; categoria?: u
   if (locale === 'it') {
     return candidates.find((row) => parseCatalogLingua(row.lingua) === 'it')
   }
-  const dedicated = candidates.find((row) => String(row.lingua ?? '') === locale)
+  const dedicated = candidates.find((row) => parseCatalogLingua(row.lingua) === locale)
   if (dedicated) return dedicated
-  const catalogHit = candidates.find((row) => parseCatalogLingua(row.lingua) === locale)
-  if (catalogHit) return catalogHit
   const itHit = candidates.find((row) => parseCatalogLingua(row.lingua) === 'it')
   if (itHit && !isLanguageSpecificCategory(rowCategory(itHit))) return itHit
   return undefined

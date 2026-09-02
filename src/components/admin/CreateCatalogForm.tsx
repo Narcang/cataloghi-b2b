@@ -22,7 +22,7 @@ import { isZipDownloadCategory } from '@/lib/catalogFileKind'
 import { RUOLI_CATALOGO, RUOLI_CATALOGO_DEFAULT, type RuoloCatalogo } from '@/lib/catalogRoles'
 import { tCatalogAdmin } from '@/lib/i18n'
 import { tAdmin, tCatalogRole } from '@/lib/i18nAdmin'
-import { CATALOG_LOCALES, isCatalogLocale, LOCALE_LABEL, type CatalogLocale } from '@/lib/locale'
+import { CATALOG_LOCALES, isCatalogLocale, localeNameIn, type CatalogLocale } from '@/lib/locale'
 import type { Mercato } from '@/lib/mercato'
 import { useAppLocale } from '@/lib/useAppLocale'
 
@@ -313,7 +313,7 @@ export default function CreateCatalogForm({
         >
           {CATALOG_LOCALES.map((key) => (
             <option key={key} value={key}>
-              {key.toUpperCase()} · {LOCALE_LABEL[key]}
+              {key.toUpperCase()} · {localeNameIn(uiLocale, key)}
             </option>
           ))}
         </select>

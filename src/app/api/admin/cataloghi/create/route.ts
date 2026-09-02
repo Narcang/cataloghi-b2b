@@ -214,7 +214,7 @@ export async function POST(request: NextRequest) {
       return jsonResponse(false, 'DB non aggiornato: esegui script categoria/aree su Supabase', 500)
     }
     if (insertError.message.includes('lingua')) {
-      return jsonResponse(false, 'DB non aggiornato: esegui supabase_alter_cataloghi_lingua.sql su Supabase', 500)
+      return jsonResponse(false, 'DB non aggiornato: esegui supabase_alter_cataloghi_lingua_all.sql su Supabase', 500)
     }
     if (insertError.message.toLowerCase().includes('row-level security')) {
       return jsonResponse(
