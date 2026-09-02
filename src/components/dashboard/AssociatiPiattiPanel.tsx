@@ -3,17 +3,18 @@
 import { useMemo, useState } from 'react'
 import { Users } from 'lucide-react'
 import {
-  flatListSectionDescription,
   flatListTabsForViewer,
   getFlatListProfilesByRole,
   profiloGerarchiaDisplayLabel,
-  referentAssociatoLabel,
   resolveFlatListReferent,
   ruoloBreakdownDotClass,
-  ruoloGerarchiaLabel,
   type FlatListViewerRole,
   type ProfiloGerarchiaRow,
 } from '@/lib/userHierarchy'
+import { tElencoAssociatiHelp, tElencoAssociatiTab, tDashboard } from '@/lib/i18n'
+import { tAdmin, tRuolo } from '@/lib/i18nAdmin'
+import { useAppLocale } from '@/lib/useAppLocale'
+import type { AppLocale } from '@/lib/locale'
 
 type Props = {
   ownerProfile: ProfiloGerarchiaRow
@@ -25,10 +26,14 @@ type Props = {
 function AssociatoCard({
   profile,
   referent,
+  locale,
 }: {
   profile: ProfiloGerarchiaRow
   referent: ProfiloGerarchiaRow | null
+  locale: AppLocale
 }) {
+  const copy = tDashboard(locale)
+  const adminCopy = tAdmin(locale)
   const roleDotClass = ruoloBreakdownDotClass(profile.ruolo)
 
   return (
@@ -49,16 +54,16 @@ function AssociatoCard({
               <p className="text-sm text-zinc-600 mt-0.5">{profile.email}</p>
             ) : null}
             <p className="text-xs text-zinc-500 mt-1">
-              {profile.area_geografica || 'Area non indicata'}
+              {profile.area_geografica || adminCopy.areaNonIndicata}
             </p>
           </div>
           <div className="flex flex-col items-end gap-1.5 text-right">
             <span className="rounded-full border border-black/10 bg-zinc-100 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-zinc-700">
-              {ruoloGerarchiaLabel(profile.ruolo)}
+              {tRuolo(locale, profile.ruolo)}
             </span>
             {referent ? (
               <p className="text-base font-semibold text-zinc-800 max-w-[16rem] leading-snug">
-                Associato a: {referentAssociatoLabel(referent)}
+                {copy.associatoA}: {profiloGerarchiaDisplayLabel(referent)} ({tRuolo(locale, referent.ruolo)})
               </p>
             ) : null}
           </div>
@@ -74,6 +79,8 @@ export default function AssociatiPiattiPanel({
   profili,
   links,
 }: Props) {
+  const locale = useAppLocale()
+  const copy = tDashboard(locale)
   const tabs = flatListTabsForViewer(viewerRole)
   const [activeTab, setActiveTab] = useState<string>(tabs[0]?.id ?? 'rivenditore')
 
@@ -103,19 +110,20 @@ export default function AssociatiPiattiPanel({
     return map
   }, [associati, ownerProfile, profili, links])
 
-  const listHeading = tabs.find((t) => t.id === activeTab)?.label ?? 'Associati'
+  const activeRuolo = tabs.find((t) => t.id === activeTab)?.ruolo
+  const listHeading = activeRuolo ? tElencoAssociatiTab(locale, activeRuolo) : copy.associatiFallback
 
   return (
     <section id="elenco-associati" className="border border-black rounded-2xl bg-white p-6 space-y-6">
       <div>
         <h2 className="text-xl text-zinc-900 font-medium flex items-center gap-2">
           <Users size={20} className="text-[#060d41]" />
-          Elenco Tutti Gli Associati
+          {copy.elencoAssociati}
         </h2>
-        <p className="text-sm text-zinc-600 mt-1">{flatListSectionDescription(viewerRole)}</p>
+        <p className="text-sm text-zinc-600 mt-1">{tElencoAssociatiHelp(locale, viewerRole)}</p>
       </div>
 
-      <div className="flex flex-wrap gap-2" role="tablist" aria-label="Filtra associati per categoria">
+      <div className="flex flex-wrap gap-2" role="tablist" aria-label={copy.filtraAssociati}>
         {tabs.map((tab) => {
           const active = activeTab === tab.id
           const roleDotClass = ruoloBreakdownDotClass(tab.ruolo)
@@ -133,7 +141,7 @@ export default function AssociatiPiattiPanel({
                   : 'border-black/20 bg-zinc-50 text-zinc-800 hover:bg-zinc-100'
               }`}
             >
-              {tab.label}
+              {tElencoAssociatiTab(locale, tab.ruolo)}
               <span
                 className={`rounded-full min-w-[1.5rem] px-2 py-0.5 text-xs font-semibold text-center ${
                   roleDotClass
@@ -157,7 +165,7 @@ export default function AssociatiPiattiPanel({
 
         {associati.length === 0 ? (
           <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-6 text-center text-sm text-zinc-600">
-            Nessun associato in questa categoria al momento.
+            {copy.nessunAssociatoCategoria}
           </div>
         ) : (
           <ul className="m-0 p-0 space-y-2">
@@ -166,6 +174,7 @@ export default function AssociatiPiattiPanel({
                 key={profile.id}
                 profile={profile}
                 referent={referentById.get(profile.id) ?? null}
+                locale={locale}
               />
             ))}
           </ul>

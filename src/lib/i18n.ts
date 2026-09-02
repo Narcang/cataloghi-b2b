@@ -172,6 +172,25 @@ const dashboard = {
     portaleBenvenuto: 'Benvenuto',
     portaleTitolo: 'Area Riservata',
     portaleHelp: 'Seleziona la sezione che vuoi consultare',
+    elencoAssociati: 'Elenco tutti gli associati',
+    elencoAssociatiHelpAgenzia:
+      'Vista rapida di agenti, back-office, venditori, rivenditori e studi collegati alla tua agenzia, con il referente di riferimento.',
+    elencoAssociatiHelpCompagnia:
+      'Vista rapida di agenti, back-office, venditori, rivenditori e studi della tua compagnia, con il referente di riferimento.',
+    elencoAssociatiHelpRivenditore:
+      'Vista rapida di venditori, promoter e studi collegati al tuo rivenditore, con il referente di riferimento.',
+    elencoAssociatiHelpDistributore:
+      'Vista rapida di venditori, promoter e studi della tua compagnia rivenditore, con il referente di riferimento.',
+    filtraAssociati: 'Filtra associati per categoria',
+    nessunAssociatoCategoria: 'Nessun associato in questa categoria al momento.',
+    associatoA: 'Associato a',
+    associatiFallback: 'Associati',
+    tabAgenti: 'Agenti',
+    tabBackOffice: 'Back-Office',
+    tabVenditori: 'Venditori',
+    tabRivenditori: 'Rivenditori',
+    tabStudi: 'Studi',
+    tabPromoter: 'Promoter',
   },
   ru: {
     kicker: 'Закрытая панель',
@@ -215,6 +234,25 @@ const dashboard = {
     portaleBenvenuto: 'Добро пожаловать',
     portaleTitolo: 'Закрытый раздел',
     portaleHelp: 'Выберите раздел для просмотра',
+    elencoAssociati: 'Список всех связанных',
+    elencoAssociatiHelpAgenzia:
+      'Краткий список агентов, back-office, продавцов, дилеров и студий вашего агентства, с указанным куратором.',
+    elencoAssociatiHelpCompagnia:
+      'Краткий список агентов, back-office, продавцов, дилеров и студий вашей компании, с указанным куратором.',
+    elencoAssociatiHelpRivenditore:
+      'Краткий список продавцов, промоутеров и студий вашего дилера, с указанным куратором.',
+    elencoAssociatiHelpDistributore:
+      'Краткий список продавцов, промоутеров и студий вашей дилерской компании, с указанным куратором.',
+    filtraAssociati: 'Фильтр связанных по категории',
+    nessunAssociatoCategoria: 'В этой категории пока нет связанных пользователей.',
+    associatoA: 'Связан с',
+    associatiFallback: 'Связанные',
+    tabAgenti: 'Агенты',
+    tabBackOffice: 'Back-Office',
+    tabVenditori: 'Продавцы',
+    tabRivenditori: 'Дилеры',
+    tabStudi: 'Студии',
+    tabPromoter: 'Промоутеры',
   },
   en: {
     kicker: 'Reserved dashboard',
@@ -258,6 +296,25 @@ const dashboard = {
     portaleBenvenuto: 'Welcome',
     portaleTitolo: 'Reserved area',
     portaleHelp: 'Select the section you want to open',
+    elencoAssociati: 'All associates',
+    elencoAssociatiHelpAgenzia:
+      'Quick view of agents, back-office, sellers, resellers and studios linked to your agency, with their referent.',
+    elencoAssociatiHelpCompagnia:
+      'Quick view of agents, back-office, sellers, resellers and studios in your company, with their referent.',
+    elencoAssociatiHelpRivenditore:
+      'Quick view of sellers, promoters and studios linked to your reseller, with their referent.',
+    elencoAssociatiHelpDistributore:
+      'Quick view of sellers, promoters and studios in your reseller company, with their referent.',
+    filtraAssociati: 'Filter associates by category',
+    nessunAssociatoCategoria: 'No associates in this category at the moment.',
+    associatoA: 'Linked to',
+    associatiFallback: 'Associates',
+    tabAgenti: 'Agents',
+    tabBackOffice: 'Back-Office',
+    tabVenditori: 'Sellers',
+    tabRivenditori: 'Resellers',
+    tabStudi: 'Studios',
+    tabPromoter: 'Promoters',
   },
 } as const
 
@@ -279,4 +336,41 @@ export function tLogin(locale: AppLocale) {
 
 export function tDashboard(locale: AppLocale) {
   return dashboard[locale]
+}
+
+export function tElencoAssociatiHelp(locale: AppLocale, viewerRole: string): string {
+  const copy = tDashboard(locale)
+  switch (viewerRole) {
+    case 'agenzia':
+      return copy.elencoAssociatiHelpAgenzia
+    case 'agente':
+    case 'back_office':
+      return copy.elencoAssociatiHelpCompagnia
+    case 'rivenditore':
+      return copy.elencoAssociatiHelpRivenditore
+    case 'distributore':
+      return copy.elencoAssociatiHelpDistributore
+    default:
+      return copy.elencoAssociatiHelpAgenzia
+  }
+}
+
+export function tElencoAssociatiTab(locale: AppLocale, ruolo: string): string {
+  const copy = tDashboard(locale)
+  switch (ruolo) {
+    case 'agente':
+      return copy.tabAgenti
+    case 'back_office':
+      return copy.tabBackOffice
+    case 'distributore':
+      return copy.tabVenditori
+    case 'rivenditore':
+      return copy.tabRivenditori
+    case 'studio':
+      return copy.tabStudi
+    case 'partner_dipendente':
+      return copy.tabPromoter
+    default:
+      return ruolo
+  }
 }

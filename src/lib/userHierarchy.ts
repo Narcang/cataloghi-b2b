@@ -544,20 +544,6 @@ export function filterProfiliInHierarchySubtree(
   return profili.filter((p) => ids.has(p.id))
 }
 
-export function flatListSectionDescription(viewerRole: FlatListViewerRole): string {
-  switch (viewerRole) {
-    case 'agenzia':
-      return 'Vista rapida di agenti, back-office, venditori, rivenditori e studi collegati alla tua agenzia, con il referente di riferimento.'
-    case 'agente':
-    case 'back_office':
-      return 'Vista rapida di agenti, back-office, venditori, rivenditori e studi della tua compagnia, con il referente di riferimento.'
-    case 'rivenditore':
-      return 'Vista rapida di venditori, promoter e studi collegati al tuo rivenditore, con il referente di riferimento.'
-    case 'distributore':
-      return 'Vista rapida di venditori, promoter e studi della tua compagnia rivenditore, con il referente di riferimento.'
-  }
-}
-
 export function profiloToGerarchiaRow(
   p: {
     id: string
