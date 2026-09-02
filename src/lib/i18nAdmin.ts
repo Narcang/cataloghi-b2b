@@ -147,13 +147,6 @@ const admin = {
     caricaOppureTutte:
       'Carica un file in questa lingua dalla sezione Nuovo Catalogo, oppure apri la scheda Tutte.',
     nessunFileArchivio: 'Non risulta nessun file in archivio. Puoi caricarne uno dalla sezione Nuovo Catalogo.',
-    importRuTitle: 'Cataloghi Russia',
-    importRuHelp:
-      'Copia PDF e copertine dal progetto Russia in questo database, con lingua ru. I file italiani restano invariati.',
-    importRuTrovati: 'Cataloghi trovati sul progetto Russia',
-    importRuBtn: 'Importa cataloghi Russia',
-    importRuWait: 'Verifica archivio Russia…',
-    importRuLoading: 'Copia in corso…',
     titoloCatalogo: 'Titolo Catalogo',
     categoria: 'Categoria',
     selezionaCategoria: 'Seleziona categoria',
@@ -164,8 +157,6 @@ const admin = {
     caricamento: 'Caricamento…',
     almenoUnRuolo: 'Seleziona almeno un ruolo.',
     copertina: 'Copertina (immagine A4 verticale, opzionale)',
-    confirmImportRu:
-      'Copiare i cataloghi dal progetto Russia a questo sito, come file in lingua russa? I PDF italiani non vengono toccati.',
     russiaEnvHelp:
       'Versione Russia: collegare NEXT_PUBLIC_SUPABASE_URL_RU e SUPABASE_SERVICE_ROLE_KEY_RU su Vercel.',
     configuraRu: 'Configura Supabase RU nelle env',
@@ -318,12 +309,6 @@ const admin = {
     nessunCatalogoLingua: 'Нет каталогов на',
     caricaOppureTutte: 'Загрузите файл на этом языке или откройте вкладку Все.',
     nessunFileArchivio: 'В архиве нет файлов. Загрузите один в разделе Новый каталог.',
-    importRuTitle: 'Каталоги России',
-    importRuHelp: 'Копирует PDF с проекта Russia в эту базу с языком ru. Итальянские файлы не меняются.',
-    importRuTrovati: 'Каталоги на проекте Russia',
-    importRuBtn: 'Импортировать каталоги Russia',
-    importRuWait: 'Проверка архива Russia…',
-    importRuLoading: 'Копирование…',
     titoloCatalogo: 'Название каталога',
     categoria: 'Категория',
     selezionaCategoria: 'Выберите категорию',
@@ -334,7 +319,6 @@ const admin = {
     caricamento: 'Загрузка…',
     almenoUnRuolo: 'Выберите хотя бы одну роль.',
     copertina: 'Обложка (изображение A4 вертикальное, необязательно)',
-    confirmImportRu: 'Скопировать каталоги с проекта Russia на этот сайт как русские файлы? Итальянские PDF не изменятся.',
     russiaEnvHelp:
       'Версия Россия: задайте NEXT_PUBLIC_SUPABASE_URL_RU и SUPABASE_SERVICE_ROLE_KEY_RU на Vercel.',
     configuraRu: 'Настройте Supabase RU в переменных окружения',
@@ -486,13 +470,6 @@ const admin = {
     nessunCatalogoLingua: 'No catalogs in',
     caricaOppureTutte: 'Upload a file in this language from New catalog, or open the All tab.',
     nessunFileArchivio: 'No files in the archive. You can upload one from New catalog.',
-    importRuTitle: 'Russia catalogs',
-    importRuHelp:
-      'Copy PDFs and covers from the Russia project into this database, with language ru. Italian files stay unchanged.',
-    importRuTrovati: 'Catalogs found on the Russia project',
-    importRuBtn: 'Import Russia catalogs',
-    importRuWait: 'Checking Russia archive…',
-    importRuLoading: 'Copying…',
     titoloCatalogo: 'Catalog title',
     categoria: 'Category',
     selezionaCategoria: 'Select category',
@@ -503,8 +480,6 @@ const admin = {
     caricamento: 'Uploading…',
     almenoUnRuolo: 'Select at least one role.',
     copertina: 'Cover (vertical A4 image, optional)',
-    confirmImportRu:
-      'Copy catalogs from the Russia project to this site as Russian files? Italian PDFs will not be changed.',
     russiaEnvHelp:
       'Russia version: set NEXT_PUBLIC_SUPABASE_URL_RU and SUPABASE_SERVICE_ROLE_KEY_RU on Vercel.',
     configuraRu: 'Configure RU Supabase in env vars',

@@ -5,7 +5,6 @@ import Image from 'next/image'
 import { FileText, ArrowLeft } from 'lucide-react'
 import Header from '@/components/Header'
 import CreateCatalogForm from '@/components/admin/CreateCatalogForm'
-import ImportCataloghiRussia from '@/components/admin/ImportCataloghiRussia'
 import {
   CATALOG_CATEGORIES_FOR_UPLOAD,
   categoriesVisibleOnDashboard,
@@ -170,8 +169,6 @@ export default async function GestioneCataloghiPage(props: {
             />
           </section>
         )}
-
-        {isAdmin ? <ImportCataloghiRussia /> : null}
 
         {/* Lista cataloghi per categoria */}
         <section id="cataloghi">
