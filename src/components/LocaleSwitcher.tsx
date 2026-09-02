@@ -1,6 +1,6 @@
 'use client'
 
-import { CHOOSER_LOCALES, isCatalogLocale, LOCALE_SHORT, type AppLocale } from '@/lib/locale'
+import { CHOOSER_LOCALES, LOCALE_SHORT, type AppLocale } from '@/lib/locale'
 import { tHeader } from '@/lib/i18n'
 import { useAppLocale } from '@/lib/useAppLocale'
 
@@ -18,7 +18,7 @@ export default function LocaleSwitcher() {
     })
     const url = new URL(window.location.href)
     if (url.pathname.includes('gestione-cataloghi')) {
-      url.searchParams.set('lingua', isCatalogLocale(next) ? next : 'it')
+      url.searchParams.set('lingua', next)
       window.location.assign(url.toString())
       return
     }

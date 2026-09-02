@@ -55,6 +55,94 @@ export const LOCALE_FLAG: Record<AppLocale, string> = {
   uk: '🇺🇦',
 }
 
+/** Nome della lingua `target` scritto nella lingua dell’interfaccia `ui`. */
+export const LOCALE_NAME_IN: Record<AppLocale, Record<AppLocale, string>> = {
+  it: {
+    it: 'Italiano',
+    ru: 'Russo',
+    en: 'Inglese',
+    fr: 'Francese',
+    de: 'Tedesco',
+    el: 'Greco',
+    pl: 'Polacco',
+    uk: 'Ucraino',
+  },
+  ru: {
+    it: 'Итальянский',
+    ru: 'Русский',
+    en: 'Английский',
+    fr: 'Французский',
+    de: 'Немецкий',
+    el: 'Греческий',
+    pl: 'Польский',
+    uk: 'Украинский',
+  },
+  en: {
+    it: 'Italian',
+    ru: 'Russian',
+    en: 'English',
+    fr: 'French',
+    de: 'German',
+    el: 'Greek',
+    pl: 'Polish',
+    uk: 'Ukrainian',
+  },
+  fr: {
+    it: 'Italien',
+    ru: 'Russe',
+    en: 'Anglais',
+    fr: 'Français',
+    de: 'Allemand',
+    el: 'Grec',
+    pl: 'Polonais',
+    uk: 'Ukrainien',
+  },
+  de: {
+    it: 'Italienisch',
+    ru: 'Russisch',
+    en: 'Englisch',
+    fr: 'Französisch',
+    de: 'Deutsch',
+    el: 'Griechisch',
+    pl: 'Polnisch',
+    uk: 'Ukrainisch',
+  },
+  el: {
+    it: 'Ιταλικά',
+    ru: 'Ρωσικά',
+    en: 'Αγγλικά',
+    fr: 'Γαλλικά',
+    de: 'Γερμανικά',
+    el: 'Ελληνικά',
+    pl: 'Πολωνικά',
+    uk: 'Ουκρανικά',
+  },
+  pl: {
+    it: 'Włoski',
+    ru: 'Rosyjski',
+    en: 'Angielski',
+    fr: 'Francuski',
+    de: 'Niemiecki',
+    el: 'Grecki',
+    pl: 'Polski',
+    uk: 'Ukraiński',
+  },
+  uk: {
+    it: 'Італійська',
+    ru: 'Російська',
+    en: 'Англійська',
+    fr: 'Французька',
+    de: 'Німецька',
+    el: 'Грецька',
+    pl: 'Польська',
+    uk: 'Українська',
+  },
+}
+
+export function localeNameIn(uiLocale: AppLocale, target: AppLocale): string {
+  return LOCALE_NAME_IN[uiLocale][target]
+}
+
 export function isAppLocale(value: string | null | undefined): value is AppLocale {
   return APP_LOCALES.includes(value as AppLocale)
 }

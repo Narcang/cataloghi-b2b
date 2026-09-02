@@ -1,35 +1,26 @@
 import Link from 'next/link'
-import { CATALOG_LOCALES, LOCALE_LABEL, type AppLocale, type CatalogLocale } from '@/lib/locale'
+import { APP_LOCALES, localeNameIn, type AppLocale } from '@/lib/locale'
 import { tAdmin } from '@/lib/i18nAdmin'
 
-type Tab = CatalogLocale | 'all'
+type Tab = AppLocale | 'all'
 
 export default function CatalogLinguaTabs({
   active,
   counts,
   nome,
-  categoria,
   locale,
 }: {
   active: Tab
   counts: Record<Tab, number>
   nome: string
-  categoria?: string
   locale: AppLocale
 }) {
   const copy = tAdmin(locale)
-  const tabs: Tab[] = ['all', ...CATALOG_LOCALES]
-  const tabLabel: Record<Tab, string> = {
-    all: copy.tutteLingue,
-    it: LOCALE_LABEL.it,
-    ru: LOCALE_LABEL.ru,
-    en: LOCALE_LABEL.en,
-  }
+  const tabs: Tab[] = ['all', ...APP_LOCALES]
 
   function href(tab: Tab) {
     const params = new URLSearchParams()
     if (nome) params.set('nome', nome)
-    if (categoria) params.set('categoria', categoria)
     params.set('lingua', tab)
     return `/dashboard/gestione-cataloghi?${params.toString()}`
   }
@@ -38,20 +29,19 @@ export default function CatalogLinguaTabs({
     <div className="flex flex-wrap gap-2" role="tablist" aria-label={copy.linguaCataloghi}>
       {tabs.map((tab) => {
         const selected = active === tab
+        const label = tab === 'all' ? copy.tutteLingue : localeNameIn(locale, tab)
         return (
           <Link
             key={tab}
             href={href(tab)}
             role="tab"
             aria-selected={selected}
-            className={`inline-flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-1.5 text-sm font-semibold transition-colors ${
-              selected
-                ? 'border-[#060d41] bg-[#060d41] text-white'
-                : 'border-black bg-white text-[#060d41] hover:bg-zinc-100'
+            className={`ladiva-filter-tab inline-flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-1.5 text-sm font-semibold transition-colors ${
+              selected ? 'ladiva-filter-tab-active' : ''
             }`}
           >
-            {tabLabel[tab]}
-            <span className={selected ? 'text-white/80' : 'text-zinc-500'}>{counts[tab]}</span>
+            {label}
+            <span className="ladiva-filter-tab-count">{counts[tab]}</span>
           </Link>
         )
       })}

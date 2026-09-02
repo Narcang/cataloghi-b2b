@@ -228,6 +228,34 @@
   color: #fafafa !important;
 }
 
+/* Filtri lingua in gestione cataloghi: testo bianco anche sui tasti non selezionati */
+.ladiva-filter-tab {
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: transparent;
+  color: #fff !important;
+}
+.ladiva-filter-tab:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff !important;
+}
+.ladiva-filter-tab-active,
+.ladiva-filter-tab-active:hover {
+  border-color: #fff;
+  background: #060d41;
+  color: #fff !important;
+}
+.ladiva-filter-tab-count {
+  color: rgba(255, 255, 255, 0.75) !important;
+}
+.ladiva-filter-tab-active .ladiva-filter-tab-count {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+.ladiva-root-app-dark .ladiva-filter-tab,
+.ladiva-root-app-dark .ladiva-filter-tab:hover,
+.ladiva-root-app-dark .ladiva-filter-tab-active {
+  color: #fff !important;
+}
+
 /* Pulsanti leggibili sulle card contatti (dashboard scura): dopo override zinc */
 .ladiva-root-app-dark a.ladiva-dashboard-btn-light {
   background-color: #fff !important;
