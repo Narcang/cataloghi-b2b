@@ -337,6 +337,145 @@ const catalogCategoria = {
   },
 } as const
 
+const portale = {
+  it: {
+    file2dLabel: 'File 2D',
+    file2dDesc: 'File tecnici 2D scaricabili',
+    file3dLabel: 'File 3D',
+    file3dDesc: 'File tecnici 3D scaricabili',
+    listiniLabel: 'Listini pubblici',
+    listiniDesc: 'Listini prezzi',
+    merchandisingLabel: 'Merchandising',
+    merchandisingDesc: 'Condizioni commerciali',
+    docsLabel: 'Documentazione',
+    docsDesc: 'Documentazione riservata',
+    pptLabel: 'Power Point',
+    pptDesc: 'Presentazioni PowerPoint',
+    fileOne: 'file',
+    fileMany: 'file',
+    home: '← Home',
+  },
+  ru: {
+    file2dLabel: 'File 2D',
+    file2dDesc: 'Технические файлы 2D для скачивания',
+    file3dLabel: 'File 3D',
+    file3dDesc: 'Технические файлы 3D для скачивания',
+    listiniLabel: 'Публичные прайс-листы',
+    listiniDesc: 'Прайс-листы',
+    merchandisingLabel: 'Merchandising',
+    merchandisingDesc: 'Коммерческие условия',
+    docsLabel: 'Документация',
+    docsDesc: 'Закрытая документация',
+    pptLabel: 'Power Point',
+    pptDesc: 'Презентации PowerPoint',
+    fileOne: 'файл',
+    fileMany: 'файлов',
+    home: '← Главная',
+  },
+  en: {
+    file2dLabel: 'File 2D',
+    file2dDesc: 'Downloadable 2D technical files',
+    file3dLabel: 'File 3D',
+    file3dDesc: 'Downloadable 3D technical files',
+    listiniLabel: 'Public price lists',
+    listiniDesc: 'Price lists',
+    merchandisingLabel: 'Merchandising',
+    merchandisingDesc: 'Commercial terms',
+    docsLabel: 'Documentation',
+    docsDesc: 'Reserved documentation',
+    pptLabel: 'Power Point',
+    pptDesc: 'PowerPoint presentations',
+    fileOne: 'file',
+    fileMany: 'files',
+    home: '← Home',
+  },
+  fr: {
+    file2dLabel: 'File 2D',
+    file2dDesc: 'Fichiers techniques 2D téléchargeables',
+    file3dLabel: 'File 3D',
+    file3dDesc: 'Fichiers techniques 3D téléchargeables',
+    listiniLabel: 'Listes de prix publiques',
+    listiniDesc: 'Listes de prix',
+    merchandisingLabel: 'Merchandising',
+    merchandisingDesc: 'Conditions commerciales',
+    docsLabel: 'Documentation',
+    docsDesc: 'Documentation réservée',
+    pptLabel: 'Power Point',
+    pptDesc: 'Présentations PowerPoint',
+    fileOne: 'fichier',
+    fileMany: 'fichiers',
+    home: '← Accueil',
+  },
+  de: {
+    file2dLabel: 'File 2D',
+    file2dDesc: 'Technische 2D-Dateien zum Download',
+    file3dLabel: 'File 3D',
+    file3dDesc: 'Technische 3D-Dateien zum Download',
+    listiniLabel: 'Öffentliche Preislisten',
+    listiniDesc: 'Preislisten',
+    merchandisingLabel: 'Merchandising',
+    merchandisingDesc: 'Handelsbedingungen',
+    docsLabel: 'Dokumentation',
+    docsDesc: 'Geschützte Dokumentation',
+    pptLabel: 'Power Point',
+    pptDesc: 'PowerPoint-Präsentationen',
+    fileOne: 'Datei',
+    fileMany: 'Dateien',
+    home: '← Startseite',
+  },
+  el: {
+    file2dLabel: 'File 2D',
+    file2dDesc: 'Τεχνικά αρχεία 2D για λήψη',
+    file3dLabel: 'File 3D',
+    file3dDesc: 'Τεχνικά αρχεία 3D για λήψη',
+    listiniLabel: 'Δημόσιοι τιμοκατάλογοι',
+    listiniDesc: 'Τιμοκατάλογοι',
+    merchandisingLabel: 'Merchandising',
+    merchandisingDesc: 'Εμπορικοί όροι',
+    docsLabel: 'Τεκμηρίωση',
+    docsDesc: 'Κλειστή τεκμηρίωση',
+    pptLabel: 'Power Point',
+    pptDesc: 'Παρουσιάσεις PowerPoint',
+    fileOne: 'αρχείο',
+    fileMany: 'αρχεία',
+    home: '← Αρχική',
+  },
+  pl: {
+    file2dLabel: 'File 2D',
+    file2dDesc: 'Techniczne pliki 2D do pobrania',
+    file3dLabel: 'File 3D',
+    file3dDesc: 'Techniczne pliki 3D do pobrania',
+    listiniLabel: 'Publiczne cenniki',
+    listiniDesc: 'Cenniki',
+    merchandisingLabel: 'Merchandising',
+    merchandisingDesc: 'Warunki handlowe',
+    docsLabel: 'Dokumentacja',
+    docsDesc: 'Dokumentacja zastrzeżona',
+    pptLabel: 'Power Point',
+    pptDesc: 'Prezentacje PowerPoint',
+    fileOne: 'plik',
+    fileMany: 'pliki',
+    home: '← Strona główna',
+  },
+  uk: {
+    file2dLabel: 'File 2D',
+    file2dDesc: 'Технічні файли 2D для завантаження',
+    file3dLabel: 'File 3D',
+    file3dDesc: 'Технічні файли 3D для завантаження',
+    listiniLabel: 'Публічні прайс-листи',
+    listiniDesc: 'Прайс-листи',
+    merchandisingLabel: 'Merchandising',
+    merchandisingDesc: 'Комерційні умови',
+    docsLabel: 'Документація',
+    docsDesc: 'Закрита документація',
+    pptLabel: 'Power Point',
+    pptDesc: 'Презентації PowerPoint',
+    fileOne: 'файл',
+    fileMany: 'файлів',
+    home: '← Головна',
+  },
+} as const
+
 const catalogAdmin = {
   it: {
     linguaFile: 'Lingua del file',
@@ -956,6 +1095,30 @@ export function tHome(locale: AppLocale) {
 
 export function tCatalogCategoria(locale: AppLocale) {
   return catalogCategoria[locale]
+}
+
+export function tPortale(locale: AppLocale) {
+  return portale[locale]
+}
+
+export function tPortaleTile(locale: AppLocale, categoria: string): { label: string; descrizione: string } {
+  const copy = tPortale(locale)
+  switch (categoria) {
+    case 'File 2D':
+      return { label: copy.file2dLabel, descrizione: copy.file2dDesc }
+    case 'File 3D':
+      return { label: copy.file3dLabel, descrizione: copy.file3dDesc }
+    case 'Listini':
+      return { label: copy.listiniLabel, descrizione: copy.listiniDesc }
+    case 'Scontistiche':
+      return { label: copy.merchandisingLabel, descrizione: copy.merchandisingDesc }
+    case 'Agenti':
+      return { label: copy.docsLabel, descrizione: copy.docsDesc }
+    case 'Power Point':
+      return { label: copy.pptLabel, descrizione: copy.pptDesc }
+    default:
+      return { label: categoria, descrizione: '' }
+  }
 }
 
 export function tCatalogAdmin(locale: AppLocale) {

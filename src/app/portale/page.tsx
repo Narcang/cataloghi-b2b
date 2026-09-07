@@ -12,15 +12,17 @@ import {
 import { CATALOG_RETURN_TO_PARAM, catalogPdfHref } from '@/lib/catalogNavigation'
 import { getAppLocale } from '@/lib/localeServer'
 import { catalogLingueForLocale, preferCatalogLingua, pickCatalogForLocale } from '@/lib/catalogLingua'
-import { tDashboard } from '@/lib/i18n'
+import { tDashboard, tPortale, tPortaleTile } from '@/lib/i18n'
 
 /** Categorie che aprono direttamente il PDF (nessuna lista intermedia). */
 const DIRECT_OPEN_CATEGORIES = new Set<string>(['Scontistiche', 'Listini', 'Power Point'])
 
 export const dynamic = 'force-dynamic'
 
-export const metadata = {
-  title: 'Area Riservata · Ladiva Ceramica',
+export async function generateMetadata() {
+  const locale = await getAppLocale()
+  const copy = tDashboard(locale)
+  return { title: `${copy.portaleTitolo} · Ladiva Ceramica` }
 }
 
 function tileIcon(categoria: CatalogCategory) {
@@ -47,6 +49,7 @@ function tileAccentColor(categoria: CatalogCategory): string {
 export default async function PortalePage() {
   const locale = await getAppLocale()
   const copy = tDashboard(locale)
+  const portaleCopy = tPortale(locale)
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -117,6 +120,8 @@ export default async function PortalePage() {
           {tiles.map((tile) => {
             const count = countPerCategoria[tile.categoria] ?? 0
             const slug = categoryToSlug(tile.categoria)
+            const tileCopy = tPortaleTile(locale, tile.categoria)
+            const fileLabel = count === 1 ? portaleCopy.fileOne : portaleCopy.fileMany
             const directId = directOpenIdPerCategoria[tile.categoria]
             const categoryHref = directId
               ? catalogPdfHref(directId, '/portale')
@@ -137,16 +142,16 @@ export default async function PortalePage() {
                         {tileIcon(tile.categoria)}
                       </div>
                       <h2 className="text-xl font-semibold uppercase tracking-wide text-zinc-900 font-[family-name:var(--font-sans)]">
-                        {tile.label}
+                        {tileCopy.label}
                       </h2>
                       <p className="mt-1 text-sm text-zinc-500 font-[family-name:var(--font-sans)]">
-                        {tile.descrizione}
+                        {tileCopy.descrizione}
                       </p>
                     </div>
 
                     <div className="mt-6 flex items-center justify-between">
                       <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white ${tileAccentColor(tile.categoria)}`}>
-                        {count} {count === 1 ? 'file' : 'file'}
+                        {count} {fileLabel}
                       </span>
                       <span className="flex items-center gap-1 text-xs font-medium text-zinc-400 group-hover:text-zinc-700 transition-colors uppercase tracking-wide">
                         {copy.apri} <ChevronRight size={14} />
@@ -166,7 +171,7 @@ export default async function PortalePage() {
             © {new Date().getFullYear()} Ladiva Ceramica · Carpineti (RE), Italia
             {' · '}
             <Link href="/" className="ladiva-footer-link whitespace-nowrap">
-              ← Home
+              {portaleCopy.home}
             </Link>
           </p>
         </div>
