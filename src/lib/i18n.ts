@@ -476,6 +476,105 @@ const portale = {
   },
 } as const
 
+const doveSiamo = {
+  it: {
+    kicker: 'Vieni a trovarci',
+    titolo: 'Dove Siamo',
+    showRoom: 'Show Room',
+    produzione: 'Produzione',
+    deposito: 'Deposito',
+    paese: 'Italia',
+    tornaHome: '← Torna alla home',
+    metaTitle: 'Dove siamo',
+    metaDescription: 'Sede, contatti e come raggiungere Ladiva Ceramica a Carpineti (RE).',
+    mapTitle: 'Mappa di Carpineti (RE)',
+  },
+  ru: {
+    kicker: 'Приезжайте к нам',
+    titolo: 'Где мы',
+    showRoom: 'Show Room',
+    produzione: 'Производство',
+    deposito: 'Склад',
+    paese: 'Италия',
+    tornaHome: '← На главную',
+    metaTitle: 'Где мы',
+    metaDescription: 'Адрес, контакты и как добраться до Ladiva Ceramica в Карпинети (RE).',
+    mapTitle: 'Карта Карпинети (RE)',
+  },
+  en: {
+    kicker: 'Come visit us',
+    titolo: 'Where we are',
+    showRoom: 'Show Room',
+    produzione: 'Production',
+    deposito: 'Warehouse',
+    paese: 'Italy',
+    tornaHome: '← Back to home',
+    metaTitle: 'Where we are',
+    metaDescription: 'Address, contacts and how to reach Ladiva Ceramica in Carpineti (RE).',
+    mapTitle: 'Map of Carpineti (RE)',
+  },
+  fr: {
+    kicker: 'Venez nous voir',
+    titolo: 'Où nous sommes',
+    showRoom: 'Show Room',
+    produzione: 'Production',
+    deposito: 'Entrepôt',
+    paese: 'Italie',
+    tornaHome: '← Retour à l’accueil',
+    metaTitle: 'Où nous sommes',
+    metaDescription: 'Adresse, contacts et accès à Ladiva Ceramica à Carpineti (RE).',
+    mapTitle: 'Carte de Carpineti (RE)',
+  },
+  de: {
+    kicker: 'Besuchen Sie uns',
+    titolo: 'Wo wir sind',
+    showRoom: 'Show Room',
+    produzione: 'Produktion',
+    deposito: 'Lager',
+    paese: 'Italien',
+    tornaHome: '← Zurück zur Startseite',
+    metaTitle: 'Wo wir sind',
+    metaDescription: 'Adresse, Kontakte und Anfahrt zu Ladiva Ceramica in Carpineti (RE).',
+    mapTitle: 'Karte von Carpineti (RE)',
+  },
+  el: {
+    kicker: 'Ελάτε να μας βρείτε',
+    titolo: 'Πού είμαστε',
+    showRoom: 'Show Room',
+    produzione: 'Παραγωγή',
+    deposito: 'Αποθήκη',
+    paese: 'Ιταλία',
+    tornaHome: '← Επιστροφή στην αρχική',
+    metaTitle: 'Πού είμαστε',
+    metaDescription: 'Διεύθυνση, επαφές και πώς να φτάσετε στη Ladiva Ceramica στο Carpineti (RE).',
+    mapTitle: 'Χάρτης Carpineti (RE)',
+  },
+  pl: {
+    kicker: 'Odwiedź nas',
+    titolo: 'Gdzie jesteśmy',
+    showRoom: 'Show Room',
+    produzione: 'Produkcja',
+    deposito: 'Magazyn',
+    paese: 'Włochy',
+    tornaHome: '← Powrót na stronę główną',
+    metaTitle: 'Gdzie jesteśmy',
+    metaDescription: 'Adres, kontakty i dojazd do Ladiva Ceramica w Carpineti (RE).',
+    mapTitle: 'Mapa Carpineti (RE)',
+  },
+  uk: {
+    kicker: 'Завітайте до нас',
+    titolo: 'Де ми',
+    showRoom: 'Show Room',
+    produzione: 'Виробництво',
+    deposito: 'Склад',
+    paese: 'Італія',
+    tornaHome: '← На головну',
+    metaTitle: 'Де ми',
+    metaDescription: 'Адреса, контакти та як дістатися до Ladiva Ceramica у Карпінеті (RE).',
+    mapTitle: 'Карта Карпінеті (RE)',
+  },
+} as const
+
 const catalogAdmin = {
   it: {
     linguaFile: 'Lingua del file',
@@ -1099,6 +1198,10 @@ export function tCatalogCategoria(locale: AppLocale) {
 
 export function tPortale(locale: AppLocale) {
   return portale[locale]
+}
+
+export function tDoveSiamo(locale: AppLocale) {
+  return doveSiamo[locale]
 }
 
 export function tPortaleTile(locale: AppLocale, categoria: string): { label: string; descrizione: string } {

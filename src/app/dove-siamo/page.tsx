@@ -1,14 +1,25 @@
-import type { Metadata } from 'next'
 import Link from 'next/link'
 import { MapPin } from 'lucide-react'
 import Header from '@/components/Header'
+import { getAppLocale } from '@/lib/localeServer'
+import { tDoveSiamo, tHome } from '@/lib/i18n'
 
-export const metadata: Metadata = {
-  title: 'Dove siamo · Ladiva Ceramica',
-  description: 'Sede, contatti e come raggiungere Ladiva Ceramica a Carpineti (RE).',
+export const dynamic = 'force-dynamic'
+
+export async function generateMetadata() {
+  const locale = await getAppLocale()
+  const copy = tDoveSiamo(locale)
+  return {
+    title: `${copy.metaTitle} · Ladiva Ceramica`,
+    description: copy.metaDescription,
+  }
 }
 
-export default function DoveSiamoPage() {
+export default async function DoveSiamoPage() {
+  const locale = await getAppLocale()
+  const copy = tDoveSiamo(locale)
+  const homeCopy = tHome(locale)
+
   return (
     <div className="min-h-screen flex flex-col bg-white text-neutral-900">
       <Header />
@@ -19,30 +30,30 @@ export default function DoveSiamoPage() {
           id="dove-siamo"
         >
           <div className="ladiva-home-dove-inner">
-            <span className="ladiva-label">Vieni a trovarci</span>
-            <h1 className="ladiva-section-title">Dove Siamo</h1>
+            <span className="ladiva-label">{copy.kicker}</span>
+            <h1 className="ladiva-section-title">{copy.titolo}</h1>
             <div className="ladiva-contact-grid">
               <div className="ladiva-home-contact-card">
                 <MapPin className="ladiva-home-contact-icon" size={28} />
-                <h3>Show Room</h3>
+                <h3>{copy.showRoom}</h3>
                 <p>
                   Via Matteotti 2<br />
                   Formigine MO<br />
-                  Italia
+                  {copy.paese}
                 </p>
               </div>
               <div className="ladiva-home-contact-card">
                 <MapPin className="ladiva-home-contact-icon" size={28} />
-                <h3>Produzione</h3>
+                <h3>{copy.produzione}</h3>
                 <p>
                   Via San Prospero 65/A<br />
                   42033 Carpineti RE<br />
-                  Italia
+                  {copy.paese}
                 </p>
               </div>
               <div className="ladiva-home-contact-card">
                 <MapPin className="ladiva-home-contact-icon" size={28} />
-                <h3>Deposito</h3>
+                <h3>{copy.deposito}</h3>
                 <p>
                   Strada Statale 467<br />
                   Sant&apos;Antonino di Casalgrande RE
@@ -52,7 +63,7 @@ export default function DoveSiamoPage() {
 
             <div className="ladiva-map-placeholder">
               <iframe
-                title="Carpineti RE Map"
+                title={copy.mapTitle}
                 src="https://maps.google.com/maps?q=Carpineti,+Reggio+Emilia,+Italy&z=13&output=embed"
                 width="100%"
                 height="360"
@@ -71,11 +82,11 @@ export default function DoveSiamoPage() {
               © {new Date().getFullYear()} Ladiva Ceramica · Carpineti (RE), Italia
               {' · '}
               <Link href="/" className="ladiva-footer-link whitespace-nowrap">
-                ← Torna alla home
+                {copy.tornaHome}
               </Link>
               {' · '}
               <Link href="/login" className="ladiva-footer-link whitespace-nowrap">
-                Accedi al Portale Agenti →
+                {homeCopy.accediPortale}
               </Link>
             </p>
           </div>
