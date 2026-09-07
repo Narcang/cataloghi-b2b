@@ -230,6 +230,113 @@ const home = {
   },
 } as const
 
+const catalogCategoria = {
+  it: {
+    tornaHomepage: 'Torna alla homepage',
+    tornaPortale: 'Torna al portale',
+    tornaDashboard: 'Torna alla dashboard',
+    kicker: 'Cataloghi pubblicati',
+    help: 'Seleziona un altro settore dalla homepage. Per cataloghi riservati e strumenti B2B usa l’accesso al portale.',
+    vuoto: 'Non ci sono cataloghi pubblicati in questa categoria al momento.',
+    errore: 'Errore nel caricamento dei cataloghi',
+    nessunaImmagine: 'Nessuna immagine',
+    copertina: 'Copertina',
+    metaTitle: 'Cataloghi',
+    metaDescription: 'Sfoglia i cataloghi pubblicati Ladiva nella linea {categoria}.',
+  },
+  ru: {
+    tornaHomepage: 'На главную',
+    tornaPortale: 'В портал',
+    tornaDashboard: 'К панели',
+    kicker: 'Опубликованные каталоги',
+    help: 'Выберите другую линейку на главной. Для закрытых каталогов и инструментов B2B войдите в портал.',
+    vuoto: 'В этой категории пока нет опубликованных каталогов.',
+    errore: 'Ошибка загрузки каталогов',
+    nessunaImmagine: 'Нет изображения',
+    copertina: 'Обложка',
+    metaTitle: 'Каталоги',
+    metaDescription: 'Опубликованные каталоги Ladiva в линейке {categoria}.',
+  },
+  en: {
+    tornaHomepage: 'Back to homepage',
+    tornaPortale: 'Back to the portal',
+    tornaDashboard: 'Back to the dashboard',
+    kicker: 'Published catalogs',
+    help: 'Choose another range from the homepage. For reserved catalogs and B2B tools, sign in to the portal.',
+    vuoto: 'There are no published catalogs in this category at the moment.',
+    errore: 'Error loading catalogs',
+    nessunaImmagine: 'No image',
+    copertina: 'Cover',
+    metaTitle: 'Catalogs',
+    metaDescription: 'Browse published Ladiva catalogs in the {categoria} range.',
+  },
+  fr: {
+    tornaHomepage: 'Retour à l’accueil',
+    tornaPortale: 'Retour au portail',
+    tornaDashboard: 'Retour au tableau de bord',
+    kicker: 'Catalogues publiés',
+    help: 'Choisissez une autre gamme depuis l’accueil. Pour les catalogues réservés et les outils B2B, connectez-vous au portail.',
+    vuoto: 'Il n’y a pas de catalogues publiés dans cette catégorie pour le moment.',
+    errore: 'Erreur lors du chargement des catalogues',
+    nessunaImmagine: 'Aucune image',
+    copertina: 'Couverture',
+    metaTitle: 'Catalogues',
+    metaDescription: 'Parcourez les catalogues Ladiva publiés dans la gamme {categoria}.',
+  },
+  de: {
+    tornaHomepage: 'Zurück zur Startseite',
+    tornaPortale: 'Zurück zum Portal',
+    tornaDashboard: 'Zurück zum Dashboard',
+    kicker: 'Veröffentlichte Kataloge',
+    help: 'Wählen Sie auf der Startseite eine andere Linie. Für geschützte Kataloge und B2B-Tools im Portal anmelden.',
+    vuoto: 'In dieser Kategorie gibt es derzeit keine veröffentlichten Kataloge.',
+    errore: 'Fehler beim Laden der Kataloge',
+    nessunaImmagine: 'Kein Bild',
+    copertina: 'Cover',
+    metaTitle: 'Kataloge',
+    metaDescription: 'Veröffentlichte Ladiva-Kataloge der Linie {categoria}.',
+  },
+  el: {
+    tornaHomepage: 'Επιστροφή στην αρχική',
+    tornaPortale: 'Επιστροφή στην πύλη',
+    tornaDashboard: 'Επιστροφή στον πίνακα',
+    kicker: 'Δημοσιευμένοι κατάλογοι',
+    help: 'Επιλέξτε άλλη σειρά από την αρχική. Για κλειστούς καταλόγους και εργαλεία B2B συνδεθείτε στην πύλη.',
+    vuoto: 'Δεν υπάρχουν δημοσιευμένοι κατάλογοι σε αυτή την κατηγορία προς το παρόν.',
+    errore: 'Σφάλμα φόρτωσης καταλόγων',
+    nessunaImmagine: 'Χωρίς εικόνα',
+    copertina: 'Εξώφυλλο',
+    metaTitle: 'Κατάλογοι',
+    metaDescription: 'Δημοσιευμένοι κατάλογοι Ladiva στη σειρά {categoria}.',
+  },
+  pl: {
+    tornaHomepage: 'Powrót na stronę główną',
+    tornaPortale: 'Powrót do portalu',
+    tornaDashboard: 'Powrót do panelu',
+    kicker: 'Opublikowane katalogi',
+    help: 'Wybierz inną linię ze strony głównej. Do katalogów zastrzeżonych i narzędzi B2B zaloguj się do portalu.',
+    vuoto: 'W tej kategorii nie ma teraz opublikowanych katalogów.',
+    errore: 'Błąd wczytywania katalogów',
+    nessunaImmagine: 'Brak obrazu',
+    copertina: 'Okładka',
+    metaTitle: 'Katalogi',
+    metaDescription: 'Opublikowane katalogi Ladiva w linii {categoria}.',
+  },
+  uk: {
+    tornaHomepage: 'На головну',
+    tornaPortale: 'До порталу',
+    tornaDashboard: 'До панелі',
+    kicker: 'Опубліковані каталоги',
+    help: 'Оберіть іншу лінійку на головній. Для закритих каталогів і інструментів B2B увійдіть до порталу.',
+    vuoto: 'У цій категорії зараз немає опублікованих каталогів.',
+    errore: 'Помилка завантаження каталогів',
+    nessunaImmagine: 'Немає зображення',
+    copertina: 'Обкладинка',
+    metaTitle: 'Каталоги',
+    metaDescription: 'Опубліковані каталоги Ladiva у лінійці {categoria}.',
+  },
+} as const
+
 const catalogAdmin = {
   it: {
     linguaFile: 'Lingua del file',
@@ -845,6 +952,10 @@ export function tHeader(locale: AppLocale) {
 
 export function tHome(locale: AppLocale) {
   return home[locale]
+}
+
+export function tCatalogCategoria(locale: AppLocale) {
+  return catalogCategoria[locale]
 }
 
 export function tCatalogAdmin(locale: AppLocale) {

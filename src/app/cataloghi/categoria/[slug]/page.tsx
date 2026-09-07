@@ -9,26 +9,29 @@ import { catalogPdfHref, safeCatalogReturnTo, CATALOG_RETURN_TO_PARAM } from '@/
 import { compareCatalogTitoli } from '@/lib/catalogSorting'
 import { getAppLocale } from '@/lib/localeServer'
 import { catalogLingueForLocale, preferCatalogLingua } from '@/lib/catalogLingua'
+import { tCatalogCategoria, tHome } from '@/lib/i18n'
 
 /** Elenco cataloghi pubblici: sempre dati aggiornati da Supabase. */
 export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
+  const locale = await getAppLocale()
+  const copy = tCatalogCategoria(locale)
   const categoria = categoryFromSlug(slug)
   if (!categoria) {
-    return { title: 'Categoria · Ladiva Ceramica' }
+    return { title: `${copy.metaTitle} · Ladiva Ceramica` }
   }
   return {
-    title: `${categoria} · Cataloghi · Ladiva Ceramica`,
-    description: `Sfoglia i cataloghi pubblicati Ladiva nella linea ${categoria}.`,
+    title: `${categoria} · ${copy.metaTitle} · Ladiva Ceramica`,
+    description: copy.metaDescription.replace('{categoria}', categoria),
   }
 }
 
-function backLabel(returnTo: string): string {
-  if (returnTo === '/portale') return 'Torna al portale'
-  if (returnTo.startsWith('/dashboard')) return 'Torna alla dashboard'
-  return 'Torna alla homepage'
+function backLabel(returnTo: string, copy: ReturnType<typeof tCatalogCategoria>): string {
+  if (returnTo === '/portale') return copy.tornaPortale
+  if (returnTo.startsWith('/dashboard')) return copy.tornaDashboard
+  return copy.tornaHomepage
 }
 
 export default async function CataloghiPerCategoriaPage({
@@ -49,6 +52,8 @@ export default async function CataloghiPerCategoriaPage({
   if (!categoria) notFound()
 
   const locale = await getAppLocale()
+  const copy = tCatalogCategoria(locale)
+  const homeCopy = tHome(locale)
   const supabase = await createClient()
   const {
     data: { user },
@@ -70,7 +75,7 @@ export default async function CataloghiPerCategoriaPage({
       <div className="ladiva-categoria-vetrina flex min-h-screen flex-col bg-black text-zinc-100 antialiased">
         <Header />
         <main className="mx-auto w-full max-w-[1200px] flex-1 px-6 py-10">
-          <p className="text-red-400">Errore nel caricamento dei cataloghi: {error.message}</p>
+          <p className="text-red-400">{copy.errore}: {error.message}</p>
         </main>
       </div>
     )
@@ -100,19 +105,19 @@ export default async function CataloghiPerCategoriaPage({
           className="mb-8 inline-flex items-center gap-2 text-sm font-medium text-zinc-200 underline-offset-4 hover:text-white hover:underline"
         >
           <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden />
-          {backLabel(returnTo)}
+          {backLabel(returnTo, copy)}
         </Link>
 
         <header className="mb-10 border-b border-white/15 pb-6">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-zinc-400">Cataloghi pubblicati</p>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-zinc-400">{copy.kicker}</p>
           <h1 className="text-3xl font-semibold tracking-tight text-white md:text-4xl">{categoria}</h1>
           <p className="mt-2 max-w-2xl text-zinc-300">
-            Seleziona un altro settore dalla homepage. Per cataloghi riservati e strumenti B2B usa l&apos;accesso al portale.
+            {copy.help}
           </p>
         </header>
 
         {cataloghi.length === 0 ? (
-          <p className="text-lg text-zinc-400">Non ci sono cataloghi pubblicati in questa categoria al momento.</p>
+          <p className="text-lg text-zinc-400">{copy.vuoto}</p>
         ) : (
           <ul className="m-0 grid list-none grid-cols-1 gap-6 p-0 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {cataloghi.map((catalogo) => (
@@ -127,7 +132,7 @@ export default async function CataloghiPerCategoriaPage({
                       {catalogo.url_immagine ? (
                         <Image
                           src={catalogo.url_immagine}
-                          alt={`Copertina ${catalogo.titolo}`}
+                          alt={`${copy.copertina} ${catalogo.titolo}`}
                           fill
                           unoptimized
                           className="object-contain object-top transition-transform duration-500 group-hover:scale-105"
@@ -135,7 +140,7 @@ export default async function CataloghiPerCategoriaPage({
                       ) : (
                         <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-100 text-zinc-600">
                           <FileText size={48} className="mb-3 text-[#060d41] opacity-40" />
-                          <span className="text-xs font-medium uppercase tracking-widest">Nessuna immagine</span>
+                          <span className="text-xs font-medium uppercase tracking-widest">{copy.nessunaImmagine}</span>
                         </div>
                       )}
                     </div>
@@ -159,7 +164,7 @@ export default async function CataloghiPerCategoriaPage({
               © {new Date().getFullYear()} Ladiva Ceramica · Carpineti (RE), Italia
               {' · '}
               <Link href="/login" className="ladiva-footer-link whitespace-nowrap">
-                Accedi al Portale Agenti →
+                {homeCopy.accediPortale}
               </Link>
             </p>
           </div>
