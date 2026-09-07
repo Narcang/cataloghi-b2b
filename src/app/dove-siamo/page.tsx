@@ -1,10 +1,10 @@
-import Link from 'next/link'
-import { MapPin } from 'lucide-react'
 import Header from '@/components/Header'
+import DoveSiamoContent from '@/components/DoveSiamoContent'
 import { getAppLocale } from '@/lib/localeServer'
-import { tDoveSiamo, tHome } from '@/lib/i18n'
+import { tDoveSiamo } from '@/lib/i18n'
 
 export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 export async function generateMetadata() {
   const locale = await getAppLocale()
@@ -17,81 +17,11 @@ export async function generateMetadata() {
 
 export default async function DoveSiamoPage() {
   const locale = await getAppLocale()
-  const copy = tDoveSiamo(locale)
-  const homeCopy = tHome(locale)
 
   return (
     <div className="min-h-screen flex flex-col bg-white text-neutral-900">
       <Header />
-
-      <div className="ladiva-root ladiva-root--auto ladiva-root-home-lower flex-1 flex flex-col">
-        <section
-          className="ladiva-home-dove-section ladiva-section-catalog-wide"
-          id="dove-siamo"
-        >
-          <div className="ladiva-home-dove-inner">
-            <span className="ladiva-label">{copy.kicker}</span>
-            <h1 className="ladiva-section-title">{copy.titolo}</h1>
-            <div className="ladiva-contact-grid">
-              <div className="ladiva-home-contact-card">
-                <MapPin className="ladiva-home-contact-icon" size={28} />
-                <h3>{copy.showRoom}</h3>
-                <p>
-                  Via Matteotti 2<br />
-                  Formigine MO<br />
-                  {copy.paese}
-                </p>
-              </div>
-              <div className="ladiva-home-contact-card">
-                <MapPin className="ladiva-home-contact-icon" size={28} />
-                <h3>{copy.produzione}</h3>
-                <p>
-                  Via San Prospero 65/A<br />
-                  42033 Carpineti RE<br />
-                  {copy.paese}
-                </p>
-              </div>
-              <div className="ladiva-home-contact-card">
-                <MapPin className="ladiva-home-contact-icon" size={28} />
-                <h3>{copy.deposito}</h3>
-                <p>
-                  Strada Statale 467<br />
-                  Sant&apos;Antonino di Casalgrande RE
-                </p>
-              </div>
-            </div>
-
-            <div className="ladiva-map-placeholder">
-              <iframe
-                title={copy.mapTitle}
-                src="https://maps.google.com/maps?q=Carpineti,+Reggio+Emilia,+Italy&z=13&output=embed"
-                width="100%"
-                height="360"
-                style={{ border: 0, borderRadius: '1rem' }}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-              />
-            </div>
-          </div>
-        </section>
-
-        <footer className="ladiva-footer ladiva-footer--compact ladiva-footer-home-strip mt-auto">
-          <div className="ladiva-home-footer-inner">
-            <p className="text-sm max-w-3xl mx-auto text-center">
-              © {new Date().getFullYear()} Ladiva Ceramica · Carpineti (RE), Italia
-              {' · '}
-              <Link href="/" className="ladiva-footer-link whitespace-nowrap">
-                {copy.tornaHome}
-              </Link>
-              {' · '}
-              <Link href="/login" className="ladiva-footer-link whitespace-nowrap">
-                {homeCopy.accediPortale}
-              </Link>
-            </p>
-          </div>
-        </footer>
-      </div>
+      <DoveSiamoContent initialLocale={locale} />
     </div>
   )
 }

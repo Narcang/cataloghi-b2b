@@ -9,8 +9,8 @@ export function readLocaleCookie(): AppLocale {
   return parseAppLocale(match?.split('=')[1])
 }
 
-export function useAppLocale(): AppLocale {
-  const [locale, setLocale] = useState<AppLocale>('it')
+export function useAppLocale(initial?: AppLocale): AppLocale {
+  const [locale, setLocale] = useState<AppLocale>(initial ?? 'it')
 
   useEffect(() => {
     setLocale(readLocaleCookie())
