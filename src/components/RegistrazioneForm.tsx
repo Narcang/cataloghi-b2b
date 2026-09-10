@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { tHome, tRegistrazione } from '@/lib/i18n'
 import { tRuolo } from '@/lib/i18nAdmin'
 import type { AppLocale } from '@/lib/locale'
-import { useAppLocale } from '@/lib/useAppLocale'
+import { tutorialPdfHref } from '@/lib/tutorialInvite'
 
 function flashMessage(copy: ReturnType<typeof tRegistrazione>, message: string): string {
   const known: Record<string, string> = {
@@ -47,11 +47,13 @@ export default function RegistrazioneForm({
   const homeCopy = tHome(locale)
   const ruoloLabel = ruoloKey ? tRuolo(locale, ruoloKey) : null
   const flash = message && !ok ? flashMessage(copy, message) : ''
+  const tutorialHref = hasInvito ? tutorialPdfHref(ruoloKey, locale) : null
 
   return (
     <>
       <main className="w-full max-w-[1200px] mx-auto px-6 py-10 md:py-14 flex-1 flex items-center justify-center">
-        <Card className="w-full max-w-lg border border-black bg-white shadow-sm">
+        <div className="w-full max-w-lg">
+        <Card className="w-full border border-black bg-white shadow-sm">
           <form action={register}>
             {tokenRaw ? <input type="hidden" name="invito_token" value={tokenRaw} /> : null}
 
@@ -170,6 +172,20 @@ export default function RegistrazioneForm({
             </CardFooter>
           </form>
         </Card>
+        {tutorialHref ? (
+          <div className="mt-5 rounded-2xl border border-black/10 bg-[#060d41]/5 px-5 py-4 text-center">
+            <p className="text-sm text-zinc-700">{copy.tutorialHelp}</p>
+            <a
+              href={tutorialHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 inline-flex text-sm font-semibold text-[#060d41] underline underline-offset-4 hover:text-[#0a155a]"
+            >
+              {copy.tutorialLink}
+            </a>
+          </div>
+        ) : null}
+        </div>
       </main>
 
       <footer className="ladiva-footer ladiva-footer--compact ladiva-footer-home-strip">
