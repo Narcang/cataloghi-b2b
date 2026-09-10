@@ -33,6 +33,7 @@ export async function updateSession(request: NextRequest) {
     '/dove-siamo',
     '/login',
     '/registrazione',
+    '/tutorial',
     '/auth',
     '/recupero-password',
     '/reset-password',
