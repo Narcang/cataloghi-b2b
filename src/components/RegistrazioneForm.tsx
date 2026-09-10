@@ -10,6 +10,7 @@ import { tHome, tRegistrazione } from '@/lib/i18n'
 import { tRuolo } from '@/lib/i18nAdmin'
 import type { AppLocale } from '@/lib/locale'
 import { tutorialPdfHref } from '@/lib/tutorialInvite'
+import { useAppLocale } from '@/lib/useAppLocale'
 
 function flashMessage(copy: ReturnType<typeof tRegistrazione>, message: string): string {
   const known: Record<string, string> = {
