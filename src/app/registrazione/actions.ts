@@ -22,15 +22,15 @@ export async function register(formData: FormData) {
 
   if (!consenso) {
     const q = invitoToken ? `&token=${invitoToken}` : ''
-    redirect('/registrazione?message=' + encodeURIComponent('Devi accettare le policy per procedere.') + q)
+    redirect('/registrazione?message=' + encodeURIComponent('consenso') + q)
   }
 
   if (!nome || !cognome || !societa || !email || !password || !telefono) {
-    redirect('/registrazione?message=' + encodeURIComponent('Compila tutti i campi obbligatori.'))
+    redirect('/registrazione?message=' + encodeURIComponent('campi'))
   }
 
   if (password.length < 8) {
-    redirect('/registrazione?message=' + encodeURIComponent('La password deve avere almeno 8 caratteri.'))
+    redirect('/registrazione?message=' + encodeURIComponent('password'))
   }
 
   // Valida il token di invito tramite service role (bypassa RLS)
@@ -94,7 +94,7 @@ export async function register(formData: FormData) {
     const svc = createServiceRoleSupabase()
     if (!svc) {
       const q = invitoToken ? `&token=${encodeURIComponent(invitoToken)}` : ''
-      redirect('/registrazione?message=' + encodeURIComponent('Errore di configurazione server.') + q)
+      redirect('/registrazione?message=' + encodeURIComponent('server') + q)
     }
 
     const { data: adminUserData, error: adminError } = await svc.auth.admin.createUser({
@@ -109,7 +109,7 @@ export async function register(formData: FormData) {
         adminError.message.includes('already registered') ||
         adminError.message.includes('already exists') ||
         adminError.message.includes('already been registered')
-          ? 'Questa email è già registrata. Prova ad accedere o recupera la password.'
+          ? 'email_exists'
           : adminError.message
       const q = invitoToken ? `&token=${encodeURIComponent(invitoToken)}` : ''
       redirect('/registrazione?message=' + encodeURIComponent(msg) + q)
@@ -177,7 +177,7 @@ export async function register(formData: FormData) {
   if (error) {
     const msg =
       error.message.includes('already registered') || error.message.includes('already been registered')
-        ? 'Questa email è già registrata. Prova ad accedere o recupera la password.'
+        ? 'email_exists'
         : error.message
     redirect('/registrazione?message=' + encodeURIComponent(msg))
   }
