@@ -5,12 +5,15 @@ export type TutorialKind = 'agenzia' | 'rivenditori' | 'studio'
 const TUTORIAL_FILES: Record<TutorialKind, Partial<Record<AppLocale, string>>> = {
   agenzia: {
     it: '/tutorial/tutorial-agenzia-it.pdf',
+    en: '/tutorial/tutorial-agenzia-en.pdf',
   },
   rivenditori: {
     it: '/tutorial/tutorial-rivenditori-it.pdf',
+    en: '/tutorial/tutorial-rivenditori-en.pdf',
   },
   studio: {
     it: '/tutorial/tutorial-studio-it.pdf',
+    en: '/tutorial/tutorial-studio-en.pdf',
   },
 }
 
