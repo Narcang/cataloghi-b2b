@@ -40,6 +40,19 @@ const ruolo: Record<AppLocale, Record<string, string>> = {
     studio: 'Studio',
     free: 'Free',
   },
+  es: {
+    all: 'Todos los roles',
+    admin: 'Admin',
+    manager: 'Manager',
+    agenzia: 'Agencia',
+    agente: 'Agente',
+    back_office: 'Back-Office',
+    rivenditore: 'Revendedores',
+    distributore: 'Vendedores',
+    partner_dipendente: 'Promoter',
+    studio: 'Estudio',
+    free: 'Free',
+  },
   fr: {
     all: 'Tous les rôles',
     admin: 'Admin',
@@ -139,6 +152,17 @@ const catalogRole: Record<AppLocale, Record<string, string>> = {
     agente: 'Agent',
     back_office: 'Back-Office',
     agenzia: 'Agency',
+    manager: 'Manager',
+  },
+  es: {
+    free: 'Público (invitados / Free)',
+    studio: 'Estudio',
+    partner_dipendente: 'Promoter',
+    distributore: 'Vendedores',
+    rivenditore: 'Revendedores',
+    agente: 'Agente',
+    back_office: 'Back-Office',
+    agenzia: 'Agencia',
     manager: 'Manager',
   },
   fr: {
@@ -710,6 +734,178 @@ const admin = {
 type AdminCopy = { [K in keyof (typeof admin)['it']]: string }
 
 const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
+  es: {
+    versioneMonitorata: 'Versión monitorizada',
+    monitoraggioMercato: 'Monitorización de mercado',
+    italia: 'Italia',
+    russia: 'Rusia',
+    english: 'English',
+    caricaMercato: 'No se ha podido cargar el mercado',
+    salvaMercato: 'No se ha podido guardar',
+    gestioneUtenti: 'Gestión de usuarios',
+    gestioneRivenditori: 'Gestión de revendedores',
+    gestioneRivenditoriHelp: 'Actualiza expositores y box de los revendedores vinculados a tu agencia.',
+    filtraUtenti: 'Filtrar usuarios',
+    filtraUtentiHelp: 'Filtra por rol y/o por nombre.',
+    cercaNome: 'Buscar por nombre',
+    placeholderNome: 'Ej. Fabio',
+    applica: 'Aplicar',
+    struttura: 'Estructura organizativa',
+    strutturaHelp: 'Elige el rol de partida y pulsa un perfil para expandir los asociados en cascada.',
+    filtraStruttura: 'Filtrar estructura por rol',
+    areaNonIndicata: 'Área no indicada',
+    utenteSenzaNome: 'Usuario sin nombre',
+    seguitoDa: 'Seguido por',
+    invitaUtenti: 'Invitar usuarios',
+    invitaHelp:
+      'Genera un enlace de registro para el rol elegido. El nuevo usuario se vinculará a tu perfil tras la aprobación.',
+    gestioneUtentiPanel: 'Gestión de usuarios',
+    gestioneUtentiPanelHelp:
+      'Aprueba los registros, actualiza los datos o elimina cuentas, asocia los contactos visibles en la agenda.',
+    registrazioniAttesa: 'Registros pendientes',
+    nessunaAttesa: 'Ningún registro pendiente.',
+    utentiAssociati: 'Usuarios y operadores asociados',
+    rivenditoriAssociati: 'Revendedores asociados',
+    eliminaUtente: 'Eliminar usuario',
+    eliminazione: 'Eliminando…',
+    gestioneCataloghi: 'Gestión de catálogos',
+    filtraCataloghi: 'Filtrar catálogos',
+    filtraCataloghiHelp: 'Busca por título de catálogo.',
+    cercaCatalogo: 'Buscar por nombre de catálogo',
+    cerca: 'Buscar',
+    nuovoCatalogo: 'Nuevo catálogo',
+    nuovoCatalogoHelp: 'Carga el PDF del catálogo y define los roles y el estado de publicación.',
+    nuovoCatalogoHelpRu:
+      'Estás monitorizando Rusia: el fichero se guarda en el archivo Rusia. Para el portal oficial elige Italia e indica el idioma del archivo Русский.',
+    cataloghi: 'Catálogos',
+    tutteLingue: 'Todas',
+    linguaCataloghi: 'Idioma de los catálogos',
+    enVedeIt:
+      'La lista English muestra los archivos EN dedicados; si falta la versión EN del mismo título, aparece el PDF italiano. Más adelante las dos listas pueden divergir.',
+    usaPdfItaliano: 'Usa el PDF italiano',
+    cataloghiCondivisiHelp:
+      'Family 15, Family 20, Family Gres, Capsule Collection, Bricks, File 2D, File 3D y los 5 catálogos fotográficos usan el mismo PDF italiano en todos los idiomas, sin duplicar los archivos.',
+    cataloghiPerLinguaHelp:
+      'Tarifas, docs de agentes, merchandising y Power Point se cargan por cada idioma. En Русский y English siguen visibles los catálogos Family con el PDF italiano; las categorías textuales se rellenan cuando cargas el archivo dedicado.',
+    stessoPdfTutteLingue: 'Mismo PDF para todos los idiomas',
+    stessoPdfTutteLingueHelp:
+      'Este catálogo es el mismo para todos los idiomas. Se gestiona desde la pestaña Italiano: no hace falta una copia RU o EN.',
+    caricaEnDedicata:
+      'Para gestionarlo como catálogo English separado, carga un archivo con idioma English y el mismo título desde Nuevo catálogo.',
+    pubblicato: 'Publicado',
+    bozzaNascosto: 'Borrador / Oculto',
+    senzaCategoria: 'Sin categoría',
+    statoVisibilita: 'Estado de visibilidad',
+    salvaStato: 'Guardar estado',
+    aggiornaCopertina: 'Actualizar portada (A4 vertical)',
+    rimuoviCopertina: 'Quitar portada actual',
+    salvaCopertina: 'Guardar portada',
+    chiPuoVedere: 'Quién puede ver este catálogo',
+    salvaVisibilita: 'Guardar visibilidad',
+    eliminaCatalogo: 'Eliminar catálogo (acción irreversible)',
+    eliminaCatalogoBtn: 'Eliminar catálogo',
+    nessunCatalogoMercato: 'Ningún catálogo en este mercado',
+    nessunCatalogoLingua: 'Ningún catálogo en',
+    caricaOppureTutte:
+      'Carga un archivo en este idioma desde Nuevo catálogo, o abre la pestaña Todas.',
+    nessunFileArchivio: 'No hay ficheros en el archivo. Puedes cargar uno desde Nuevo catálogo.',
+    titoloCatalogo: 'Título del catálogo',
+    categoria: 'Categoría',
+    selezionaCategoria: 'Selecciona categoría',
+    stato: 'Estado',
+    bozza: 'Borrador',
+    attivo: 'Activo',
+    creaCatalogo: 'Crear catálogo',
+    caricamento: 'Cargando…',
+    almenoUnRuolo: 'Selecciona al menos un rol.',
+    copertina: 'Portada (imagen A4 vertical, opcional)',
+    russiaEnvHelp:
+      'Versión Rusia: conectar NEXT_PUBLIC_SUPABASE_URL_RU y SUPABASE_SERVICE_ROLE_KEY_RU en Vercel.',
+    configuraRu: 'Configura Supabase RU en las variables de entorno',
+    headingAgenzie: 'Agencias',
+    headingStudi: 'Estudios',
+    nestedManager: 'Agencias / agentes / Back-Office asociados',
+    nestedAgenzia: 'Agentes / Back-Office / revendedores / estudios asociados',
+    nestedAgente: 'Estudios asociados',
+    nestedRivenditore: 'Vendedores / promoter / estudios asociados',
+    nestedDistributore: 'Promoter / estudios asociados',
+    nestedDefault: 'Asociados',
+    tuoiAssociati: 'Tus asociados',
+    strutturaAgenzia: 'Estructura de la agencia',
+    descAgente: 'Los revendedores vinculados a tu perfil y sus asociados.',
+    descBackOffice: 'Los revendedores vinculados a tu perfil y sus asociados.',
+    descRivenditore: 'Los vendedores, promoter y estudios vinculados a tu perfil.',
+    descDistributore: 'Los promoter y los estudios vinculados a tu perfil.',
+    descAgenziaAgent:
+      'Tu agencia: primero los agentes y el Back-Office, luego los revendedores vinculados a la agencia (no bajo un único agente).',
+    descAgenziaOwner:
+      'Los agentes, el Back-Office, los revendedores, los estudios y sus asociados vinculados a tu perfil.',
+    descAssociatiDefault: 'Los asociados vinculados a tu perfil.',
+    nessunAssociatoLivello: 'Ningún asociado en este nivel.',
+    nessunAssociatoProfilo: 'Ningún asociado vinculado a tu perfil.',
+    nessunUtenteRuolo: 'Ningún usuario con rol',
+    nelFiltroCorrente: 'en el filtro actual.',
+    comprimi: 'Comprimir',
+    espandi: 'Expandir',
+    nessunCatalogoCategoria: 'Ningún catálogo en esta categoría.',
+    nessunaImmagine: 'Sin imagen',
+    erroreCaricamento: 'Error al cargar',
+    staiMonitorandoRu:
+      'Estás monitorizando la versión Rusia, cuyo archivo está separado del italiano.',
+    cataloghiItaliaSwitch:
+      'En el mercado Italia hay {n} catálogos: selecciona Italia en el conmutador de arriba para verlos.',
+    selezionaItalia:
+      'Selecciona Italia en el conmutador de arriba para ver los catálogos del portal italiano.',
+    placeholderCatalogo: 'Ej. Family 15',
+    gestioneUtentiPanelHelpAgenzia:
+      'Actualiza expositores y box de los revendedores vinculados a tu agencia. El resto de datos del perfil queda en solo lectura.',
+    listaRivenditoriHelp:
+      'Listado de revendedores vinculados a tu agencia (orden alfabético). Abre un perfil para actualizar expositores y box.',
+    listaUtentiHelp:
+      'Listado filtrado como el Filtro Manager (área). Elige un rol para ver solo esos usuarios (orden alfabético). En cada perfil puedes editar los datos y marcar los contactos de la agenda.',
+    filtraPerRuolo: 'Filtrar usuarios por rol',
+    nessunRivenditoreAgenzia: 'Ningún revendedor vinculado a tu agencia.',
+    nessunUtenteRuoloFiltro: 'Ningún usuario con este rol en el filtro de área actual.',
+    inAttesa: 'pendiente',
+    areaNonDefinita: 'Área no definida',
+    campoNome: 'Nombre completo',
+    campoEmail: 'Email (perfil)',
+    campoTelefono: 'Teléfono',
+    campoSocieta: 'Empresa',
+    campoArea: 'Área geográfica',
+    campoRuolo: 'Rol',
+    placeholderArea: 'Ej. MONDO, Emilia Romagna',
+    placeholderSeguito: 'Ej. nombre del agente o referente',
+    approvaReg: 'Aprobar registro (acceso a catálogos según rol y área)',
+    registrazioneApprovata: 'Registro aprobado',
+    salvaConferma: 'Guardar y confirmar',
+    salvaProfilo: 'Guardar perfil',
+    eliminaConfirm:
+      '¿Eliminar definitivamente este usuario? Se quitarán el perfil, el acceso al portal y los vínculos de la agenda. La operación no se puede deshacer.',
+    profiloSolaLettura: 'Perfil en solo lectura.',
+    visualizzazioneManager: 'Vista en solo lectura (rol Manager).',
+    profiloAdminAccount: 'Perfil admin o tu cuenta: edítalo en Supabase si hace falta.',
+    salvaEspositori: 'Guardar expositores y box',
+    salvaSpecializzazione: 'Guardar especialización',
+    editRivenditoreHelp:
+      'Puedes actualizar expositores y box de este revendedor. El resto de datos del perfil queda en solo lectura.',
+    editAgenziaHelp:
+      'Puedes actualizar herramientas de trabajo del agente, catálogos, expositores y box. El resto de datos del perfil queda en solo lectura.',
+    associaProfilo: 'Asociar perfil',
+    senzaNome: 'Sin nombre',
+    invitaUnUtente: 'Invitar a un usuario',
+    invitaFormHelp:
+      'Genera un enlace de un solo uso. Quien se registre con este enlace obtiene el rol seleccionado y se vincula automáticamente a tu perfil tras la aprobación.',
+    selezionaRuolo: '— Selecciona rol —',
+    generaLink: 'Generar enlace',
+    generazione: 'Generando…',
+    linkPermanente: 'Enlace permanente — puede usarlo más de una persona (no se desactiva)',
+    linkInvito: 'Enlace de invitación',
+    copia: 'Copiar',
+    copiato: '¡Copiado!',
+    linkPermanenteHint: 'Enlace permanente: puede usarlo más de una persona.',
+    linkMonousoHint: 'Enlace de un solo uso: se desactiva tras el primer registro.',
+  },
   fr: {
     versioneMonitorata: 'Version suivie',
     monitoraggioMercato: 'Suivi du marché',
@@ -1567,6 +1763,7 @@ export function tCatalogRole(locale: AppLocale, ruoloKey: string): string {
 
 export function tAssociatiCount(locale: AppLocale, count: number): string {
   if (locale === 'en') return count === 1 ? '1 associate' : `${count} associates`
+  if (locale === 'es') return count === 1 ? '1 asociado' : `${count} asociados`
   if (locale === 'ru') return count === 1 ? '1 связанный' : `${count} связанных`
   if (locale === 'uk') return count === 1 ? '1 пов’язаний' : `${count} пов’язаних`
   if (locale === 'fr') return count === 1 ? '1 associé' : `${count} associés`
@@ -1605,6 +1802,7 @@ export function tNestedAssociati(locale: AppLocale, ruoloKey: string): string | 
 
 export function tCatalogCount(locale: AppLocale, count: number): string {
   if (locale === 'en') return count === 1 ? '1 catalog' : `${count} catalogs`
+  if (locale === 'es') return count === 1 ? '1 catálogo' : `${count} catálogos`
   if (locale === 'ru') return count === 1 ? '1 каталог' : `${count} каталогов`
   if (locale === 'uk') return count === 1 ? '1 каталог' : `${count} каталогів`
   if (locale === 'fr') return count === 1 ? '1 catalogue' : `${count} catalogues`
@@ -1616,6 +1814,7 @@ export function tCatalogCount(locale: AppLocale, count: number): string {
 
 export function tRivenditoriCount(locale: AppLocale, count: number): string {
   if (locale === 'en') return count === 1 ? '1 reseller' : `${count} resellers`
+  if (locale === 'es') return count === 1 ? '1 revendedor' : `${count} revendedores`
   if (locale === 'ru') return count === 1 ? '1 дилер' : `${count} дилеров`
   if (locale === 'uk') return count === 1 ? '1 дилер' : `${count} дилерів`
   if (locale === 'fr') return count === 1 ? '1 revendeur' : `${count} revendeurs`

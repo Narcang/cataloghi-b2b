@@ -6,16 +6,19 @@ const TUTORIAL_FILES: Record<TutorialKind, Partial<Record<AppLocale, string>>> =
   agenzia: {
     it: '/tutorial/tutorial-agenzia-it.pdf',
     en: '/tutorial/tutorial-agenzia-en.pdf',
+    es: '/tutorial/tutorial-agenzia-es.pdf',
     el: '/tutorial/tutorial-agenzia-el.pdf',
   },
   rivenditori: {
     it: '/tutorial/tutorial-rivenditori-it.pdf',
     en: '/tutorial/tutorial-rivenditori-en.pdf',
+    es: '/tutorial/tutorial-rivenditori-es.pdf',
     el: '/tutorial/tutorial-rivenditori-el.pdf',
   },
   studio: {
     it: '/tutorial/tutorial-studio-it.pdf',
     en: '/tutorial/tutorial-studio-en.pdf',
+    es: '/tutorial/tutorial-studio-es.pdf',
     el: '/tutorial/tutorial-studio-el.pdf',
   },
 }
