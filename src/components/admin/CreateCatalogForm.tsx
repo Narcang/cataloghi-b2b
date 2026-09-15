@@ -29,22 +29,34 @@ import { useAppLocale } from '@/lib/useAppLocale'
 type Props = {
   categories: readonly CatalogCategory[]
   defaultLingua?: CatalogLocale
+  initialLocale?: CatalogLocale
   mercato?: Mercato
+}
+
+function linguaDaInterfaccia(
+  defaultLingua: CatalogLocale | undefined,
+  uiLocale: CatalogLocale,
+): CatalogLocale {
+  if (defaultLingua) return defaultLingua
+  return isCatalogLocale(uiLocale) ? uiLocale : 'it'
 }
 
 export default function CreateCatalogForm({
   categories,
   defaultLingua,
+  initialLocale,
   mercato = 'it',
 }: Props) {
   const router = useRouter()
-  const uiLocale = useAppLocale()
+  const uiLocale = useAppLocale(initialLocale)
   const copy = tCatalogAdmin(uiLocale)
   const adminCopy = tAdmin(uiLocale)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [categoriaSelezionata, setCategoriaSelezionata] = useState('')
-  const [linguaSelezionata, setLinguaSelezionata] = useState<CatalogLocale>(defaultLingua ?? 'it')
+  const [linguaSelezionata, setLinguaSelezionata] = useState<CatalogLocale>(
+    linguaDaInterfaccia(defaultLingua, initialLocale ?? 'it'),
+  )
   const [ruoliSelezionati, setRuoliSelezionati] = useState<RuoloCatalogo[]>(RUOLI_CATALOGO_DEFAULT)
 
   const sharedAcrossLanguages = isLanguageSharedCategory(categoriaSelezionata)
@@ -55,7 +67,7 @@ export default function CreateCatalogForm({
       setLinguaSelezionata('it')
       return
     }
-    setLinguaSelezionata(defaultLingua ?? (isCatalogLocale(uiLocale) ? uiLocale : 'it'))
+    setLinguaSelezionata(linguaDaInterfaccia(defaultLingua, uiLocale))
   }, [defaultLingua, uiLocale, categoriaSelezionata])
 
   const isZipCategory = isZipDownloadCategory(categoriaSelezionata)

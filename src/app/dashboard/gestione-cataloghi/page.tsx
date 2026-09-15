@@ -2,8 +2,10 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
+import { Suspense } from 'react'
 import { FileText, ArrowLeft } from 'lucide-react'
 import Header from '@/components/Header'
+import CatalogLinguaQuerySync from '@/components/admin/CatalogLinguaQuerySync'
 import CreateCatalogForm from '@/components/admin/CreateCatalogForm'
 import {
   CATALOG_CATEGORIES_FOR_UPLOAD,
@@ -55,6 +57,7 @@ export default async function GestioneCataloghiPage(props: {
   const uiLocale = await getAppLocale()
   const copy = tAdmin(uiLocale)
   const linguaTabRaw = (searchParams?.lingua ?? '').trim()
+  const linguaTabExplicit = linguaTabRaw === 'all' || isAppLocale(linguaTabRaw)
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -73,14 +76,13 @@ export default async function GestioneCataloghiPage(props: {
 
   if (!isManager) redirect('/dashboard')
 
-  const linguaTab: AppLocale | 'all' =
-    linguaTabRaw === 'all' || isAppLocale(linguaTabRaw)
+  const linguaTab: AppLocale | 'all' = linguaTabExplicit
+    ? linguaTabRaw
+    : defaultCatalogTab(uiLocale)
+  const formDefaultLingua: CatalogLocale | undefined =
+    linguaTabExplicit && linguaTabRaw !== 'all' && isCatalogLocale(linguaTabRaw)
       ? linguaTabRaw
-      : defaultCatalogTab(uiLocale)
-  const formDefaultLingua: CatalogLocale =
-    linguaTab !== 'all' && isCatalogLocale(linguaTab)
-      ? linguaTab
-      : defaultCatalogTab(uiLocale)
+      : undefined
 
   // Fetch cataloghi (admin/manager vedono anche le bozze)
   let cataloghiQuery = supabase
@@ -122,6 +124,9 @@ export default async function GestioneCataloghiPage(props: {
   return (
     <div className="ladiva-root ladiva-root-app-dark min-h-screen flex flex-col">
       <Header />
+      <Suspense fallback={null}>
+        <CatalogLinguaQuerySync />
+      </Suspense>
 
       <main className="flex-1 max-w-[1200px] w-full mx-auto p-6 md:p-10 space-y-12">
 
@@ -183,6 +188,7 @@ export default async function GestioneCataloghiPage(props: {
             <CreateCatalogForm
               categories={CATALOG_CATEGORIES_FOR_UPLOAD}
               defaultLingua={formDefaultLingua}
+              initialLocale={uiLocale}
             />
           </section>
         )}
