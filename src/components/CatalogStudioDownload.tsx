@@ -1,6 +1,7 @@
 'use client'
 
 import { Download, FileArchive } from 'lucide-react'
+import { MAX_CATALOG_STUDIO_ZIP_BYTES } from '@/lib/catalogUploadLimits'
 
 type CatalogStudioDownloadProps = {
   catalogoId: string
@@ -17,7 +18,8 @@ export default function CatalogStudioDownload({ catalogoId, titolo }: CatalogStu
       </div>
       <h2 className="mb-2 text-xl font-semibold text-zinc-900">{titolo}</h2>
       <p className="mb-8 max-w-md text-sm text-zinc-600">
-        Pacchetto riservato alla linea Studio (archivio ZIP, max 15 MB). Scarica il file sul tuo dispositivo per
+        Pacchetto riservato alla linea Studio (archivio ZIP, max{' '}
+        {MAX_CATALOG_STUDIO_ZIP_BYTES / (1024 * 1024)} MB). Scarica il file sul tuo dispositivo per
         consultarlo offline.
       </p>
       <a
