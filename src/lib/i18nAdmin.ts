@@ -79,6 +79,19 @@ const ruolo: Record<AppLocale, Record<string, string>> = {
     studio: 'Studio',
     free: 'Free',
   },
+  nl: {
+    all: 'Alle rollen',
+    admin: 'Admin',
+    manager: 'Manager',
+    agenzia: 'Agentschap',
+    agente: 'Agent',
+    back_office: 'Back-Office',
+    rivenditore: 'Wederverkopers',
+    distributore: 'Verkopers',
+    partner_dipendente: 'Promoter',
+    studio: 'Studio',
+    free: 'Free',
+  },
   el: {
     all: 'Όλοι οι ρόλοι',
     admin: 'Admin',
@@ -185,6 +198,17 @@ const catalogRole: Record<AppLocale, Record<string, string>> = {
     agente: 'Agent',
     back_office: 'Back-Office',
     agenzia: 'Agentur',
+    manager: 'Manager',
+  },
+  nl: {
+    free: 'Openbaar (gasten / Free)',
+    studio: 'Studio',
+    partner_dipendente: 'Promoter',
+    distributore: 'Verkopers',
+    rivenditore: 'Wederverkopers',
+    agente: 'Agent',
+    back_office: 'Back-Office',
+    agenzia: 'Agentschap',
     manager: 'Manager',
   },
   el: {
@@ -1242,6 +1266,178 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     linkPermanenteHint: 'Dauerlink: mehrere Personen können ihn nutzen.',
     linkMonousoHint: 'Einmal-Link: nach der ersten Registrierung deaktiviert.',
   },
+  nl: {
+    versioneMonitorata: 'Bewaakte versie',
+    monitoraggioMercato: 'Marktmonitoring',
+    italia: 'Italië',
+    russia: 'Rusland',
+    english: 'English',
+    caricaMercato: 'Markt kon niet worden geladen',
+    salvaMercato: 'Opslaan mislukt',
+    gestioneUtenti: 'Gebruikersbeheer',
+    gestioneRivenditori: 'Beheer van wederverkopers',
+    gestioneRivenditoriHelp: 'Werk displays en boxen bij van de wederverkopers die aan uw agentschap zijn gekoppeld.',
+    filtraUtenti: 'Gebruikers filteren',
+    filtraUtentiHelp: 'Filter op rol en/of naam.',
+    cercaNome: 'Zoeken op naam',
+    placeholderNome: 'Bijv. Fabio',
+    applica: 'Toepassen',
+    struttura: 'Organisatiestructuur',
+    strutturaHelp: 'Kies de startrol en klik op een profiel om de gekoppelden in cascade te openen.',
+    filtraStruttura: 'Structuur filteren op rol',
+    areaNonIndicata: 'Gebied niet opgegeven',
+    utenteSenzaNome: 'Gebruiker zonder naam',
+    seguitoDa: 'Gevolgd door',
+    invitaUtenti: 'Gebruikers uitnodigen',
+    invitaHelp:
+      'Genereer een registratielink voor de gekozen rol. De nieuwe gebruiker wordt na goedkeuring aan uw profiel gekoppeld.',
+    gestioneUtentiPanel: 'Gebruikersbeheer',
+    gestioneUtentiPanelHelp:
+      'Keur registraties goed, werk gegevens bij of verwijder accounts, en koppel contacten die in het adresboek zichtbaar zijn.',
+    registrazioniAttesa: 'Registraties in afwachting',
+    nessunaAttesa: 'Geen registraties in afwachting.',
+    utentiAssociati: 'Gekoppelde gebruikers en operators',
+    rivenditoriAssociati: 'Gekoppelde wederverkopers',
+    eliminaUtente: 'Gebruiker verwijderen',
+    eliminazione: 'Verwijderen…',
+    gestioneCataloghi: 'Catalogusbeheer',
+    filtraCataloghi: 'Catalogi filteren',
+    filtraCataloghiHelp: 'Zoek op catalogustitel.',
+    cercaCatalogo: 'Zoeken op catalogusnaam',
+    cerca: 'Zoeken',
+    nuovoCatalogo: 'Nieuwe catalogus',
+    nuovoCatalogoHelp: 'Upload de PDF van de catalogus en stel de rollen en de publicatiestatus in.',
+    nuovoCatalogoHelpRu:
+      'U bewaakt Rusland: het bestand wordt in het Rusland-archief opgeslagen. Voor de officiële site kiest u Italië en zet u de bestandstaal op Русский.',
+    cataloghi: 'Catalogi',
+    tutteLingue: 'Alle',
+    linguaCataloghi: 'Catalogustaal',
+    enVedeIt:
+      'De lijst English toont de aparte EN-bestanden; ontbreekt de EN-versie van dezelfde titel, dan verschijnt de Italiaanse PDF. De twee lijsten kunnen later uiteenlopen.',
+    usaPdfItaliano: 'Gebruikt de Italiaanse PDF',
+    cataloghiCondivisiHelp:
+      'Family 15, Family 20, Family Gres, Capsule Collection, Bricks, File 2D, File 3D en de 5 fotocatalogi gebruiken in alle talen dezelfde Italiaanse PDF, zonder bestanden te dupliceren.',
+    cataloghiPerLinguaHelp:
+      'Prijslijsten, agentdocs, merchandising en Power Point worden per taal geüpload. In Русский en English blijven de Family-catalogi zichtbaar met de Italiaanse PDF; de tekstcategorieën vullen zich wanneer u het aparte bestand uploadt.',
+    stessoPdfTutteLingue: 'Zelfde PDF voor alle talen',
+    stessoPdfTutteLingueHelp:
+      'Deze catalogus is hetzelfde voor alle talen. U beheert hem vanaf het tabblad Italiano: een aparte RU- of EN-kopie is niet nodig.',
+    caricaEnDedicata:
+      'Om hem als aparte English-catalogus te beheren, uploadt u vanuit Nieuwe catalogus een bestand met taal English en dezelfde titel.',
+    pubblicato: 'Gepubliceerd',
+    bozzaNascosto: 'Concept / Verborgen',
+    senzaCategoria: 'Geen categorie',
+    statoVisibilita: 'Zichtbaarheidsstatus',
+    salvaStato: 'Status opslaan',
+    aggiornaCopertina: 'Omslag bijwerken (A4 staand)',
+    rimuoviCopertina: 'Huidige omslag verwijderen',
+    salvaCopertina: 'Omslag opslaan',
+    chiPuoVedere: 'Wie deze catalogus mag zien',
+    salvaVisibilita: 'Zichtbaarheid opslaan',
+    eliminaCatalogo: 'Catalogus verwijderen (kan niet ongedaan worden gemaakt)',
+    eliminaCatalogoBtn: 'Catalogus verwijderen',
+    nessunCatalogoMercato: 'Geen catalogi op deze markt',
+    nessunCatalogoLingua: 'Geen catalogi in',
+    caricaOppureTutte:
+      'Upload een bestand in deze taal via Nieuwe catalogus, of open het tabblad Alle.',
+    nessunFileArchivio: 'Er staan geen bestanden in het archief. U kunt er een uploaden via Nieuwe catalogus.',
+    titoloCatalogo: 'Catalogustitel',
+    categoria: 'Categorie',
+    selezionaCategoria: 'Selecteer categorie',
+    stato: 'Status',
+    bozza: 'Concept',
+    attivo: 'Actief',
+    creaCatalogo: 'Catalogus aanmaken',
+    caricamento: 'Uploaden…',
+    almenoUnRuolo: 'Selecteer minstens één rol.',
+    copertina: 'Omslag (A4-staand beeld, optioneel)',
+    russiaEnvHelp:
+      'Rusland-versie: stel NEXT_PUBLIC_SUPABASE_URL_RU en SUPABASE_SERVICE_ROLE_KEY_RU in op Vercel.',
+    configuraRu: 'Configureer Supabase RU in de omgevingsvariabelen',
+    headingAgenzie: 'Agentschappen',
+    headingStudi: 'Studio’s',
+    nestedManager: 'Gekoppelde agentschappen / agenten / Back-Office',
+    nestedAgenzia: 'Gekoppelde agenten / Back-Office / wederverkopers / studio’s',
+    nestedAgente: 'Gekoppelde studio’s',
+    nestedRivenditore: 'Gekoppelde verkopers / promoters / studio’s',
+    nestedDistributore: 'Gekoppelde promoters / studio’s',
+    nestedDefault: 'Gekoppelden',
+    tuoiAssociati: 'Uw gekoppelden',
+    strutturaAgenzia: 'Agentschapstructuur',
+    descAgente: 'De wederverkopers die aan uw profiel zijn gekoppeld en hun gekoppelden.',
+    descBackOffice: 'De wederverkopers die aan uw profiel zijn gekoppeld en hun gekoppelden.',
+    descRivenditore: 'De verkopers, promoters en studio’s die aan uw profiel zijn gekoppeld.',
+    descDistributore: 'De promoters en studio’s die aan uw profiel zijn gekoppeld.',
+    descAgenziaAgent:
+      'Uw agentschap: eerst de agenten en het Back-Office, daarna de wederverkopers van het agentschap (niet onder één enkele agent).',
+    descAgenziaOwner:
+      'De agenten, het Back-Office, de wederverkopers, de studio’s en hun gekoppelden die aan uw profiel zijn gekoppeld.',
+    descAssociatiDefault: 'De gekoppelden die aan uw profiel zijn gekoppeld.',
+    nessunAssociatoLivello: 'Geen gekoppelden op dit niveau.',
+    nessunAssociatoProfilo: 'Geen gekoppelden aan uw profiel.',
+    nessunUtenteRuolo: 'Geen gebruikers met rol',
+    nelFiltroCorrente: 'in het huidige filter.',
+    comprimi: 'Inklappen',
+    espandi: 'Uitklappen',
+    nessunCatalogoCategoria: 'Geen catalogi in deze categorie.',
+    nessunaImmagine: 'Geen afbeelding',
+    erroreCaricamento: 'Fout bij het laden',
+    staiMonitorandoRu:
+      'U bewaakt de Rusland-versie, waarvan het archief gescheiden is van het Italiaanse.',
+    cataloghiItaliaSwitch:
+      'Op de markt Italië staan {n} catalogi: selecteer Italië in de schakelaar hierboven om ze te zien.',
+    selezionaItalia:
+      'Selecteer Italië in de schakelaar hierboven om de catalogi van het Italiaanse portaal te zien.',
+    placeholderCatalogo: 'Bijv. Family 15',
+    gestioneUtentiPanelHelpAgenzia:
+      'Werk displays en boxen bij van de wederverkopers die aan uw agentschap zijn gekoppeld. De overige profielgegevens blijven alleen-lezen.',
+    listaRivenditoriHelp:
+      'Lijst van wederverkopers die aan uw agentschap zijn gekoppeld (alfabetisch). Open een profiel om displays en boxen bij te werken.',
+    listaUtentiHelp:
+      'Gefilterd zoals het Manager-filter (gebied). Kies een rol om alleen die gebruikers te zien (alfabetisch). Per profiel kunt u gegevens wijzigen en adresboekcontacten aanvinken.',
+    filtraPerRuolo: 'Gebruikers filteren op rol',
+    nessunRivenditoreAgenzia: 'Geen wederverkopers gekoppeld aan uw agentschap.',
+    nessunUtenteRuoloFiltro: 'Geen gebruikers met deze rol in het huidige gebiedsfilter.',
+    inAttesa: 'in afwachting',
+    areaNonDefinita: 'Gebied niet gedefinieerd',
+    campoNome: 'Volledige naam',
+    campoEmail: 'E-mail (profiel)',
+    campoTelefono: 'Telefoon',
+    campoSocieta: 'Bedrijf',
+    campoArea: 'Geografisch gebied',
+    campoRuolo: 'Rol',
+    placeholderArea: 'Bijv. MONDO, Emilia Romagna',
+    placeholderSeguito: 'Bijv. naam van de agent of het aanspreekpunt',
+    approvaReg: 'Registratie goedkeuren (catalogustoegang volgens rol en gebied)',
+    registrazioneApprovata: 'Registratie goedgekeurd',
+    salvaConferma: 'Opslaan en bevestigen',
+    salvaProfilo: 'Profiel opslaan',
+    eliminaConfirm:
+      'Deze gebruiker definitief verwijderen? Profiel, portaaltoegang en adresboekkoppelingen worden verwijderd. Dit kan niet ongedaan worden gemaakt.',
+    profiloSolaLettura: 'Profiel alleen-lezen.',
+    visualizzazioneManager: 'Alleen-lezenweergave (rol Manager).',
+    profiloAdminAccount: 'Admin-profiel of uw eigen account: wijzig indien nodig in Supabase.',
+    salvaEspositori: 'Displays en boxen opslaan',
+    salvaSpecializzazione: 'Specialisatie opslaan',
+    editRivenditoreHelp:
+      'U kunt displays en boxen van deze wederverkoper bijwerken. De overige profielgegevens blijven alleen-lezen.',
+    editAgenziaHelp:
+      'U kunt agenttools, catalogi, displays en boxen bijwerken. De overige profielgegevens blijven alleen-lezen.',
+    associaProfilo: 'Profiel koppelen',
+    senzaNome: 'Zonder naam',
+    invitaUnUtente: 'Een gebruiker uitnodigen',
+    invitaFormHelp:
+      'Genereer een eenmalige link. Wie zich via deze link registreert, krijgt de geselecteerde rol en wordt na goedkeuring automatisch aan uw profiel gekoppeld.',
+    selezionaRuolo: '— Selecteer rol —',
+    generaLink: 'Link genereren',
+    generazione: 'Genereren…',
+    linkPermanente: 'Permanente link — kan door meerdere personen worden gebruikt (wordt niet uitgeschakeld)',
+    linkInvito: 'Uitnodigingslink',
+    copia: 'Kopiëren',
+    copiato: 'Gekopieerd!',
+    linkPermanenteHint: 'Permanente link: kan door meerdere personen worden gebruikt.',
+    linkMonousoHint: 'Eenmalige link: wordt uitgeschakeld na de eerste registratie.',
+  },
   el: {
     versioneMonitorata: 'Παρακολουθούμενη έκδοση',
     monitoraggioMercato: 'Παρακολούθηση αγοράς',
@@ -1768,6 +1964,7 @@ export function tAssociatiCount(locale: AppLocale, count: number): string {
   if (locale === 'uk') return count === 1 ? '1 пов’язаний' : `${count} пов’язаних`
   if (locale === 'fr') return count === 1 ? '1 associé' : `${count} associés`
   if (locale === 'de') return count === 1 ? '1 Zugeordneter' : `${count} Zugeordnete`
+  if (locale === 'nl') return count === 1 ? '1 gekoppelde' : `${count} gekoppelden`
   if (locale === 'el') return count === 1 ? '1 συνδεδεμένος' : `${count} συνδεδεμένοι`
   if (locale === 'pl') return count === 1 ? '1 powiązany' : `${count} powiązanych`
   return count === 1 ? '1 associato' : `${count} associati`
@@ -1807,6 +2004,7 @@ export function tCatalogCount(locale: AppLocale, count: number): string {
   if (locale === 'uk') return count === 1 ? '1 каталог' : `${count} каталогів`
   if (locale === 'fr') return count === 1 ? '1 catalogue' : `${count} catalogues`
   if (locale === 'de') return count === 1 ? '1 Katalog' : `${count} Kataloge`
+  if (locale === 'nl') return count === 1 ? '1 catalogus' : `${count} catalogi`
   if (locale === 'el') return count === 1 ? '1 κατάλογος' : `${count} κατάλογοι`
   if (locale === 'pl') return count === 1 ? '1 katalog' : `${count} katalogów`
   return count === 1 ? '1 catalogo' : `${count} cataloghi`
@@ -1819,6 +2017,7 @@ export function tRivenditoriCount(locale: AppLocale, count: number): string {
   if (locale === 'uk') return count === 1 ? '1 дилер' : `${count} дилерів`
   if (locale === 'fr') return count === 1 ? '1 revendeur' : `${count} revendeurs`
   if (locale === 'de') return count === 1 ? '1 Händler' : `${count} Händler`
+  if (locale === 'nl') return count === 1 ? '1 wederverkoper' : `${count} wederverkopers`
   if (locale === 'el') return count === 1 ? '1 μεταπωλητής' : `${count} μεταπωλητές`
   if (locale === 'pl') return count === 1 ? '1 dystrybutor' : `${count} dystrybutorów`
   return count === 1 ? '1 rivenditore' : `${count} rivenditori`

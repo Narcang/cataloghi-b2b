@@ -20,4 +20,4 @@ ALTER TABLE public.cataloghi
 
 ALTER TABLE public.cataloghi
   ADD CONSTRAINT cataloghi_lingua_check
-  CHECK (lingua IN ('it', 'ru', 'en', 'fr', 'de', 'el', 'pl', 'uk'));
+  CHECK (lingua IN ('it', 'ru', 'en', 'es', 'fr', 'de', 'nl', 'el', 'pl', 'uk'));
