@@ -273,52 +273,37 @@
   stroke: #000 !important;
 }
 
-/* Switcher lingua in header: stessa altezza del box Area riservata, una sola riga */
+/* Switcher lingua in header: menu a tendina, stessa altezza di Menu / Area riservata */
 .ladiva-locale-switch {
-  display: inline-flex;
-  flex-wrap: nowrap;
-  align-items: stretch;
   flex-shrink: 0;
-  overflow: hidden;
+}
+
+.ladiva-locale-switch-trigger {
   min-height: 2.375rem;
-  border-radius: 0.5rem;
-  border: 1px solid rgba(0, 0, 0, 0.35);
-  background: #fff;
-}
-
-.ladiva-locale-switch-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  padding: 0 0.42rem;
-  font-size: 0.75rem;
+  padding: 0.45rem 0.75rem;
+  letter-spacing: 0.06em;
   font-weight: 600;
-  letter-spacing: 0.04em;
-  line-height: 1;
-  text-transform: uppercase;
   white-space: nowrap;
-  border: 0;
-  background: #fff;
-  color: #000;
 }
 
-.ladiva-locale-switch-btn-inactive,
-.ladiva-root-app-dark .ladiva-locale-switch-btn-inactive {
-  background-color: #fff !important;
-  color: #000 !important;
+.ladiva-locale-switch-menu {
+  min-width: 12.5rem;
+  z-index: 120;
 }
 
-.ladiva-locale-switch-btn-inactive:hover,
-.ladiva-root-app-dark .ladiva-locale-switch-btn-inactive:hover {
-  background-color: #f4f4f5 !important;
-  color: #000 !important;
+.ladiva-locale-switch-code {
+  display: inline-flex;
+  min-width: 1.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #060d41;
 }
 
-.ladiva-locale-switch-btn-active,
-.ladiva-root-app-dark .ladiva-locale-switch-btn-active {
-  background-color: #060d41 !important;
-  color: #fff !important;
+.ladiva-locale-switch-item-active {
+  background: rgba(6, 13, 65, 0.08);
+  color: #060d41;
+  font-weight: 600;
 }
 
 /* Dashboard dark: testi leggermente più grandi (area riservata / manager) */
@@ -774,7 +759,7 @@
     padding: 0.35rem 0.7rem;
     white-space: nowrap;
   }
-  .ladiva-locale-switch,
+  .ladiva-locale-switch-trigger,
   .ladiva-account-trigger-row {
     min-height: 40px;
   }

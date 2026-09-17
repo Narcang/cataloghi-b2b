@@ -336,9 +336,6 @@ export default function Header() {
             <Download size={18} />
             {labels.installa}
           </button>
-          <div className="px-4 py-3">
-            <LocaleSwitcher />
-          </div>
         </div>
       )}
     </header>

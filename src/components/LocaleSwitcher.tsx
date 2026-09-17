@@ -1,14 +1,19 @@
 'use client'
 
-import { CHOOSER_LOCALES, LOCALE_SHORT, type AppLocale } from '@/lib/locale'
+import { useEffect, useRef, useState } from 'react'
+import { ChevronDown } from 'lucide-react'
+import { CHOOSER_LOCALES, LOCALE_LABEL, LOCALE_SHORT, type AppLocale } from '@/lib/locale'
 import { tHeader } from '@/lib/i18n'
 import { useAppLocale } from '@/lib/useAppLocale'
 
 export default function LocaleSwitcher() {
   const locale = useAppLocale()
   const labels = tHeader(locale)
+  const [open, setOpen] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
 
   async function scegli(next: AppLocale) {
+    setOpen(false)
     if (next === locale) return
     await fetch('/api/locale', {
       method: 'POST',
@@ -25,25 +30,56 @@ export default function LocaleSwitcher() {
     window.location.reload()
   }
 
+  useEffect(() => {
+    function handlePointer(e: MouseEvent) {
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('mousedown', handlePointer)
+    document.addEventListener('keydown', handleKey)
+    return () => {
+      document.removeEventListener('mousedown', handlePointer)
+      document.removeEventListener('keydown', handleKey)
+    }
+  }, [])
+
   return (
-    <div
-      className="ladiva-locale-switch"
-      role="group"
-      aria-label={labels.lingua}
-    >
-      {CHOOSER_LOCALES.map((key) => {
-        const active = locale === key
-        return (
-          <button
-            key={key}
-            type="button"
-            onClick={() => void scegli(key)}
-            className={`ladiva-locale-switch-btn cursor-pointer${active ? ' ladiva-locale-switch-btn-active' : ' ladiva-locale-switch-btn-inactive'}`}
-          >
-            {LOCALE_SHORT[key]}
-          </button>
-        )
-      })}
+    <div className="ladiva-dropdown ladiva-locale-switch" ref={rootRef}>
+      <button
+        type="button"
+        className="ladiva-dropdown-trigger ladiva-locale-switch-trigger"
+        onClick={() => setOpen((value) => !value)}
+        aria-expanded={open}
+        aria-haspopup="listbox"
+        aria-label={labels.lingua}
+      >
+        {LOCALE_SHORT[locale]}
+        <ChevronDown size={16} className={`ladiva-chevron ${open ? 'open' : ''}`} />
+      </button>
+      {open ? (
+        <div className="ladiva-dropdown-menu ladiva-locale-switch-menu" role="listbox" aria-label={labels.lingua}>
+          {CHOOSER_LOCALES.map((key) => {
+            const active = locale === key
+            return (
+              <button
+                key={key}
+                type="button"
+                role="option"
+                aria-selected={active}
+                className={`ladiva-dropdown-item w-full text-left${active ? ' ladiva-locale-switch-item-active' : ''}`}
+                onClick={() => void scegli(key)}
+              >
+                <span className="ladiva-locale-switch-code">{LOCALE_SHORT[key]}</span>
+                {LOCALE_LABEL[key]}
+              </button>
+            )
+          })}
+        </div>
+      ) : null}
     </div>
   )
 }
