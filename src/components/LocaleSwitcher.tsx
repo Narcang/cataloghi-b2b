@@ -27,10 +27,9 @@ export default function LocaleSwitcher() {
 
   return (
     <div
-      className="ladiva-locale-switch inline-flex flex-wrap rounded-lg overflow-hidden max-w-[min(100%,22rem)]"
+      className="ladiva-locale-switch"
       role="group"
       aria-label={labels.lingua}
-      style={{ backgroundColor: '#fff', border: '1px solid rgba(0, 0, 0, 0.2)' }}
     >
       {CHOOSER_LOCALES.map((key) => {
         const active = locale === key
@@ -39,12 +38,7 @@ export default function LocaleSwitcher() {
             key={key}
             type="button"
             onClick={() => void scegli(key)}
-            className="ladiva-locale-switch-btn cursor-pointer px-2.5 py-1 text-xs font-semibold uppercase tracking-wide"
-            style={
-              active
-                ? { backgroundColor: '#060d41', color: '#fff' }
-                : { backgroundColor: '#fff', color: '#000' }
-            }
+            className={`ladiva-locale-switch-btn cursor-pointer${active ? ' ladiva-locale-switch-btn-active' : ' ladiva-locale-switch-btn-inactive'}`}
           >
             {LOCALE_SHORT[key]}
           </button>
