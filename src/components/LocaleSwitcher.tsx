@@ -47,19 +47,34 @@ export default function LocaleSwitcher() {
     }
   }, [])
 
+  function toggle() {
+    setOpen((value) => !value)
+  }
+
   return (
     <div className="ladiva-dropdown ladiva-locale-switch" ref={rootRef}>
-      <button
-        type="button"
-        className="ladiva-dropdown-trigger ladiva-locale-switch-trigger"
-        onClick={() => setOpen((value) => !value)}
-        aria-expanded={open}
-        aria-haspopup="listbox"
-        aria-label={labels.lingua}
-      >
-        {LOCALE_SHORT[locale]}
-        <ChevronDown size={16} className={`ladiva-chevron ${open ? 'open' : ''}`} />
-      </button>
+      <div className="ladiva-account-trigger-row">
+        <button
+          type="button"
+          className="ladiva-split-trigger-label ladiva-locale-switch-label"
+          onClick={toggle}
+          aria-expanded={open}
+          aria-haspopup="listbox"
+          aria-label={labels.lingua}
+        >
+          {LOCALE_SHORT[locale]}
+        </button>
+        <button
+          type="button"
+          className="ladiva-account-chevron-btn"
+          onClick={toggle}
+          aria-expanded={open}
+          aria-haspopup="listbox"
+          aria-label={labels.lingua}
+        >
+          <ChevronDown size={16} className={`ladiva-chevron ${open ? 'open' : ''}`} />
+        </button>
+      </div>
       {open ? (
         <div className="ladiva-dropdown-menu ladiva-locale-switch-menu" role="listbox" aria-label={labels.lingua}>
           {CHOOSER_LOCALES.map((key) => {

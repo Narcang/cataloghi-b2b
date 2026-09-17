@@ -189,16 +189,33 @@ export default function Header() {
           {/* Desktop Nav */}
           <nav className="ladiva-nav-desktop">
             <div className="ladiva-dropdown" ref={dropdownRef}>
-              <button
-                className="ladiva-dropdown-trigger"
-                onClick={() => {
-                  setDropdownOpen(!dropdownOpen)
-                  setAccountMenuOpen(false)
-                }}
-                aria-expanded={dropdownOpen}
-              >
-                {labels.menu} <ChevronDown size={16} className={`ladiva-chevron ${dropdownOpen ? 'open' : ''}`} />
-              </button>
+              <div className="ladiva-account-trigger-row">
+                <button
+                  type="button"
+                  className="ladiva-split-trigger-label"
+                  onClick={() => {
+                    setDropdownOpen(!dropdownOpen)
+                    setAccountMenuOpen(false)
+                  }}
+                  aria-expanded={dropdownOpen}
+                  aria-haspopup="menu"
+                >
+                  {labels.menu}
+                </button>
+                <button
+                  type="button"
+                  className="ladiva-account-chevron-btn"
+                  onClick={() => {
+                    setDropdownOpen(!dropdownOpen)
+                    setAccountMenuOpen(false)
+                  }}
+                  aria-expanded={dropdownOpen}
+                  aria-haspopup="menu"
+                  aria-label={labels.menu}
+                >
+                  <ChevronDown size={16} className={`ladiva-chevron ${dropdownOpen ? 'open' : ''}`} />
+                </button>
+              </div>
 
               {dropdownOpen && (
                 <div className="ladiva-dropdown-menu">
