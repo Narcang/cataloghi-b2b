@@ -661,6 +661,34 @@ function hasDirectedParentChildLink(
   return false
 }
 
+/** Invito o rubrica, senza passare dalla risoluzione agenzia. */
+function isLinkedByInviteOrRubrica(
+  parentId: string,
+  parentRole: string,
+  child: ProfiloGerarchiaRow,
+  links: OperatoreLink[],
+): boolean {
+  if (child.invitato_da === parentId) return true
+  if (hasDirectedParentChildLink(parentId, child.id, parentRole, child.ruolo, links)) return true
+  if (links.some((l) => l.utente_id === child.id && l.operatore_id === parentId)) return true
+  return false
+}
+
+function managerShouldShowAgenzia(
+  managerId: string,
+  managerRole: string,
+  agenzia: ProfiloGerarchiaRow,
+  profili: ProfiloGerarchiaRow[],
+  links: OperatoreLink[],
+): boolean {
+  if (isLinkedByInviteOrRubrica(managerId, managerRole, agenzia, links)) return true
+  return profili.some((p) => {
+    if (!isProfiloVisibileInGerarchia(p) || !isAgenteLike(p.ruolo)) return false
+    if (!isLinkedByInviteOrRubrica(managerId, managerRole, p, links)) return false
+    return resolveAgenziaParentForAgent(p, profili, links)?.id === agenzia.id
+  })
+}
+
 function isDirectChild(
   parentId: string,
   parentProfile: ProfiloGerarchiaRow,
@@ -671,6 +699,13 @@ function isDirectChild(
   const expectedRoles = CHILD_ROLES_BY_PARENT[parentProfile.ruolo] ?? []
   if (!expectedRoles.includes(child.ruolo)) return false
   if (isAgenteLike(parentProfile.ruolo) && child.ruolo === 'rivenditore') return false
+  // Manager: se l'agente ha un'agenzia, mostra l'agenzia (non l'agente sciolto).
+  if (parentProfile.ruolo === 'manager' && isAgenteLike(child.ruolo)) {
+    if (resolveAgenziaParentForAgent(child, profili, links)) return false
+  }
+  if (parentProfile.ruolo === 'manager' && child.ruolo === 'agenzia') {
+    return managerShouldShowAgenzia(parentId, parentProfile.ruolo, child, profili, links)
+  }
   if (parentProfile.ruolo === 'agenzia' && isAgenteLike(child.ruolo)) {
     const agenzia = resolveAgenziaParentForAgent(child, profili, links)
     if (agenzia?.id === parentId) return true
