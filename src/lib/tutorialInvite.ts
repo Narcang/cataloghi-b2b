@@ -9,6 +9,7 @@ const TUTORIAL_FILES: Record<TutorialKind, Partial<Record<AppLocale, string>>> =
     es: '/tutorial/tutorial-agenzia-es.pdf',
     fr: '/tutorial/tutorial-agenzia-fr.pdf',
     el: '/tutorial/tutorial-agenzia-el.pdf',
+    nl: '/tutorial/tutorial-agenzia-nl.pdf',
   },
   rivenditori: {
     it: '/tutorial/tutorial-rivenditori-it.pdf',
@@ -16,6 +17,7 @@ const TUTORIAL_FILES: Record<TutorialKind, Partial<Record<AppLocale, string>>> =
     es: '/tutorial/tutorial-rivenditori-es.pdf',
     fr: '/tutorial/tutorial-rivenditori-fr.pdf',
     el: '/tutorial/tutorial-rivenditori-el.pdf',
+    nl: '/tutorial/tutorial-rivenditori-nl.pdf',
   },
   studio: {
     it: '/tutorial/tutorial-studio-it.pdf',
@@ -23,6 +25,7 @@ const TUTORIAL_FILES: Record<TutorialKind, Partial<Record<AppLocale, string>>> =
     es: '/tutorial/tutorial-studio-es.pdf',
     fr: '/tutorial/tutorial-studio-fr.pdf',
     el: '/tutorial/tutorial-studio-el.pdf',
+    nl: '/tutorial/tutorial-studio-nl.pdf',
   },
 }
 
