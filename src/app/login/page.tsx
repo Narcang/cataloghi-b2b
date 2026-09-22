@@ -47,7 +47,7 @@ export default async function LoginPage(props: { searchParams: Promise<{ message
 
               {searchParams?.message && (
                 <div className="text-sm text-red-500 font-medium mt-2 text-center">
-                  {searchParams.message}
+                  {searchParams.message === 'sessione' ? copy.sessioneScaduta : searchParams.message}
                 </div>
               )}
             </CardContent>

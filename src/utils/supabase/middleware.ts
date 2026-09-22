@@ -1,5 +1,15 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { isSessioneScadutaPerRiloggio } from '@/lib/ultimoAccessoUtenti'
+
+function copyCookies(from: NextResponse, to: NextResponse) {
+  from.cookies.getAll().forEach((cookie) => to.cookies.set(cookie))
+  return to
+}
+
+function isAuthKeepSessionPath(pathname: string): boolean {
+  return pathname.startsWith('/auth') || pathname.startsWith('/reset-password')
+}
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
@@ -26,6 +36,18 @@ export async function updateSession(request: NextRequest) {
   )
 
   const { data: { user } } = await supabase.auth.getUser()
+
+  // Dopo 24h da last_sign_in_at si forza un nuovo login (email+password) così l'ultimo accesso si aggiorna.
+  if (user && isSessioneScadutaPerRiloggio(user.last_sign_in_at) && !isAuthKeepSessionPath(request.nextUrl.pathname)) {
+    await supabase.auth.signOut()
+    if (request.nextUrl.pathname.startsWith('/login')) {
+      return supabaseResponse
+    }
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    url.search = '?message=sessione'
+    return copyCookies(supabaseResponse, NextResponse.redirect(url))
+  }
 
   // Pagine pubbliche (free / ospite senza password): home, dove siamo, login, auth, dashboard ridotta, PDF cataloghi attivi
   const publicPaths = [

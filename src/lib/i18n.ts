@@ -1168,6 +1168,7 @@ const login = {
     accedi: 'Accedi al Portale',
     registrazione: 'Richiedi registrazione portale',
     recupero: 'Recupera password',
+    sessioneScaduta: 'Sessione scaduta. Accedi di nuovo con email e password.',
   },
   ru: {
     titolo: 'Вход Ladiva',
@@ -1175,6 +1176,7 @@ const login = {
     accedi: 'Войти в портал',
     registrazione: 'Запросить регистрацию',
     recupero: 'Восстановить пароль',
+    sessioneScaduta: 'Сессия истекла. Войдите снова с email и паролем.',
   },
   en: {
     titolo: 'Ladiva sign in',
@@ -1182,6 +1184,7 @@ const login = {
     accedi: 'Sign in to the portal',
     registrazione: 'Request portal registration',
     recupero: 'Reset password',
+    sessioneScaduta: 'Session expired. Sign in again with email and password.',
   },
   es: {
     titolo: 'Acceso Ladiva',
@@ -1189,6 +1192,7 @@ const login = {
     accedi: 'Acceder al portal',
     registrazione: 'Solicitar registro en el portal',
     recupero: 'Recuperar contraseña',
+    sessioneScaduta: 'Sesión caducada. Vuelve a entrar con email y contraseña.',
   },
   fr: {
     titolo: 'Connexion Ladiva',
@@ -1196,6 +1200,7 @@ const login = {
     accedi: 'Accéder au portail',
     registrazione: 'Demander l’inscription',
     recupero: 'Réinitialiser le mot de passe',
+    sessioneScaduta: 'Session expirée. Reconnectez-vous avec e-mail et mot de passe.',
   },
   de: {
     titolo: 'Ladiva-Anmeldung',
@@ -1203,6 +1208,7 @@ const login = {
     accedi: 'Zum Portal anmelden',
     registrazione: 'Registrierung anfragen',
     recupero: 'Passwort zurücksetzen',
+    sessioneScaduta: 'Sitzung abgelaufen. Bitte erneut mit E-Mail und Passwort anmelden.',
   },
   nl: {
     titolo: 'Ladiva-login',
@@ -1210,6 +1216,7 @@ const login = {
     accedi: 'Inloggen op het portaal',
     registrazione: 'Portaalregistratie aanvragen',
     recupero: 'Wachtwoord herstellen',
+    sessioneScaduta: 'Sessie verlopen. Log opnieuw in met e-mail en wachtwoord.',
   },
   el: {
     titolo: 'Είσοδος Ladiva',
@@ -1217,6 +1224,7 @@ const login = {
     accedi: 'Είσοδος στην πύλη',
     registrazione: 'Αίτημα εγγραφής',
     recupero: 'Επαναφορά κωδικού',
+    sessioneScaduta: 'Η συνεδρία έληξε. Συνδεθείτε ξανά με email και κωδικό.',
   },
   pl: {
     titolo: 'Logowanie Ladiva',
@@ -1224,6 +1232,7 @@ const login = {
     accedi: 'Zaloguj się do portalu',
     registrazione: 'Poproś o rejestrację',
     recupero: 'Resetuj hasło',
+    sessioneScaduta: 'Sesja wygasła. Zaloguj się ponownie e-mailem i hasłem.',
   },
   uk: {
     titolo: 'Вхід Ladiva',
@@ -1231,6 +1240,7 @@ const login = {
     accedi: 'Увійти до порталу',
     registrazione: 'Запит на реєстрацію',
     recupero: 'Скинути пароль',
+    sessioneScaduta: 'Сесію завершено. Увійдіть знову з email і паролем.',
   },
 } as const
 

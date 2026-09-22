@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { ChevronDown, ChevronRight, Users } from 'lucide-react'
+import { ChevronDown, ChevronRight, Clock, Users } from 'lucide-react'
 import {
   canHaveHierarchyChildren,
   countChildrenProfiles,
@@ -28,7 +28,8 @@ import {
 import { canViewProfiloSpecializzazioneAggiornato, canDeleteProfiloSpecializzazioneStoricoVoce } from '@/lib/profiloSpecializzazioneDate'
 import {
   canViewerSeeUltimoAccessoForProfile,
-  formatUltimoAccessoRiga,
+  formatUltimoAccessoOrario,
+  ultimoAccessoStato,
 } from '@/lib/ultimoAccessoUtenti'
 import { useAppLocale } from '@/lib/useAppLocale'
 import {
@@ -75,6 +76,41 @@ const COLONNA_CENTRALE_CLASS = 'md:pl-6'
 /** Ultima colonna (cataloghi / box) più a destra e più larga. */
 const COLONNA_DESTRA_CLASS = 'md:pl-8'
 
+function UltimoAccessoIndicatore({
+  iso,
+  label,
+  mai,
+}: {
+  iso: string | null
+  label: string
+  mai: string
+}) {
+  const locale = useAppLocale()
+  const stato = ultimoAccessoStato(iso)
+  const orario = formatUltimoAccessoOrario(iso, locale)
+  const iconClass = stato === 'verde' ? 'text-emerald-500' : 'text-red-600'
+
+  return (
+    <div
+      className="shrink-0 self-end md:self-stretch flex md:flex-col items-center md:items-end justify-center gap-1.5 md:min-w-[7.5rem] md:pl-3 md:border-l md:border-black/10"
+      title={orario ? `${label}: ${orario}` : `${label}: ${mai}`}
+    >
+      <Clock
+        size={20}
+        strokeWidth={2.25}
+        className={iconClass}
+        aria-hidden
+      />
+      <div className="text-right leading-tight">
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">{label}</p>
+        <p className={`text-xs font-medium ${stato === 'verde' ? 'text-zinc-800' : 'text-red-700'}`}>
+          {orario ?? mai}
+        </p>
+      </div>
+    </div>
+  )
+}
+
 function HierarchyNode({
   profile,
   depth,
@@ -117,8 +153,8 @@ function HierarchyNode({
   const seguitoDa =
     profile.ruolo === 'rivenditore' ? profile.seguito_da?.trim() || null : null
   const mostraUltimoAccesso = canViewerSeeUltimoAccessoForProfile(viewerRole, profile.ruolo)
-  const ultimoAccessoRiga = mostraUltimoAccesso
-    ? formatUltimoAccessoRiga(ultimoAccessoByProfiloId[profile.id] ?? null)
+  const ultimoAccessoIso = mostraUltimoAccesso
+    ? ultimoAccessoByProfiloId[profile.id] ?? null
     : null
 
   return (
@@ -161,7 +197,8 @@ function HierarchyNode({
               : undefined
           }
         >
-          <div className={CARD_GRID_CLASS}>
+          <div className="flex flex-col md:flex-row md:items-stretch gap-3">
+          <div className={`flex-1 min-w-0 ${CARD_GRID_CLASS}`}>
             <div className="min-w-0">
               <h4 className="text-base font-semibold text-zinc-900 flex items-center gap-2">
                 {roleDotClass ? (
@@ -185,9 +222,6 @@ function HierarchyNode({
               <p className="text-xs text-zinc-500 mt-1">
                 {profile.area_geografica || copy.areaNonIndicata}
               </p>
-              {ultimoAccessoRiga ? (
-                <p className="text-xs text-zinc-500 mt-1">{ultimoAccessoRiga}</p>
-              ) : null}
               {seguitoDa ? (
                 <p className="text-xs text-zinc-600 mt-1">
                   {copy.seguitoDa}: <span className="font-medium text-zinc-800">{seguitoDa}</span>
@@ -265,6 +299,14 @@ function HierarchyNode({
                 <div className="hidden md:block" aria-hidden />
               </>
             )}
+          </div>
+          {mostraUltimoAccesso ? (
+            <UltimoAccessoIndicatore
+              iso={ultimoAccessoIso}
+              label={copy.ultimoAccesso}
+              mai={copy.ultimoAccessoMai}
+            />
+          ) : null}
           </div>
         </div>
       </div>
