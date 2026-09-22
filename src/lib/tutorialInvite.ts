@@ -35,7 +35,7 @@ export function tutorialKindForRuolo(ruolo: string | null | undefined): Tutorial
   if (ruolo === 'rivenditore' || ruolo === 'distributore' || ruolo === 'partner_dipendente') {
     return 'rivenditori'
   }
-  if (ruolo === 'studio') return 'studio'
+  if (ruolo === 'studio' || ruolo === 'studio_associato') return 'studio'
   return null
 }
 

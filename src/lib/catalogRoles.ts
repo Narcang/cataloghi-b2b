@@ -1,7 +1,8 @@
 /** Ruoli che possono essere assegnati come visibilità di un catalogo. */
 export const RUOLI_CATALOGO = [
   { value: 'free',               label: 'Pubblico (ospiti / Free)' },
-  { value: 'studio',             label: 'Studio' },
+  { value: 'studio',             label: 'Sede Studio' },
+  { value: 'studio_associato',   label: 'Studio' },
   { value: 'partner_dipendente', label: 'Promoter' },
   { value: 'distributore',       label: 'Venditori' },
   { value: 'rivenditore',        label: 'Rivenditori' },
@@ -29,7 +30,27 @@ export function isAgenteLike(ruolo: string | null | undefined): boolean {
   return ruolo === 'agente' || ruolo === 'back_office'
 }
 
+/** Sede Studio (`studio`): l’entità, come l’agenzia. */
+export function isSedeStudio(ruolo: string | null | undefined): boolean {
+  return ruolo === 'studio'
+}
+
+/** Studio associato a una sede (`studio_associato`): come l’agente sotto agenzia. */
+export function isStudioAssociato(ruolo: string | null | undefined): boolean {
+  return ruolo === 'studio_associato'
+}
+
+/** Sede Studio e Studio: stessi poteri sui cataloghi. */
+export function isStudioFamily(ruolo: string | null | undefined): boolean {
+  return ruolo === 'studio' || ruolo === 'studio_associato'
+}
+
+/** Cataloghi “studio-like”: sede, studio associato e promoter. */
+export function isStudioLike(ruolo: string | null | undefined): boolean {
+  return isStudioFamily(ruolo) || ruolo === 'partner_dipendente'
+}
+
 /** Ruoli di default per un nuovo catalogo (tutti tranne free/pubblico). */
 export const RUOLI_CATALOGO_DEFAULT: RuoloCatalogo[] = [
-  'agente', 'back_office', 'agenzia', 'distributore', 'rivenditore', 'studio', 'partner_dipendente', 'manager',
+  'agente', 'back_office', 'agenzia', 'distributore', 'rivenditore', 'studio', 'studio_associato', 'partner_dipendente', 'manager',
 ]

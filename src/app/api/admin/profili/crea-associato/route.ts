@@ -21,6 +21,7 @@ const RUOLO_GENITORE_OBBLIGATORIO: Record<string, string> = {
   agente: 'agenzia',
   back_office: 'agenzia',
   distributore: 'rivenditore',
+  studio_associato: 'studio',
 }
 
 /** Ruoli creabili a mano senza genitore (admin/manager). Se c'è un parent, deve avere uno di questi ruoli. */
@@ -57,11 +58,13 @@ function callerPuoCreare(
       ruoloNuovo === 'back_office' ||
       ruoloNuovo === 'distributore' ||
       ruoloNuovo === 'agenzia' ||
-      ruoloNuovo === 'rivenditore'
+      ruoloNuovo === 'rivenditore' ||
+      ruoloNuovo === 'studio_associato'
     )
   }
   if (callerRuolo === 'agenzia') return (ruoloNuovo === 'agente' || ruoloNuovo === 'back_office') && parentId === callerId
   if (callerRuolo === 'rivenditore') return ruoloNuovo === 'distributore' && parentId === callerId
+  if (callerRuolo === 'studio') return ruoloNuovo === 'studio_associato' && parentId === callerId
   return false
 }
 
@@ -206,7 +209,9 @@ export async function POST(request: NextRequest) {
           ? 'Agenzia'
           : ruoloNuovo === 'rivenditore'
             ? 'Rivenditore'
-            : 'Venditore'
+            : ruoloNuovo === 'studio_associato'
+              ? 'Studio'
+              : 'Venditore'
   return jsonResponse(
     true,
     emailReale

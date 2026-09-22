@@ -169,7 +169,7 @@ export function agenteReservedDashboardCategories(): CatalogCategory[] {
 /**
  * Sezioni cataloghi in dashboard:
  * - Ospite: niente Partner / Agenti / Studio (serve login).
- * - Ruolo `studio`: solo Family 15/20/Gres, Capsule Collection e linea Studio.
+ * - Ruoli `studio` (Sede Studio) e `studio_associato` (Studio): solo Family 15/20/Gres, Capsule Collection e linea Studio.
  * - Partner (distributore): categorie pubbliche; listini Partner/Studio in /dashboard/listini-partner.
  * - Agente: categorie pubbliche; Agenti e Scontistiche in /dashboard/documentazione-agente.
  * - Altri utenti autenticati: tutte le categorie (inclusa Studio).
@@ -181,7 +181,7 @@ export function categoriesVisibleOnDashboard(
   if (!isAuthenticated) {
     return [...PUBLIC_CATALOG_CATEGORIES]
   }
-  if (ruoloProfilo === 'studio' || ruoloProfilo === 'partner_dipendente') {
+  if (ruoloProfilo === 'studio' || ruoloProfilo === 'studio_associato' || ruoloProfilo === 'partner_dipendente') {
     return CATALOG_CATEGORIES.filter((c) => STUDIO_ROLE_ALLOWED.has(c) && !UI_HIDDEN_CATEGORIES.has(c))
   }
   if (isVenditoreLike(ruoloProfilo) || isAgenteLike(ruoloProfilo) || ruoloProfilo === 'agenzia') {
@@ -289,6 +289,7 @@ const VENDITORE_TILES: PortaleTile[] = [
 
 export const PORTALE_TILES_PER_RUOLO: Record<string, PortaleTile[]> = {
   studio: STUDIO_TILES,
+  studio_associato: STUDIO_TILES,
   partner_dipendente: STUDIO_TILES,
   distributore: VENDITORE_TILES,
   rivenditore: VENDITORE_TILES,

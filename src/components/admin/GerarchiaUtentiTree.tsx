@@ -425,6 +425,7 @@ export default function GerarchiaUtentiTree({
       rivenditore: copy.descRivenditore,
       distributore: copy.descDistributore,
       agenzia: agentViewsAgenzia ? copy.descAgenziaAgent : copy.descAgenziaOwner,
+      studio: copy.descStudio,
     }
 
     return (

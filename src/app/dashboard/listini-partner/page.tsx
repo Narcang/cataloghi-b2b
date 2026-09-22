@@ -12,7 +12,7 @@ import {
   STUDIO_CATALOG_CATEGORY,
   type CatalogCategory,
 } from '@/lib/catalogCategories'
-import { isVenditoreLike } from '@/lib/catalogRoles'
+import { isVenditoreLike, isStudioLike } from '@/lib/catalogRoles'
 import { getAppLocale } from '@/lib/localeServer'
 import { catalogLingueForLocale, preferCatalogLingua } from '@/lib/catalogLingua'
 
@@ -35,9 +35,7 @@ export default async function ListiniPartnerPage() {
     .single()
 
   const isVenditoreLikeRole = isVenditoreLike(profilo?.ruolo)
-  const isStudio = profilo?.ruolo === 'studio'
-  const isPartnerDipendente = profilo?.ruolo === 'partner_dipendente'
-  const isStudioLikeRole = isStudio || isPartnerDipendente
+  const isStudioLikeRole = isStudioLike(profilo?.ruolo)
   if (!isVenditoreLikeRole && !isStudioLikeRole) {
     redirect('/dashboard')
   }

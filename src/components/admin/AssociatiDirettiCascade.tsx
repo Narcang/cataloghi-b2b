@@ -163,7 +163,7 @@ function CascadeNode({
 }
 
 /** Ordine canonico dei ruoli nei tab del selettore di associazione. */
-const RUOLO_TAB_ORDER = ['agente', 'back_office', 'rivenditore', 'distributore', 'partner_dipendente', 'studio', 'agenzia', 'manager']
+const RUOLO_TAB_ORDER = ['agente', 'back_office', 'rivenditore', 'distributore', 'partner_dipendente', 'studio', 'studio_associato', 'agenzia', 'manager']
 
 /** Ruoli "persona" che raggruppiamo per entità di appartenenza (agenzia / rivenditore). */
 const RUOLI_CON_GRUPPO = new Set(['agente', 'back_office', 'distributore', 'partner_dipendente'])

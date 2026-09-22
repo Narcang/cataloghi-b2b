@@ -9,6 +9,7 @@ const RUOLO_BADGE_CLASS: Record<string, string> = {
   rivenditore:        'bg-sky-50 text-sky-800 border-sky-200',
   distributore:       'bg-blue-50 text-blue-800 border-blue-200',
   studio:             'bg-violet-50 text-violet-800 border-violet-200',
+  studio_associato:   'bg-violet-50 text-violet-800 border-violet-200',
   partner_dipendente: 'bg-indigo-50 text-indigo-800 border-indigo-200',
   manager:            'bg-zinc-100 text-zinc-700 border-zinc-300',
 }

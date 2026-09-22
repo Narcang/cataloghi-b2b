@@ -3,13 +3,11 @@ import {
   isCatalogCategoryAllowedForStudioRole,
   isLoginOnlyCatalogCategory,
 } from '@/lib/catalogCategories'
-import { isVenditoreLike, isAgenteLike } from '@/lib/catalogRoles'
+import { isVenditoreLike, isAgenteLike, isStudioLike, isStudioFamily } from '@/lib/catalogRoles'
 
-export const STUDIO_LIKE_ROLES = ['studio', 'partner_dipendente'] as const
+export { isStudioLike, isSedeStudio, isStudioAssociato, isStudioFamily } from '@/lib/catalogRoles'
 
-export function isStudioLike(ruolo: string | null | undefined): boolean {
-  return ruolo === 'studio' || ruolo === 'partner_dipendente'
-}
+export const STUDIO_LIKE_ROLES = ['studio', 'studio_associato', 'partner_dipendente'] as const
 
 type CatalogoRow = {
   categoria: string | null
@@ -49,8 +47,10 @@ export function getCatalogAccessDenial(
         ? ['agenzia', 'agente', 'back_office']
         : isAgenteLike(ruoloEffettivo)
           ? ['back_office', 'agente']
+        : isStudioFamily(ruoloEffettivo)
+          ? ['studio', 'studio_associato']
           : ruoloEffettivo === 'partner_dipendente'
-            ? ['partner_dipendente', 'studio']
+            ? ['partner_dipendente', 'studio', 'studio_associato']
             : isVenditoreLike(ruoloEffettivo)
               ? ['distributore', 'rivenditore']
               : [ruoloEffettivo]

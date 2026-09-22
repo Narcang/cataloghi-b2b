@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { UserPlus } from 'lucide-react'
 
-type RuoloNuovo = 'agente' | 'back_office' | 'distributore' | 'agenzia' | 'rivenditore'
+type RuoloNuovo = 'agente' | 'back_office' | 'distributore' | 'agenzia' | 'rivenditore' | 'studio_associato'
 
 type ParentOption = { id: string; label: string }
 
@@ -59,6 +59,13 @@ const CONFIG: Record<
     nomePlaceholder: 'Es. Luca Bianchi',
     societaPlaceholder: 'Es. Ceramiche Bianchi',
     button: 'Crea rivenditore',
+  },
+  studio_associato: {
+    titolo: 'Inserisci studio manualmente',
+    persona: 'studio',
+    nomePlaceholder: 'Es. Mario Rossi',
+    societaPlaceholder: '',
+    button: 'Crea e associa studio',
   },
 }
 

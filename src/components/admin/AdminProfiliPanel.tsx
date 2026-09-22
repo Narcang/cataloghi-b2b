@@ -86,7 +86,7 @@ export type OperatoreAssociazione = {
   area_geografica: string | null
 }
 
-const RUOLI_OPTIONS = ['admin', 'manager', 'agenzia', 'agente', 'back_office', 'rivenditore', 'distributore', 'partner_dipendente', 'studio', 'free'] as const
+const RUOLI_OPTIONS = ['admin', 'manager', 'agenzia', 'agente', 'back_office', 'rivenditore', 'distributore', 'partner_dipendente', 'studio', 'studio_associato', 'free'] as const
 
 /** Ruoli per cui ha senso personalizzare la dashboard portale per singolo utente. */
 function puoPersonalizzareCataloghi(ruolo: string): boolean {
@@ -95,7 +95,7 @@ function puoPersonalizzareCataloghi(ruolo: string): boolean {
 
 type RuoloOption = (typeof RUOLI_OPTIONS)[number]
 
-type RuoloTabId = 'admin' | 'manager' | 'agenzia' | 'agente' | 'back_office' | 'rivenditore' | 'distributore' | 'studio' | 'partner_dipendente'
+type RuoloTabId = 'admin' | 'manager' | 'agenzia' | 'agente' | 'back_office' | 'rivenditore' | 'distributore' | 'studio' | 'studio_associato' | 'partner_dipendente'
 
 const RUOLI_TAB: { id: RuoloTabId }[] = [
   { id: 'admin' },
@@ -107,6 +107,7 @@ const RUOLI_TAB: { id: RuoloTabId }[] = [
   { id: 'distributore' },
   { id: 'partner_dipendente' },
   { id: 'studio' },
+  { id: 'studio_associato' },
 ]
 
 function profiloSortKey(p: ProfiloGestioneRow): string {
@@ -975,6 +976,13 @@ export default function AdminProfiliPanel({
                         parentId={p.id}
                         parentLabel={p.societa || p.nome_completo || p.email || 'questo rivenditore'}
                         ruoloNuovo="distributore"
+                      />
+                    ) : null}
+                    {canCreateAssociati && p.ruolo === 'studio' ? (
+                      <CreaAssociatoManuale
+                        parentId={p.id}
+                        parentLabel={p.societa || p.nome_completo || p.email || 'questa sede studio'}
+                        ruoloNuovo="studio_associato"
                       />
                     ) : null}
 

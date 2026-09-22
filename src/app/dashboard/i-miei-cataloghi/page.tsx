@@ -51,7 +51,6 @@ export default async function IMieiCataloghiPage() {
   const isAdmin = ruoloCorrente === 'admin'
   const isManager = isAdmin || ruoloCorrente === 'manager'
   const isVenditoreLikeRole = isVenditoreLike(ruoloCorrente)
-  const isStudio = ruoloCorrente === 'studio'
   const isStudioLikeRole = isStudioLike(ruoloCorrente)
 
   if (isManager) {

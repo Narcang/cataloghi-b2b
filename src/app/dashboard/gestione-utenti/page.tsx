@@ -36,6 +36,7 @@ const RUOLO_FILTER_VALUES = [
   'distributore',
   'partner_dipendente',
   'studio',
+  'studio_associato',
   'free',
 ] as const
 

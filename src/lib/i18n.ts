@@ -1296,6 +1296,8 @@ const dashboard = {
       'Vista rapida di venditori, promoter e studi collegati al tuo rivenditore, con il referente di riferimento.',
     elencoAssociatiHelpDistributore:
       'Vista rapida di venditori, promoter e studi della tua compagnia rivenditore, con il referente di riferimento.',
+    elencoAssociatiHelpStudio:
+      'Vista rapida degli studio collegati alla tua sede, con il referente di riferimento.',
     filtraAssociati: 'Filtra associati per categoria',
     nessunAssociatoCategoria: 'Nessun associato in questa categoria al momento.',
     associatoA: 'Associato a',
@@ -1304,7 +1306,8 @@ const dashboard = {
     tabBackOffice: 'Back-Office',
     tabVenditori: 'Venditori',
     tabRivenditori: 'Rivenditori',
-    tabStudi: 'Studi',
+    tabStudi: 'Sedi Studio',
+    tabStudioAssociato: 'Studio',
     tabPromoter: 'Promoter',
   },
   ru: {
@@ -1358,6 +1361,8 @@ const dashboard = {
       'Краткий список продавцов, промоутеров и студий вашего дилера, с указанным куратором.',
     elencoAssociatiHelpDistributore:
       'Краткий список продавцов, промоутеров и студий вашей дилерской компании, с указанным куратором.',
+    elencoAssociatiHelpStudio:
+      'Краткий список студий, связанных с вашим офисом, с указанным куратором.',
     filtraAssociati: 'Фильтр связанных по категории',
     nessunAssociatoCategoria: 'В этой категории пока нет связанных пользователей.',
     associatoA: 'Связан с',
@@ -1366,7 +1371,8 @@ const dashboard = {
     tabBackOffice: 'Back-Office',
     tabVenditori: 'Продавцы',
     tabRivenditori: 'Дилеры',
-    tabStudi: 'Студии',
+    tabStudi: 'Студии (офисы)',
+    tabStudioAssociato: 'Студии',
     tabPromoter: 'Промоутеры',
   },
   en: {
@@ -1420,6 +1426,8 @@ const dashboard = {
       'Quick view of sellers, promoters and studios linked to your reseller, with their referent.',
     elencoAssociatiHelpDistributore:
       'Quick view of sellers, promoters and studios in your reseller company, with their referent.',
+    elencoAssociatiHelpStudio:
+      'Quick view of studios linked to your location, with their referent.',
     filtraAssociati: 'Filter associates by category',
     nessunAssociatoCategoria: 'No associates in this category at the moment.',
     associatoA: 'Linked to',
@@ -1428,7 +1436,8 @@ const dashboard = {
     tabBackOffice: 'Back-Office',
     tabVenditori: 'Sellers',
     tabRivenditori: 'Resellers',
-    tabStudi: 'Studios',
+    tabStudi: 'Studio locations',
+    tabStudioAssociato: 'Studios',
     tabPromoter: 'Promoters',
   },
   es: {
@@ -1482,6 +1491,8 @@ const dashboard = {
       'Vista rápida de vendedores, promoters y estudios vinculados a tu revendedor, con el referente de referencia.',
     elencoAssociatiHelpDistributore:
       'Vista rápida de vendedores, promoters y estudios de tu compañía revendedora, con el referente de referencia.',
+    elencoAssociatiHelpStudio:
+      'Vista rápida de los estudios vinculados a tu sede, con el referente de referencia.',
     filtraAssociati: 'Filtrar asociados por categoría',
     nessunAssociatoCategoria: 'No hay asociados en esta categoría de momento.',
     associatoA: 'Asociado a',
@@ -1490,7 +1501,8 @@ const dashboard = {
     tabBackOffice: 'Back-Office',
     tabVenditori: 'Vendedores',
     tabRivenditori: 'Revendedores',
-    tabStudi: 'Estudios',
+    tabStudi: 'Sedes estudio',
+    tabStudioAssociato: 'Estudios',
     tabPromoter: 'Promotores',
   },
   fr: {
@@ -1544,6 +1556,8 @@ const dashboard = {
       'Vue rapide des vendeurs, promoteurs et studios liés à votre revendeur, avec le référent.',
     elencoAssociatiHelpDistributore:
       'Vue rapide des vendeurs, promoteurs et studios de votre société revendeur, avec le référent.',
+    elencoAssociatiHelpStudio:
+      'Vue rapide des studios liés à votre siège, avec le référent.',
     filtraAssociati: 'Filtrer les associés par catégorie',
     nessunAssociatoCategoria: 'Aucun associé dans cette catégorie pour le moment.',
     associatoA: 'Associé à',
@@ -1552,7 +1566,8 @@ const dashboard = {
     tabBackOffice: 'Back-Office',
     tabVenditori: 'Vendeurs',
     tabRivenditori: 'Revendeurs',
-    tabStudi: 'Studios',
+    tabStudi: 'Sièges studio',
+    tabStudioAssociato: 'Studios',
     tabPromoter: 'Promoteurs',
   },
   de: {
@@ -1606,6 +1621,8 @@ const dashboard = {
       'Schnellübersicht von Verkäufern, Promotern und Studios Ihres Händlers mit Ansprechpartner.',
     elencoAssociatiHelpDistributore:
       'Schnellübersicht von Verkäufern, Promotern und Studios Ihres Händlerunternehmens mit Ansprechpartner.',
+    elencoAssociatiHelpStudio:
+      'Schnellübersicht der Studios an Ihrem Standort mit Ansprechpartner.',
     filtraAssociati: 'Zugeordnete nach Kategorie filtern',
     nessunAssociatoCategoria: 'In dieser Kategorie gibt es derzeit keine zugeordneten Kontakte.',
     associatoA: 'Zugeordnet zu',
@@ -1614,7 +1631,8 @@ const dashboard = {
     tabBackOffice: 'Back-Office',
     tabVenditori: 'Verkäufer',
     tabRivenditori: 'Händler',
-    tabStudi: 'Studios',
+    tabStudi: 'Studio-Standorte',
+    tabStudioAssociato: 'Studios',
     tabPromoter: 'Promoter',
   },
   nl: {
@@ -1668,6 +1686,8 @@ const dashboard = {
       'Sneloverzicht van verkopers, promoters en studio’s die aan uw wederverkoper zijn gekoppeld, met hun aanspreekpunt.',
     elencoAssociatiHelpDistributore:
       'Sneloverzicht van verkopers, promoters en studio’s van uw wederverkopersbedrijf, met hun aanspreekpunt.',
+    elencoAssociatiHelpStudio:
+      'Sneloverzicht van studio’s die aan uw vestiging zijn gekoppeld, met hun aanspreekpunt.',
     filtraAssociati: 'Gekoppelden filteren op categorie',
     nessunAssociatoCategoria: 'Er zijn momenteel geen gekoppelden in deze categorie.',
     associatoA: 'Gekoppeld aan',
@@ -1676,7 +1696,8 @@ const dashboard = {
     tabBackOffice: 'Back-Office',
     tabVenditori: 'Verkopers',
     tabRivenditori: 'Wederverkopers',
-    tabStudi: 'Studio’s',
+    tabStudi: 'Studiovestigingen',
+    tabStudioAssociato: 'Studio’s',
     tabPromoter: 'Promoters',
   },
   el: {
@@ -1730,6 +1751,8 @@ const dashboard = {
       'Γρήγορη προβολή πωλητών, promoter και στούντιο του μεταπωλητή σας, με υπεύθυνο.',
     elencoAssociatiHelpDistributore:
       'Γρήγορη προβολή πωλητών, promoter και στούντιο της εταιρείας μεταπωλητή, με υπεύθυνο.',
+    elencoAssociatiHelpStudio:
+      'Γρήγορη προβολή των στούντιο που συνδέονται με την έδρα σας, με υπεύθυνο.',
     filtraAssociati: 'Φίλτρο συνδεδεμένων ανά κατηγορία',
     nessunAssociatoCategoria: 'Δεν υπάρχουν συνδεδεμένοι σε αυτή την κατηγορία αυτή τη στιγμή.',
     associatoA: 'Συνδεδεμένος με',
@@ -1738,7 +1761,8 @@ const dashboard = {
     tabBackOffice: 'Back-Office',
     tabVenditori: 'Πωλητές',
     tabRivenditori: 'Μεταπωλητές',
-    tabStudi: 'Στούντιο',
+    tabStudi: 'Έδρες στούντιο',
+    tabStudioAssociato: 'Στούντιο',
     tabPromoter: 'Promoter',
   },
   pl: {
@@ -1792,6 +1816,8 @@ const dashboard = {
       'Szybki podgląd sprzedawców, promoterów i studiów Twojego dystrybutora, z opiekunem.',
     elencoAssociatiHelpDistributore:
       'Szybki podgląd sprzedawców, promoterów i studiów firmy dystrybutora, z opiekunem.',
+    elencoAssociatiHelpStudio:
+      'Szybki podgląd studiów powiązanych z Twoją siedzibą, z opiekunem.',
     filtraAssociati: 'Filtruj powiązanych według kategorii',
     nessunAssociatoCategoria: 'W tej kategorii nie ma teraz powiązanych użytkowników.',
     associatoA: 'Powiązany z',
@@ -1800,7 +1826,8 @@ const dashboard = {
     tabBackOffice: 'Back-Office',
     tabVenditori: 'Sprzedawcy',
     tabRivenditori: 'Dystrybutorzy',
-    tabStudi: 'Studia',
+    tabStudi: 'Siedziby studiów',
+    tabStudioAssociato: 'Studia',
     tabPromoter: 'Promoterzy',
   },
   uk: {
@@ -1854,6 +1881,8 @@ const dashboard = {
       'Швидкий список продавців, промоутерів і студій вашого дилера, з куратором.',
     elencoAssociatiHelpDistributore:
       'Швидкий список продавців, промоутерів і студій дилерської компанії, з куратором.',
+    elencoAssociatiHelpStudio:
+      'Швидкий список студій, пов’язаних з вашим осередком, з куратором.',
     filtraAssociati: 'Фільтр пов’язаних за категорією',
     nessunAssociatoCategoria: 'У цій категорії зараз немає пов’язаних користувачів.',
     associatoA: 'Пов’язаний з',
@@ -1862,7 +1891,8 @@ const dashboard = {
     tabBackOffice: 'Back-Office',
     tabVenditori: 'Продавці',
     tabRivenditori: 'Дилери',
-    tabStudi: 'Студії',
+    tabStudi: 'Осередки студій',
+    tabStudioAssociato: 'Студії',
     tabPromoter: 'Промоутери',
   },
 } as const
@@ -1935,6 +1965,8 @@ export function tElencoAssociatiHelp(locale: AppLocale, viewerRole: string): str
       return copy.elencoAssociatiHelpRivenditore
     case 'distributore':
       return copy.elencoAssociatiHelpDistributore
+    case 'studio':
+      return copy.elencoAssociatiHelpStudio
     default:
       return copy.elencoAssociatiHelpAgenzia
   }
@@ -1953,6 +1985,8 @@ export function tElencoAssociatiTab(locale: AppLocale, ruolo: string): string {
       return copy.tabRivenditori
     case 'studio':
       return copy.tabStudi
+    case 'studio_associato':
+      return copy.tabStudioAssociato
     case 'partner_dipendente':
       return copy.tabPromoter
     default:

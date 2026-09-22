@@ -17,7 +17,7 @@ import {
 } from '@/lib/catalogCategories'
 import { catalogPdfHref, dashboardCatalogReturnTo } from '@/lib/catalogNavigation'
 import { compareCatalogTitoli } from '@/lib/catalogSorting'
-import { RUOLI_CATALOGO, isAgenteLike, isVenditoreLike } from '@/lib/catalogRoles'
+import { RUOLI_CATALOGO, isAgenteLike, isVenditoreLike, isStudioAssociato } from '@/lib/catalogRoles'
 import { isStudioLike } from '@/lib/catalogAccess'
 import CreateCatalogForm from '@/components/admin/CreateCatalogForm'
 import InvitaUtente from '@/components/InvitaUtente'
@@ -225,9 +225,9 @@ export default async function Dashboard(props: {
 
   let profiliGerarchiaDashboard: ProfiloGerarchiaRow[] = []
   let linksDashboard: { utente_id: string; operatore_id: string }[] = []
-  if (user && (isAgenzia || isAgente || isVenditoreLikeRole)) {
+  if (user && (isAgenzia || isAgente || isVenditoreLikeRole || isStudio)) {
     const gerarchiaClient =
-      isAgenzia || isAgente ? createServiceRoleSupabase() ?? supabase : supabase
+      isAgenzia || isAgente || isStudio ? createServiceRoleSupabase() ?? supabase : supabase
     const [profiliRes, linksRes] = await Promise.all([
       gerarchiaClient
         .from('profili')
@@ -243,7 +243,7 @@ export default async function Dashboard(props: {
     profiliGerarchiaDashboard = (profiliRes.data ?? []) as ProfiloGerarchiaRow[]
     linksDashboard = (linksRes.data ?? []) as { utente_id: string; operatore_id: string }[]
 
-    if (isAgenzia || isAgente) {
+    if (isAgenzia || isAgente || isStudio) {
       const selfRowForScope = profiloToGerarchiaRow(
         { ...profilo!, email: user.email ?? null },
         profilo!.invitato_da ?? null,
@@ -261,7 +261,7 @@ export default async function Dashboard(props: {
   }
 
   let ultimoAccessoByProfiloId: Record<string, string> = {}
-  if (user && (isAgenzia || isAgente || isVenditoreLikeRole)) {
+  if (user && (isAgenzia || isAgente || isVenditoreLikeRole || isStudio)) {
     const svcAccesso = createServiceRoleSupabase()
     if (svcAccesso) {
       try {
@@ -370,7 +370,15 @@ export default async function Dashboard(props: {
       profilo.invitato_da ?? null,
     )
     associatiPiattiOwnerProfile = resolveFlatListOwnerProfile(
-      isAgenzia ? 'agenzia' : isAgente ? 'agente' : isPartner ? 'distributore' : 'rivenditore',
+      isAgenzia
+        ? 'agenzia'
+        : isAgente
+          ? 'agente'
+          : isStudio
+            ? 'studio'
+            : isPartner
+              ? 'distributore'
+              : 'rivenditore',
       selfRow,
       profiliGerarchiaDashboard,
       linksDashboard,
@@ -435,6 +443,7 @@ export default async function Dashboard(props: {
                 {isAgente && !isBackOffice ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">{tRuolo(locale, 'agente')}</span> : null}
                 {isBackOffice ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">{tRuolo(locale, 'back_office')}</span> : null}
                 {isStudio ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">{tRuolo(locale, 'studio')}</span> : null}
+                {isStudioAssociato(ruoloCorrente) ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">{tRuolo(locale, 'studio_associato')}</span> : null}
                 {isPartnerDipendente ? <span className="ml-3 inline-flex items-center rounded-full border border-white/40 px-2.5 py-0.5 text-xs font-semibold bg-white/10 text-white">{tRuolo(locale, 'partner_dipendente')}</span> : null}
                 {user && profilo?.registrazione_approvata === false ? (
                   <span className="ml-3 inline-flex items-center rounded-full border border-amber-300 px-2.5 py-0.5 text-xs font-semibold bg-amber-50 text-amber-900">
@@ -455,18 +464,26 @@ export default async function Dashboard(props: {
           </div>
         ) : null}
 
-        {showFullDashboard && (isAgenzia || isVenditoreLikeRole || isAgente) && associatiPiattiOwnerProfile && (
+        {showFullDashboard && (isAgenzia || isVenditoreLikeRole || isAgente || isStudio) && associatiPiattiOwnerProfile && (
           <AssociatiPiattiPanel
             ownerProfile={associatiPiattiOwnerProfile}
             viewerRole={
-              isAgenzia ? 'agenzia' : isAgente ? (isBackOffice ? 'back_office' : 'agente') : isPartner ? 'distributore' : 'rivenditore'
+              isAgenzia
+                ? 'agenzia'
+                : isAgente
+                  ? (isBackOffice ? 'back_office' : 'agente')
+                  : isStudio
+                    ? 'studio'
+                    : isPartner
+                      ? 'distributore'
+                      : 'rivenditore'
             }
             profili={profiliGerarchiaDashboard}
             links={linksDashboard}
           />
         )}
 
-        {showFullDashboard && (isAgenzia || isAgente || isVenditoreLikeRole) && gerarchiaOwnerProfile && (
+        {showFullDashboard && (isAgenzia || isAgente || isVenditoreLikeRole || isStudio) && gerarchiaOwnerProfile && (
           <GerarchiaUtentiTree
             currentUserId={user!.id}
             viewerRole={ruoloCorrente}
@@ -512,6 +529,25 @@ export default async function Dashboard(props: {
           </section>
         )}
 
+        {showFullDashboard && !isManager && isStudio && user && (
+          <section className="border border-black rounded-2xl bg-white p-6 space-y-8">
+            <div>
+              <h2 className="text-xl text-zinc-900 font-medium mb-1">
+                Inserisci studio manualmente
+              </h2>
+              <p className="text-sm text-zinc-500 mb-4">
+                Crea uno studio e collegarlo a questa sede. Senza email viene creato un account tecnico interno.
+              </p>
+              <CreaAssociatoManuale
+                parentId={user.id}
+                parentLabel={profilo?.societa || profilo?.nome_completo || copy.ilTuoProfilo}
+                ruoloNuovo="studio_associato"
+                societaBloccata={profilo?.societa ?? undefined}
+              />
+            </div>
+          </section>
+        )}
+
         {showFullDashboard && (isAgenzia || isAgente) && !isManager && user && (
           <AdminProfiliPanel
             currentUserId={user.id}
@@ -531,7 +567,7 @@ export default async function Dashboard(props: {
           />
         )}
 
-        {showFullDashboard && !isManager && (isVenditoreLikeRole || isPartnerDipendente || isAgenzia || isAgente) && (
+        {showFullDashboard && !isManager && (isVenditoreLikeRole || isPartnerDipendente || isAgenzia || isAgente || isStudio) && (
           <section className="border border-black rounded-2xl bg-white p-6">
             <h2 className="text-xl text-zinc-900 font-medium mb-1">{copy.invitaUtenti}</h2>
             <p className="text-sm text-zinc-500 mb-4">

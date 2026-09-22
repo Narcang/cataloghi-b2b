@@ -108,7 +108,7 @@ const MANAGER_PATCH_KEYS = new Set<string>([
   'box_aggiornato_il',
 ])
 
-const RUOLI_OK = new Set(['admin', 'manager', 'agenzia', 'agente', 'back_office', 'fornitore', 'rivenditore', 'distributore', 'free', 'studio', 'partner_dipendente'])
+const RUOLI_OK = new Set(['admin', 'manager', 'agenzia', 'agente', 'back_office', 'fornitore', 'rivenditore', 'distributore', 'free', 'studio', 'studio_associato', 'partner_dipendente'])
 
 function jsonResponse(ok: boolean, message: string, status: number) {
   return NextResponse.json({ ok, message }, { status })
@@ -491,7 +491,7 @@ export async function POST(request: NextRequest) {
       const invitantId = profiloApprovato?.invitato_da
       const ruoloNuovoUtente = profiloApprovato?.ruolo
 
-      const RUOLI_CONNESSIONE = new Set(['agenzia', 'agente', 'back_office', 'rivenditore', 'distributore', 'studio', 'partner_dipendente'])
+      const RUOLI_CONNESSIONE = new Set(['agenzia', 'agente', 'back_office', 'rivenditore', 'distributore', 'studio', 'studio_associato', 'partner_dipendente'])
 
       if (invitantId && RUOLI_CONNESSIONE.has(ruoloNuovoUtente)) {
         const { data: profiloInvitante } = await svc
