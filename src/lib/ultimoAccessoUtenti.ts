@@ -70,7 +70,11 @@ export async function fetchUltimoAccessoMap(svc: SupabaseClient): Promise<Map<st
 
   while (page <= 20) {
     const { data, error } = await svc.auth.admin.listUsers({ page, perPage })
-    if (error || !data?.users?.length) break
+    if (error) {
+      console.error('fetchUltimoAccessoMap: listUsers', error.message)
+      break
+    }
+    if (!data?.users?.length) break
 
     for (const user of data.users) {
       if (user.last_sign_in_at) {

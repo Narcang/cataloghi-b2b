@@ -141,10 +141,12 @@ export default async function GestioneUtentiPage(props: {
   const profiliAssociazione = (associazioneRes.data ?? []) as ProfiloGerarchiaRow[]
   const allCataloghi = (cataloghiRes.data ?? []) as { id: string; titolo: string | null; categoria: string | null; ruoli_visibili: string[] }[]
 
+  // Auth Admin (last_sign_in_at) richiede la service role: il client sessione admin non la vede.
+  const svcAuthLastSignIn = createServiceRoleSupabase()
   let ultimoAccessoByProfiloId: Record<string, string> = {}
-  if (svc) {
+  if (svcAuthLastSignIn) {
     try {
-      ultimoAccessoByProfiloId = ultimoAccessoMapToRecord(await fetchUltimoAccessoMap(svc))
+      ultimoAccessoByProfiloId = ultimoAccessoMapToRecord(await fetchUltimoAccessoMap(svcAuthLastSignIn))
     } catch (error) {
       console.error('gestione-utenti: fetch ultimo accesso', error)
     }
