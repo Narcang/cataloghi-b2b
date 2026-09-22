@@ -28,6 +28,7 @@ const RUOLO_GENITORE_OBBLIGATORIO: Record<string, string> = {
 const PARENT_RUOLI_OPZIONALI: Record<string, string[]> = {
   agenzia: ['manager'],
   rivenditore: ['agenzia', 'agente', 'back_office', 'manager'],
+  studio: ['agenzia', 'agente', 'back_office', 'rivenditore', 'manager'],
 }
 
 const RUOLI_CREABILI = new Set([
@@ -59,6 +60,7 @@ function callerPuoCreare(
       ruoloNuovo === 'distributore' ||
       ruoloNuovo === 'agenzia' ||
       ruoloNuovo === 'rivenditore' ||
+      ruoloNuovo === 'studio' ||
       ruoloNuovo === 'studio_associato'
     )
   }
@@ -103,7 +105,7 @@ export async function POST(request: NextRequest) {
   if (genitoreObbligatorio && !parentId) {
     return jsonResponse(false, 'Entità di appartenenza non specificata', 400)
   }
-  const prioritaSocieta = ruoloNuovo === 'agenzia' || ruoloNuovo === 'rivenditore'
+  const prioritaSocieta = ruoloNuovo === 'agenzia' || ruoloNuovo === 'rivenditore' || ruoloNuovo === 'studio'
   if (prioritaSocieta && !societa) {
     return jsonResponse(false, 'La società è obbligatoria', 400)
   }
@@ -209,9 +211,11 @@ export async function POST(request: NextRequest) {
           ? 'Agenzia'
           : ruoloNuovo === 'rivenditore'
             ? 'Rivenditore'
-            : ruoloNuovo === 'studio_associato'
-              ? 'Studio'
-              : 'Venditore'
+            : ruoloNuovo === 'studio'
+              ? 'Sede Studio'
+              : ruoloNuovo === 'studio_associato'
+                ? 'Studio'
+                : 'Venditore'
   return jsonResponse(
     true,
     emailReale

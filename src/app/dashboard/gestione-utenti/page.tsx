@@ -285,24 +285,37 @@ export default async function GestioneUtentiPage(props: {
             <p className="text-sm text-zinc-600 mt-1">{copy.creaManualeAgenziaRivenditoreHelp}</p>
           </div>
           <CreaAssociatoManuale
-            ruoloNuovo="agenzia"
-            parentId={ruoloCorrente === 'manager' ? user.id : undefined}
-            parentLabel={
-              ruoloCorrente === 'manager'
-                ? profilo?.nome_completo || user.email || copy.utenteSenzaNome
-                : undefined
-            }
-            parentOptions={ruoloCorrente === 'admin' ? managerOptions : undefined}
-            parentSelectLabel={copy.collegaManager}
-            allowEmptyParent={ruoloCorrente === 'admin'}
-            emptyParentLabel={copy.nessunCollegamento}
-          />
-          <CreaAssociatoManuale
-            ruoloNuovo="rivenditore"
-            parentOptions={agenziaOptions}
-            parentSelectLabel={copy.collegaAgenzia}
-            allowEmptyParent
-            emptyParentLabel={copy.nessunCollegamento}
+            ruoliSelezionabili={[
+              { value: 'agenzia', label: 'Agenzia' },
+              { value: 'rivenditore', label: 'Rivenditore' },
+              { value: 'studio', label: 'Sede Studio' },
+            ]}
+            parentByRuolo={{
+              agenzia:
+                ruoloCorrente === 'manager'
+                  ? {
+                      parentId: user.id,
+                      parentLabel: profilo?.nome_completo || user.email || copy.utenteSenzaNome,
+                    }
+                  : {
+                      options: managerOptions,
+                      selectLabel: copy.collegaManager,
+                      allowEmpty: true,
+                      emptyParentLabel: copy.nessunCollegamento,
+                    },
+              rivenditore: {
+                options: agenziaOptions,
+                selectLabel: copy.collegaAgenzia,
+                allowEmpty: true,
+                emptyParentLabel: copy.nessunCollegamento,
+              },
+              studio: {
+                options: agenziaOptions,
+                selectLabel: copy.collegaAgenzia,
+                allowEmpty: true,
+                emptyParentLabel: copy.nessunCollegamento,
+              },
+            }}
           />
         </section>
 
