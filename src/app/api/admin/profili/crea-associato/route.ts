@@ -100,9 +100,15 @@ export async function POST(request: NextRequest) {
   if (genitoreObbligatorio && !parentId) {
     return jsonResponse(false, 'Entità di appartenenza non specificata', 400)
   }
-  if (!nomeCompleto) {
+  const prioritaSocieta = ruoloNuovo === 'agenzia' || ruoloNuovo === 'rivenditore'
+  if (prioritaSocieta && !societa) {
+    return jsonResponse(false, 'La società è obbligatoria', 400)
+  }
+  if (!prioritaSocieta && !nomeCompleto) {
     return jsonResponse(false, 'Il nome è obbligatorio', 400)
   }
+
+  const nomeDaSalvare = nomeCompleto || societa
 
   if (!callerPuoCreare(callerRuolo, user.id, ruoloNuovo, parentId)) {
     return jsonResponse(false, 'Operazione non consentita per il tuo ruolo', 403)
@@ -144,7 +150,7 @@ export async function POST(request: NextRequest) {
     email_confirm: true,
     user_metadata: {
       registration_flow: 'portale_self',
-      nome_completo: nomeCompleto,
+      nome_completo: nomeDaSalvare,
       societa: societa || undefined,
       telefono: telefono || undefined,
       invito_ruolo: ruoloNuovo,

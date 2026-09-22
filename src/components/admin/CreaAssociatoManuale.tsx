@@ -23,36 +23,41 @@ type Props = {
 
 const CONFIG: Record<
   RuoloNuovo,
-  { titolo: string; persona: string; nomePlaceholder: string; button: string }
+  { titolo: string; persona: string; nomePlaceholder: string; societaPlaceholder: string; button: string }
 > = {
   agente: {
     titolo: 'Inserisci agente manualmente',
     persona: 'agente',
     nomePlaceholder: 'Es. Mario Rossi',
+    societaPlaceholder: '',
     button: 'Crea e associa agente',
   },
   back_office: {
     titolo: 'Inserisci back-office manualmente',
     persona: 'back-office',
     nomePlaceholder: 'Es. Mario Rossi',
+    societaPlaceholder: '',
     button: 'Crea e associa back-office',
   },
   distributore: {
     titolo: 'Inserisci venditore manualmente',
     persona: 'venditore',
     nomePlaceholder: 'Es. Luca Bianchi',
+    societaPlaceholder: '',
     button: 'Crea e associa venditore',
   },
   agenzia: {
     titolo: 'Inserisci agenzia manualmente',
     persona: 'agenzia',
-    nomePlaceholder: 'Es. Rossi Agency',
+    nomePlaceholder: 'Es. Mario Rossi',
+    societaPlaceholder: 'Es. Rossi Agency',
     button: 'Crea agenzia',
   },
   rivenditore: {
     titolo: 'Inserisci rivenditore manualmente',
     persona: 'rivenditore',
-    nomePlaceholder: 'Es. Ceramiche Bianchi',
+    nomePlaceholder: 'Es. Luca Bianchi',
+    societaPlaceholder: 'Es. Ceramiche Bianchi',
     button: 'Crea rivenditore',
   },
 }
@@ -70,6 +75,7 @@ export default function CreaAssociatoManuale({
   const router = useRouter()
   const cfg = CONFIG[ruoloNuovo]
   const societaLocked = Boolean(societaBloccata?.trim())
+  const prioritaSocieta = ruoloNuovo === 'agenzia' || ruoloNuovo === 'rivenditore'
   const [nomeCompleto, setNomeCompleto] = useState('')
   const [email, setEmail] = useState('')
   const [telefono, setTelefono] = useState('')
@@ -94,7 +100,11 @@ export default function CreaAssociatoManuale({
     e.preventDefault()
     setError(null)
     setMessage(null)
-    if (!nomeCompleto.trim()) {
+    if (prioritaSocieta && !(societaLocked ? societaBloccata : societa)?.trim()) {
+      setError('La società è obbligatoria')
+      return
+    }
+    if (!prioritaSocieta && !nomeCompleto.trim()) {
       setError('Il nome è obbligatorio')
       return
     }
@@ -185,8 +195,30 @@ export default function CreaAssociatoManuale({
             </select>
           </label>
         ) : null}
+        {prioritaSocieta ? (
+          <label className="block text-xs font-medium uppercase text-zinc-600 md:col-span-2">
+            Società *
+            {societaLocked ? (
+              <input
+                type="text"
+                value={societaBloccata ?? ''}
+                readOnly
+                disabled
+                className={`${inputClass} bg-zinc-100 text-zinc-500 cursor-not-allowed`}
+              />
+            ) : (
+              <input
+                type="text"
+                value={societa}
+                onChange={(e) => setSocieta(e.target.value)}
+                placeholder={cfg.societaPlaceholder}
+                className={inputClass}
+              />
+            )}
+          </label>
+        ) : null}
         <label className="block text-xs font-medium uppercase text-zinc-600">
-          Nome completo *
+          {prioritaSocieta ? 'Nome referente (opzionale)' : 'Nome completo *'}
           <input
             type="text"
             value={nomeCompleto}
@@ -219,20 +251,22 @@ export default function CreaAssociatoManuale({
             className={inputClass}
           />
         </label>
-        <label className="block text-xs font-medium uppercase text-zinc-600 md:col-span-2">
-          Società {societaLocked ? '(uguale alla tua azienda)' : '(opzionale)'}
-          {societaLocked ? (
-            <input
-              type="text"
-              value={societaBloccata ?? ''}
-              readOnly
-              disabled
-              className={`${inputClass} bg-zinc-100 text-zinc-500 cursor-not-allowed`}
-            />
-          ) : (
-            <input type="text" value={societa} onChange={(e) => setSocieta(e.target.value)} className={inputClass} />
-          )}
-        </label>
+        {prioritaSocieta ? null : (
+          <label className="block text-xs font-medium uppercase text-zinc-600 md:col-span-2">
+            Società {societaLocked ? '(uguale alla tua azienda)' : '(opzionale)'}
+            {societaLocked ? (
+              <input
+                type="text"
+                value={societaBloccata ?? ''}
+                readOnly
+                disabled
+                className={`${inputClass} bg-zinc-100 text-zinc-500 cursor-not-allowed`}
+              />
+            ) : (
+              <input type="text" value={societa} onChange={(e) => setSocieta(e.target.value)} className={inputClass} />
+            )}
+          </label>
+        )}
         <div className="md:col-span-2">
           <button
             type="submit"
