@@ -135,7 +135,7 @@ type Props = {
   canEditSpecializzazione?: boolean
   /** Admin e manager possono gestire i cataloghi visibili anche se readOnly è true. */
   canManageCataloghi?: boolean
-  /** Admin e manager possono inserire manualmente agenti (agenzie) e venditori (rivenditori). */
+  /** Admin e manager possono inserire a mano agenzie, rivenditori, agenti e venditori. */
   canCreateAssociati?: boolean
   /** Vista agenzia/agente: elenco rivenditori associati, senza approvazioni né tab multi-ruolo. */
   agenziaRivenditoriMode?: boolean
@@ -944,6 +944,13 @@ export default function AdminProfiliPanel({
                       </>
                     )}
 
+                    {canCreateAssociati && p.ruolo === 'manager' ? (
+                      <CreaAssociatoManuale
+                        parentId={p.id}
+                        parentLabel={p.societa || p.nome_completo || p.email || 'questo manager'}
+                        ruoloNuovo="agenzia"
+                      />
+                    ) : null}
                     {canCreateAssociati && p.ruolo === 'agenzia' ? (
                       <>
                         <CreaAssociatoManuale
@@ -955,6 +962,11 @@ export default function AdminProfiliPanel({
                           parentId={p.id}
                           parentLabel={p.societa || p.nome_completo || p.email || 'questa agenzia'}
                           ruoloNuovo="back_office"
+                        />
+                        <CreaAssociatoManuale
+                          parentId={p.id}
+                          parentLabel={p.societa || p.nome_completo || p.email || 'questa agenzia'}
+                          ruoloNuovo="rivenditore"
                         />
                       </>
                     ) : null}

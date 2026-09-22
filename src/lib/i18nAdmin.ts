@@ -274,6 +274,12 @@ const admin = {
     invitaUtenti: 'Invita utenti',
     invitaHelp:
       'Genera un link di registrazione per il ruolo scelto. Il nuovo utente sarà collegato al tuo profilo dopo l’approvazione.',
+    creaManualeAgenziaRivenditore: 'Inserisci agenzia o rivenditore a mano',
+    creaManualeAgenziaRivenditoreHelp:
+      'Crea il profilo e, se vuoi, collegalo a un manager o a un’agenzia. Senza email viene creato un account tecnico interno: resta visibile ma non può accedere finché non gli configuri l’accesso.',
+    collegaManager: 'Collega a un manager (opzionale)',
+    collegaAgenzia: 'Collega a un’agenzia (opzionale)',
+    nessunCollegamento: 'Nessun collegamento',
     gestioneUtentiPanel: 'Gestione utenti',
     gestioneUtentiPanelHelp:
       'Approva le registrazioni, aggiorna i dati o elimina account, associa i contatti visibili nella rubrica.',
@@ -450,6 +456,12 @@ const admin = {
     seguitoDa: 'Сопровождает',
     invitaUtenti: 'Пригласить пользователей',
     invitaHelp: 'Создайте ссылку регистрации для выбранной роли. Новый пользователь будет связан с вашим профилем после одобрения.',
+    creaManualeAgenziaRivenditore: 'Добавить агентство или дилера вручную',
+    creaManualeAgenziaRivenditoreHelp:
+      'Создайте профиль и при необходимости свяжите его с менеджером или агентством. Без email создаётся внутренний технический аккаунт: профиль виден, но войти нельзя, пока не настроите доступ.',
+    collegaManager: 'Связать с менеджером (необязательно)',
+    collegaAgenzia: 'Связать с агентством (необязательно)',
+    nessunCollegamento: 'Без связи',
     gestioneUtentiPanel: 'Управление пользователями',
     gestioneUtentiPanelHelp: 'Одобряйте регистрации, обновляйте данные или удаляйте аккаунты.',
     registrazioniAttesa: 'Регистрации в ожидании',
@@ -622,6 +634,12 @@ const admin = {
     invitaUtenti: 'Invite users',
     invitaHelp:
       'Generate a registration link for the selected role. The new user will be linked to your profile after approval.',
+    creaManualeAgenziaRivenditore: 'Add an agency or reseller by hand',
+    creaManualeAgenziaRivenditoreHelp:
+      'Create the profile and optionally link it to a manager or an agency. Without an email a technical internal account is created: it stays visible but cannot sign in until you set up access.',
+    collegaManager: 'Link to a manager (optional)',
+    collegaAgenzia: 'Link to an agency (optional)',
+    nessunCollegamento: 'No link',
     gestioneUtentiPanel: 'User management',
     gestioneUtentiPanelHelp:
       'Approve registrations, update details or delete accounts, and link contacts visible in the directory.',
@@ -800,6 +818,12 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     invitaUtenti: 'Invitar usuarios',
     invitaHelp:
       'Genera un enlace de registro para el rol elegido. El nuevo usuario se vinculará a tu perfil tras la aprobación.',
+    creaManualeAgenziaRivenditore: 'Añadir agencia o revendedor a mano',
+    creaManualeAgenziaRivenditoreHelp:
+      'Crea el perfil y, si quieres, vincúlalo a un manager o a una agencia. Sin email se crea una cuenta técnica interna: el perfil se ve pero no puede entrar hasta que configures el acceso.',
+    collegaManager: 'Vincular a un manager (opcional)',
+    collegaAgenzia: 'Vincular a una agencia (opcional)',
+    nessunCollegamento: 'Sin vínculo',
     gestioneUtentiPanel: 'Gestión de usuarios',
     gestioneUtentiPanelHelp:
       'Aprueba los registros, actualiza los datos o elimina cuentas, asocia los contactos visibles en la agenda.',
@@ -977,6 +1001,12 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     invitaUtenti: 'Inviter des utilisateurs',
     invitaHelp:
       'Générez un lien d’inscription pour le rôle choisi. Le nouvel utilisateur sera lié à votre profil après approbation.',
+    creaManualeAgenziaRivenditore: 'Ajouter une agence ou un revendeur à la main',
+    creaManualeAgenziaRivenditoreHelp:
+      'Créez le profil et, si besoin, liez-le à un manager ou à une agence. Sans e-mail, un compte technique interne est créé : il reste visible mais ne peut pas se connecter tant que vous n’avez pas configuré l’accès.',
+    collegaManager: 'Lier à un manager (facultatif)',
+    collegaAgenzia: 'Lier à une agence (facultatif)',
+    nessunCollegamento: 'Aucun lien',
     gestioneUtentiPanel: 'Gestion des utilisateurs',
     gestioneUtentiPanelHelp:
       'Approuvez les inscriptions, mettez à jour les données ou supprimez des comptes, liez les contacts de l’annuaire.',
@@ -1150,6 +1180,12 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     invitaUtenti: 'Benutzer einladen',
     invitaHelp:
       'Erzeugen Sie einen Registrierungslink für die gewählte Rolle. Der neue Nutzer wird nach Freigabe verknüpft.',
+    creaManualeAgenziaRivenditore: 'Agentur oder Händler manuell anlegen',
+    creaManualeAgenziaRivenditoreHelp:
+      'Legen Sie das Profil an und verknüpfen Sie es optional mit einem Manager oder einer Agentur. Ohne E-Mail entsteht ein internes technisches Konto: sichtbar, aber ohne Login, bis Sie den Zugang einrichten.',
+    collegaManager: 'Mit einem Manager verknüpfen (optional)',
+    collegaAgenzia: 'Mit einer Agentur verknüpfen (optional)',
+    nessunCollegamento: 'Keine Verknüpfung',
     gestioneUtentiPanel: 'Benutzerverwaltung',
     gestioneUtentiPanelHelp:
       'Registrierungen freigeben, Daten aktualisieren oder Konten löschen, Verzeichnis-Kontakte verknüpfen.',
@@ -1323,6 +1359,12 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     invitaUtenti: 'Gebruikers uitnodigen',
     invitaHelp:
       'Genereer een registratielink voor de gekozen rol. De nieuwe gebruiker wordt na goedkeuring aan uw profiel gekoppeld.',
+    creaManualeAgenziaRivenditore: 'Agentschap of wederverkoper handmatig toevoegen',
+    creaManualeAgenziaRivenditoreHelp:
+      'Maak het profiel en koppel het desgewenst aan een manager of een agentschap. Zonder e-mail ontstaat een intern technisch account: zichtbaar, maar zonder login tot u de toegang instelt.',
+    collegaManager: 'Koppelen aan een manager (optioneel)',
+    collegaAgenzia: 'Koppelen aan een agentschap (optioneel)',
+    nessunCollegamento: 'Geen koppeling',
     gestioneUtentiPanel: 'Gebruikersbeheer',
     gestioneUtentiPanelHelp:
       'Keur registraties goed, werk gegevens bij of verwijder accounts, en koppel contacten die in het adresboek zichtbaar zijn.',
@@ -1500,6 +1542,12 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     invitaUtenti: 'Πρόσκληση χρηστών',
     invitaHelp:
       'Δημιουργήστε σύνδεσμο εγγραφής για τον επιλεγμένο ρόλο. Ο νέος χρήστης θα συνδεθεί μετά την έγκριση.',
+    creaManualeAgenziaRivenditore: 'Προσθήκη πρακτορείου ή μεταπωλητή χειροκίνητα',
+    creaManualeAgenziaRivenditoreHelp:
+      'Δημιουργήστε το προφίλ και, αν θέλετε, συνδέστε το με manager ή πρακτορείο. Χωρίς email δημιουργείται εσωτερικός τεχνικός λογαριασμός: φαίνεται αλλά δεν μπορεί να συνδεθεί μέχρι να ρυθμίσετε την πρόσβαση.',
+    collegaManager: 'Σύνδεση με manager (προαιρετικό)',
+    collegaAgenzia: 'Σύνδεση με πρακτορείο (προαιρετικό)',
+    nessunCollegamento: 'Χωρίς σύνδεση',
     gestioneUtentiPanel: 'Διαχείριση χρηστών',
     gestioneUtentiPanelHelp:
       'Εγκρίνετε εγγραφές, ενημερώστε στοιχεία ή διαγράψτε λογαριασμούς, συνδέστε επαφές καταλόγου.',
@@ -1673,6 +1721,12 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     invitaUtenti: 'Zaproś użytkowników',
     invitaHelp:
       'Wygeneruj link rejestracji dla wybranej roli. Nowy użytkownik zostanie powiązany po zatwierdzeniu.',
+    creaManualeAgenziaRivenditore: 'Dodaj agencję lub dystrybutora ręcznie',
+    creaManualeAgenziaRivenditoreHelp:
+      'Utwórz profil i opcjonalnie powiąż go z managerem lub agencją. Bez e-maila powstaje wewnętrzne konto techniczne: widać je, ale nie można się zalogować, dopóki nie ustawisz dostępu.',
+    collegaManager: 'Powiąż z managerem (opcjonalnie)',
+    collegaAgenzia: 'Powiąż z agencją (opcjonalnie)',
+    nessunCollegamento: 'Brak powiązania',
     gestioneUtentiPanel: 'Zarządzanie użytkownikami',
     gestioneUtentiPanelHelp:
       'Zatwierdzaj rejestracje, aktualizuj dane lub usuwaj konta, powiązuj kontakty w książce.',
@@ -1846,6 +1900,12 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     invitaUtenti: 'Запросити користувачів',
     invitaHelp:
       'Створіть посилання реєстрації для обраної ролі. Нового користувача буде пов’язано після схвалення.',
+    creaManualeAgenziaRivenditore: 'Додати агентство або дилера вручну',
+    creaManualeAgenziaRivenditoreHelp:
+      'Створіть профіль і за потреби зв’яжіть його з менеджером або агентством. Без email створюється внутрішній технічний обліковий запис: профіль видно, але увійти не можна, доки не налаштуєте доступ.',
+    collegaManager: 'Зв’язати з менеджером (необов’язково)',
+    collegaAgenzia: 'Зв’язати з агентством (необов’язково)',
+    nessunCollegamento: 'Без зв’язку',
     gestioneUtentiPanel: 'Керування користувачами',
     gestioneUtentiPanelHelp:
       'Схвалюйте реєстрації, оновлюйте дані або видаляйте облікові записи, пов’язуйте контакти довідника.',

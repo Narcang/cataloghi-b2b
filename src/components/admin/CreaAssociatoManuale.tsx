@@ -4,14 +4,21 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { UserPlus } from 'lucide-react'
 
-type RuoloNuovo = 'agente' | 'back_office' | 'distributore'
+type RuoloNuovo = 'agente' | 'back_office' | 'distributore' | 'agenzia' | 'rivenditore'
+
+type ParentOption = { id: string; label: string }
 
 type Props = {
-  parentId: string
-  parentLabel: string
+  parentId?: string
+  parentLabel?: string
   ruoloNuovo: RuoloNuovo
   /** Se valorizzata, la società è fissata a questo valore (uguale a quella del genitore) e non modificabile. */
   societaBloccata?: string
+  /** Se presente, l'utente sceglie il collegamento da questo elenco. */
+  parentOptions?: ParentOption[]
+  parentSelectLabel?: string
+  allowEmptyParent?: boolean
+  emptyParentLabel?: string
 }
 
 const CONFIG: Record<
@@ -36,6 +43,18 @@ const CONFIG: Record<
     nomePlaceholder: 'Es. Luca Bianchi',
     button: 'Crea e associa venditore',
   },
+  agenzia: {
+    titolo: 'Inserisci agenzia manualmente',
+    persona: 'agenzia',
+    nomePlaceholder: 'Es. Rossi Agency',
+    button: 'Crea agenzia',
+  },
+  rivenditore: {
+    titolo: 'Inserisci rivenditore manualmente',
+    persona: 'rivenditore',
+    nomePlaceholder: 'Es. Ceramiche Bianchi',
+    button: 'Crea rivenditore',
+  },
 }
 
 export default function CreaAssociatoManuale({
@@ -43,6 +62,10 @@ export default function CreaAssociatoManuale({
   parentLabel,
   ruoloNuovo,
   societaBloccata,
+  parentOptions,
+  parentSelectLabel,
+  allowEmptyParent = false,
+  emptyParentLabel = 'Nessun collegamento',
 }: Props) {
   const router = useRouter()
   const cfg = CONFIG[ruoloNuovo]
@@ -52,6 +75,9 @@ export default function CreaAssociatoManuale({
   const [telefono, setTelefono] = useState('')
   const [areaGeografica, setAreaGeografica] = useState('')
   const [societa, setSocieta] = useState('')
+  const [selectedParentId, setSelectedParentId] = useState(
+    parentId ?? (allowEmptyParent ? '' : (parentOptions?.[0]?.id ?? '')),
+  )
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -72,6 +98,7 @@ export default function CreaAssociatoManuale({
       setError('Il nome è obbligatorio')
       return
     }
+    const parentToSend = (parentOptions ? selectedParentId : parentId)?.trim() || undefined
     setSaving(true)
     try {
       const res = await fetch('/api/admin/profili/crea-associato', {
@@ -79,7 +106,7 @@ export default function CreaAssociatoManuale({
         headers: { 'Content-Type': 'application/json' },
         credentials: 'same-origin',
         body: JSON.stringify({
-          parent_id: parentId,
+          parent_id: parentToSend,
           ruolo_nuovo: ruoloNuovo,
           nome_completo: nomeCompleto,
           email,
@@ -102,6 +129,8 @@ export default function CreaAssociatoManuale({
   }
 
   const inputClass = 'mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm'
+  const selectedParentLabel =
+    parentOptions?.find((o) => o.id === selectedParentId)?.label ?? parentLabel
 
   return (
     <div>
@@ -110,9 +139,20 @@ export default function CreaAssociatoManuale({
         {cfg.titolo}
       </p>
       <p className="text-xs text-zinc-500 mb-2">
-        Crea un {cfg.persona} e collegalo a <span className="font-medium text-zinc-700">{parentLabel}</span>:
-        comparirà nella struttura organizzativa. Se non indichi un’email viene creato un account tecnico interno
-        (il profilo resta visibile ma non può accedere finché non gli configuri l’accesso).
+        {selectedParentLabel ? (
+          <>
+            Crea un{cfg.persona === 'agenzia' ? '’' : ' '}{cfg.persona} e collegalo a{' '}
+            <span className="font-medium text-zinc-700">{selectedParentLabel}</span>: comparirà nella
+            struttura organizzativa.
+          </>
+        ) : (
+          <>
+            Crea un{cfg.persona === 'agenzia' ? '’' : ' '}{cfg.persona}: comparirà nella struttura
+            organizzativa.
+          </>
+        )}{' '}
+        Se non indichi un’email viene creato un account tecnico interno (il profilo resta visibile ma
+        non può accedere finché non gli configuri l’accesso).
       </p>
 
       {message ? (
@@ -128,6 +168,23 @@ export default function CreaAssociatoManuale({
         className="grid grid-cols-1 md:grid-cols-2 gap-3 border border-black/15 rounded-lg p-3 bg-zinc-50"
         onSubmit={submit}
       >
+        {parentOptions && parentOptions.length > 0 ? (
+          <label className="block text-xs font-medium uppercase text-zinc-600 md:col-span-2">
+            {parentSelectLabel ?? 'Collega a'}
+            <select
+              value={selectedParentId}
+              onChange={(e) => setSelectedParentId(e.target.value)}
+              className={inputClass}
+            >
+              {allowEmptyParent ? <option value="">{emptyParentLabel}</option> : null}
+              {parentOptions.map((opt) => (
+                <option key={opt.id} value={opt.id}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : null}
         <label className="block text-xs font-medium uppercase text-zinc-600">
           Nome completo *
           <input

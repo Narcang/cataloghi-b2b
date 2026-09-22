@@ -8,8 +8,9 @@ import Header from '@/components/Header'
 import AdminProfiliPanel, { type ProfiloGestioneRow } from '@/components/admin/AdminProfiliPanel'
 import GerarchiaUtentiTree from '@/components/admin/GerarchiaUtentiTree'
 import InvitaUtente from '@/components/InvitaUtente'
+import CreaAssociatoManuale from '@/components/admin/CreaAssociatoManuale'
 import type { ProfiloGerarchiaRow } from '@/lib/userHierarchy'
-import { getDescendantsByRole, profiloToGerarchiaRow } from '@/lib/userHierarchy'
+import { getDescendantsByRole, profiloGerarchiaDisplayLabel, profiloToGerarchiaRow } from '@/lib/userHierarchy'
 import { fetchUltimoAccessoMap, ultimoAccessoMapToRecord } from '@/lib/ultimoAccessoUtenti'
 import { getAppLocale } from '@/lib/localeServer'
 import { tAdmin, tRuolo } from '@/lib/i18nAdmin'
@@ -189,6 +190,13 @@ export default async function GestioneUtentiPage(props: {
     profiliGestioneAgenzia = rivenditori as unknown as ProfiloGestioneRow[]
   }
 
+  const managerOptions = profiliAssociazione
+    .filter((p) => p.ruolo === 'manager')
+    .map((p) => ({ id: p.id, label: profiloGerarchiaDisplayLabel(p) }))
+  const agenziaOptions = profiliAssociazione
+    .filter((p) => p.ruolo === 'agenzia')
+    .map((p) => ({ id: p.id, label: profiloGerarchiaDisplayLabel(p) }))
+
   return (
     <div className="ladiva-root ladiva-root-app-dark min-h-screen flex flex-col">
       <Header />
@@ -268,6 +276,33 @@ export default async function GestioneUtentiPage(props: {
               </button>
             </form>
           </div>
+        </section>
+
+        <section className="border border-black rounded-2xl bg-white p-5 space-y-8">
+          <div>
+            <h2 className="text-xl text-zinc-900 font-medium">{copy.creaManualeAgenziaRivenditore}</h2>
+            <p className="text-sm text-zinc-600 mt-1">{copy.creaManualeAgenziaRivenditoreHelp}</p>
+          </div>
+          <CreaAssociatoManuale
+            ruoloNuovo="agenzia"
+            parentId={ruoloCorrente === 'manager' ? user.id : undefined}
+            parentLabel={
+              ruoloCorrente === 'manager'
+                ? profilo?.nome_completo || user.email || copy.utenteSenzaNome
+                : undefined
+            }
+            parentOptions={ruoloCorrente === 'admin' ? managerOptions : undefined}
+            parentSelectLabel={copy.collegaManager}
+            allowEmptyParent={ruoloCorrente === 'admin'}
+            emptyParentLabel={copy.nessunCollegamento}
+          />
+          <CreaAssociatoManuale
+            ruoloNuovo="rivenditore"
+            parentOptions={agenziaOptions}
+            parentSelectLabel={copy.collegaAgenzia}
+            allowEmptyParent
+            emptyParentLabel={copy.nessunCollegamento}
+          />
         </section>
 
         {/* Struttura organizzativa (matrioska) */}

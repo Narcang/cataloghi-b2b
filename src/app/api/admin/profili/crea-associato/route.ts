@@ -16,12 +16,23 @@ type Body = {
   area_geografica?: string | null
 }
 
-/** Ruoli creabili manualmente e ruolo dell'entità genitore richiesta. */
-const RUOLO_GENITORE: Record<string, string> = {
+/** Ruoli che richiedono un genitore con ruolo fisso. */
+const RUOLO_GENITORE_OBBLIGATORIO: Record<string, string> = {
   agente: 'agenzia',
   back_office: 'agenzia',
   distributore: 'rivenditore',
 }
+
+/** Ruoli creabili a mano senza genitore (admin/manager). Se c'è un parent, deve avere uno di questi ruoli. */
+const PARENT_RUOLI_OPZIONALI: Record<string, string[]> = {
+  agenzia: ['manager'],
+  rivenditore: ['agenzia', 'agente', 'back_office', 'manager'],
+}
+
+const RUOLI_CREABILI = new Set([
+  ...Object.keys(RUOLO_GENITORE_OBBLIGATORIO),
+  ...Object.keys(PARENT_RUOLI_OPZIONALI),
+])
 
 function pulisci(value: unknown): string {
   return String(value ?? '').trim()
@@ -39,8 +50,16 @@ function callerPuoCreare(
   ruoloNuovo: string,
   parentId: string,
 ): boolean {
-  if (callerRuolo === 'admin') return true
-  if (callerRuolo === 'manager') return ruoloNuovo === 'agente' || ruoloNuovo === 'back_office' || ruoloNuovo === 'distributore'
+  if (callerRuolo === 'admin') return RUOLI_CREABILI.has(ruoloNuovo)
+  if (callerRuolo === 'manager') {
+    return (
+      ruoloNuovo === 'agente' ||
+      ruoloNuovo === 'back_office' ||
+      ruoloNuovo === 'distributore' ||
+      ruoloNuovo === 'agenzia' ||
+      ruoloNuovo === 'rivenditore'
+    )
+  }
   if (callerRuolo === 'agenzia') return (ruoloNuovo === 'agente' || ruoloNuovo === 'back_office') && parentId === callerId
   if (callerRuolo === 'rivenditore') return ruoloNuovo === 'distributore' && parentId === callerId
   return false
@@ -74,10 +93,11 @@ export async function POST(request: NextRequest) {
   const societa = pulisci(body.societa)
   const areaGeografica = pulisci(body.area_geografica)
 
-  if (!ruoloNuovo || !(ruoloNuovo in RUOLO_GENITORE)) {
+  if (!ruoloNuovo || !RUOLI_CREABILI.has(ruoloNuovo)) {
     return jsonResponse(false, 'Ruolo da creare non valido', 400)
   }
-  if (!parentId) {
+  const genitoreObbligatorio = RUOLO_GENITORE_OBBLIGATORIO[ruoloNuovo]
+  if (genitoreObbligatorio && !parentId) {
     return jsonResponse(false, 'Entità di appartenenza non specificata', 400)
   }
   if (!nomeCompleto) {
@@ -93,16 +113,25 @@ export async function POST(request: NextRequest) {
     return jsonResponse(false, 'Configurazione server incompleta', 500)
   }
 
-  // Verifica che l'entità genitore esista e abbia il ruolo corretto
-  const ruoloGenitoreAtteso = RUOLO_GENITORE[ruoloNuovo]
-  const { data: genitore } = await svc
-    .from('profili')
-    .select('id, ruolo')
-    .eq('id', parentId)
-    .maybeSingle()
+  const collegamentoId = parentId || user.id
 
-  if (!genitore || genitore.ruolo !== ruoloGenitoreAtteso) {
-    return jsonResponse(false, 'Entità di appartenenza non trovata o ruolo non valido', 404)
+  if (parentId) {
+    const { data: genitore } = await svc
+      .from('profili')
+      .select('id, ruolo')
+      .eq('id', parentId)
+      .maybeSingle()
+
+    if (!genitore) {
+      return jsonResponse(false, 'Entità di appartenenza non trovata o ruolo non valido', 404)
+    }
+    if (genitoreObbligatorio && genitore.ruolo !== genitoreObbligatorio) {
+      return jsonResponse(false, 'Entità di appartenenza non trovata o ruolo non valido', 404)
+    }
+    const parentRuoliOpzionali = PARENT_RUOLI_OPZIONALI[ruoloNuovo]
+    if (parentRuoliOpzionali && !parentRuoliOpzionali.includes(genitore.ruolo)) {
+      return jsonResponse(false, 'Entità di appartenenza non trovata o ruolo non valido', 404)
+    }
   }
 
   const emailReale = Boolean(emailInput)
@@ -119,7 +148,7 @@ export async function POST(request: NextRequest) {
       societa: societa || undefined,
       telefono: telefono || undefined,
       invito_ruolo: ruoloNuovo,
-      invito_da: parentId,
+      invito_da: collegamentoId,
       inserito_manualmente: true,
     },
   })
@@ -153,8 +182,8 @@ export async function POST(request: NextRequest) {
   // Connessione bidirezionale genitore <-> nuovo profilo (rubrica reciproca)
   const { error: linkErr } = await svc.from('connessioni_utente_operatore').upsert(
     [
-      { utente_id: parentId, operatore_id: nuovoId },
-      { utente_id: nuovoId, operatore_id: parentId },
+      { utente_id: collegamentoId, operatore_id: nuovoId },
+      { utente_id: nuovoId, operatore_id: collegamentoId },
     ],
     { onConflict: 'utente_id,operatore_id', ignoreDuplicates: true },
   )
@@ -163,7 +192,15 @@ export async function POST(request: NextRequest) {
   }
 
   const etichettaRuolo =
-    ruoloNuovo === 'agente' ? 'Agente' : ruoloNuovo === 'back_office' ? 'Back-Office' : 'Venditore'
+    ruoloNuovo === 'agente'
+      ? 'Agente'
+      : ruoloNuovo === 'back_office'
+        ? 'Back-Office'
+        : ruoloNuovo === 'agenzia'
+          ? 'Agenzia'
+          : ruoloNuovo === 'rivenditore'
+            ? 'Rivenditore'
+            : 'Venditore'
   return jsonResponse(
     true,
     emailReale
