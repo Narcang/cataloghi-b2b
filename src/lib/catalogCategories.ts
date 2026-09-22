@@ -231,6 +231,35 @@ export const CATEGORY_TILE_IMAGE: Record<CatalogCategory, string> = {
   'Bricks Fotografico': '/catalog/bricks.png',
 }
 
+/** Foto dedicate (homepage / gestione cataloghi). Le altre categorie usano un’icona. */
+const CATEGORY_PHOTO_TILE: Partial<Record<CatalogCategory, string>> = {
+  'Family 15': '/catalog/family-15.png',
+  'Family 20': '/catalog/family-20.png',
+  'Family Gres': '/catalog/family-gres.png',
+  'Capsule Collection': '/catalog/capsule-collection.png',
+  Bricks: '/catalog/bricks.png',
+  Metal: '/catalog/metal.png',
+  'Family 15 Fotografico': '/catalog/family-15.png',
+  'Family 20 Fotografico': '/catalog/family-20.png',
+  'Capsule Collection Fotografico': '/catalog/capsule-collection.png',
+  'Family Gres Fotografico': '/catalog/family-gres.png',
+  'Bricks Fotografico': '/catalog/bricks.png',
+}
+
+export function categoryPhotoTile(categoria: string): string | null {
+  return CATEGORY_PHOTO_TILE[categoria as CatalogCategory] ?? null
+}
+
+export function resolveCategoryFromSlug(slug: string, extraCategories: string[] = []): string | null {
+  const known = categoryFromSlug(slug)
+  if (known) return known
+  const key = slug.toLowerCase()
+  for (const c of extraCategories) {
+    if (categoryToSlug(c) === key) return c
+  }
+  return null
+}
+
 /** Configurazione tile del portale per ogni ruolo. */
 export type PortaleTile = {
   categoria: CatalogCategory

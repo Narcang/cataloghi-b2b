@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { APP_LOCALES, localeNameIn, type AppLocale } from '@/lib/locale'
 import { tAdmin } from '@/lib/i18nAdmin'
+import { gestioneCataloghiHref } from '@/lib/catalogNavigation'
 
 type Tab = AppLocale | 'all'
 
@@ -8,21 +9,24 @@ export default function CatalogLinguaTabs({
   active,
   counts,
   nome,
+  categoriaSlug,
   locale,
 }: {
   active: Tab
   counts: Record<Tab, number>
   nome: string
+  categoriaSlug?: string | null
   locale: AppLocale
 }) {
   const copy = tAdmin(locale)
   const tabs: Tab[] = ['all', ...APP_LOCALES]
 
   function href(tab: Tab) {
-    const params = new URLSearchParams()
-    if (nome) params.set('nome', nome)
-    params.set('lingua', tab)
-    return `/dashboard/gestione-cataloghi?${params.toString()}`
+    return gestioneCataloghiHref({
+      lingua: tab,
+      nome,
+      categoriaSlug,
+    })
   }
 
   return (

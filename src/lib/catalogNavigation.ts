@@ -40,3 +40,16 @@ export function reservedAreaCatalogReturnTo(
   const hash = categoria ? `#${categoryToDomId(categoria)}` : ''
   return `${basePath}${hash}`
 }
+
+export function gestioneCataloghiHref(opts: {
+  lingua?: string
+  nome?: string
+  categoriaSlug?: string | null
+}): string {
+  const params = new URLSearchParams()
+  if (opts.lingua) params.set('lingua', opts.lingua)
+  if (opts.nome) params.set('nome', opts.nome)
+  if (opts.categoriaSlug) params.set('categoria', opts.categoriaSlug)
+  const q = params.toString()
+  return q ? `/dashboard/gestione-cataloghi?${q}` : '/dashboard/gestione-cataloghi'
+}

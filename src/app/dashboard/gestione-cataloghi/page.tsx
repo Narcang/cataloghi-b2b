@@ -7,23 +7,18 @@ import { FileText, ArrowLeft } from 'lucide-react'
 import Header from '@/components/Header'
 import CatalogLinguaQuerySync from '@/components/admin/CatalogLinguaQuerySync'
 import CreateCatalogForm from '@/components/admin/CreateCatalogForm'
+import CatalogCategoryTiles from '@/components/admin/CatalogCategoryTiles'
 import {
   CATALOG_CATEGORIES_FOR_UPLOAD,
   categoriesVisibleOnDashboard,
+  categoryDisplayLabel,
   categoryToDomId,
+  categoryToSlug,
   isLanguageSharedCategory,
-  type CatalogCategory,
+  resolveCategoryFromSlug,
 } from '@/lib/catalogCategories'
-
-const CATEGORY_DISPLAY_LABEL: Partial<Record<CatalogCategory, string>> = {
-  Scontistiche: 'Merchandising',
-}
-
-function categoryDisplayLabel(cat: string): string {
-  return CATEGORY_DISPLAY_LABEL[cat as CatalogCategory] ?? cat
-}
 import { RUOLI_CATALOGO } from '@/lib/catalogRoles'
-import { catalogPdfHref, reservedAreaCatalogReturnTo } from '@/lib/catalogNavigation'
+import { catalogPdfHref, gestioneCataloghiHref } from '@/lib/catalogNavigation'
 import { compareCatalogTitoli } from '@/lib/catalogSorting'
 import CatalogLinguaTabs from '@/components/admin/CatalogLinguaTabs'
 import {
@@ -47,14 +42,13 @@ function escapeIlikePattern(value: string): string {
   return value.replace(/[%_\\]/g, '\\$&')
 }
 
-const RETURN_BASE = '/dashboard/gestione-cataloghi'
-
 export default async function GestioneCataloghiPage(props: {
-  searchParams: Promise<{ nome?: string; message?: string; lingua?: string }>
+  searchParams: Promise<{ nome?: string; message?: string; lingua?: string; categoria?: string }>
 }) {
   const searchParams = await props.searchParams
   const nomeFilter = (searchParams?.nome ?? '').trim()
   const actionMessage = searchParams?.message ?? ''
+  const categoriaSlugRaw = (searchParams?.categoria ?? '').trim()
   const uiLocale = await getAppLocale()
   const copy = tAdmin(uiLocale)
   const linguaTabRaw = (searchParams?.lingua ?? '').trim()
@@ -121,6 +115,32 @@ export default async function GestioneCataloghiPage(props: {
       ),
     ),
   ]
+  const countsByCategoria: Record<string, number> = Object.fromEntries(
+    categorieDaMostrare.map((cat) => [
+      cat,
+      cataloghiPerVista.filter((c) => String(c.categoria ?? '').trim() === cat).length,
+    ]),
+  )
+  const categorieTiles = nomeFilter
+    ? categorieDaMostrare.filter((cat) => (countsByCategoria[cat] ?? 0) > 0)
+    : categorieDaMostrare
+  const categoriaAperta = categoriaSlugRaw
+    ? resolveCategoryFromSlug(categoriaSlugRaw, categorieDaMostrare)
+    : null
+  const returnToCategoria = gestioneCataloghiHref({
+    lingua: linguaTab,
+    nome: nomeFilter,
+    categoriaSlug: categoriaAperta ? categoryToSlug(categoriaAperta) : null,
+  })
+  const categoriaItems = categoriaAperta
+    ? cataloghiPerVista
+        .filter((c) => String(c.categoria ?? '').trim() === categoriaAperta)
+        .sort((a, b) => {
+          const byTitle = compareCatalogTitoli(a.titolo, b.titolo)
+          if (byTitle !== 0) return byTitle
+          return a.id.localeCompare(b.id)
+        })
+    : []
 
   return (
     <div className="ladiva-root ladiva-root-app-dark min-h-screen flex flex-col">
@@ -159,6 +179,9 @@ export default async function GestioneCataloghiPage(props: {
             </div>
             <form className="flex flex-wrap items-center gap-3" method="get">
               <input type="hidden" name="lingua" value={linguaTab} />
+              {categoriaAperta ? (
+                <input type="hidden" name="categoria" value={categoryToSlug(categoriaAperta)} />
+              ) : null}
               <input
                 type="search"
                 name="nome"
@@ -210,6 +233,7 @@ export default async function GestioneCataloghiPage(props: {
               active={linguaTab}
               counts={linguaCounts}
               nome={nomeFilter}
+              categoriaSlug={categoriaAperta ? categoryToSlug(categoriaAperta) : null}
               locale={uiLocale}
             />
             <p className="text-sm text-zinc-400">
@@ -232,37 +256,40 @@ export default async function GestioneCataloghiPage(props: {
                 {copy.nessunFileArchivio}
               </p>
             </div>
+          ) : !categoriaAperta ? (
+            <CatalogCategoryTiles
+              categorie={categorieTiles}
+              counts={countsByCategoria}
+              lingua={linguaTab}
+              nome={nomeFilter}
+              locale={uiLocale}
+            />
           ) : (
-            <div className="space-y-10">
-              {categorieDaMostrare.map((categoria) => {
-                const items = cataloghiPerVista
-                  .filter((c) => String(c.categoria ?? '').trim() === categoria)
-                  .sort((a, b) => {
-                    const byTitle = compareCatalogTitoli(a.titolo, b.titolo)
-                    if (byTitle !== 0) return byTitle
-                    return a.id.localeCompare(b.id)
-                  })
-
-                // Con filtro nome attivo, salta le categorie vuote
-                if (nomeFilter && items.length === 0) return null
-
-                return (
-                  <section
-                    key={categoria}
-                    id={categoryToDomId(categoria)}
-                    className="scroll-mt-32 space-y-4"
-                  >
-                    <div className="flex items-center gap-3">
-                      <h3 className="text-3xl md:text-4xl text-zinc-100 font-semibold tracking-wide">{categoryDisplayLabel(categoria)}</h3>
-                      <span className="text-xs rounded-full border border-black px-2 py-0.5 text-zinc-600">
-                        {tCatalogCount(uiLocale, items.length)}
-                      </span>
-                    </div>
-                    {items.length === 0 ? (
-                      <p className="text-lg text-zinc-500 py-2">{copy.nessunCatalogoCategoria}</p>
-                    ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {items.map((catalogo) => {
+            <section
+              id={categoryToDomId(categoriaAperta)}
+              className="scroll-mt-32 space-y-4"
+            >
+              <div className="flex flex-wrap items-center gap-3">
+                <Link
+                  href={gestioneCataloghiHref({ lingua: linguaTab, nome: nomeFilter })}
+                  className="inline-flex items-center gap-2 text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors"
+                >
+                  <ArrowLeft size={15} /> {copy.tornaCategorie}
+                </Link>
+              </div>
+              <div className="flex items-center gap-3">
+                <h3 className="text-3xl md:text-4xl text-zinc-100 font-semibold tracking-wide">
+                  {categoryDisplayLabel(categoriaAperta)}
+                </h3>
+                <span className="text-xs rounded-full border border-white/20 px-2 py-0.5 text-zinc-400">
+                  {tCatalogCount(uiLocale, categoriaItems.length)}
+                </span>
+              </div>
+              {categoriaItems.length === 0 ? (
+                <p className="text-lg text-zinc-500 py-2">{copy.nessunCatalogoCategoria}</p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {categoriaItems.map((catalogo) => {
                           const fallbackIt = isItalianFallbackCatalog(catalogo, linguaTab)
                           const fallbackRu = isRussianFallbackCatalog(catalogo, linguaTab)
                           const fallbackShared = fallbackIt || fallbackRu
@@ -275,7 +302,7 @@ export default async function GestioneCataloghiPage(props: {
                               prefetch={false}
                               href={catalogPdfHref(
                                 catalogo.id,
-                                reservedAreaCatalogReturnTo(RETURN_BASE, catalogo.categoria),
+                                returnToCategoria,
                               )}
                               className="group block focus:outline-none focus:ring-2 focus:ring-[#060d41] rounded-none"
                             >
@@ -451,10 +478,7 @@ export default async function GestioneCataloghiPage(props: {
                         })}
                       </div>
                     )}
-                  </section>
-                )
-              })}
-            </div>
+            </section>
           )}
         </section>
 
