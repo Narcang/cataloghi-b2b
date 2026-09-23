@@ -644,6 +644,11 @@ export default function AdminProfiliPanel({
               : null
             const inviterRow = profiliGerarchia.find((row) => row.id === profiloGerarchia.invitato_da)
             const agenteRiferimento = inviterRow && isAgenteLike(inviterRow.ruolo) ? inviterRow : null
+            const venditoreRiferimento =
+              inviterRow && p.ruolo === 'distributore' && inviterRow.ruolo === 'distributore'
+                ? inviterRow
+                : null
+            const riferimentoInvito = agenteRiferimento ?? venditoreRiferimento
             const associatiLabel = associatiDirettiSectionLabel(p.ruolo)
             const aggiungiLabel = associatiAggiungiSectionLabel(p.ruolo)
             const candidateAssociati = getCandidateAssociatiProfiles(p.id, p.ruolo, profiliAssociazione)
@@ -686,8 +691,8 @@ export default function AdminProfiliPanel({
                       )}
                       <span className="ml-2 text-xs font-normal text-zinc-500">
                         {tRuolo(locale, p.ruolo)}
-                        {agenteRiferimento
-                          ? ` · ${dashCopy.associatoA} ${profiloGerarchiaDisplayLabel(agenteRiferimento)} (${tRuolo(locale, agenteRiferimento.ruolo)})`
+                        {riferimentoInvito
+                          ? ` · ${dashCopy.associatoA} ${profiloGerarchiaDisplayLabel(riferimentoInvito)} (${tRuolo(locale, riferimentoInvito.ruolo)})`
                           : agenziaAssociata
                             ? ` · ${dashCopy.associatoA} ${profiloGerarchiaDisplayLabel(agenziaAssociata)}`
                             : ''}

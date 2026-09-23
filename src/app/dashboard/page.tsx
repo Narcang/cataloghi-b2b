@@ -33,6 +33,7 @@ import {
   isRivenditoreManagedByAgente,
   resolveAgenziaParentForAgent,
   resolveFlatListOwnerProfile,
+  resolveRivenditoreParentForDistributore,
   type ProfiloGerarchiaRow,
 } from '@/lib/userHierarchy'
 import { fetchUltimoAccessoMap, ultimoAccessoMapToRecord } from '@/lib/ultimoAccessoUtenti'
@@ -228,7 +229,9 @@ export default async function Dashboard(props: {
   let linksDashboard: { utente_id: string; operatore_id: string }[] = []
   if (user && (isAgenzia || isAgente || isVenditoreLikeRole || isStudio)) {
     const gerarchiaClient =
-      isAgenzia || isAgente || isStudio ? createServiceRoleSupabase() ?? supabase : supabase
+      isAgenzia || isAgente || isStudio || isPartner
+        ? createServiceRoleSupabase() ?? supabase
+        : supabase
     const [profiliRes, linksRes] = await Promise.all([
       gerarchiaClient
         .from('profili')
@@ -244,7 +247,7 @@ export default async function Dashboard(props: {
     profiliGerarchiaDashboard = (profiliRes.data ?? []) as ProfiloGerarchiaRow[]
     linksDashboard = (linksRes.data ?? []) as { utente_id: string; operatore_id: string }[]
 
-    if (isAgenzia || isAgente || isStudio) {
+    if (isAgenzia || isAgente || isStudio || isPartner) {
       const selfRowForScope = profiloToGerarchiaRow(
         { ...profilo!, email: user.email ?? null },
         profilo!.invitato_da ?? null,
@@ -252,13 +255,19 @@ export default async function Dashboard(props: {
       const scopeRoot = isAgente
         ? resolveAgenziaParentForAgent(selfRowForScope, profiliGerarchiaDashboard, linksDashboard) ??
           selfRowForScope
-        : selfRowForScope
+        : isPartner
+          ? resolveRivenditoreParentForDistributore(
+              selfRowForScope,
+              profiliGerarchiaDashboard,
+              linksDashboard,
+            ) ?? selfRowForScope
+          : selfRowForScope
       const scoped = filterProfiliInHierarchySubtree(
         scopeRoot,
         profiliGerarchiaDashboard,
         linksDashboard,
       )
-      if (isAgente && scopeRoot.id === selfRowForScope.id && selfRowForScope.invitato_da) {
+      if ((isAgente || isPartner) && scopeRoot.id === selfRowForScope.id && selfRowForScope.invitato_da) {
         const kept = new Set(scoped.map((p) => p.id))
         const byId = new Map(profiliGerarchiaDashboard.map((p) => [p.id, p]))
         let cursor: string | null = selfRowForScope.invitato_da
@@ -268,7 +277,13 @@ export default async function Dashboard(props: {
           const row = byId.get(cursor)
           if (!row) break
           kept.add(row.id)
-          cursor = isAgenteLike(row.ruolo) ? row.invitato_da : null
+          cursor = isAgente
+            ? isAgenteLike(row.ruolo)
+              ? row.invitato_da
+              : null
+            : row.ruolo === 'distributore'
+              ? row.invitato_da
+              : null
         }
         profiliGerarchiaDashboard = profiliGerarchiaDashboard.filter((p) => kept.has(p.id))
       } else {
@@ -403,6 +418,10 @@ export default async function Dashboard(props: {
     if (isAgente) {
       gerarchiaOwnerProfile =
         resolveAgenziaParentForAgent(selfRow, profiliGerarchiaDashboard, linksDashboard) ?? selfRow
+    } else if (isPartner) {
+      gerarchiaOwnerProfile =
+        resolveRivenditoreParentForDistributore(selfRow, profiliGerarchiaDashboard, linksDashboard) ??
+        selfRow
     } else {
       gerarchiaOwnerProfile = selfRow
     }

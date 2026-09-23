@@ -63,7 +63,7 @@ export const CHILD_ROLES_BY_PARENT: Record<string, string[]> = {
   agente: ['agente', 'distributore', 'studio_associato', 'studio'],
   back_office: ['agente', 'back_office', 'distributore', 'studio_associato', 'studio'],
   rivenditore: ['distributore', 'partner_dipendente', 'studio'],
-  distributore: ['partner_dipendente', 'studio'],
+  distributore: ['distributore', 'partner_dipendente', 'studio'],
   partner_dipendente: ['studio'],
   studio: ['studio_associato'],
 }
@@ -174,7 +174,10 @@ export function roleBreakdownBadgesForNode(ruolo: string): RoleBreakdownBadge[] 
     case 'rivenditore':
       return [{ ruolo: 'studio', label: 'Sedi Studio' }]
     case 'distributore':
-      return [{ ruolo: 'studio', label: 'Sedi Studio' }]
+      return [
+        { ruolo: 'distributore', label: 'Venditori' },
+        { ruolo: 'studio', label: 'Sedi Studio' },
+      ]
     case 'studio':
       return [{ ruolo: 'studio_associato', label: 'Studio' }]
     default:
@@ -356,7 +359,12 @@ export function resolveRivenditoreParentForDistributore(
   distributoreProfile: ProfiloGerarchiaRow,
   profili: ProfiloGerarchiaRow[],
   links: OperatoreLink[],
+  seen?: Set<string>,
 ): ProfiloGerarchiaRow | null {
+  const visited = seen ?? new Set<string>()
+  if (visited.has(distributoreProfile.id)) return null
+  visited.add(distributoreProfile.id)
+
   const byId = new Map(profili.map((p) => [p.id, p]))
 
   const rivenditoreFromId = (id: string | null | undefined): ProfiloGerarchiaRow | null => {
@@ -380,10 +388,16 @@ export function resolveRivenditoreParentForDistributore(
     if (hit) return hit
   }
 
+  const inviter = byId.get(distributoreProfile.invitato_da ?? '')
+  if (inviter?.ruolo === 'distributore') {
+    const viaInviter = resolveRivenditoreParentForDistributore(inviter, profili, links, visited)
+    if (viaInviter) return viaInviter
+  }
+
   let current: ProfiloGerarchiaRow | null = distributoreProfile
-  const visited = new Set<string>()
-  while (current && !visited.has(current.id)) {
-    visited.add(current.id)
+  const walked = new Set<string>()
+  while (current && !walked.has(current.id)) {
+    walked.add(current.id)
     const parent = findDirectParentProfile(current, profili, links)
     if (!parent) break
     if (parent.ruolo === 'rivenditore') return parent
@@ -541,6 +555,14 @@ export function getFlatListProfilesByRole(
   if (targetRole === 'agente') {
     return getAgentiInCompanyScope(ownerProfile, profili, links)
   }
+  if (targetRole === 'distributore' && ownerProfile.ruolo === 'distributore') {
+    const rivenditore = resolveRivenditoreParentForDistributore(ownerProfile, profili, links)
+    if (rivenditore) {
+      return getDescendantsByRole(rivenditore.id, rivenditore, 'distributore', profili, links)
+    }
+    const inviter = profili.find((p) => p.id === ownerProfile.invitato_da)
+    return inviter?.ruolo === 'distributore' ? [inviter] : []
+  }
   return getDescendantsByRole(ownerProfile.id, ownerProfile, targetRole, profili, links)
 }
 
@@ -616,7 +638,7 @@ export function associatiDirettiSectionLabel(ruolo: string): string | null {
     case 'rivenditore':
       return 'Associati diretti (venditori / promoter / sedi studio)'
     case 'distributore':
-      return 'Associati diretti (promoter / sedi studio)'
+      return 'Associati diretti (venditori / promoter / sedi studio)'
     case 'partner_dipendente':
       return 'Associati diretti (sedi studio)'
     case 'studio':
@@ -642,7 +664,7 @@ export function associatiAggiungiSectionLabel(ruolo: string): string | null {
     case 'rivenditore':
       return 'Associa venditore / promoter / sede studio'
     case 'distributore':
-      return 'Associa promoter / sede studio'
+      return 'Associa venditore / promoter / sede studio'
     case 'partner_dipendente':
       return 'Associa sede studio'
     case 'studio':
@@ -744,6 +766,9 @@ function isDirectChild(
   ) {
     return child.invitato_da === parentId
   }
+  if (parentProfile.ruolo === 'distributore' && child.ruolo === 'distributore') {
+    return child.invitato_da === parentId
+  }
   // Manager: se l'agente ha un'agenzia, mostra l'agenzia (non l'agente sciolto).
   if (parentProfile.ruolo === 'manager' && isAgenteLike(child.ruolo)) {
     if (resolveAgenziaParentForAgent(child, profili, links)) return false
@@ -765,6 +790,10 @@ function isDirectChild(
   }
   if (parentProfile.ruolo === 'agenzia' && child.ruolo === 'studio') {
     if (child.invitato_da === parentId) return true
+  }
+  if (parentProfile.ruolo === 'rivenditore' && child.ruolo === 'distributore') {
+    const inviter = profili.find((p) => p.id === child.invitato_da)
+    if (inviter?.ruolo === 'distributore') return false
   }
   if (child.invitato_da === parentId) return true
   if (hasDirectedParentChildLink(
@@ -982,7 +1011,7 @@ export function nestedAssociatiLabel(ruolo: string): string | null {
     case 'rivenditore':
       return 'Venditori / promoter / sedi studio associati'
     case 'distributore':
-      return 'Promoter / sedi studio associati'
+      return 'Venditori / promoter / sedi studio associati'
     case 'partner_dipendente':
       return 'Sedi studio associate'
     case 'studio':

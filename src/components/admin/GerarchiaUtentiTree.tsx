@@ -161,6 +161,9 @@ function HierarchyNode({
     : null
   const inviter = profili.find((p) => p.id === profile.invitato_da)
   const agenteRiferimento = inviter && isAgenteLike(inviter.ruolo) ? inviter : null
+  const venditoreRiferimento =
+    inviter && profile.ruolo === 'distributore' && inviter.ruolo === 'distributore' ? inviter : null
+  const riferimentoInvito = agenteRiferimento ?? venditoreRiferimento
 
   return (
     <li className="list-none">
@@ -223,9 +226,9 @@ function HierarchyNode({
                   )}
                 </span>
               </h4>
-              {agenteRiferimento ? (
+              {riferimentoInvito ? (
                 <p className="text-sm font-semibold text-zinc-800 mt-1">
-                  {dashCopy.associatoA}: {profiloGerarchiaDisplayLabel(agenteRiferimento)} ({tRuolo(locale, agenteRiferimento.ruolo)})
+                  {dashCopy.associatoA}: {profiloGerarchiaDisplayLabel(riferimentoInvito)} ({tRuolo(locale, riferimentoInvito.ruolo)})
                 </p>
               ) : null}
               <p className="text-sm text-zinc-600 mt-0.5">{profile.email}</p>
