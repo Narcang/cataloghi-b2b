@@ -2,7 +2,9 @@
 export const INVITA_RUOLI_DISPONIBILI: Record<string, string[]> = {
   admin:              ['manager', 'agente', 'back_office', 'distributore', 'partner_dipendente', 'studio_associato'],
   manager:            ['agente', 'back_office', 'distributore', 'partner_dipendente', 'studio_associato'],
-  agenzia:            ['agente', 'back_office'],
+  agenzia:            ['agente', 'distributore', 'studio_associato'],
+  agente:             ['agente', 'distributore', 'studio_associato'],
+  back_office:        ['agente', 'back_office', 'distributore', 'studio_associato'],
   rivenditore:        ['distributore', 'partner_dipendente'],
   distributore:       ['distributore', 'partner_dipendente'],
   studio:             ['studio_associato'],
