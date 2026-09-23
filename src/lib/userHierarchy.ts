@@ -270,7 +270,12 @@ export function resolveAgenziaParentForAgent(
   agentProfile: ProfiloGerarchiaRow,
   profili: ProfiloGerarchiaRow[],
   links: OperatoreLink[],
+  seen?: Set<string>,
 ): ProfiloGerarchiaRow | null {
+  const visited = seen ?? new Set<string>()
+  if (visited.has(agentProfile.id)) return null
+  visited.add(agentProfile.id)
+
   const byId = new Map(profili.map((p) => [p.id, p]))
 
   const agenziaFromId = (id: string | null | undefined): ProfiloGerarchiaRow | null => {
@@ -296,7 +301,7 @@ export function resolveAgenziaParentForAgent(
 
   const inviter = byId.get(agentProfile.invitato_da ?? '')
   if (inviter && isAgenteLike(inviter.ruolo)) {
-    return agenziaFromId(inviter.invitato_da)
+    return resolveAgenziaParentForAgent(inviter, profili, links, visited)
   }
 
   return null
@@ -481,6 +486,15 @@ function getAgentiInCompanyScope(
 ): ProfiloGerarchiaRow[] {
   if (ownerProfile.ruolo === 'agenzia') {
     return getDescendantsByRole(ownerProfile.id, ownerProfile, 'agente', profili, links)
+  }
+
+  if (isAgenteLike(ownerProfile.ruolo)) {
+    const agenzia = resolveAgenziaParentForAgent(ownerProfile, profili, links)
+    if (agenzia) {
+      return getDescendantsByRole(agenzia.id, agenzia, 'agente', profili, links)
+    }
+    const inviter = profili.find((p) => p.id === ownerProfile.invitato_da)
+    return inviter && isAgenteLike(inviter.ruolo) ? [inviter] : []
   }
 
   if (ownerProfile.ruolo === 'rivenditore') {

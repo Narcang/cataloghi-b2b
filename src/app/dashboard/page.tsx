@@ -235,7 +235,7 @@ export default async function Dashboard(props: {
         .select(PROFILI_GERARCHIA_SEL)
         .neq('ruolo', 'free')
         .or('registrazione_approvata.eq.true,registrazione_approvata.is.null')
-        .limit(500),
+        .limit(2000),
       gerarchiaClient
         .from('connessioni_utente_operatore')
         .select('utente_id, operatore_id')
@@ -253,11 +253,27 @@ export default async function Dashboard(props: {
         ? resolveAgenziaParentForAgent(selfRowForScope, profiliGerarchiaDashboard, linksDashboard) ??
           selfRowForScope
         : selfRowForScope
-      profiliGerarchiaDashboard = filterProfiliInHierarchySubtree(
+      const scoped = filterProfiliInHierarchySubtree(
         scopeRoot,
         profiliGerarchiaDashboard,
         linksDashboard,
       )
+      if (isAgente && scopeRoot.id === selfRowForScope.id && selfRowForScope.invitato_da) {
+        const kept = new Set(scoped.map((p) => p.id))
+        const byId = new Map(profiliGerarchiaDashboard.map((p) => [p.id, p]))
+        let cursor: string | null = selfRowForScope.invitato_da
+        const guard = new Set<string>()
+        while (cursor && !guard.has(cursor)) {
+          guard.add(cursor)
+          const row = byId.get(cursor)
+          if (!row) break
+          kept.add(row.id)
+          cursor = isAgenteLike(row.ruolo) ? row.invitato_da : null
+        }
+        profiliGerarchiaDashboard = profiliGerarchiaDashboard.filter((p) => kept.has(p.id))
+      } else {
+        profiliGerarchiaDashboard = scoped
+      }
     }
   }
 
