@@ -70,10 +70,12 @@ export default async function GestioneUtentiPage(props: {
   if (!isManager && !isAgenzia) redirect('/dashboard')
 
   const adminDataClient = isAdmin ? (await getAdminDataSupabase()).client : null
-  const dataSource = adminDataClient ?? supabase
+  const svc = createServiceRoleSupabase() ?? adminDataClient ?? supabase
+  const dataSource = svc
+  const cataloghiSource = adminDataClient ?? supabase
 
   const profiloSel =
-    'id, nome_completo, email, telefono, societa, area_geografica, ruolo, registrazione_approvata, creato_il, seguito_da, espositore_1, espositore_2, box_show_room_1, box_show_room_2, box_show_room_3, box_show_room_4, agenzia_campione_1, agenzia_campione_2, agenzia_catalogo_1, agenzia_catalogo_2, espositore_1_qta, espositore_2_qta, box_show_room_1_qta, box_show_room_2_qta, box_show_room_3_qta, box_show_room_4_qta, agenzia_campione_1_qta, agenzia_campione_2_qta, agenzia_catalogo_1_qta, agenzia_catalogo_2_qta, espositore_1_data, espositore_2_data, box_show_room_1_data, box_show_room_2_data, box_show_room_3_data, box_show_room_4_data, agenzia_campione_1_data, agenzia_campione_2_data, agenzia_catalogo_1_data, agenzia_catalogo_2_data, agenzia_catalogo_3, agenzia_catalogo_4, agenzia_catalogo_3_qta, agenzia_catalogo_4_qta, agenzia_catalogo_3_data, agenzia_catalogo_4_data, agenzia_campioni_aggiornato_il, agenzia_cataloghi_aggiornato_il, espositori_aggiornato_il, box_aggiornato_il'
+    'id, nome_completo, email, telefono, societa, area_geografica, ruolo, invitato_da, registrazione_approvata, creato_il, seguito_da, espositore_1, espositore_2, box_show_room_1, box_show_room_2, box_show_room_3, box_show_room_4, agenzia_campione_1, agenzia_campione_2, agenzia_catalogo_1, agenzia_catalogo_2, espositore_1_qta, espositore_2_qta, box_show_room_1_qta, box_show_room_2_qta, box_show_room_3_qta, box_show_room_4_qta, agenzia_campione_1_qta, agenzia_campione_2_qta, agenzia_catalogo_1_qta, agenzia_catalogo_2_qta, espositore_1_data, espositore_2_data, box_show_room_1_data, box_show_room_2_data, box_show_room_3_data, box_show_room_4_data, agenzia_campione_1_data, agenzia_campione_2_data, agenzia_catalogo_1_data, agenzia_catalogo_2_data, agenzia_catalogo_3, agenzia_catalogo_4, agenzia_catalogo_3_qta, agenzia_catalogo_4_qta, agenzia_catalogo_3_data, agenzia_catalogo_4_data, agenzia_campioni_aggiornato_il, agenzia_cataloghi_aggiornato_il, espositori_aggiornato_il, box_aggiornato_il'
 
   let listaQuery = dataSource
     .from('profili')
@@ -81,10 +83,13 @@ export default async function GestioneUtentiPage(props: {
     .neq('ruolo', 'free')
     .or('registrazione_approvata.eq.true,registrazione_approvata.is.null')
     .order('nome_completo', { ascending: true, nullsFirst: false })
-    .limit(150)
+    .limit(500)
 
   if (ruoloFilter !== 'all') listaQuery = listaQuery.eq('ruolo', ruoloFilter)
-  if (nomeFilter.length > 0) listaQuery = listaQuery.ilike('nome_completo', `%${escapeIlikePattern(nomeFilter)}%`)
+  if (nomeFilter.length > 0) {
+    const q = `%${escapeIlikePattern(nomeFilter).replace(/"/g, '')}%`
+    listaQuery = listaQuery.or(`nome_completo.ilike."${q}",societa.ilike."${q}"`)
+  }
 
   const pendQuery = dataSource
     .from('profili')
@@ -92,25 +97,18 @@ export default async function GestioneUtentiPage(props: {
     .eq('registrazione_approvata', false)
     .order('nome_completo', { ascending: true, nullsFirst: false })
 
-  // Per la struttura organizzativa usiamo il service role per bypassare la RLS e
-  // vedere tutte le connessioni/profili indipendentemente dal ruolo del viewer.
-  const svc = adminDataClient ?? createServiceRoleSupabase() ?? supabase
-
   const linksQuery = svc
     .from('connessioni_utente_operatore')
     .select('utente_id, operatore_id')
     .limit(2000)
 
-  let gerarchiaQuery = svc
+  // Albero sempre completo: i filtri lista non devono togliere i figli (es. "Test settembre" sotto Kanji).
+  const gerarchiaQuery = svc
     .from('profili')
     .select('id, nome_completo, societa, email, area_geografica, ruolo, invitato_da, registrazione_approvata, seguito_da, espositore_1, espositore_2, box_show_room_1, box_show_room_2, box_show_room_3, box_show_room_4, agenzia_campione_1, agenzia_campione_2, agenzia_catalogo_1, agenzia_catalogo_2, espositore_1_qta, espositore_2_qta, box_show_room_1_qta, box_show_room_2_qta, box_show_room_3_qta, box_show_room_4_qta, agenzia_campione_1_qta, agenzia_campione_2_qta, agenzia_catalogo_1_qta, agenzia_catalogo_2_qta, espositore_1_data, espositore_2_data, box_show_room_1_data, box_show_room_2_data, box_show_room_3_data, box_show_room_4_data, agenzia_campione_1_data, agenzia_campione_2_data, agenzia_catalogo_1_data, agenzia_catalogo_2_data, agenzia_catalogo_3, agenzia_catalogo_4, agenzia_catalogo_3_qta, agenzia_catalogo_4_qta, agenzia_catalogo_3_data, agenzia_catalogo_4_data, agenzia_campioni_aggiornato_il, agenzia_cataloghi_aggiornato_il, espositori_aggiornato_il, box_aggiornato_il')
     .neq('ruolo', 'free')
     .order('nome_completo', { ascending: true, nullsFirst: false })
-
-  if (ruoloFilter !== 'all') gerarchiaQuery = gerarchiaQuery.eq('ruolo', ruoloFilter)
-  if (nomeFilter.length > 0) {
-    gerarchiaQuery = gerarchiaQuery.ilike('nome_completo', `%${escapeIlikePattern(nomeFilter)}%`)
-  }
+    .limit(2000)
 
   /** Tutti gli utenti approvati, senza filtro area/nome: usati per associare il ruolo inferiore. */
   const associazioneQuery = svc
@@ -122,7 +120,7 @@ export default async function GestioneUtentiPage(props: {
     .limit(500)
 
   /** Cataloghi attivi per permessi per-utente. */
-  const cataloghiQuery = dataSource
+  const cataloghiQuery = cataloghiSource
     .from('cataloghi')
     .select('id, titolo, categoria, ruoli_visibili')
     .eq('stato_pubblicazione', 'attivo')

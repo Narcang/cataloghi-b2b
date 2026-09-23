@@ -33,6 +33,7 @@ export async function register(formData: FormData) {
 
   let invitoRuolo: string | null = null
   let invitoDa: string | null = null
+  let invitoCreatoDa: string | null = null
   let invitoMultiUso = false
 
   if (invitoToken) {
@@ -55,6 +56,7 @@ export async function register(formData: FormData) {
     invitoRuolo = invito.ruolo
     invitoMultiUso = invito.multiUso
     invitoDa = invito.associatoA
+    invitoCreatoDa = invito.creatoDa
     if (!invitoRuolo) {
       redirect(
         '/registrazione?message=' +
@@ -207,6 +209,13 @@ export async function register(formData: FormData) {
             )
           }
         }
+      }
+
+      if (invitoCreatoDa && invitoCreatoDa !== invitoDa) {
+        await svc.from('connessioni_utente_operatore').upsert(
+          { utente_id: invitoCreatoDa, operatore_id: newUserId },
+          { onConflict: 'utente_id,operatore_id', ignoreDuplicates: true },
+        )
       }
     }
 

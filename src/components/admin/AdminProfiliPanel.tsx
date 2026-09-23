@@ -21,11 +21,15 @@ import {
   getChildrenProfiles,
   isRivenditoreManagedByAgenzia,
   isRivenditoreManagedByAgente,
+  profiloGerarchiaDisplayLabel,
   profiloToGerarchiaRow,
+  resolveAgenziaParentForAgent,
   type ProfiloGerarchiaRow,
 } from '@/lib/userHierarchy'
+import { isAgenteLike } from '@/lib/catalogRoles'
 
 import { useAppLocale } from '@/lib/useAppLocale'
+import { tDashboard } from '@/lib/i18n'
 import { tAdmin, tRuolo, tRivenditoriCount } from '@/lib/i18nAdmin'
 
 export type ProfiloGestioneRow = {
@@ -36,6 +40,7 @@ export type ProfiloGestioneRow = {
   societa: string | null
   area_geografica: string | null
   ruolo: string
+  invitato_da?: string | null
   registrazione_approvata: boolean | null
   creato_il: string | null
   espositore_1?: string | null
@@ -173,6 +178,7 @@ export default function AdminProfiliPanel({
   const router = useRouter()
   const locale = useAppLocale()
   const copy = tAdmin(locale)
+  const dashCopy = tDashboard(locale)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
@@ -258,7 +264,10 @@ export default function AdminProfiliPanel({
   }, [profiliGerarchia])
 
   function getDirectAssociati(profilo: ProfiloGestioneRow): ProfiloGerarchiaRow[] {
-    const row = profiloToGerarchiaRow(profilo, invitatoDaById.get(profilo.id) ?? null)
+    const row = profiloToGerarchiaRow(
+      profilo,
+      profilo.invitato_da ?? invitatoDaById.get(profilo.id) ?? null,
+    )
     return getChildrenProfiles(profilo.id, row, profilo.id, profilo.ruolo, profiliGerarchia, links)
   }
 
@@ -624,9 +633,15 @@ export default function AdminProfiliPanel({
             </li>
           ) : null}
           {profiliRuoloAttivo.map((p) => {
-            const profiloGerarchia = profiloToGerarchiaRow(p, invitatoDaById.get(p.id) ?? null)
+            const profiloGerarchia = profiloToGerarchiaRow(
+              p,
+              p.invitato_da ?? invitatoDaById.get(p.id) ?? null,
+            )
             const profiloReadOnly = readOnly || p.id === currentUserId || p.ruolo === 'admin'
             const directAssociati = getDirectAssociati(p)
+            const agenziaAssociata = isAgenteLike(p.ruolo)
+              ? resolveAgenziaParentForAgent(profiloGerarchia, profiliGerarchia, links)
+              : null
             const associatiLabel = associatiDirettiSectionLabel(p.ruolo)
             const aggiungiLabel = associatiAggiungiSectionLabel(p.ruolo)
             const candidateAssociati = getCandidateAssociatiProfiles(p.id, p.ruolo, profiliAssociazione)
@@ -669,6 +684,9 @@ export default function AdminProfiliPanel({
                       )}
                       <span className="ml-2 text-xs font-normal text-zinc-500">
                         {tRuolo(locale, p.ruolo)}
+                        {agenziaAssociata
+                          ? ` · ${dashCopy.associatoA} ${profiloGerarchiaDisplayLabel(agenziaAssociata)}`
+                          : ''}
                         {p.registrazione_approvata === false ? ` · ${copy.inAttesa}` : ''}
                       </span>
                     </span>
