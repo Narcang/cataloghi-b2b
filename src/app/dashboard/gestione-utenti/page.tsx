@@ -279,6 +279,31 @@ export default async function GestioneUtentiPage(props: {
           </div>
         </section>
 
+        {/* Struttura organizzativa (matrioska) */}
+        <GerarchiaUtentiTree
+          currentUserId={user.id}
+          viewerRole={ruoloCorrente}
+          profili={profiliGerarchia}
+          links={connessioniUtenteOperatoreRows}
+          ultimoAccessoByProfiloId={ultimoAccessoByProfiloId}
+        />
+
+        {/* Gestione profili */}
+        <AdminProfiliPanel
+          currentUserId={user.id}
+          profiliPendenti={profiliRegistrazionePendente}
+          profiliLista={profiliGestioneAdmin}
+          profiliGerarchia={profiliGerarchia}
+          profiliAssociazione={profiliAssociazione}
+          links={connessioniUtenteOperatoreRows}
+          allCataloghi={allCataloghi}
+          readOnly={!isAdmin}
+          canEditSpecializzazione={isManager}
+          canManageCataloghi={isManager}
+          canCreateAssociati={isManager}
+          canManageSpecializzazioneOpzioni={isAdmin}
+        />
+
         <section className="border border-black rounded-2xl bg-white p-5 space-y-8">
           <div>
             <h2 className="text-xl text-zinc-900 font-medium">{copy.creaManualeAgenziaRivenditore}</h2>
@@ -318,31 +343,6 @@ export default async function GestioneUtentiPage(props: {
             }}
           />
         </section>
-
-        {/* Struttura organizzativa (matrioska) */}
-        <GerarchiaUtentiTree
-          currentUserId={user.id}
-          viewerRole={ruoloCorrente}
-          profili={profiliGerarchia}
-          links={connessioniUtenteOperatoreRows}
-          ultimoAccessoByProfiloId={ultimoAccessoByProfiloId}
-        />
-
-        {/* Gestione profili */}
-        <AdminProfiliPanel
-          currentUserId={user.id}
-          profiliPendenti={profiliRegistrazionePendente}
-          profiliLista={profiliGestioneAdmin}
-          profiliGerarchia={profiliGerarchia}
-          profiliAssociazione={profiliAssociazione}
-          links={connessioniUtenteOperatoreRows}
-          allCataloghi={allCataloghi}
-          readOnly={!isAdmin}
-          canEditSpecializzazione={isManager}
-          canManageCataloghi={isManager}
-          canCreateAssociati={isManager}
-          canManageSpecializzazioneOpzioni={isAdmin}
-        />
 
         {/* Invita utenti */}
         <section className="border border-black rounded-2xl bg-white p-6">
