@@ -60,8 +60,8 @@ export const CHILD_ROLES_BY_PARENT: Record<string, string[]> = {
   admin: ['manager'],
   manager: ['agenzia', 'agente', 'back_office'],
   agenzia: ['agente', 'back_office', 'rivenditore', 'studio'],
-  agente: ['studio'],
-  back_office: ['studio'],
+  agente: ['agente', 'distributore', 'studio_associato', 'studio'],
+  back_office: ['agente', 'back_office', 'distributore', 'studio_associato', 'studio'],
   rivenditore: ['distributore', 'partner_dipendente', 'studio'],
   distributore: ['partner_dipendente', 'studio'],
   partner_dipendente: ['studio'],
@@ -161,8 +161,16 @@ export function roleBreakdownBadgesForNode(ruolo: string): RoleBreakdownBadge[] 
         { ruolo: 'studio', label: 'Sedi Studio' },
       ]
     case 'agente':
+      return [
+        { ruolo: 'agente', label: 'Agenti' },
+        { ruolo: 'studio', label: 'Sedi Studio' },
+      ]
     case 'back_office':
-      return [{ ruolo: 'studio', label: 'Sedi Studio' }]
+      return [
+        { ruolo: 'agente', label: 'Agenti' },
+        { ruolo: 'back_office', label: 'Back-Office' },
+        { ruolo: 'studio', label: 'Sedi Studio' },
+      ]
     case 'rivenditore':
       return [{ ruolo: 'studio', label: 'Sedi Studio' }]
     case 'distributore':
@@ -588,8 +596,9 @@ export function associatiDirettiSectionLabel(ruolo: string): string | null {
     case 'agenzia':
       return 'Associati diretti (agenti / back-office / rivenditori / sedi studio)'
     case 'agente':
+      return 'Associati diretti (agenti / venditori / studi / sedi studio)'
     case 'back_office':
-      return 'Associati diretti (sedi studio)'
+      return 'Associati diretti (agenti / back-office / venditori / studi / sedi studio)'
     case 'rivenditore':
       return 'Associati diretti (venditori / promoter / sedi studio)'
     case 'distributore':
@@ -712,6 +721,15 @@ function isDirectChild(
   const expectedRoles = CHILD_ROLES_BY_PARENT[parentProfile.ruolo] ?? []
   if (!expectedRoles.includes(child.ruolo)) return false
   if (isAgenteLike(parentProfile.ruolo) && child.ruolo === 'rivenditore') return false
+  if (
+    isAgenteLike(parentProfile.ruolo) &&
+    (child.ruolo === 'agente' ||
+      child.ruolo === 'back_office' ||
+      child.ruolo === 'distributore' ||
+      child.ruolo === 'studio_associato')
+  ) {
+    return child.invitato_da === parentId
+  }
   // Manager: se l'agente ha un'agenzia, mostra l'agenzia (non l'agente sciolto).
   if (parentProfile.ruolo === 'manager' && isAgenteLike(child.ruolo)) {
     if (resolveAgenziaParentForAgent(child, profili, links)) return false
@@ -720,8 +738,11 @@ function isDirectChild(
     return managerShouldShowAgenzia(parentId, parentProfile.ruolo, child, profili, links)
   }
   if (parentProfile.ruolo === 'agenzia' && isAgenteLike(child.ruolo)) {
-    const agenzia = resolveAgenziaParentForAgent(child, profili, links)
-    if (agenzia?.id === parentId) return true
+    const inviter = profili.find((p) => p.id === child.invitato_da)
+    if (!(inviter && isAgenteLike(inviter.ruolo))) {
+      const agenzia = resolveAgenziaParentForAgent(child, profili, links)
+      if (agenzia?.id === parentId) return true
+    }
   }
   if (parentProfile.ruolo === 'agenzia' && child.ruolo === 'rivenditore') {
     if (child.invitato_da === parentId) return true
@@ -795,6 +816,15 @@ export function resolveFlatListReferent(
   if (stopRoles.length === 0) return null
 
   const stopSet = new Set(stopRoles)
+  const invitedBy = profili.find((p) => p.id === child.invitato_da)
+  if (
+    invitedBy &&
+    stopSet.has(invitedBy.ruolo) &&
+    isDirectChild(invitedBy.id, invitedBy, child, links, profili)
+  ) {
+    return invitedBy
+  }
+
   let current: ProfiloGerarchiaRow | null = child
   const visited = new Set<string>()
 
@@ -932,8 +962,9 @@ export function nestedAssociatiLabel(ruolo: string): string | null {
     case 'agenzia':
       return 'Agenti / back-office / rivenditori / sedi studio associati'
     case 'agente':
+      return 'Agenti / venditori / studi / sedi studio associati'
     case 'back_office':
-      return 'Sedi studio associate'
+      return 'Agenti / back-office / venditori / studi / sedi studio associati'
     case 'rivenditore':
       return 'Venditori / promoter / sedi studio associati'
     case 'distributore':

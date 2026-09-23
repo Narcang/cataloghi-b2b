@@ -372,6 +372,8 @@ const admin = {
     nestedManager: 'Agenzie / agenti / back-office associati',
     nestedAgenzia: 'Agenti / back-office / rivenditori / studi associati',
     nestedAgente: 'Sedi studio associate',
+    nestedAgenteRete: 'Agenti / venditori / studi / sedi studio associati',
+    nestedBackOfficeRete: 'Agenti / back-office / venditori / studi / sedi studio associati',
     nestedStudio: 'Studio associati',
     nestedRivenditore: 'Venditori / promoter / studi associati',
     nestedDistributore: 'Promoter / studi associati',
@@ -559,6 +561,8 @@ const admin = {
     nestedManager: 'Связанные агентства / агенты / back-office',
     nestedAgenzia: 'Связанные агенты / back-office / дилеры / студии',
     nestedAgente: 'Связанные студии (офисы)',
+    nestedAgenteRete: 'Связанные агенты / продавцы / студии / офисы',
+    nestedBackOfficeRete: 'Связанные агенты / back-office / продавцы / студии / офисы',
     nestedStudio: 'Связанные студии',
     nestedRivenditore: 'Связанные продавцы / промоутеры / студии',
     nestedDistributore: 'Связанные промоутеры / студии',
@@ -745,6 +749,8 @@ const admin = {
     nestedManager: 'Linked agencies / agents / back-office',
     nestedAgenzia: 'Linked agents / back-office / resellers / studios',
     nestedAgente: 'Linked studio locations',
+    nestedAgenteRete: 'Linked agents / vendors / studios / studio locations',
+    nestedBackOfficeRete: 'Linked agents / back-office / vendors / studios / studio locations',
     nestedStudio: 'Linked studios',
     nestedRivenditore: 'Linked sellers / promoters / studios',
     nestedDistributore: 'Linked promoters / studios',
@@ -937,6 +943,8 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     nestedManager: 'Agencias / agentes / Back-Office asociados',
     nestedAgenzia: 'Agentes / Back-Office / revendedores / estudios asociados',
     nestedAgente: 'Sedes estudio asociadas',
+    nestedAgenteRete: 'Agentes / vendedores / estudios / sedes asociados',
+    nestedBackOfficeRete: 'Agentes / back-office / vendedores / estudios / sedes asociados',
     nestedStudio: 'Estudios asociados',
     nestedRivenditore: 'Vendedores / promoter / estudios asociados',
     nestedDistributore: 'Promoter / estudios asociados',
@@ -1126,6 +1134,8 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     nestedManager: 'Agences / agents / back-office associés',
     nestedAgenzia: 'Agents / back-office / revendeurs / studios associés',
     nestedAgente: 'Sièges studio associés',
+    nestedAgenteRete: 'Agents / vendeurs / studios / sièges associés',
+    nestedBackOfficeRete: 'Agents / back-office / vendeurs / studios / sièges associés',
     nestedStudio: 'Studios associés',
     nestedRivenditore: 'Vendeurs / promoteurs / studios associés',
     nestedDistributore: 'Promoteurs / studios associés',
@@ -1312,6 +1322,8 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     nestedManager: 'Verknüpfte Agenturen / Agenten / Back-Office',
     nestedAgenzia: 'Verknüpfte Agenten / Back-Office / Händler / Studios',
     nestedAgente: 'Verknüpfte Studio-Standorte',
+    nestedAgenteRete: 'Verknüpfte Agenten / Verkäufer / Studios / Standorte',
+    nestedBackOfficeRete: 'Verknüpfte Agenten / Back-Office / Verkäufer / Studios / Standorte',
     nestedStudio: 'Verknüpfte Studios',
     nestedRivenditore: 'Verknüpfte Verkäufer / Promoter / Studios',
     nestedDistributore: 'Verknüpfte Promoter / Studios',
@@ -1499,6 +1511,8 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     nestedManager: 'Gekoppelde agentschappen / agenten / Back-Office',
     nestedAgenzia: 'Gekoppelde agenten / Back-Office / wederverkopers / studio’s',
     nestedAgente: 'Gekoppelde studiovestigingen',
+    nestedAgenteRete: 'Gekoppelde agenten / verkopers / studio’s / vestigingen',
+    nestedBackOfficeRete: 'Gekoppelde agenten / back-office / verkopers / studio’s / vestigingen',
     nestedStudio: 'Gekoppelde studio’s',
     nestedRivenditore: 'Gekoppelde verkopers / promoters / studio’s',
     nestedDistributore: 'Gekoppelde promoters / studio’s',
@@ -1688,6 +1702,8 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     nestedManager: 'Συνδεδεμένα πρακτορεία / πράκτορες / back-office',
     nestedAgenzia: 'Συνδεδεμένοι πράκτορες / back-office / μεταπωλητές / στούντιο',
     nestedAgente: 'Συνδεδεμένες έδρες στούντιο',
+    nestedAgenteRete: 'Συνδεδεμένοι πράκτορες / πωλητές / στούντιο / έδρες',
+    nestedBackOfficeRete: 'Συνδεδεμένοι πράκτορες / back-office / πωλητές / στούντιο / έδρες',
     nestedStudio: 'Συνδεδεμένα στούντιο',
     nestedRivenditore: 'Συνδεδεμένοι πωλητές / promoter / στούντιο',
     nestedDistributore: 'Συνδεδεμένοι promoter / στούντιο',
@@ -1874,6 +1890,8 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     nestedManager: 'Powiązane agencje / agenci / back-office',
     nestedAgenzia: 'Powiązani agenci / back-office / dystrybutorzy / studia',
     nestedAgente: 'Powiązane siedziby studiów',
+    nestedAgenteRete: 'Powiązani agenci / sprzedawcy / studia / siedziby',
+    nestedBackOfficeRete: 'Powiązani agenci / back-office / sprzedawcy / studia / siedziby',
     nestedStudio: 'Powiązane studia',
     nestedRivenditore: 'Powiązani sprzedawcy / promoterzy / studia',
     nestedDistributore: 'Powiązani promoterzy / studia',
@@ -2060,6 +2078,8 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     nestedManager: 'Пов’язані агентства / агенти / back-office',
     nestedAgenzia: 'Пов’язані агенти / back-office / дилери / студії',
     nestedAgente: 'Пов’язані осередки студій',
+    nestedAgenteRete: 'Пов’язані агенти / продавці / студії / осередки',
+    nestedBackOfficeRete: 'Пов’язані агенти / back-office / продавці / студії / осередки',
     nestedStudio: 'Пов’язані студії',
     nestedRivenditore: 'Пов’язані продавці / промоутери / студії',
     nestedDistributore: 'Пов’язані промоутери / студії',
@@ -2210,7 +2230,9 @@ export function tNestedAssociati(locale: AppLocale, ruoloKey: string): string | 
     case 'agenzia':
       return copy.nestedAgenzia
     case 'agente':
+      return copy.nestedAgenteRete
     case 'back_office':
+      return copy.nestedBackOfficeRete
     case 'partner_dipendente':
       return copy.nestedAgente
     case 'rivenditore':
