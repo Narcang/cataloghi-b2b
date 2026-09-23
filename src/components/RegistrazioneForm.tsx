@@ -19,6 +19,7 @@ function flashMessage(copy: ReturnType<typeof tRegistrazione>, message: string):
     password: copy.errPassword,
     email_exists: copy.errEmailExists,
     server: copy.errServer,
+    invito: copy.errInvito,
     'Devi accettare le policy per procedere.': copy.errConsenso,
     'Compila tutti i campi obbligatori.': copy.errCampi,
     'La password deve avere almeno 8 caratteri.': copy.errPassword,
@@ -33,6 +34,7 @@ export default function RegistrazioneForm({
   tokenRaw,
   hasInvito,
   ruoloKey,
+  societaInvito,
   ok,
   message,
 }: {
@@ -40,6 +42,7 @@ export default function RegistrazioneForm({
   tokenRaw: string
   hasInvito: boolean
   ruoloKey: string | null
+  societaInvito: string | null
   ok: boolean
   message: string
 }) {
@@ -56,7 +59,7 @@ export default function RegistrazioneForm({
         <div className="w-full max-w-lg">
         <Card className="w-full border border-black bg-white shadow-sm">
           <form action={register}>
-            {tokenRaw ? <input type="hidden" name="invito_token" value={tokenRaw} /> : null}
+            {hasInvito && tokenRaw ? <input type="hidden" name="invito_token" value={tokenRaw} /> : null}
 
             <CardHeader>
               <CardTitle className="text-2xl text-zinc-900">{copy.titolo}</CardTitle>
@@ -92,7 +95,19 @@ export default function RegistrazioneForm({
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="societa">{copy.societa}</Label>
-                <Input id="societa" name="societa" type="text" autoComplete="organization" required />
+                <Input
+                  id="societa"
+                  name="societa"
+                  type="text"
+                  autoComplete="organization"
+                  defaultValue={societaInvito ?? ''}
+                  readOnly={Boolean(societaInvito)}
+                  required
+                  className={societaInvito ? 'bg-zinc-50' : undefined}
+                />
+                {societaInvito ? (
+                  <p className="text-xs text-zinc-500">{copy.societaDaInvito}</p>
+                ) : null}
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="email">{copy.email}</Label>
