@@ -198,6 +198,15 @@ export default async function GestioneUtentiPage(props: {
   const agenziaOptions = profiliAssociazione
     .filter((p) => p.ruolo === 'agenzia')
     .map((p) => ({ id: p.id, label: profiloGerarchiaDisplayLabel(p) }))
+    .sort((a, b) => a.label.localeCompare(b.label, 'it', { sensitivity: 'base' }))
+  const rivenditoreOptions = profiliAssociazione
+    .filter((p) => p.ruolo === 'rivenditore')
+    .map((p) => ({ id: p.id, label: profiloGerarchiaDisplayLabel(p) }))
+    .sort((a, b) => a.label.localeCompare(b.label, 'it', { sensitivity: 'base' }))
+  const studioOptions = profiliAssociazione
+    .filter((p) => p.ruolo === 'studio')
+    .map((p) => ({ id: p.id, label: profiloGerarchiaDisplayLabel(p) }))
+    .sort((a, b) => a.label.localeCompare(b.label, 'it', { sensitivity: 'base' }))
 
   return (
     <div className="ladiva-root ladiva-root-app-dark min-h-screen flex flex-col">
@@ -351,7 +360,14 @@ export default async function GestioneUtentiPage(props: {
           <p className="text-sm text-zinc-500 mb-4">
             {copy.invitaHelp}
           </p>
-          <InvitaUtente ruoloCorrente={ruoloCorrente} />
+          <InvitaUtente
+            ruoloCorrente={ruoloCorrente}
+            parentOptionsByCategoria={{
+              agenzia: agenziaOptions,
+              rivenditore: rivenditoreOptions,
+              studio: studioOptions,
+            }}
+          />
         </section>
         ) : null}
           </>

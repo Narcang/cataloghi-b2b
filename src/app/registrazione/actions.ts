@@ -43,14 +43,25 @@ export async function register(formData: FormData) {
     if (svc) {
       const { data: invito } = await svc
         .from('inviti')
-        .select('id, ruolo_invitato, creato_da, usato, multi_uso')
+        .select('id, ruolo_invitato, creato_da, usato, multi_uso, associato_a')
         .eq('token', invitoToken)
         .single()
 
       if (invito && (!invito.usato || invito.multi_uso)) {
         invitoRuolo = invito.ruolo_invitato
-        invitoDa = invito.creato_da
         invitoMultiUso = invito.multi_uso ?? false
+        invitoDa = invito.associato_a ?? null
+
+        if (!invitoDa && invito.creato_da) {
+          const { data: creatore } = await svc
+            .from('profili')
+            .select('ruolo')
+            .eq('id', invito.creato_da)
+            .single()
+          if (creatore && creatore.ruolo !== 'admin' && creatore.ruolo !== 'manager') {
+            invitoDa = invito.creato_da
+          }
+        }
 
         if (invitoRuolo === 'rivenditore' && invitoDa) {
           const { data: invitante } = await svc

@@ -443,6 +443,11 @@ const admin = {
     invitaUnUtente: 'Invita un utente',
     invitaFormHelp:
       'Genera un link monouso. Chi si registra tramite questo link ottiene il ruolo selezionato e viene collegato automaticamente al tuo profilo dopo l’approvazione.',
+    invitaFormHelpEntita:
+      'Genera un link monouso. Se scegli un’agenzia, un rivenditore o una sede studio, chi si registra resta associato a quella. Se lasci il collegamento vuoto, andrà associato a mano.',
+    collegaInvitoA: 'Collega a',
+    opzionaleInvito: 'opzionale',
+    nessunCollegamentoDaAssociare: 'Nessun collegamento — da associare a mano',
     selezionaRuolo: '— Seleziona ruolo —',
     generaLink: 'Genera link',
     generazione: 'Generazione…',
@@ -622,6 +627,11 @@ const admin = {
     invitaUnUtente: 'Пригласить пользователя',
     invitaFormHelp:
       'Создайте одноразовую ссылку. Зарегистрированный пользователь получит выбранную роль и будет связан с вашим профилем после одобрения.',
+    invitaFormHelpEntita:
+      'Создайте одноразовую ссылку. Если выбрать агентство, дилера или студию (офис), новый пользователь будет связан с ним. Если оставить поле пустым, связь нужно будет назначить вручную.',
+    collegaInvitoA: 'Связать с',
+    opzionaleInvito: 'необязательно',
+    nessunCollegamentoDaAssociare: 'Без связи — назначить вручную',
     selezionaRuolo: '— Выберите роль —',
     generaLink: 'Создать ссылку',
     generazione: 'Создание…',
@@ -803,6 +813,11 @@ const admin = {
     invitaUnUtente: 'Invite a user',
     invitaFormHelp:
       'Generate a one-time link. Anyone who registers with it gets the selected role and is linked to your profile after approval.',
+    invitaFormHelpEntita:
+      'Generate a one-time link. If you pick an agency, reseller or studio location, the new user is linked to it. If you leave the link empty, they will need to be associated by hand.',
+    collegaInvitoA: 'Link to',
+    opzionaleInvito: 'optional',
+    nessunCollegamentoDaAssociare: 'No link — associate later by hand',
     selezionaRuolo: '— Select role —',
     generaLink: 'Generate link',
     generazione: 'Generating…',
@@ -993,6 +1008,11 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     invitaUnUtente: 'Invitar a un usuario',
     invitaFormHelp:
       'Genera un enlace de un solo uso. Quien se registre con este enlace obtiene el rol seleccionado y se vincula automáticamente a tu perfil tras la aprobación.',
+    invitaFormHelpEntita:
+      'Genera un enlace de un solo uso. Si eliges una agencia, un revendedor o una sede estudio, el nuevo usuario queda vinculado a ella. Si dejas el enlace vacío, habrá que asociarlo a mano.',
+    collegaInvitoA: 'Vincular a',
+    opzionaleInvito: 'opcional',
+    nessunCollegamentoDaAssociare: 'Sin vínculo — asociar a mano después',
     selezionaRuolo: '— Selecciona rol —',
     generaLink: 'Generar enlace',
     generazione: 'Generando…',
@@ -1174,6 +1194,11 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     invitaUnUtente: 'Inviter un utilisateur',
     invitaFormHelp:
       'Générez un lien à usage unique. La personne inscrite obtient le rôle choisi et est liée à votre profil après approbation.',
+    invitaFormHelpEntita:
+      'Générez un lien à usage unique. Si vous choisissez une agence, un revendeur ou un siège studio, la personne inscrite y est liée. Si vous laissez le champ vide, l’association se fera à la main.',
+    collegaInvitoA: 'Lier à',
+    opzionaleInvito: 'facultatif',
+    nessunCollegamentoDaAssociare: 'Aucun lien — à associer à la main',
     selezionaRuolo: '— Sélectionner un rôle —',
     generaLink: 'Générer le lien',
     generazione: 'Génération…',
@@ -1355,6 +1380,11 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     invitaUnUtente: 'Benutzer einladen',
     invitaFormHelp:
       'Einmal-Link erzeugen. Wer sich registriert, erhält die Rolle und wird nach Freigabe verknüpft.',
+    invitaFormHelpEntita:
+      'Einmal-Link erzeugen. Wenn Sie eine Agentur, einen Händler oder einen Studio-Standort wählen, wird der neue Benutzer damit verknüpft. Bleibt das Feld leer, muss die Zuordnung später manuell erfolgen.',
+    collegaInvitoA: 'Verknüpfen mit',
+    opzionaleInvito: 'optional',
+    nessunCollegamentoDaAssociare: 'Keine Verknüpfung — später manuell zuordnen',
     selezionaRuolo: '— Rolle wählen —',
     generaLink: 'Link erzeugen',
     generazione: 'Erzeugen…',
@@ -1540,6 +1570,11 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     invitaUnUtente: 'Een gebruiker uitnodigen',
     invitaFormHelp:
       'Genereer een eenmalige link. Wie zich via deze link registreert, krijgt de geselecteerde rol en wordt na goedkeuring automatisch aan uw profiel gekoppeld.',
+    invitaFormHelpEntita:
+      'Genereer een eenmalige link. Als u een agentschap, wederverkoper of studiovestiging kiest, wordt de nieuwe gebruiker daaraan gekoppeld. Laat u het veld leeg, dan moet de koppeling later handmatig gebeuren.',
+    collegaInvitoA: 'Koppelen aan',
+    opzionaleInvito: 'optioneel',
+    nessunCollegamentoDaAssociare: 'Geen koppeling — later handmatig koppelen',
     selezionaRuolo: '— Selecteer rol —',
     generaLink: 'Link genereren',
     generazione: 'Genereren…',
@@ -1721,6 +1756,11 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     invitaUnUtente: 'Πρόσκληση χρήστη',
     invitaFormHelp:
       'Δημιουργήστε σύνδεσμο μίας χρήσης. Όποιος εγγραφεί παίρνει τον ρόλο και συνδέεται μετά την έγκριση.',
+    invitaFormHelpEntita:
+      'Δημιουργήστε σύνδεσμο μίας χρήσης. Αν επιλέξετε πρακτορείο, μεταπωλητή ή έδρα στούντιο, ο νέος χρήστης συνδέεται εκεί. Αν αφήσετε το πεδίο κενό, η σύνδεση γίνεται χειροκίνητα αργότερα.',
+    collegaInvitoA: 'Σύνδεση με',
+    opzionaleInvito: 'προαιρετικό',
+    nessunCollegamentoDaAssociare: 'Χωρίς σύνδεση — να συνδεθεί χειροκίνητα',
     selezionaRuolo: '— Επιλέξτε ρόλο —',
     generaLink: 'Δημιουργία συνδέσμου',
     generazione: 'Δημιουργία…',
@@ -1902,6 +1942,11 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     invitaUnUtente: 'Zaproś użytkownika',
     invitaFormHelp:
       'Wygeneruj jednorazowy link. Osoba, która się zarejestruje, otrzyma rolę i zostanie powiązana po zatwierdzeniu.',
+    invitaFormHelpEntita:
+      'Wygeneruj jednorazowy link. Jeśli wybierzesz agencję, dystrybutora lub siedzibę studia, nowy użytkownik zostanie z nią powiązany. Jeśli zostawisz pole puste, powiązanie trzeba będzie zrobić ręcznie.',
+    collegaInvitoA: 'Powiąż z',
+    opzionaleInvito: 'opcjonalnie',
+    nessunCollegamentoDaAssociare: 'Brak powiązania — powiąż ręcznie później',
     selezionaRuolo: '— Wybierz rolę —',
     generaLink: 'Generuj link',
     generazione: 'Generowanie…',
@@ -2083,6 +2128,11 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     invitaUnUtente: 'Запросити користувача',
     invitaFormHelp:
       'Створіть одноразове посилання. Хто зареєструється, отримає роль і буде пов’язаний після схвалення.',
+    invitaFormHelpEntita:
+      'Створіть одноразове посилання. Якщо вибрати агентство, дилера або осередок студії, новий користувач буде з ним пов’язаний. Якщо залишити поле порожнім, зв’язок треба буде призначити вручну.',
+    collegaInvitoA: 'Зв’язати з',
+    opzionaleInvito: 'необов’язково',
+    nessunCollegamentoDaAssociare: 'Без зв’язку — призначити вручну пізніше',
     selezionaRuolo: '— Оберіть роль —',
     generaLink: 'Створити посилання',
     generazione: 'Створення…',
