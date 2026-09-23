@@ -5,8 +5,8 @@ export const INVITA_RUOLI_DISPONIBILI: Record<string, string[]> = {
   agenzia:            ['agente', 'distributore', 'studio_associato'],
   agente:             ['agente', 'distributore', 'studio_associato'],
   back_office:        ['agente', 'back_office', 'distributore', 'studio_associato'],
-  rivenditore:        ['distributore', 'partner_dipendente'],
-  distributore:       ['distributore', 'partner_dipendente'],
+  rivenditore:        ['distributore', 'partner_dipendente', 'studio_associato'],
+  distributore:       ['distributore', 'partner_dipendente', 'studio_associato'],
   studio:             ['studio_associato'],
 }
 
