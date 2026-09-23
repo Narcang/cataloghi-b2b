@@ -642,6 +642,8 @@ export default function AdminProfiliPanel({
             const agenziaAssociata = isAgenteLike(p.ruolo)
               ? resolveAgenziaParentForAgent(profiloGerarchia, profiliGerarchia, links)
               : null
+            const inviterRow = profiliGerarchia.find((row) => row.id === profiloGerarchia.invitato_da)
+            const agenteRiferimento = inviterRow && isAgenteLike(inviterRow.ruolo) ? inviterRow : null
             const associatiLabel = associatiDirettiSectionLabel(p.ruolo)
             const aggiungiLabel = associatiAggiungiSectionLabel(p.ruolo)
             const candidateAssociati = getCandidateAssociatiProfiles(p.id, p.ruolo, profiliAssociazione)
@@ -684,9 +686,11 @@ export default function AdminProfiliPanel({
                       )}
                       <span className="ml-2 text-xs font-normal text-zinc-500">
                         {tRuolo(locale, p.ruolo)}
-                        {agenziaAssociata
-                          ? ` · ${dashCopy.associatoA} ${profiloGerarchiaDisplayLabel(agenziaAssociata)}`
-                          : ''}
+                        {agenteRiferimento
+                          ? ` · ${dashCopy.associatoA} ${profiloGerarchiaDisplayLabel(agenteRiferimento)} (${tRuolo(locale, agenteRiferimento.ruolo)})`
+                          : agenziaAssociata
+                            ? ` · ${dashCopy.associatoA} ${profiloGerarchiaDisplayLabel(agenziaAssociata)}`
+                            : ''}
                         {p.registrazione_approvata === false ? ` · ${copy.inAttesa}` : ''}
                       </span>
                     </span>

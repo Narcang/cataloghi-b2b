@@ -13,6 +13,7 @@ import {
   ruoloBreakdownDotClass,
   roleBreakdownBadgesForNode,
   countDescendantsByRoles,
+  profiloGerarchiaDisplayLabel,
   type HierarchyRootRole,
   type ProfiloGerarchiaRow,
 } from '@/lib/userHierarchy'
@@ -31,6 +32,7 @@ import {
   formatUltimoAccessoOrario,
   ultimoAccessoStato,
 } from '@/lib/ultimoAccessoUtenti'
+import { tDashboard } from '@/lib/i18n'
 import { useAppLocale } from '@/lib/useAppLocale'
 import {
   tAdmin,
@@ -124,6 +126,7 @@ function HierarchyNode({
 }: HierarchyNodeProps) {
   const locale = useAppLocale()
   const copy = tAdmin(locale)
+  const dashCopy = tDashboard(locale)
   const children = getChildrenProfiles(
     profile.id,
     profile,
@@ -156,6 +159,8 @@ function HierarchyNode({
   const ultimoAccessoIso = mostraUltimoAccesso
     ? ultimoAccessoByProfiloId[profile.id] ?? null
     : null
+  const inviter = profili.find((p) => p.id === profile.invitato_da)
+  const agenteRiferimento = inviter && isAgenteLike(inviter.ruolo) ? inviter : null
 
   return (
     <li className="list-none">
@@ -218,6 +223,11 @@ function HierarchyNode({
                   )}
                 </span>
               </h4>
+              {agenteRiferimento ? (
+                <p className="text-sm font-semibold text-zinc-800 mt-1">
+                  {dashCopy.associatoA}: {profiloGerarchiaDisplayLabel(agenteRiferimento)} ({tRuolo(locale, agenteRiferimento.ruolo)})
+                </p>
+              ) : null}
               <p className="text-sm text-zinc-600 mt-0.5">{profile.email}</p>
               <p className="text-xs text-zinc-500 mt-1">
                 {profile.area_geografica || copy.areaNonIndicata}
