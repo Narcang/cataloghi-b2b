@@ -1,17 +1,23 @@
 /** Ruoli che ogni ruolo può invitare (gerarchia discendente). */
 export const INVITA_RUOLI_DISPONIBILI: Record<string, string[]> = {
-  admin:              ['manager', 'agenzia', 'agente', 'back_office', 'rivenditore', 'distributore', 'partner_dipendente', 'studio', 'studio_associato'],
-  manager:            ['agenzia', 'rivenditore', 'studio', 'studio_associato'],
-  agenzia:            ['agente', 'back_office', 'rivenditore', 'studio'],
-  agente:             ['rivenditore', 'studio'],
-  back_office:        ['rivenditore', 'studio'],
-  rivenditore:        ['distributore', 'partner_dipendente', 'studio'],
-  distributore:       ['distributore', 'partner_dipendente', 'studio'],
-  partner_dipendente: ['studio'],
+  admin:              ['manager', 'agente', 'back_office', 'distributore', 'partner_dipendente', 'studio_associato'],
+  manager:            ['studio_associato'],
+  agenzia:            ['agente', 'back_office'],
+  rivenditore:        ['distributore', 'partner_dipendente'],
+  distributore:       ['distributore', 'partner_dipendente'],
   studio:             ['studio_associato'],
 }
 
-/** Etichette UI per i ruoli invitabili. */
+/** Categoria (entità) da mostrare tra parentesi nel menu inviti. */
+export const INVITO_CATEGORIA_PARENT: Record<string, string> = {
+  agente: 'agenzia',
+  back_office: 'agenzia',
+  distributore: 'rivenditore',
+  partner_dipendente: 'rivenditore',
+  studio_associato: 'studio',
+}
+
+/** Etichette UI per i ruoli invitabili (fallback italiano). */
 export const RUOLO_LABEL: Record<string, string> = {
   manager:            'Manager',
   agenzia:            'Agenzia',

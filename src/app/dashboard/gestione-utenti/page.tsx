@@ -11,6 +11,7 @@ import InvitaUtente from '@/components/InvitaUtente'
 import CreaAssociatoManuale from '@/components/admin/CreaAssociatoManuale'
 import type { ProfiloGerarchiaRow } from '@/lib/userHierarchy'
 import { getDescendantsByRole, profiloGerarchiaDisplayLabel, profiloToGerarchiaRow } from '@/lib/userHierarchy'
+import { ruoliInvitabili } from '@/lib/inviteHierarchy'
 import { fetchUltimoAccessoMap, ultimoAccessoMapToRecord } from '@/lib/ultimoAccessoUtenti'
 import { getAppLocale } from '@/lib/localeServer'
 import { tAdmin, tRuolo } from '@/lib/i18nAdmin'
@@ -344,7 +345,7 @@ export default async function GestioneUtentiPage(props: {
           />
         </section>
 
-        {/* Invita utenti */}
+        {ruoliInvitabili(ruoloCorrente).length > 0 ? (
         <section className="border border-black rounded-2xl bg-white p-6">
           <h2 className="text-xl text-zinc-900 font-medium mb-1">{copy.invitaUtenti}</h2>
           <p className="text-sm text-zinc-500 mb-4">
@@ -352,6 +353,7 @@ export default async function GestioneUtentiPage(props: {
           </p>
           <InvitaUtente ruoloCorrente={ruoloCorrente} />
         </section>
+        ) : null}
           </>
         )}
 

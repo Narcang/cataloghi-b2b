@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { ruoliInvitabili } from '@/lib/inviteHierarchy'
 import { useAppLocale } from '@/lib/useAppLocale'
-import { tAdmin, tRuolo } from '@/lib/i18nAdmin'
+import { tAdmin, tRuoloInvito } from '@/lib/i18nAdmin'
 
 type Props = {
   ruoloCorrente: string
@@ -72,11 +72,11 @@ export default function InvitaUtente({ ruoloCorrente }: Props) {
           <select
             value={ruoloSelezionato}
             onChange={(e) => { setRuoloSelezionato(e.target.value); setLink(null) }}
-            className="h-9 rounded-md border border-black/20 bg-white px-3 text-sm text-zinc-900 min-w-[140px]"
+            className="h-9 rounded-md border border-black/20 bg-white px-3 text-sm text-zinc-900 min-w-[220px]"
           >
             <option value="" disabled>{copy.selezionaRuolo}</option>
             {opzioni.map((op) => (
-              <option key={op.value} value={op.value}>{tRuolo(locale, op.value)}</option>
+              <option key={op.value} value={op.value}>{tRuoloInvito(locale, op.value)}</option>
             ))}
           </select>
         </div>

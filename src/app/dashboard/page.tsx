@@ -36,6 +36,7 @@ import {
   type ProfiloGerarchiaRow,
 } from '@/lib/userHierarchy'
 import { fetchUltimoAccessoMap, ultimoAccessoMapToRecord } from '@/lib/ultimoAccessoUtenti'
+import { ruoliInvitabili } from '@/lib/inviteHierarchy'
 import { getAppLocale } from '@/lib/localeServer'
 import { catalogLingueForLocale, preferCatalogLingua } from '@/lib/catalogLingua'
 import { tDashboard } from '@/lib/i18n'
@@ -567,7 +568,7 @@ export default async function Dashboard(props: {
           />
         )}
 
-        {showFullDashboard && !isManager && (isVenditoreLikeRole || isPartnerDipendente || isAgenzia || isAgente || isStudio) && (
+        {showFullDashboard && !isManager && ruoliInvitabili(ruoloCorrente).length > 0 && (
           <section className="border border-black rounded-2xl bg-white p-6">
             <h2 className="text-xl text-zinc-900 font-medium mb-1">{copy.invitaUtenti}</h2>
             <p className="text-sm text-zinc-500 mb-4">

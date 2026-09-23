@@ -1,4 +1,5 @@
 import type { AppLocale } from '@/lib/locale'
+import { INVITO_CATEGORIA_PARENT } from '@/lib/inviteHierarchy'
 
 const ruolo: Record<AppLocale, Record<string, string>> = {
   it: {
@@ -2101,6 +2102,30 @@ export function tAdmin(locale: AppLocale): AdminCopy {
 
 export function tRuolo(locale: AppLocale, ruoloKey: string): string {
   return ruolo[locale][ruoloKey] ?? ruoloKey
+}
+
+function tInvitoCategoria(locale: AppLocale, parentKey: string): string {
+  if (parentKey === 'rivenditore') {
+    if (locale === 'en') return 'Reseller'
+    if (locale === 'es') return 'Revendedor'
+    if (locale === 'ru') return 'Дилер'
+    if (locale === 'uk') return 'Дилер'
+    if (locale === 'fr') return 'Revendeur'
+    if (locale === 'de') return 'Händler'
+    if (locale === 'nl') return 'Wederverkoper'
+    if (locale === 'el') return 'Μεταπωλητής'
+    if (locale === 'pl') return 'Dystrybutor'
+    return 'Rivenditore'
+  }
+  return tRuolo(locale, parentKey)
+}
+
+/** Etichetta ruolo nel menu inviti: es. Agente (Agenzia). */
+export function tRuoloInvito(locale: AppLocale, ruoloKey: string): string {
+  const base = tRuolo(locale, ruoloKey)
+  const parent = INVITO_CATEGORIA_PARENT[ruoloKey]
+  if (!parent) return base
+  return `${base} (${tInvitoCategoria(locale, parent)})`
 }
 
 export function tCatalogRole(locale: AppLocale, ruoloKey: string): string {
