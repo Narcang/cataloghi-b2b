@@ -23,7 +23,13 @@ const DATETIME_LOCALE: Record<AppLocale, string> = {
 
 export type UltimoAccessoStato = 'verde' | 'rosso'
 
-const RUOLI_SENZA_ULTIMO_ACCESSO = new Set(['admin', 'free'])
+const RUOLI_SENZA_ULTIMO_ACCESSO = new Set([
+  'admin',
+  'free',
+  'agenzia',
+  'rivenditore',
+  'studio',
+])
 
 export function profiloMostraUltimoAccesso(ruolo: string): boolean {
   return Boolean(ruolo) && !RUOLI_SENZA_ULTIMO_ACCESSO.has(ruolo)
