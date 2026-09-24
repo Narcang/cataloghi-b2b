@@ -14,6 +14,7 @@ import {
   roleBreakdownBadgesForNode,
   countDescendantsByRoles,
   profiloGerarchiaDisplayLabel,
+  seguitoDaCatena,
   type HierarchyRootRole,
   type ProfiloGerarchiaRow,
 } from '@/lib/userHierarchy'
@@ -153,8 +154,7 @@ function HierarchyNode({
   }, [profile.id, profile.ruolo, breakdownBadges, profili, links])
   const mostraDateAggiornamento = canViewProfiloSpecializzazioneAggiornato(viewerRole)
   const canEliminareVociStorico = canDeleteProfiloSpecializzazioneStoricoVoce(viewerRole)
-  const seguitoDa =
-    profile.ruolo === 'rivenditore' ? profile.seguito_da?.trim() || null : null
+  const seguitoDa = seguitoDaCatena(profile, profili, links)
   const mostraUltimoAccesso = canViewerSeeUltimoAccessoForProfile(viewerRole, profile.ruolo)
   const ultimoAccessoIso = mostraUltimoAccesso
     ? ultimoAccessoByProfiloId[profile.id] ?? null

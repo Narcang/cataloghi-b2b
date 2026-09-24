@@ -445,6 +445,92 @@ export function resolveAgenziaParentForRivenditore(
   return null
 }
 
+function etichettaPersona(p: ProfiloGerarchiaRow): string {
+  return (p.nome_completo || p.societa || p.email || '').trim()
+}
+
+function etichettaSocieta(p: ProfiloGerarchiaRow): string {
+  return (p.societa || p.nome_completo || p.email || '').trim()
+}
+
+function agenteDaSeguitoDa(
+  seguitoDa: string,
+  profili: ProfiloGerarchiaRow[],
+): ProfiloGerarchiaRow | null {
+  const key = seguitoDa.trim().toLocaleLowerCase('it')
+  if (!key) return null
+  return (
+    profili.find(
+      (p) =>
+        isAgenteLike(p.ruolo) && (p.nome_completo ?? '').trim().toLocaleLowerCase('it') === key,
+    ) ?? null
+  )
+}
+
+/** Catena "Seguito da" nella struttura: venditore, rivenditore, agente, agenzia. */
+export function seguitoDaCatena(
+  profile: ProfiloGerarchiaRow,
+  profili: ProfiloGerarchiaRow[],
+  links: OperatoreLink[],
+): string | null {
+  if (
+    profile.ruolo !== 'rivenditore' &&
+    profile.ruolo !== 'distributore' &&
+    profile.ruolo !== 'partner_dipendente' &&
+    profile.ruolo !== 'studio'
+  ) {
+    return null
+  }
+
+  const byId = new Map(profili.map((p) => [p.id, p]))
+  const parts: string[] = []
+  const push = (label: string | null | undefined) => {
+    const value = label?.trim()
+    if (!value) return
+    const key = value.toLocaleLowerCase('it')
+    if (parts.some((part) => part.toLocaleLowerCase('it') === key)) return
+    parts.push(value)
+  }
+
+  const inviter = byId.get(profile.invitato_da ?? '')
+  let rivenditore: ProfiloGerarchiaRow | null = profile.ruolo === 'rivenditore' ? profile : null
+
+  if (profile.ruolo === 'distributore') {
+    if (inviter?.ruolo === 'distributore') push(etichettaPersona(inviter))
+    rivenditore = resolveRivenditoreParentForDistributore(profile, profili, links)
+  }
+
+  if (profile.ruolo === 'partner_dipendente' || profile.ruolo === 'studio') {
+    if (inviter?.ruolo === 'distributore') {
+      push(etichettaPersona(inviter))
+      rivenditore = resolveRivenditoreParentForDistributore(inviter, profili, links)
+    } else if (inviter?.ruolo === 'rivenditore') {
+      rivenditore = inviter
+    } else if (inviter && isAgenteLike(inviter.ruolo)) {
+      push(etichettaPersona(inviter))
+      const agenziaAgente = resolveAgenziaParentForAgent(inviter, profili, links)
+      push(agenziaAgente ? etichettaSocieta(agenziaAgente) : null)
+      return parts.length > 0 ? parts.join(', ') : null
+    }
+  }
+
+  if (profile.ruolo !== 'rivenditore' && rivenditore) push(etichettaSocieta(rivenditore))
+
+  const seguito = rivenditore?.seguito_da?.trim() || null
+  if (profile.ruolo === 'rivenditore' && !seguito) return null
+  push(seguito)
+
+  const agente = seguito ? agenteDaSeguitoDa(seguito, profili) : null
+  const agenzia = agente
+    ? resolveAgenziaParentForAgent(agente, profili, links)
+    : rivenditore
+      ? resolveAgenziaParentForRivenditore(rivenditore, profili, links)
+      : null
+  push(agenzia ? etichettaSocieta(agenzia) : null)
+
+  return parts.length > 0 ? parts.join(', ') : null
+}
+
 /** True se il rivenditore appartiene alla gerarchia dell'agenzia (invito diretto, agente o rubrica). */
 export function isRivenditoreManagedByAgenzia(
   agenziaId: string,
