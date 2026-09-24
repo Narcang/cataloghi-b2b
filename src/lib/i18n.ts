@@ -1309,9 +1309,9 @@ const dashboard = {
     portaleHelp: 'Seleziona la sezione che vuoi consultare',
     elencoAssociati: 'Elenco tutti gli associati',
     elencoAssociatiHelpAgenzia:
-      'Vista rapida di agenti, back-office, venditori, rivenditori e studi collegati alla tua agenzia, con il referente di riferimento.',
+      'Vista rapida di agenti, back-office, rivenditori, venditori e studi collegati alla tua agenzia, con il referente di riferimento.',
     elencoAssociatiHelpCompagnia:
-      'Vista rapida di agenti, back-office, venditori, rivenditori e studi della tua compagnia, con il referente di riferimento.',
+      'Vista rapida di agenti, back-office, rivenditori, venditori e studi della tua compagnia, con il referente di riferimento.',
     elencoAssociatiHelpRivenditore:
       'Vista rapida di venditori, promoter e studi collegati al tuo rivenditore, con il referente di riferimento.',
     elencoAssociatiHelpDistributore:
@@ -1374,9 +1374,9 @@ const dashboard = {
     portaleHelp: 'Выберите раздел для просмотра',
     elencoAssociati: 'Список всех связанных',
     elencoAssociatiHelpAgenzia:
-      'Краткий список агентов, back-office, продавцов, дилеров и студий вашего агентства, с указанным куратором.',
+      'Краткий список агентов, back-office, дилеров, продавцов и студий вашего агентства, с указанным куратором.',
     elencoAssociatiHelpCompagnia:
-      'Краткий список агентов, back-office, продавцов, дилеров и студий вашей компании, с указанным куратором.',
+      'Краткий список агентов, back-office, дилеров, продавцов и студий вашей компании, с указанным куратором.',
     elencoAssociatiHelpRivenditore:
       'Краткий список продавцов, промоутеров и студий вашего дилера, с указанным куратором.',
     elencoAssociatiHelpDistributore:
@@ -1439,9 +1439,9 @@ const dashboard = {
     portaleHelp: 'Select the section you want to open',
     elencoAssociati: 'All associates',
     elencoAssociatiHelpAgenzia:
-      'Quick view of agents, back-office, sellers, resellers and studios linked to your agency, with their referent.',
+      'Quick view of agents, back-office, resellers, sellers and studios linked to your agency, with their referent.',
     elencoAssociatiHelpCompagnia:
-      'Quick view of agents, back-office, sellers, resellers and studios in your company, with their referent.',
+      'Quick view of agents, back-office, resellers, sellers and studios in your company, with their referent.',
     elencoAssociatiHelpRivenditore:
       'Quick view of sellers, promoters and studios linked to your reseller, with their referent.',
     elencoAssociatiHelpDistributore:
@@ -1504,9 +1504,9 @@ const dashboard = {
     portaleHelp: 'Elige la sección que quieres consultar',
     elencoAssociati: 'Listado de todos los asociados',
     elencoAssociatiHelpAgenzia:
-      'Vista rápida de agentes, Back-Office, vendedores, revendedores y estudios vinculados a tu agencia, con el referente de referencia.',
+      'Vista rápida de agentes, Back-Office, revendedores, vendedores y estudios vinculados a tu agencia, con el referente de referencia.',
     elencoAssociatiHelpCompagnia:
-      'Vista rápida de agentes, Back-Office, vendedores, revendedores y estudios de tu compañía, con el referente de referencia.',
+      'Vista rápida de agentes, Back-Office, revendedores, vendedores y estudios de tu compañía, con el referente de referencia.',
     elencoAssociatiHelpRivenditore:
       'Vista rápida de vendedores, promoters y estudios vinculados a tu revendedor, con el referente de referencia.',
     elencoAssociatiHelpDistributore:
@@ -1569,9 +1569,9 @@ const dashboard = {
     portaleHelp: 'Sélectionnez la section à consulter',
     elencoAssociati: 'Tous les associés',
     elencoAssociatiHelpAgenzia:
-      'Vue rapide des agents, back-office, vendeurs, revendeurs et studios liés à votre agence, avec le référent.',
+      'Vue rapide des agents, back-office, revendeurs, vendeurs et studios liés à votre agence, avec le référent.',
     elencoAssociatiHelpCompagnia:
-      'Vue rapide des agents, back-office, vendeurs, revendeurs et studios de votre société, avec le référent.',
+      'Vue rapide des agents, back-office, revendeurs, vendeurs et studios de votre société, avec le référent.',
     elencoAssociatiHelpRivenditore:
       'Vue rapide des vendeurs, promoteurs et studios liés à votre revendeur, avec le référent.',
     elencoAssociatiHelpDistributore:
@@ -1634,9 +1634,9 @@ const dashboard = {
     portaleHelp: 'Wählen Sie den Bereich, den Sie öffnen möchten',
     elencoAssociati: 'Alle zugeordneten Kontakte',
     elencoAssociatiHelpAgenzia:
-      'Schnellübersicht von Agenten, Back-Office, Verkäufern, Händlern und Studios Ihrer Agentur mit Ansprechpartner.',
+      'Schnellübersicht von Agenten, Back-Office, Händlern, Verkäufern und Studios Ihrer Agentur mit Ansprechpartner.',
     elencoAssociatiHelpCompagnia:
-      'Schnellübersicht von Agenten, Back-Office, Verkäufern, Händlern und Studios Ihres Unternehmens mit Ansprechpartner.',
+      'Schnellübersicht von Agenten, Back-Office, Händlern, Verkäufern und Studios Ihres Unternehmens mit Ansprechpartner.',
     elencoAssociatiHelpRivenditore:
       'Schnellübersicht von Verkäufern, Promotern und Studios Ihres Händlers mit Ansprechpartner.',
     elencoAssociatiHelpDistributore:
@@ -1699,9 +1699,9 @@ const dashboard = {
     portaleHelp: 'Selecteer de sectie die u wilt openen',
     elencoAssociati: 'Alle gekoppelden',
     elencoAssociatiHelpAgenzia:
-      'Sneloverzicht van agenten, Back-Office, verkopers, wederverkopers en studio’s die aan uw agentschap zijn gekoppeld, met hun aanspreekpunt.',
+      'Sneloverzicht van agenten, Back-Office, wederverkopers, verkopers en studio’s die aan uw agentschap zijn gekoppeld, met hun aanspreekpunt.',
     elencoAssociatiHelpCompagnia:
-      'Sneloverzicht van agenten, Back-Office, verkopers, wederverkopers en studio’s van uw bedrijf, met hun aanspreekpunt.',
+      'Sneloverzicht van agenten, Back-Office, wederverkopers, verkopers en studio’s van uw bedrijf, met hun aanspreekpunt.',
     elencoAssociatiHelpRivenditore:
       'Sneloverzicht van verkopers, promoters en studio’s die aan uw wederverkoper zijn gekoppeld, met hun aanspreekpunt.',
     elencoAssociatiHelpDistributore:
@@ -1764,9 +1764,9 @@ const dashboard = {
     portaleHelp: 'Επιλέξτε την ενότητα που θέλετε να ανοίξετε',
     elencoAssociati: 'Όλοι οι συνδεδεμένοι',
     elencoAssociatiHelpAgenzia:
-      'Γρήγορη προβολή πρακτόρων, back-office, πωλητών, μεταπωλητών και στούντιο του πρακτορείου σας, με υπεύθυνο.',
+      'Γρήγορη προβολή πρακτόρων, back-office, μεταπωλητών, πωλητών και στούντιο του πρακτορείου σας, με υπεύθυνο.',
     elencoAssociatiHelpCompagnia:
-      'Γρήγορη προβολή πρακτόρων, back-office, πωλητών, μεταπωλητών και στούντιο της εταιρείας σας, με υπεύθυνο.',
+      'Γρήγορη προβολή πρακτόρων, back-office, μεταπωλητών, πωλητών και στούντιο της εταιρείας σας, με υπεύθυνο.',
     elencoAssociatiHelpRivenditore:
       'Γρήγορη προβολή πωλητών, promoter και στούντιο του μεταπωλητή σας, με υπεύθυνο.',
     elencoAssociatiHelpDistributore:
@@ -1829,9 +1829,9 @@ const dashboard = {
     portaleHelp: 'Wybierz sekcję, którą chcesz otworzyć',
     elencoAssociati: 'Wszyscy powiązani',
     elencoAssociatiHelpAgenzia:
-      'Szybki podgląd agentów, back-office, sprzedawców, dystrybutorów i studiów Twojej agencji, z opiekunem.',
+      'Szybki podgląd agentów, back-office, dystrybutorów, sprzedawców i studiów Twojej agencji, z opiekunem.',
     elencoAssociatiHelpCompagnia:
-      'Szybki podgląd agentów, back-office, sprzedawców, dystrybutorów i studiów Twojej firmy, z opiekunem.',
+      'Szybki podgląd agentów, back-office, dystrybutorów, sprzedawców i studiów Twojej firmy, z opiekunem.',
     elencoAssociatiHelpRivenditore:
       'Szybki podgląd sprzedawców, promoterów i studiów Twojego dystrybutora, z opiekunem.',
     elencoAssociatiHelpDistributore:
@@ -1894,9 +1894,9 @@ const dashboard = {
     portaleHelp: 'Оберіть розділ для перегляду',
     elencoAssociati: 'Усі пов’язані',
     elencoAssociatiHelpAgenzia:
-      'Швидкий список агентів, back-office, продавців, дилерів і студій вашого агентства, з куратором.',
+      'Швидкий список агентів, back-office, дилерів, продавців і студій вашого агентства, з куратором.',
     elencoAssociatiHelpCompagnia:
-      'Швидкий список агентів, back-office, продавців, дилерів і студій вашої компанії, з куратором.',
+      'Швидкий список агентів, back-office, дилерів, продавців і студій вашої компанії, з куратором.',
     elencoAssociatiHelpRivenditore:
       'Швидкий список продавців, промоутерів і студій вашого дилера, з куратором.',
     elencoAssociatiHelpDistributore:

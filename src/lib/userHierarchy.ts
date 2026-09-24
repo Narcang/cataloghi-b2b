@@ -318,22 +318,22 @@ const FLAT_LIST_TABS_BY_VIEWER: Record<FlatListViewerRole, FlatListTab[]> = {
   agenzia: [
     { id: 'agente', label: 'Agenti', ruolo: 'agente' },
     { id: 'back_office', label: 'Back-Office', ruolo: 'back_office' },
-    { id: 'distributore', label: 'Venditori', ruolo: 'distributore' },
     { id: 'rivenditore', label: 'Rivenditori', ruolo: 'rivenditore' },
+    { id: 'distributore', label: 'Venditori', ruolo: 'distributore' },
     { id: 'studio', label: 'Sedi Studio', ruolo: 'studio' },
   ],
   agente: [
     { id: 'agente', label: 'Agenti', ruolo: 'agente' },
     { id: 'back_office', label: 'Back-Office', ruolo: 'back_office' },
-    { id: 'distributore', label: 'Venditori', ruolo: 'distributore' },
     { id: 'rivenditore', label: 'Rivenditori', ruolo: 'rivenditore' },
+    { id: 'distributore', label: 'Venditori', ruolo: 'distributore' },
     { id: 'studio', label: 'Sedi Studio', ruolo: 'studio' },
   ],
   back_office: [
     { id: 'agente', label: 'Agenti', ruolo: 'agente' },
     { id: 'back_office', label: 'Back-Office', ruolo: 'back_office' },
-    { id: 'distributore', label: 'Venditori', ruolo: 'distributore' },
     { id: 'rivenditore', label: 'Rivenditori', ruolo: 'rivenditore' },
+    { id: 'distributore', label: 'Venditori', ruolo: 'distributore' },
     { id: 'studio', label: 'Sedi Studio', ruolo: 'studio' },
   ],
   rivenditore: [
