@@ -170,6 +170,14 @@ export default function CreaAssociatoManuale({
       return
     }
     const parentToSend = (effectiveParentOptions ? selectedParentId : effectiveParentId)?.trim() || undefined
+    if (effectiveParentOptions && !effectiveAllowEmpty && !parentToSend) {
+      setError(
+        effectiveParentOptions.length === 0
+          ? 'Nessun rivenditore collegato. Creane uno prima di aggiungere un venditore.'
+          : 'Seleziona a chi collegare il profilo',
+      )
+      return
+    }
     setSaving(true)
     try {
       const res = await fetch('/api/admin/profili/crea-associato', {
@@ -258,21 +266,27 @@ export default function CreaAssociatoManuale({
             </select>
           </label>
         ) : null}
-        {effectiveParentOptions && effectiveParentOptions.length > 0 ? (
+        {effectiveParentOptions ? (
           <label className="block text-xs font-medium uppercase text-zinc-600 md:col-span-2">
             {effectiveSelectLabel ?? 'Collega a'}
-            <select
-              value={selectedParentId}
-              onChange={(e) => setSelectedParentId(e.target.value)}
-              className={inputClass}
-            >
-              {effectiveAllowEmpty ? <option value="">{effectiveEmptyLabel}</option> : null}
-              {effectiveParentOptions.map((opt) => (
-                <option key={opt.id} value={opt.id}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+            {effectiveParentOptions.length === 0 && !effectiveAllowEmpty ? (
+              <p className="mt-1 text-sm font-normal normal-case text-zinc-500">
+                Nessun rivenditore collegato. Creane uno prima di aggiungere un venditore.
+              </p>
+            ) : (
+              <select
+                value={selectedParentId}
+                onChange={(e) => setSelectedParentId(e.target.value)}
+                className={inputClass}
+              >
+                {effectiveAllowEmpty ? <option value="">{effectiveEmptyLabel}</option> : null}
+                {effectiveParentOptions.map((opt) => (
+                  <option key={opt.id} value={opt.id}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            )}
           </label>
         ) : null}
         {prioritaSocieta ? (

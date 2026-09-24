@@ -980,23 +980,29 @@ export default function AdminProfiliPanel({
                       />
                     ) : null}
                     {canCreateAssociati && p.ruolo === 'agenzia' ? (
-                      <>
-                        <CreaAssociatoManuale
-                          parentId={p.id}
-                          parentLabel={p.societa || p.nome_completo || p.email || 'questa agenzia'}
-                          ruoloNuovo="agente"
-                        />
-                        <CreaAssociatoManuale
-                          parentId={p.id}
-                          parentLabel={p.societa || p.nome_completo || p.email || 'questa agenzia'}
-                          ruoloNuovo="back_office"
-                        />
-                        <CreaAssociatoManuale
-                          parentId={p.id}
-                          parentLabel={p.societa || p.nome_completo || p.email || 'questa agenzia'}
-                          ruoloNuovo="rivenditore"
-                        />
-                      </>
+                      <CreaAssociatoManuale
+                        parentId={p.id}
+                        parentLabel={p.societa || p.nome_completo || p.email || 'questa agenzia'}
+                        ruoliSelezionabili={[
+                          { value: 'agente', label: 'Agente' },
+                          { value: 'back_office', label: 'Back-Office' },
+                          { value: 'rivenditore', label: 'Rivenditore' },
+                          { value: 'distributore', label: 'Venditore' },
+                        ]}
+                        parentByRuolo={{
+                          distributore: {
+                            options: profiliGerarchia
+                              .filter((row) =>
+                                isRivenditoreManagedByAgenzia(p.id, row, profiliGerarchia, links),
+                              )
+                              .map((row) => ({
+                                id: row.id,
+                                label: profiloGerarchiaDisplayLabel(row),
+                              })),
+                            selectLabel: 'Collega a rivenditore',
+                          },
+                        }}
+                      />
                     ) : null}
                     {canCreateAssociati && p.ruolo === 'rivenditore' ? (
                       <CreaAssociatoManuale
