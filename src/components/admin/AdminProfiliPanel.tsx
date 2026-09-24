@@ -24,6 +24,7 @@ import {
   profiloGerarchiaDisplayLabel,
   profiloToGerarchiaRow,
   resolveAgenziaParentForAgent,
+  resolveRivenditoreParentForDistributore,
   type ProfiloGerarchiaRow,
 } from '@/lib/userHierarchy'
 import { isAgenteLike } from '@/lib/catalogRoles'
@@ -187,6 +188,7 @@ export default function AdminProfiliPanel({
   const [ruoloAttivo, setRuoloAttivo] = useState<RuoloTabId>(
     agenziaRivenditoriMode ? 'rivenditore' : 'admin',
   )
+  const [soloAssociati, setSoloAssociati] = useState(true)
 
   const specializzazioneOpzioniFormProps = {
     opzioni: specializzazioneOpzioni,
@@ -242,6 +244,65 @@ export default function AdminProfiliPanel({
 
   const profiliRuoloAttivo = profiliPerRuolo.get(ruoloAttivo) ?? []
 
+  const invitatoDaById = useMemo(() => {
+    const m = new Map<string, string | null>()
+    for (const row of profiliGerarchia) m.set(row.id, row.invitato_da)
+    return m
+  }, [profiliGerarchia])
+
+  const mostraStatoAssociazione =
+    !agenziaRivenditoriMode &&
+    (ruoloAttivo === 'agente' ||
+      ruoloAttivo === 'back_office' ||
+      ruoloAttivo === 'distributore' ||
+      ruoloAttivo === 'partner_dipendente' ||
+      ruoloAttivo === 'studio_associato')
+
+  const profiloHaAssociazione = useMemo(() => {
+    return (p: ProfiloGestioneRow) => {
+      const row = profiloToGerarchiaRow(p, p.invitato_da ?? invitatoDaById.get(p.id) ?? null)
+      const inviter = profiliGerarchia.find((item) => item.id === row.invitato_da)
+      if (p.ruolo === 'agente' || p.ruolo === 'back_office') {
+        if (resolveAgenziaParentForAgent(row, profiliGerarchia, links)) return true
+        return Boolean(inviter && isAgenteLike(inviter.ruolo))
+      }
+      if (p.ruolo === 'distributore' || p.ruolo === 'partner_dipendente') {
+        if (resolveRivenditoreParentForDistributore(row, profiliGerarchia, links)) return true
+        return Boolean(
+          inviter &&
+            (inviter.ruolo === 'distributore' ||
+              inviter.ruolo === 'rivenditore' ||
+              inviter.ruolo === 'partner_dipendente'),
+        )
+      }
+      if (p.ruolo === 'studio_associato') {
+        if (inviter?.ruolo === 'studio') return true
+        return profiliGerarchia.some(
+          (other) =>
+            other.ruolo === 'studio' &&
+            links.some(
+              (link) =>
+                (link.utente_id === p.id && link.operatore_id === other.id) ||
+                (link.operatore_id === p.id && link.utente_id === other.id),
+            ),
+        )
+      }
+      return false
+    }
+  }, [invitatoDaById, profiliGerarchia, links])
+
+  const profiliAssociati = mostraStatoAssociazione
+    ? profiliRuoloAttivo.filter((p) => profiloHaAssociazione(p))
+    : []
+  const profiliNonAssociati = mostraStatoAssociazione
+    ? profiliRuoloAttivo.filter((p) => !profiloHaAssociazione(p))
+    : []
+  const profiliVisibili = mostraStatoAssociazione
+    ? soloAssociati
+      ? profiliAssociati
+      : profiliNonAssociati
+    : profiliRuoloAttivo
+
   useEffect(() => {
     const firstConUtenti = ruoliTab.find((tab) => (profiliPerRuolo.get(tab.id)?.length ?? 0) > 0)
     if ((profiliPerRuolo.get(ruoloAttivo)?.length ?? 0) > 0) return
@@ -256,12 +317,6 @@ export default function AdminProfiliPanel({
     }
     return m
   }, [links])
-
-  const invitatoDaById = useMemo(() => {
-    const m = new Map<string, string | null>()
-    for (const row of profiliGerarchia) m.set(row.id, row.invitato_da)
-    return m
-  }, [profiliGerarchia])
 
   function getDirectAssociati(profilo: ProfiloGestioneRow): ProfiloGerarchiaRow[] {
     const row = profiloToGerarchiaRow(
@@ -624,15 +679,52 @@ export default function AdminProfiliPanel({
           </p>
         )}
 
+        {mostraStatoAssociazione ? (
+          <div className="flex flex-wrap gap-2" role="tablist" aria-label={copy.filtraPerRuolo}>
+            {(
+              [
+                { id: 'associati', label: copy.associati, count: profiliAssociati.length, active: soloAssociati },
+                { id: 'non', label: copy.nonAssociati, count: profiliNonAssociati.length, active: !soloAssociati },
+              ] as const
+            ).map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                role="tab"
+                aria-selected={tab.active}
+                onClick={() => setSoloAssociati(tab.id === 'associati')}
+                className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm font-semibold transition-colors ${
+                  tab.active
+                    ? 'border-[#060d41] bg-[#060d41] text-white'
+                    : 'border-black/30 bg-white text-zinc-800 hover:bg-zinc-100'
+                }`}
+              >
+                {tab.label}
+                <span
+                  className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                    tab.active ? 'bg-white/20 text-white' : 'bg-zinc-100 text-zinc-700'
+                  }`}
+                >
+                  {tab.count}
+                </span>
+              </button>
+            ))}
+          </div>
+        ) : null}
+
         <ul className="space-y-3 list-none p-0 m-0" role="tabpanel" aria-label={`Utenti ${ruoloAttivo}`}>
-          {profiliRuoloAttivo.length === 0 ? (
+          {profiliVisibili.length === 0 ? (
             <li className="rounded-xl border border-dashed border-black/30 bg-zinc-50 px-4 py-6 text-center text-sm text-zinc-600">
               {agenziaRivenditoriMode
                 ? copy.nessunRivenditoreAgenzia
-                : copy.nessunUtenteRuoloFiltro}
+                : mostraStatoAssociazione
+                  ? soloAssociati
+                    ? copy.nessunAssociato
+                    : copy.nessunNonAssociato
+                  : copy.nessunUtenteRuoloFiltro}
             </li>
           ) : null}
-          {profiliRuoloAttivo.map((p) => {
+          {profiliVisibili.map((p) => {
             const profiloGerarchia = profiloToGerarchiaRow(
               p,
               p.invitato_da ?? invitatoDaById.get(p.id) ?? null,
