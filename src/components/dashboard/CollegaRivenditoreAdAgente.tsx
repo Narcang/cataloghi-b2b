@@ -103,14 +103,12 @@ export default function CollegaRivenditoreAdAgente({ agenti, clienti }: Props) {
           <p className="text-sm text-zinc-500">Nessun cliente associato all’agenzia.</p>
         ) : (
           <div className="flex flex-wrap items-center gap-3">
-            <label className="text-sm font-medium text-zinc-900" htmlFor="clienti-agenzia">
-              Clienti
-            </label>
             <select
               id="clienti-agenzia"
               value={clienteId}
               onChange={(e) => setClienteId(e.target.value)}
               className="h-9 rounded-md border border-black/20 bg-white px-3 text-sm text-zinc-900 min-w-[260px]"
+              aria-label="Clienti"
             >
               <option value="">Clienti</option>
               {gruppi.map((gruppo) => (
