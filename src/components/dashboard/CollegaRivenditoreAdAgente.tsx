@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-type Agente = { id: string; label: string; agenteId: string }
+type Agente = { id: string; label: string }
 type Cliente = { id: string; label: string; ruolo: string; ruoloLabel: string; agenteId: string }
 
 type Props = {
@@ -62,7 +62,7 @@ export default function CollegaRivenditoreAdAgente({ agenti, clienti }: Props) {
     }
   }
 
-  const cliente = clienti.find((c) => c.id === clienteId) ?? agenti.find((a) => a.id === clienteId)
+  const cliente = clienti.find((c) => c.id === clienteId)
 
   return (
     <section className="border border-black rounded-2xl bg-white p-6 space-y-6">
@@ -80,28 +80,20 @@ export default function CollegaRivenditoreAdAgente({ agenti, clienti }: Props) {
         {agenti.length === 0 ? (
           <p className="text-sm text-zinc-500">Nessun agente associato all’agenzia.</p>
         ) : (
-          <ul className="space-y-2 list-none p-0 m-0">
-            {agenti.map((a) => {
-              const selected = agenteId === a.id
-              return (
-                <li key={a.id}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAgenteId(a.id)
-                      setClienteId((current) => (current === a.id ? '' : current))
-                    }}
-                    className={`w-full text-left rounded-md px-3 py-2 text-sm font-medium ${
-                      selected ? 'bg-[#060d41] text-white' : 'text-zinc-900 hover:bg-zinc-100'
-                    }`}
-                    aria-pressed={selected}
-                  >
-                    {a.label}
-                  </button>
-                </li>
-              )
-            })}
-          </ul>
+          <select
+            id="agenti-agenzia"
+            value={agenteId}
+            onChange={(e) => setAgenteId(e.target.value)}
+            className="h-9 rounded-md border border-black/20 bg-white px-3 text-sm text-zinc-900 min-w-[260px]"
+            aria-label="Agente"
+          >
+            <option value="">Agenti</option>
+            {agenti.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.label}
+              </option>
+            ))}
+          </select>
         )}
       </div>
 
@@ -121,20 +113,6 @@ export default function CollegaRivenditoreAdAgente({ agenti, clienti }: Props) {
               className="h-9 rounded-md border border-black/20 bg-white px-3 text-sm text-zinc-900 min-w-[260px]"
             >
               <option value="">Clienti</option>
-              {agenti.length > 0 ? (
-                <optgroup label="Agenti">
-                  {agenti
-                    .filter((a) => a.id !== agenteId)
-                    .map((a) => {
-                      const gia = a.agenteId ? agenteLabel.get(a.agenteId) : ''
-                      return (
-                        <option key={a.id} value={a.id}>
-                          {gia ? `${a.label} · ${gia}` : a.label}
-                        </option>
-                      )
-                    })}
-                </optgroup>
-              ) : null}
               {gruppi.map((gruppo) => (
                 <optgroup key={gruppo.ruolo} label={gruppo.label}>
                   {gruppo.clienti.map((c) => {

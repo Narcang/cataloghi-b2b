@@ -539,13 +539,7 @@ export default async function Dashboard(props: {
           <CollegaRivenditoreAdAgente
             agenti={profiliGerarchiaDashboard
               .filter((p) => p.ruolo === 'agente')
-              .map((p) => ({
-                id: p.id,
-                label: profiloGerarchiaDisplayLabel(p),
-                agenteId:
-                  profiliGerarchiaDashboard.find((row) => row.id === p.invitato_da && row.ruolo === 'agente')?.id ??
-                  '',
-              }))
+              .map((p) => ({ id: p.id, label: profiloGerarchiaDisplayLabel(p) }))
               .sort((a, b) => a.label.localeCompare(b.label, 'it', { sensitivity: 'base' }))}
             clienti={profiliGerarchiaDashboard
               .filter((p) =>
