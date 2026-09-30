@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-type Agente = { id: string; label: string }
+type Agente = { id: string; label: string; agenteId: string }
 type Cliente = { id: string; label: string; ruolo: string; ruoloLabel: string; agenteId: string }
 
 type Props = {
@@ -62,7 +62,7 @@ export default function CollegaRivenditoreAdAgente({ agenti, clienti }: Props) {
     }
   }
 
-  const cliente = clienti.find((c) => c.id === clienteId)
+  const cliente = clienti.find((c) => c.id === clienteId) ?? agenti.find((a) => a.id === clienteId)
 
   return (
     <section className="border border-black rounded-2xl bg-white p-6 space-y-6">
@@ -87,7 +87,10 @@ export default function CollegaRivenditoreAdAgente({ agenti, clienti }: Props) {
                 <li key={a.id}>
                   <button
                     type="button"
-                    onClick={() => setAgenteId(a.id)}
+                    onClick={() => {
+                      setAgenteId(a.id)
+                      setClienteId((current) => (current === a.id ? '' : current))
+                    }}
                     className={`w-full text-left rounded-md px-3 py-2 text-sm font-medium ${
                       selected ? 'bg-[#060d41] text-white' : 'text-zinc-900 hover:bg-zinc-100'
                     }`}
@@ -104,7 +107,7 @@ export default function CollegaRivenditoreAdAgente({ agenti, clienti }: Props) {
 
       <div className="space-y-3 border-t border-black/20 pt-5">
         <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-900">Collegamenti</h3>
-        {clienti.length === 0 ? (
+        {clienti.length === 0 && agenti.length === 0 ? (
           <p className="text-sm text-zinc-500">Nessun cliente associato all’agenzia.</p>
         ) : (
           <div className="flex flex-wrap items-center gap-3">
@@ -118,6 +121,20 @@ export default function CollegaRivenditoreAdAgente({ agenti, clienti }: Props) {
               className="h-9 rounded-md border border-black/20 bg-white px-3 text-sm text-zinc-900 min-w-[260px]"
             >
               <option value="">Clienti</option>
+              {agenti.length > 0 ? (
+                <optgroup label="Agenti">
+                  {agenti
+                    .filter((a) => a.id !== agenteId)
+                    .map((a) => {
+                      const gia = a.agenteId ? agenteLabel.get(a.agenteId) : ''
+                      return (
+                        <option key={a.id} value={a.id}>
+                          {gia ? `${a.label} · ${gia}` : a.label}
+                        </option>
+                      )
+                    })}
+                </optgroup>
+              ) : null}
               {gruppi.map((gruppo) => (
                 <optgroup key={gruppo.ruolo} label={gruppo.label}>
                   {gruppo.clienti.map((c) => {
@@ -133,7 +150,7 @@ export default function CollegaRivenditoreAdAgente({ agenti, clienti }: Props) {
             </select>
             <button
               type="button"
-              disabled={saving || !agenteId || !clienteId}
+              disabled={saving || !agenteId || !clienteId || clienteId === agenteId}
               onClick={() => void salva(clienteId, agenteId)}
               className="h-9 rounded-md bg-[#060d41] text-white px-3 text-sm font-semibold hover:bg-[#0a155a] disabled:opacity-50"
             >

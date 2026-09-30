@@ -4,6 +4,7 @@ import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
 import { filterProfiliInHierarchySubtree, profiloToGerarchiaRow } from '@/lib/userHierarchy'
 
 const CLIENTI_RUOLI = new Set([
+  'agente',
   'back_office',
   'rivenditore',
   'distributore',
@@ -70,6 +71,16 @@ export async function POST(request: NextRequest) {
   if (!target || !CLIENTI_RUOLI.has(target.ruolo)) return json(false, 'Profilo non valido', 400)
 
   const agentiAgenzia = new Set(subtree.filter((p) => p.ruolo === 'agente').map((p) => p.id))
+  if (agenteId && profiloId === agenteId) return json(false, 'Collegamento non valido', 400)
+  if (agenteId && target.ruolo === 'agente') {
+    const seen = new Set<string>()
+    let cursor: string | null = agenteId
+    while (cursor && !seen.has(cursor)) {
+      if (cursor === profiloId) return json(false, 'Collegamento non valido', 400)
+      seen.add(cursor)
+      cursor = subtree.find((p) => p.id === cursor)?.invitato_da ?? null
+    }
+  }
 
   const nuovoParent = agenteId || agenziaId
   if (agenteId && !agentiAgenzia.has(agenteId)) {
