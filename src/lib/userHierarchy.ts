@@ -62,8 +62,8 @@ export const CHILD_ROLES_BY_PARENT: Record<string, string[]> = {
   agenzia: ['agente', 'back_office', 'rivenditore', 'studio'],
   agente: ['agente', 'back_office', 'rivenditore', 'distributore', 'partner_dipendente', 'studio_associato', 'studio'],
   back_office: ['agente', 'back_office', 'distributore', 'studio_associato', 'studio'],
-  rivenditore: ['distributore', 'partner_dipendente', 'studio'],
-  distributore: ['distributore', 'partner_dipendente', 'studio'],
+  rivenditore: ['distributore', 'partner_dipendente', 'studio', 'studio_associato'],
+  distributore: ['distributore', 'partner_dipendente', 'studio', 'studio_associato'],
   partner_dipendente: ['studio'],
   studio: ['studio_associato'],
 }
@@ -173,11 +173,15 @@ export function roleBreakdownBadgesForNode(ruolo: string): RoleBreakdownBadge[] 
         { ruolo: 'studio', label: 'Sedi Studio' },
       ]
     case 'rivenditore':
-      return [{ ruolo: 'studio', label: 'Sedi Studio' }]
+      return [
+        { ruolo: 'studio', label: 'Sedi Studio' },
+        { ruolo: 'studio_associato', label: 'Studio' },
+      ]
     case 'distributore':
       return [
         { ruolo: 'distributore', label: 'Venditori' },
         { ruolo: 'studio', label: 'Sedi Studio' },
+        { ruolo: 'studio_associato', label: 'Studio' },
       ]
     case 'studio':
       return [{ ruolo: 'studio_associato', label: 'Studio' }]
@@ -478,7 +482,8 @@ export function seguitoDaCatena(
     profile.ruolo !== 'rivenditore' &&
     profile.ruolo !== 'distributore' &&
     profile.ruolo !== 'partner_dipendente' &&
-    profile.ruolo !== 'studio'
+    profile.ruolo !== 'studio' &&
+    profile.ruolo !== 'studio_associato'
   ) {
     return null
   }
@@ -501,7 +506,11 @@ export function seguitoDaCatena(
     rivenditore = resolveRivenditoreParentForDistributore(profile, profili, links)
   }
 
-  if (profile.ruolo === 'partner_dipendente' || profile.ruolo === 'studio') {
+  if (
+    profile.ruolo === 'partner_dipendente' ||
+    profile.ruolo === 'studio' ||
+    profile.ruolo === 'studio_associato'
+  ) {
     if (inviter?.ruolo === 'distributore') {
       push(etichettaPersona(inviter))
       rivenditore = resolveRivenditoreParentForDistributore(inviter, profili, links)
@@ -750,9 +759,9 @@ export function associatiDirettiSectionLabel(ruolo: string): string | null {
     case 'back_office':
       return 'Associati diretti (agenti / back-office / venditori / studi / sedi studio)'
     case 'rivenditore':
-      return 'Associati diretti (venditori / promoter / sedi studio)'
+      return 'Associati diretti (venditori / promoter / studi / sedi studio)'
     case 'distributore':
-      return 'Associati diretti (venditori / promoter / sedi studio)'
+      return 'Associati diretti (venditori / promoter / studi / sedi studio)'
     case 'partner_dipendente':
       return 'Associati diretti (sedi studio)'
     case 'studio':
@@ -776,9 +785,9 @@ export function associatiAggiungiSectionLabel(ruolo: string): string | null {
     case 'back_office':
       return 'Associa sede studio'
     case 'rivenditore':
-      return 'Associa venditore / promoter / sede studio'
+      return 'Associa venditore / promoter / studio / sede studio'
     case 'distributore':
-      return 'Associa venditore / promoter / sede studio'
+      return 'Associa venditore / promoter / studio / sede studio'
     case 'partner_dipendente':
       return 'Associa sede studio'
     case 'studio':
@@ -894,6 +903,12 @@ function isDirectChild(
   if (parentProfile.ruolo === 'distributore' && child.ruolo === 'distributore') {
     return child.invitato_da === parentId
   }
+  if (
+    parentProfile.ruolo === 'distributore' &&
+    (child.ruolo === 'studio' || child.ruolo === 'studio_associato')
+  ) {
+    return child.invitato_da === parentId
+  }
   // Manager: se l'agente ha un'agenzia, mostra l'agenzia (non l'agente sciolto).
   if (parentProfile.ruolo === 'manager' && isAgenteLike(child.ruolo)) {
     if (resolveAgenziaParentForAgent(child, profili, links)) return false
@@ -930,6 +945,13 @@ function isDirectChild(
     }
   }
   if (parentProfile.ruolo === 'rivenditore' && child.ruolo === 'distributore') {
+    const inviter = profili.find((p) => p.id === child.invitato_da)
+    if (inviter?.ruolo === 'distributore') return false
+  }
+  if (
+    parentProfile.ruolo === 'rivenditore' &&
+    (child.ruolo === 'studio' || child.ruolo === 'studio_associato')
+  ) {
     const inviter = profili.find((p) => p.id === child.invitato_da)
     if (inviter?.ruolo === 'distributore') return false
   }
@@ -1147,9 +1169,9 @@ export function nestedAssociatiLabel(ruolo: string): string | null {
     case 'back_office':
       return 'Agenti / back-office / venditori / studi / sedi studio associati'
     case 'rivenditore':
-      return 'Venditori / promoter / sedi studio associati'
+      return 'Venditori / promoter / studi / sedi studio associati'
     case 'distributore':
-      return 'Venditori / promoter / sedi studio associati'
+      return 'Venditori / promoter / studi / sedi studio associati'
     case 'partner_dipendente':
       return 'Sedi studio associate'
     case 'studio':
