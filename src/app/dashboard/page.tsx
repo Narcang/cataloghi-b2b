@@ -35,6 +35,7 @@ import {
   resolveAgenziaParentForAgent,
   resolveFlatListOwnerProfile,
   resolveRivenditoreParentForDistributore,
+  agenteAssegnatoASedeStudio,
   agenteCheSegueRivenditore,
   profiloGerarchiaDisplayLabel,
   type ProfiloGerarchiaRow,
@@ -537,13 +538,24 @@ export default async function Dashboard(props: {
           <CollegaRivenditoreAdAgente
             agenti={profiliGerarchiaDashboard
               .filter((p) => p.ruolo === 'agente')
-              .map((p) => ({ id: p.id, label: profiloGerarchiaDisplayLabel(p) }))}
-            rivenditori={profiliGerarchiaDashboard
-              .filter((p) => p.ruolo === 'rivenditore')
+              .map((p) => ({ id: p.id, label: profiloGerarchiaDisplayLabel(p) }))
+              .sort((a, b) => a.label.localeCompare(b.label, 'it', { sensitivity: 'base' }))}
+            collegamenti={profiliGerarchiaDashboard
+              .filter((p) => {
+                if (p.ruolo === 'rivenditore') return true
+                if (p.ruolo !== 'studio' || gerarchiaOwnerProfile?.ruolo !== 'agenzia') return false
+                if (p.invitato_da === gerarchiaOwnerProfile.id) return true
+                const inviter = profiliGerarchiaDashboard.find((row) => row.id === p.invitato_da)
+                return inviter?.ruolo === 'agente'
+              })
               .map((p) => ({
                 id: p.id,
                 label: profiloGerarchiaDisplayLabel(p),
-                agenteId: agenteCheSegueRivenditore(p, profiliGerarchiaDashboard)?.id ?? '',
+                tipo: p.ruolo === 'studio' ? 'studio' as const : 'rivenditore' as const,
+                agenteId:
+                  (p.ruolo === 'studio'
+                    ? agenteAssegnatoASedeStudio(p, profiliGerarchiaDashboard)?.id
+                    : agenteCheSegueRivenditore(p, profiliGerarchiaDashboard)?.id) ?? '',
               }))}
           />
         ) : null}

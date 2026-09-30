@@ -6,7 +6,7 @@ function json(ok: boolean, message: string, status: number) {
   return NextResponse.json({ ok, message }, { status })
 }
 
-/** Il back-office collega un rivenditore della propria agenzia a un agente, oppure lo riporta sull'agenzia. */
+/** Il back-office collega un rivenditore o una sede studio della propria agenzia a un agente, oppure lo riporta sull'agenzia. */
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
   const {
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
 
   const profiloId = String(body.profilo_id ?? '').trim()
   const agenteId = String(body.agente_id ?? '').trim()
-  if (!profiloId) return json(false, 'Rivenditore mancante', 400)
+  if (!profiloId) return json(false, 'Profilo mancante', 400)
 
   const svc = createServiceRoleSupabase()
   if (!svc) return json(false, 'Configurazione server incompleta', 500)
@@ -40,12 +40,14 @@ export async function POST(request: NextRequest) {
   const { data: agenzia } = await svc.from('profili').select('id, ruolo').eq('id', agenziaId).maybeSingle()
   if (agenzia?.ruolo !== 'agenzia') return json(false, 'Agenzia non trovata', 400)
 
-  const { data: rivenditore } = await svc
+  const { data: target } = await svc
     .from('profili')
     .select('id, ruolo, invitato_da')
     .eq('id', profiloId)
     .maybeSingle()
-  if (rivenditore?.ruolo !== 'rivenditore') return json(false, 'Profilo non valido', 400)
+  if (target?.ruolo !== 'rivenditore' && target?.ruolo !== 'studio') {
+    return json(false, 'Profilo non valido', 400)
+  }
 
   const { data: agenti } = await svc
     .from('profili')
@@ -62,9 +64,9 @@ export async function POST(request: NextRequest) {
   }
 
   const parentOk =
-    rivenditore.invitato_da === agenziaId ||
-    (rivenditore.invitato_da != null && agentiAgenzia.has(rivenditore.invitato_da))
-  if (!parentOk) return json(false, 'Questo rivenditore non è della tua agenzia', 403)
+    target.invitato_da === agenziaId ||
+    (target.invitato_da != null && agentiAgenzia.has(target.invitato_da))
+  if (!parentOk) return json(false, 'Questo profilo non è della tua agenzia', 403)
 
   const nuovoParent = agenteId || agenziaId
   if (agenteId && !agentiAgenzia.has(agenteId)) {

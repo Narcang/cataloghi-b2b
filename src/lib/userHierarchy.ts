@@ -532,6 +532,16 @@ export function seguitoDaCatena(
   return parts.length > 0 ? parts.join(', ') : null
 }
 
+/** Sede studio assegnata a un agente dell'agenzia (invito diretto). */
+export function agenteAssegnatoASedeStudio(
+  studio: ProfiloGerarchiaRow,
+  profili: ProfiloGerarchiaRow[],
+): ProfiloGerarchiaRow | null {
+  if (studio.ruolo !== 'studio') return null
+  const inviter = profili.find((p) => p.id === studio.invitato_da)
+  return inviter?.ruolo === 'agente' ? inviter : null
+}
+
 /** Agente a cui il rivenditore è collegato: invito diretto oppure nome in «Seguito da». */
 export function agenteCheSegueRivenditore(
   rivenditore: ProfiloGerarchiaRow,
@@ -860,9 +870,14 @@ function isDirectChild(
 ): boolean {
   const expectedRoles = CHILD_ROLES_BY_PARENT[parentProfile.ruolo] ?? []
   if (!expectedRoles.includes(child.ruolo)) return false
-  if (parentProfile.ruolo === 'back_office' && child.ruolo === 'rivenditore') return false
+  if (parentProfile.ruolo === 'back_office' && (child.ruolo === 'rivenditore' || child.ruolo === 'studio')) {
+    return false
+  }
   if (parentProfile.ruolo === 'agente' && child.ruolo === 'rivenditore') {
     return agenteCheSegueRivenditore(child, profili)?.id === parentId
+  }
+  if (parentProfile.ruolo === 'agente' && child.ruolo === 'studio') {
+    return agenteAssegnatoASedeStudio(child, profili)?.id === parentId
   }
   if (
     isAgenteLike(parentProfile.ruolo) &&
@@ -898,6 +913,8 @@ function isDirectChild(
     if (agenzia?.id === parentId) return true
   }
   if (parentProfile.ruolo === 'agenzia' && child.ruolo === 'studio') {
+    const agente = agenteAssegnatoASedeStudio(child, profili)
+    if (agente && resolveAgenziaParentForAgent(agente, profili, links)?.id === parentId) return false
     if (child.invitato_da === parentId) return true
   }
   if (parentProfile.ruolo === 'rivenditore' && child.ruolo === 'distributore') {
