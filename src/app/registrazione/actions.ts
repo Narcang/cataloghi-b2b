@@ -4,7 +4,6 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
-import { isAgenteLike } from '@/lib/catalogRoles'
 import { loadInvitoValidato } from '@/lib/invitoLookup'
 
 function sanitize(s: unknown): string {
@@ -65,26 +64,6 @@ export async function register(formData: FormData) {
       )
     }
     if (!societa && invito.societa) societa = invito.societa
-
-    if (invitoRuolo === 'rivenditore' && invitoDa) {
-      const { data: invitante } = await svc
-        .from('profili')
-        .select('ruolo, invitato_da')
-        .eq('id', invitoDa)
-        .single()
-
-      if (invitante && isAgenteLike(invitante.ruolo) && invitante.invitato_da) {
-        const { data: agenziaParent } = await svc
-          .from('profili')
-          .select('id, ruolo')
-          .eq('id', invitante.invitato_da)
-          .single()
-
-        if (agenziaParent?.ruolo === 'agenzia') {
-          invitoDa = agenziaParent.id
-        }
-      }
-    }
   }
 
   if (!nome || !cognome || !societa || !email || !password || !telefono) {

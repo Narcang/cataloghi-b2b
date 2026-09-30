@@ -60,7 +60,7 @@ export const CHILD_ROLES_BY_PARENT: Record<string, string[]> = {
   admin: ['manager'],
   manager: ['agenzia', 'agente', 'back_office'],
   agenzia: ['agente', 'back_office', 'rivenditore', 'studio'],
-  agente: ['agente', 'distributore', 'studio_associato', 'studio'],
+  agente: ['agente', 'rivenditore', 'distributore', 'studio_associato', 'studio'],
   back_office: ['agente', 'back_office', 'distributore', 'studio_associato', 'studio'],
   rivenditore: ['distributore', 'partner_dipendente', 'studio'],
   distributore: ['distributore', 'partner_dipendente', 'studio'],
@@ -163,6 +163,7 @@ export function roleBreakdownBadgesForNode(ruolo: string): RoleBreakdownBadge[] 
     case 'agente':
       return [
         { ruolo: 'agente', label: 'Agenti' },
+        { ruolo: 'rivenditore', label: 'Rivenditori' },
         { ruolo: 'studio', label: 'Sedi Studio' },
       ]
     case 'back_office':
@@ -531,6 +532,23 @@ export function seguitoDaCatena(
   return parts.length > 0 ? parts.join(', ') : null
 }
 
+/** Agente a cui il rivenditore è collegato: invito diretto oppure nome in «Seguito da». */
+export function agenteCheSegueRivenditore(
+  rivenditore: ProfiloGerarchiaRow,
+  profili: ProfiloGerarchiaRow[],
+): ProfiloGerarchiaRow | null {
+  if (rivenditore.ruolo !== 'rivenditore') return null
+  const inviter = profili.find((p) => p.id === rivenditore.invitato_da)
+  if (inviter?.ruolo === 'agente') return inviter
+  const seguito = rivenditore.seguito_da?.trim().toLocaleLowerCase('it')
+  if (!seguito) return null
+  return (
+    profili.find(
+      (p) => p.ruolo === 'agente' && (p.nome_completo ?? '').trim().toLocaleLowerCase('it') === seguito,
+    ) ?? null
+  )
+}
+
 /** True se il rivenditore appartiene alla gerarchia dell'agenzia (invito diretto, agente o rubrica). */
 export function isRivenditoreManagedByAgenzia(
   agenziaId: string,
@@ -842,7 +860,10 @@ function isDirectChild(
 ): boolean {
   const expectedRoles = CHILD_ROLES_BY_PARENT[parentProfile.ruolo] ?? []
   if (!expectedRoles.includes(child.ruolo)) return false
-  if (isAgenteLike(parentProfile.ruolo) && child.ruolo === 'rivenditore') return false
+  if (parentProfile.ruolo === 'back_office' && child.ruolo === 'rivenditore') return false
+  if (parentProfile.ruolo === 'agente' && child.ruolo === 'rivenditore') {
+    return agenteCheSegueRivenditore(child, profili)?.id === parentId
+  }
   if (
     isAgenteLike(parentProfile.ruolo) &&
     (child.ruolo === 'agente' ||
@@ -870,6 +891,8 @@ function isDirectChild(
     }
   }
   if (parentProfile.ruolo === 'agenzia' && child.ruolo === 'rivenditore') {
+    const agente = agenteCheSegueRivenditore(child, profili)
+    if (agente && resolveAgenziaParentForAgent(agente, profili, links)?.id === parentId) return false
     if (child.invitato_da === parentId) return true
     const agenzia = resolveAgenziaParentForRivenditore(child, profili, links)
     if (agenzia?.id === parentId) return true

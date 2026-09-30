@@ -63,6 +63,22 @@ export async function loadInvitoValidato(
     }
   }
 
+  if (associatoA) {
+    const { data: collegato } = await svc
+      .from('profili')
+      .select('ruolo, invitato_da')
+      .eq('id', associatoA)
+      .maybeSingle()
+    if (collegato?.ruolo === 'back_office' && collegato.invitato_da) {
+      const { data: agenzia } = await svc
+        .from('profili')
+        .select('id, ruolo')
+        .eq('id', collegato.invitato_da)
+        .maybeSingle()
+      if (agenzia?.ruolo === 'agenzia') associatoA = agenzia.id
+    }
+  }
+
   let societa: string | null = null
   if (associatoA) {
     const { data: parent } = await svc

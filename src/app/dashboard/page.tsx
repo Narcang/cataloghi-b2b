@@ -26,6 +26,7 @@ import GerarchiaUtentiTree from '@/components/admin/GerarchiaUtentiTree'
 import AdminProfiliPanel, { type ProfiloGestioneRow } from '@/components/admin/AdminProfiliPanel'
 import CreaAssociatoManuale from '@/components/admin/CreaAssociatoManuale'
 import AssociatiPiattiPanel from '@/components/dashboard/AssociatiPiattiPanel'
+import CollegaRivenditoreAdAgente from '@/components/dashboard/CollegaRivenditoreAdAgente'
 import {
   profiloToGerarchiaRow,
   filterProfiliInHierarchySubtree,
@@ -34,6 +35,8 @@ import {
   resolveAgenziaParentForAgent,
   resolveFlatListOwnerProfile,
   resolveRivenditoreParentForDistributore,
+  agenteCheSegueRivenditore,
+  profiloGerarchiaDisplayLabel,
   type ProfiloGerarchiaRow,
 } from '@/lib/userHierarchy'
 import { fetchUltimoAccessoMap, ultimoAccessoMapToRecord } from '@/lib/ultimoAccessoUtenti'
@@ -529,6 +532,21 @@ export default async function Dashboard(props: {
             ultimoAccessoByProfiloId={ultimoAccessoByProfiloId}
           />
         )}
+
+        {showFullDashboard && isBackOffice && user ? (
+          <CollegaRivenditoreAdAgente
+            agenti={profiliGerarchiaDashboard
+              .filter((p) => p.ruolo === 'agente')
+              .map((p) => ({ id: p.id, label: profiloGerarchiaDisplayLabel(p) }))}
+            rivenditori={profiliGerarchiaDashboard
+              .filter((p) => p.ruolo === 'rivenditore')
+              .map((p) => ({
+                id: p.id,
+                label: profiloGerarchiaDisplayLabel(p),
+                agenteId: agenteCheSegueRivenditore(p, profiliGerarchiaDashboard)?.id ?? '',
+              }))}
+          />
+        ) : null}
 
         {showFullDashboard && !isManager && (isAgenzia || isRivenditore) && user && (
           <section className="border border-black rounded-2xl bg-white p-6 space-y-8">
