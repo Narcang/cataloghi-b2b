@@ -60,7 +60,7 @@ export const CHILD_ROLES_BY_PARENT: Record<string, string[]> = {
   admin: ['manager'],
   manager: ['agenzia', 'agente', 'back_office'],
   agenzia: ['agente', 'back_office', 'rivenditore', 'studio'],
-  agente: ['agente', 'rivenditore', 'distributore', 'studio_associato', 'studio'],
+  agente: ['agente', 'back_office', 'rivenditore', 'distributore', 'partner_dipendente', 'studio_associato', 'studio'],
   back_office: ['agente', 'back_office', 'distributore', 'studio_associato', 'studio'],
   rivenditore: ['distributore', 'partner_dipendente', 'studio'],
   distributore: ['distributore', 'partner_dipendente', 'studio'],
@@ -879,6 +879,9 @@ function isDirectChild(
   if (parentProfile.ruolo === 'agente' && child.ruolo === 'studio') {
     return agenteAssegnatoASedeStudio(child, profili)?.id === parentId
   }
+  if (parentProfile.ruolo === 'agente' && child.ruolo === 'partner_dipendente') {
+    return child.invitato_da === parentId
+  }
   if (
     isAgenteLike(parentProfile.ruolo) &&
     (child.ruolo === 'agente' ||
@@ -916,6 +919,15 @@ function isDirectChild(
     const agente = agenteAssegnatoASedeStudio(child, profili)
     if (agente && resolveAgenziaParentForAgent(agente, profili, links)?.id === parentId) return false
     if (child.invitato_da === parentId) return true
+  }
+  if (
+    parentProfile.ruolo === 'agenzia' &&
+    (child.ruolo === 'distributore' || child.ruolo === 'partner_dipendente' || child.ruolo === 'studio_associato')
+  ) {
+    const inviter = profili.find((p) => p.id === child.invitato_da)
+    if (inviter?.ruolo === 'agente' && resolveAgenziaParentForAgent(inviter, profili, links)?.id === parentId) {
+      return false
+    }
   }
   if (parentProfile.ruolo === 'rivenditore' && child.ruolo === 'distributore') {
     const inviter = profili.find((p) => p.id === child.invitato_da)

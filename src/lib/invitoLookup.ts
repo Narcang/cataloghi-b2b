@@ -70,12 +70,23 @@ export async function loadInvitoValidato(
       .eq('id', associatoA)
       .maybeSingle()
     if (collegato?.ruolo === 'back_office' && collegato.invitato_da) {
-      const { data: agenzia } = await svc
-        .from('profili')
-        .select('id, ruolo')
-        .eq('id', collegato.invitato_da)
-        .maybeSingle()
-      if (agenzia?.ruolo === 'agenzia') associatoA = agenzia.id
+      let cursor: string | null = collegato.invitato_da
+      const seen = new Set<string>()
+      while (cursor && !seen.has(cursor)) {
+        seen.add(cursor)
+        const { data: parent } = await svc
+          .from('profili')
+          .select('id, ruolo, invitato_da')
+          .eq('id', cursor)
+          .maybeSingle()
+        if (!parent) break
+        if (parent.ruolo === 'agenzia') {
+          associatoA = parent.id
+          break
+        }
+        if (parent.ruolo !== 'agente' && parent.ruolo !== 'back_office') break
+        cursor = parent.invitato_da
+      }
     }
   }
 

@@ -38,6 +38,7 @@ import {
   agenteAssegnatoASedeStudio,
   agenteCheSegueRivenditore,
   profiloGerarchiaDisplayLabel,
+  ruoloGerarchiaLabel,
   type ProfiloGerarchiaRow,
 } from '@/lib/userHierarchy'
 import { fetchUltimoAccessoMap, ultimoAccessoMapToRecord } from '@/lib/ultimoAccessoUtenti'
@@ -540,23 +541,34 @@ export default async function Dashboard(props: {
               .filter((p) => p.ruolo === 'agente')
               .map((p) => ({ id: p.id, label: profiloGerarchiaDisplayLabel(p) }))
               .sort((a, b) => a.label.localeCompare(b.label, 'it', { sensitivity: 'base' }))}
-            collegamenti={profiliGerarchiaDashboard
-              .filter((p) => {
-                if (p.ruolo === 'rivenditore') return true
-                if (p.ruolo !== 'studio' || gerarchiaOwnerProfile?.ruolo !== 'agenzia') return false
-                if (p.invitato_da === gerarchiaOwnerProfile.id) return true
-                const inviter = profiliGerarchiaDashboard.find((row) => row.id === p.invitato_da)
-                return inviter?.ruolo === 'agente'
-              })
-              .map((p) => ({
-                id: p.id,
-                label: profiloGerarchiaDisplayLabel(p),
-                tipo: p.ruolo === 'studio' ? 'studio' as const : 'rivenditore' as const,
-                agenteId:
-                  (p.ruolo === 'studio'
+            clienti={profiliGerarchiaDashboard
+              .filter((p) =>
+                p.id !== user.id &&
+                (p.ruolo === 'back_office' ||
+                  p.ruolo === 'rivenditore' ||
+                  p.ruolo === 'distributore' ||
+                  p.ruolo === 'partner_dipendente' ||
+                  p.ruolo === 'studio' ||
+                  p.ruolo === 'studio_associato'),
+              )
+              .map((p) => {
+                const agenteDiretto = profiliGerarchiaDashboard.find(
+                  (row) => row.id === p.invitato_da && row.ruolo === 'agente',
+                )
+                const agenteId =
+                  p.ruolo === 'studio'
                     ? agenteAssegnatoASedeStudio(p, profiliGerarchiaDashboard)?.id
-                    : agenteCheSegueRivenditore(p, profiliGerarchiaDashboard)?.id) ?? '',
-              }))}
+                    : p.ruolo === 'rivenditore'
+                      ? agenteCheSegueRivenditore(p, profiliGerarchiaDashboard)?.id
+                      : agenteDiretto?.id
+                return {
+                  id: p.id,
+                  label: profiloGerarchiaDisplayLabel(p),
+                  ruolo: p.ruolo,
+                  ruoloLabel: ruoloGerarchiaLabel(p.ruolo),
+                  agenteId: agenteId ?? '',
+                }
+              })}
           />
         ) : null}
 
