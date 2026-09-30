@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
-import { filterProfiliInHierarchySubtree, profiloToGerarchiaRow } from '@/lib/userHierarchy'
+import {
+  filterProfiliInHierarchySubtree,
+  profiloToGerarchiaRow,
+  resolveAgenziaParentForAgent,
+} from '@/lib/userHierarchy'
 
 const CLIENTI_RUOLI = new Set([
   'back_office',
@@ -46,11 +50,6 @@ export async function POST(request: NextRequest) {
   const svc = createServiceRoleSupabase()
   if (!svc) return json(false, 'Configurazione server incompleta', 500)
 
-  const agenziaId = caller.invitato_da
-  if (!agenziaId) return json(false, 'Agenzia non trovata', 400)
-  const { data: agenzia } = await svc.from('profili').select('id, ruolo').eq('id', agenziaId).maybeSingle()
-  if (agenzia?.ruolo !== 'agenzia') return json(false, 'Agenzia non trovata', 400)
-
   const [{ data: profili }, { data: links }] = await Promise.all([
     svc
       .from('profili')
@@ -63,8 +62,12 @@ export async function POST(request: NextRequest) {
     ...profiloToGerarchiaRow(p, p.invitato_da),
     seguito_da: p.seguito_da,
   }))
-  const agenziaRow = rows.find((p) => p.id === agenziaId && p.ruolo === 'agenzia')
+  const callerRow = rows.find((p) => p.id === user.id)
+  const agenziaRow = callerRow
+    ? resolveAgenziaParentForAgent(callerRow, rows, links ?? [])
+    : null
   if (!agenziaRow) return json(false, 'Agenzia non trovata', 400)
+  const agenziaId = agenziaRow.id
   const subtree = filterProfiliInHierarchySubtree(agenziaRow, rows, links ?? [])
   const target = subtree.find((p) => p.id === profiloId)
   if (!target || !CLIENTI_RUOLI.has(target.ruolo)) return json(false, 'Profilo non valido', 400)
