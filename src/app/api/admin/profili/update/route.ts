@@ -289,6 +289,14 @@ export async function POST(request: NextRequest) {
     box: opzioniToAllowedSet(opzioniSpecializzazione.box),
   }
 
+  if (
+    (ruoloEffettivo === 'studio' || ruoloEffettivo === 'studio_associato') &&
+    body.seguito_da !== undefined
+  ) {
+    patch.seguito_da =
+      body.seguito_da === null ? null : String(body.seguito_da).trim() || null
+  }
+
   if (ruoloEffettivo === 'rivenditore') {
     const rivenditoreCampi = readRivenditoreCampiFromBody(body as Record<string, unknown>)
     if ('seguito_da' in rivenditoreCampi) {

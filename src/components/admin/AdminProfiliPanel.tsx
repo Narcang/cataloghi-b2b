@@ -417,6 +417,8 @@ export default function AdminProfiliPanel({
     }
     if (ruolo === 'rivenditore') {
       Object.assign(body, readRivenditoreCampiFromFormData(fd))
+    } else if (ruolo === 'studio' || ruolo === 'studio_associato') {
+      body.seguito_da = String(fd.get('seguito_da') ?? '').trim() || null
     }
     if (ruolo === 'agenzia') {
       Object.assign(body, readAgenziaCampiFromFormData(fd))
@@ -564,7 +566,7 @@ export default function AdminProfiliPanel({
                         ))}
                       </select>
                     </label>
-                    {p.ruolo === 'rivenditore' ? (
+                    {p.ruolo === 'rivenditore' || p.ruolo === 'studio' || p.ruolo === 'studio_associato' ? (
                       <label className="block text-xs font-medium uppercase text-zinc-600">
                         {copy.seguitoDa}
                         <input
@@ -974,7 +976,7 @@ export default function AdminProfiliPanel({
                               ))}
                             </select>
                           </label>
-                          {p.ruolo === 'rivenditore' ? (
+                          {p.ruolo === 'rivenditore' || p.ruolo === 'studio' || p.ruolo === 'studio_associato' ? (
                             <label className="block text-xs font-medium uppercase text-zinc-600">
                               {copy.seguitoDa}
                               <input

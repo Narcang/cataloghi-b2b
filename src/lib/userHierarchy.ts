@@ -498,6 +498,10 @@ export function seguitoDaCatena(
     parts.push(value)
   }
 
+  if (profile.ruolo === 'studio' || profile.ruolo === 'studio_associato') {
+    push(profile.seguito_da)
+  }
+
   const inviter = byId.get(profile.invitato_da ?? '')
   let rivenditore: ProfiloGerarchiaRow | null = profile.ruolo === 'rivenditore' ? profile : null
 
@@ -526,7 +530,7 @@ export function seguitoDaCatena(
 
   if (profile.ruolo !== 'rivenditore' && rivenditore) push(etichettaSocieta(rivenditore))
 
-  const seguito = rivenditore?.seguito_da?.trim() || null
+  const seguito = rivenditore?.seguito_da?.trim() || profile.seguito_da?.trim() || null
   if (profile.ruolo === 'rivenditore' && !seguito) return null
   push(seguito)
 
