@@ -26,7 +26,9 @@ export async function POST(request: NextRequest) {
 
   const { data: profiloUtente } = await supabase.from('profili').select('ruolo').eq('id', user.id).single()
 
-  if (profiloUtente?.ruolo !== 'admin') {
+  const isAdmin = profiloUtente?.ruolo === 'admin'
+  const isManager = profiloUtente?.ruolo === 'manager'
+  if (!isAdmin && !isManager) {
     return jsonResponse(false, 'Operazione non consentita', 403)
   }
 
@@ -46,9 +48,17 @@ export async function POST(request: NextRequest) {
     return jsonResponse(false, 'Non puoi eliminare il tuo stesso account da qui', 400)
   }
 
-  const { client: db } = await getAdminDataSupabase()
+  const serviceClient = createServiceRoleSupabase()
+  if (isManager && !serviceClient) {
+    return jsonResponse(false, 'Configurazione server incompleta', 500)
+  }
+  const db = isAdmin ? (await getAdminDataSupabase()).client : serviceClient!
 
-  const { data: target, error: targetErr } = await db.from('profili').select('id, ruolo').eq('id', profiloId).maybeSingle()
+  const { data: target, error: targetErr } = await db
+    .from('profili')
+    .select('id, ruolo, registrazione_approvata')
+    .eq('id', profiloId)
+    .maybeSingle()
 
   if (targetErr || !target) {
     return jsonResponse(false, 'Profilo non trovato', 404)
@@ -56,6 +66,9 @@ export async function POST(request: NextRequest) {
 
   if (target.ruolo === 'admin') {
     return jsonResponse(false, 'Non è consentito eliminare un account amministratore', 400)
+  }
+  if (isManager && target.registrazione_approvata !== false) {
+    return jsonResponse(false, 'Il manager può rifiutare solo registrazioni in attesa', 403)
   }
 
   // DELETE su `profili`: usa la sessione admin (RLS "Admin gestisce tutti i profili"), non il service role.
@@ -76,7 +89,7 @@ export async function POST(request: NextRequest) {
     return jsonResponse(false, 'Impossibile eliminare il profilo (nessuna riga aggiornata).', 409)
   }
 
-  const svc = db
+  const svc = serviceClient
   if (!svc) {
     return jsonResponse(
       true,

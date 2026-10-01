@@ -46,7 +46,7 @@ import { ruoliInvitabili } from '@/lib/inviteHierarchy'
 import { getAppLocale } from '@/lib/localeServer'
 import { catalogLingueForLocale, preferCatalogLingua } from '@/lib/catalogLingua'
 import { tDashboard } from '@/lib/i18n'
-import { tRuolo } from '@/lib/i18nAdmin'
+import { tAdmin, tRuolo } from '@/lib/i18nAdmin'
 
 const ASSISTENZA_LADIVA_TELEFONO = '+39 0536 185 6217'
 const ASSISTENZA_LADIVA_EMAIL = 'info@ladiva-fpd.com'
@@ -108,6 +108,7 @@ export default async function Dashboard(props: {
   const actionMessage = searchParams?.message ?? ''
   const locale = await getAppLocale()
   const copy = tDashboard(locale)
+  const adminCopy = tAdmin(locale)
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -135,6 +136,16 @@ export default async function Dashboard(props: {
   const isPartnerDipendente = ruoloCorrente === 'partner_dipendente'
   const isStudioLikeRole = isStudioLike(ruoloCorrente)
   const isFree = !user || ruoloCorrente === 'free'
+
+  let registrazioniInAttesaCount = 0
+  if (user && isManager) {
+    const pendingClient = createServiceRoleSupabase() ?? supabase
+    const { count } = await pendingClient
+      .from('profili')
+      .select('id', { count: 'exact', head: true })
+      .eq('registrazione_approvata', false)
+    registrazioniInAttesaCount = count ?? 0
+  }
 
   // Recupera i cataloghi (RLS attivo)
   let cataloghiQuery = supabase
@@ -692,6 +703,17 @@ export default async function Dashboard(props: {
               <h2 className="text-2xl text-zinc-900 font-semibold tracking-tight">{copy.gestione}</h2>
               <p className="text-sm text-zinc-600 mt-1">{copy.gestioneHelp}</p>
             </div>
+            {registrazioniInAttesaCount > 0 ? (
+              <Link
+                href="/dashboard/gestione-utenti#gestione-utenti"
+                className="mb-6 flex items-center justify-between gap-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-950"
+              >
+                <span>
+                  {adminCopy.registrazioniAttesa} ({registrazioniInAttesaCount})
+                </span>
+                <span aria-hidden>→</span>
+              </Link>
+            ) : null}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <Link
                 href="/dashboard/gestione-utenti"

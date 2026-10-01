@@ -136,8 +136,10 @@ type Props = {
   links: { utente_id: string; operatore_id: string }[]
   /** Tutti i cataloghi attivi (con ruoli_visibili) per la gestione permessi per-utente. */
   allCataloghi: CatalogoDisponibile[]
-  /** Quando true (ruolo manager) il pannello è in sola lettura: nessun edit/delete/approvazione. */
+  /** Quando true (ruolo manager) i profili approvati restano in sola lettura. */
   readOnly?: boolean
+  /** Admin e manager possono approvare o rifiutare le registrazioni pendenti. */
+  canReviewPending?: boolean
   /** Admin e manager possono aggiornare strumenti/cataloghi (agenzia) ed espositori/box (rivenditore). */
   canEditSpecializzazione?: boolean
   /** Admin e manager possono gestire i cataloghi visibili anche se readOnly è true. */
@@ -167,6 +169,7 @@ export default function AdminProfiliPanel({
   links,
   allCataloghi,
   readOnly = false,
+  canReviewPending = false,
   canEditSpecializzazione = false,
   canManageCataloghi = false,
   canCreateAssociati = false,
@@ -467,6 +470,31 @@ export default function AdminProfiliPanel({
                   <strong>{p.nome_completo || copy.senzaNome}</strong> · {p.email} · {p.societa || '—'} · Tel.{' '}
                   {p.telefono || '—'} · {copy.campoRuolo}: {tRuolo(locale, p.ruolo)} · {copy.campoArea}: {p.area_geografica || '—'}
                 </p>
+                {canReviewPending ? (
+                  <div className="mb-3 flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      disabled={deletingId === p.id}
+                      onClick={() =>
+                        void postUpdate({
+                          profilo_id: p.id,
+                          registrazione_approvata: true,
+                        })
+                      }
+                      className="h-9 rounded-md bg-[#060d41] px-3 text-sm font-semibold text-white hover:bg-[#0a155a] disabled:opacity-50"
+                    >
+                      {copy.approva}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={deletingId === p.id}
+                      onClick={() => void postDelete(p.id)}
+                      className="h-9 rounded-md border border-red-600 bg-white px-3 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50"
+                    >
+                      {deletingId === p.id ? copy.eliminazione : copy.rifiuta}
+                    </button>
+                  </div>
+                ) : null}
                 {!readOnly && (
                   <form
                     className="grid grid-cols-1 md:grid-cols-2 gap-3"

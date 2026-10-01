@@ -305,6 +305,8 @@ const admin = {
     gestioneUtentiPanelHelp:
       'Approva le registrazioni, aggiorna i dati o elimina account, associa i contatti visibili nella rubrica.',
     registrazioniAttesa: 'Registrazioni in attesa',
+    approva: 'Approva',
+    rifiuta: 'Rifiuta',
     nessunaAttesa: 'Nessuna registrazione in attesa.',
     utentiAssociati: 'Utenti e operatori associati',
     rivenditoriAssociati: 'Rivenditori associati',
@@ -499,6 +501,8 @@ const admin = {
     gestioneUtentiPanel: 'Управление пользователями',
     gestioneUtentiPanelHelp: 'Одобряйте регистрации, обновляйте данные или удаляйте аккаунты.',
     registrazioniAttesa: 'Регистрации в ожидании',
+    approva: 'Одобрить',
+    rifiuta: 'Отклонить',
     nessunaAttesa: 'Нет регистраций в ожидании.',
     utentiAssociati: 'Связанные пользователи и операторы',
     rivenditoriAssociati: 'Связанные дилеры',
@@ -691,6 +695,8 @@ const admin = {
     gestioneUtentiPanelHelp:
       'Approve registrations, update details or delete accounts, and link contacts visible in the directory.',
     registrazioniAttesa: 'Pending registrations',
+    approva: 'Approve',
+    rifiuta: 'Reject',
     nessunaAttesa: 'No pending registrations.',
     utentiAssociati: 'Linked users and operators',
     rivenditoriAssociati: 'Linked resellers',
@@ -888,6 +894,8 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     gestioneUtentiPanelHelp:
       'Aprueba los registros, actualiza los datos o elimina cuentas, asocia los contactos visibles en la agenda.',
     registrazioniAttesa: 'Registros pendientes',
+    approva: 'Aprobar',
+    rifiuta: 'Rechazar',
     nessunaAttesa: 'Ningún registro pendiente.',
     utentiAssociati: 'Usuarios y operadores asociados',
     rivenditoriAssociati: 'Revendedores asociados',
@@ -1084,6 +1092,8 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     gestioneUtentiPanelHelp:
       'Approuvez les inscriptions, mettez à jour les données ou supprimez des comptes, liez les contacts de l’annuaire.',
     registrazioniAttesa: 'Inscriptions en attente',
+    approva: 'Approuver',
+    rifiuta: 'Refuser',
     nessunaAttesa: 'Aucune inscription en attente.',
     utentiAssociati: 'Utilisateurs et opérateurs associés',
     rivenditoriAssociati: 'Revendeurs associés',
@@ -1276,6 +1286,8 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     gestioneUtentiPanelHelp:
       'Registrierungen freigeben, Daten aktualisieren oder Konten löschen, Verzeichnis-Kontakte verknüpfen.',
     registrazioniAttesa: 'Ausstehende Registrierungen',
+    approva: 'Genehmigen',
+    rifiuta: 'Ablehnen',
     nessunaAttesa: 'Keine ausstehenden Registrierungen.',
     utentiAssociati: 'Verknüpfte Benutzer und Operatoren',
     rivenditoriAssociati: 'Verknüpfte Händler',
@@ -1468,6 +1480,8 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     gestioneUtentiPanelHelp:
       'Keur registraties goed, werk gegevens bij of verwijder accounts, en koppel contacten die in het adresboek zichtbaar zijn.',
     registrazioniAttesa: 'Registraties in afwachting',
+    approva: 'Goedkeuren',
+    rifiuta: 'Afwijzen',
     nessunaAttesa: 'Geen registraties in afwachting.',
     utentiAssociati: 'Gekoppelde gebruikers en operators',
     rivenditoriAssociati: 'Gekoppelde wederverkopers',
@@ -1664,6 +1678,8 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     gestioneUtentiPanelHelp:
       'Εγκρίνετε εγγραφές, ενημερώστε στοιχεία ή διαγράψτε λογαριασμούς, συνδέστε επαφές καταλόγου.',
     registrazioniAttesa: 'Εγγραφές σε αναμονή',
+    approva: 'Έγκριση',
+    rifiuta: 'Απόρριψη',
     nessunaAttesa: 'Δεν υπάρχουν εγγραφές σε αναμονή.',
     utentiAssociati: 'Συνδεδεμένοι χρήστες και χειριστές',
     rivenditoriAssociati: 'Συνδεδεμένοι μεταπωλητές',
@@ -1856,6 +1872,8 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     gestioneUtentiPanelHelp:
       'Zatwierdzaj rejestracje, aktualizuj dane lub usuwaj konta, powiązuj kontakty w książce.',
     registrazioniAttesa: 'Rejestracje oczekujące',
+    approva: 'Zatwierdź',
+    rifiuta: 'Odrzuć',
     nessunaAttesa: 'Brak oczekujących rejestracji.',
     utentiAssociati: 'Powiązani użytkownicy i operatorzy',
     rivenditoriAssociati: 'Powiązani dystrybutorzy',
@@ -2048,6 +2066,8 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     gestioneUtentiPanelHelp:
       'Схвалюйте реєстрації, оновлюйте дані або видаляйте облікові записи, пов’язуйте контакти довідника.',
     registrazioniAttesa: 'Реєстрації в очікуванні',
+    approva: 'Схвалити',
+    rifiuta: 'Відхилити',
     nessunaAttesa: 'Немає реєстрацій в очікуванні.',
     utentiAssociati: 'Пов’язані користувачі та оператори',
     rivenditoriAssociati: 'Пов’язані дилери',
