@@ -74,6 +74,8 @@ const NESTED_BRANCH_OFFSET_REM = 1
 /** Griglia card: identità compatta; colonne specializzazione più larghe a destra. */
 const CARD_GRID_CLASS =
   'grid gap-2 items-start grid-cols-1 md:grid-cols-[minmax(0,0.65fr)_minmax(0,0.52fr)_minmax(0,1fr)_minmax(0,1.35fr)]'
+const VENDITORE_CARD_GRID_CLASS =
+  'grid gap-4 items-start grid-cols-1 md:grid-cols-[minmax(0,1.6fr)_minmax(10rem,0.7fr)]'
 /** Offset colonna centrale (strumenti / espositori) verso destra. */
 const COLONNA_CENTRALE_CLASS = 'md:pl-6'
 /** Ultima colonna (cataloghi / box) più a destra e più larga. */
@@ -141,7 +143,11 @@ function HierarchyNode({
   const expanded = expandedIds.has(profile.id)
   const nestedLabel = tNestedAssociati(locale, profile.ruolo)
   const roleDotClass = ruoloGerarchiaDotClass(profile.ruolo)
-  const breakdownBadges = roleBreakdownBadgesForNode(profile.ruolo)
+  const isVenditoreCard = profile.ruolo === 'distributore'
+  const breakdownBadges = roleBreakdownBadgesForNode(profile.ruolo).filter(
+    ({ ruolo }) =>
+      !isVenditoreCard || ruolo === 'studio' || ruolo === 'studio_associato',
+  )
   const breakdownCounts = useMemo(() => {
     if (breakdownBadges.length === 0) return null
     return countDescendantsByRoles(
@@ -206,7 +212,11 @@ function HierarchyNode({
           }
         >
           <div className="flex flex-col md:flex-row md:items-stretch gap-3">
-          <div className={`flex-1 min-w-0 ${CARD_GRID_CLASS}`}>
+          <div
+            className={`flex-1 min-w-0 ${
+              isVenditoreCard ? VENDITORE_CARD_GRID_CLASS : CARD_GRID_CLASS
+            }`}
+          >
             <div className="min-w-0">
               <h4 className="text-base font-semibold text-zinc-900 flex items-center gap-2">
                 {roleDotClass ? (
@@ -226,7 +236,7 @@ function HierarchyNode({
                   )}
                 </span>
               </h4>
-              {riferimentoInvito ? (
+              {!isVenditoreCard && riferimentoInvito ? (
                 <p className="text-sm font-semibold text-zinc-800 mt-1">
                   {dashCopy.associatoA}: {profiloGerarchiaDisplayLabel(riferimentoInvito)} ({tRuolo(locale, riferimentoInvito.ruolo)})
                 </p>
@@ -243,16 +253,26 @@ function HierarchyNode({
             </div>
 
             <div className="flex flex-col items-start gap-1 min-w-0">
-              <span className="text-xs font-semibold uppercase tracking-wide text-zinc-700">
-                {tRuolo(locale, profile.ruolo)}
-              </span>
-              {expandable ? (
-                <span className="text-xs font-medium text-zinc-500">
-                  {tAssociatiCount(locale, childCount)}
-                </span>
+              {!isVenditoreCard ? (
+                <>
+                  <span className="text-xs font-semibold uppercase tracking-wide text-zinc-700">
+                    {tRuolo(locale, profile.ruolo)}
+                  </span>
+                  {expandable ? (
+                    <span className="text-xs font-medium text-zinc-500">
+                      {tAssociatiCount(locale, childCount)}
+                    </span>
+                  ) : null}
+                </>
               ) : null}
               {breakdownCounts && breakdownBadges.length > 0 ? (
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-0.5">
+                <div
+                  className={
+                    isVenditoreCard
+                      ? 'flex flex-col items-start gap-1 mt-0.5'
+                      : 'flex flex-wrap items-center gap-x-3 gap-y-1 mt-0.5'
+                  }
+                >
                   {breakdownBadges.map(({ ruolo }) => {
                     const dotClass = ruoloBreakdownDotClass(ruolo)
                     if (!dotClass) return null
@@ -306,7 +326,7 @@ function HierarchyNode({
                   canEliminareVociStorico={canEliminareVociStorico}
                 />
               </>
-            ) : (
+            ) : isVenditoreCard ? null : (
               <>
                 <div className="hidden md:block" aria-hidden />
                 <div className="hidden md:block" aria-hidden />
