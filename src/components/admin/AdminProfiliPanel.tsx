@@ -772,16 +772,16 @@ export default function AdminProfiliPanel({
               <li key={p.id} className="rounded-xl border border-black bg-zinc-50/80">
                 <details className="group" open={apriProfiliDiDefault || undefined}>
                   <summary className="cursor-pointer list-none px-4 py-3 flex flex-wrap items-center justify-between gap-2">
-                    <span className="font-medium text-zinc-900">
+                    <span className="font-medium text-black">
                       {p.societa ? (
                         <>
                           {p.societa}
-                          <span className="ml-2 text-xs font-normal text-zinc-400">{p.nome_completo || ''}</span>
+                          <span className="ml-2 text-xs font-normal text-gray-700">{p.nome_completo || ''}</span>
                         </>
                       ) : (
                         p.nome_completo || p.email || p.id
                       )}
-                      <span className="ml-2 text-xs font-normal text-zinc-500">
+                      <span className="ml-2 text-xs font-normal text-gray-700">
                         {tRuolo(locale, p.ruolo)}
                         {riferimentoInvito
                           ? ` · ${dashCopy.associatoA} ${profiloGerarchiaDisplayLabel(riferimentoInvito)} (${tRuolo(locale, riferimentoInvito.ruolo)})`
