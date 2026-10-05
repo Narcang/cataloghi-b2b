@@ -349,7 +349,7 @@ export function isLanguageSharedCategory(categoria: string | null | undefined): 
   return LANGUAGE_SHARED_SET.has(categoria)
 }
 
-/** Categorie testuali: un PDF dedicato per IT, RU e EN. */
+/** Categorie testuali: un PDF dedicato per ogni lingua disponibile, incluso l’ucraino. */
 export const LANGUAGE_SPECIFIC_CATEGORIES = [
   'Listini',
   'Agenti',

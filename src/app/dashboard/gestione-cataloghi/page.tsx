@@ -25,7 +25,6 @@ import {
   catalogsForAdminLinguaTab,
   defaultCatalogTab,
   isItalianFallbackCatalog,
-  isRussianFallbackCatalog,
   parseCatalogLingua,
 } from '@/lib/catalogLingua'
 import { APP_LOCALES, isAppLocale, isCatalogLocale, localeNameIn, type AppLocale, type CatalogLocale } from '@/lib/locale'
@@ -291,8 +290,7 @@ export default async function GestioneCataloghiPage(props: {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {categoriaItems.map((catalogo) => {
                           const fallbackIt = isItalianFallbackCatalog(catalogo, linguaTab)
-                          const fallbackRu = isRussianFallbackCatalog(catalogo, linguaTab)
-                          const fallbackShared = fallbackIt || fallbackRu
+                          const fallbackShared = fallbackIt
                           const sharedCategory = isLanguageSharedCategory(
                             typeof catalogo.categoria === 'string' ? catalogo.categoria : null,
                           )
@@ -338,11 +336,6 @@ export default async function GestioneCataloghiPage(props: {
                                         {sharedCategory ? copy.stessoPdfTutteLingue : copy.usaPdfItaliano}
                                       </span>
                                     ) : null}
-                                    {fallbackRu ? (
-                                      <span className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-sky-900">
-                                        {copy.usaPdfRusso}
-                                      </span>
-                                    ) : null}
                                     <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${
                                       catalogo.stato_pubblicazione === 'attivo'
                                         ? 'bg-emerald-50 text-emerald-900 border-emerald-200'
@@ -360,11 +353,9 @@ export default async function GestioneCataloghiPage(props: {
 
                             {isAdmin && fallbackShared ? (
                               <p className="rounded-xl border border-black bg-white px-3 py-3 text-xs text-zinc-600">
-                                {fallbackRu
-                                  ? copy.usaPdfRusso
-                                  : sharedCategory
-                                    ? copy.stessoPdfTutteLingueHelp
-                                    : copy.caricaEnDedicata}
+                                {sharedCategory
+                                  ? copy.stessoPdfTutteLingueHelp
+                                  : copy.caricaEnDedicata}
                               </p>
                             ) : null}
 
