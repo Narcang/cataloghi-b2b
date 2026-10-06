@@ -244,9 +244,37 @@ function AssociaCandidatiPicker({
 
   const ruoloCorrente = ruoloAttivo && ruoliPresenti.includes(ruoloAttivo) ? ruoloAttivo : ruoliPresenti[0] ?? null
 
+  const agenzieCollegateAManager = useMemo(() => {
+    const managerIds = new Set(
+      profiliGerarchia.filter((p) => p.ruolo === 'manager').map((p) => p.id),
+    )
+    const agenziaIds = new Set(
+      profiliGerarchia.filter((p) => p.ruolo === 'agenzia').map((p) => p.id),
+    )
+    const result = new Set<string>()
+    for (const link of links) {
+      if (managerIds.has(link.utente_id) && agenziaIds.has(link.operatore_id)) {
+        result.add(link.operatore_id)
+      }
+      if (managerIds.has(link.operatore_id) && agenziaIds.has(link.utente_id)) {
+        result.add(link.utente_id)
+      }
+    }
+    return result
+  }, [profiliGerarchia, links])
+
   const candidatiRuolo = useMemo(
-    () => sortCandidati(candidates.filter((c) => c.ruolo === ruoloCorrente)),
-    [candidates, ruoloCorrente],
+    () =>
+      sortCandidati(
+        candidates.filter(
+          (c) =>
+            c.ruolo === ruoloCorrente &&
+            (c.ruolo !== 'agenzia' ||
+              selected.has(c.id) ||
+              !agenzieCollegateAManager.has(c.id)),
+        ),
+      ),
+    [candidates, ruoloCorrente, selected, agenzieCollegateAManager],
   )
 
   const usaGruppi = ruoloCorrente ? RUOLI_CON_GRUPPO.has(ruoloCorrente) : false
@@ -314,7 +342,13 @@ function AssociaCandidatiPicker({
       {/* Selettore ruolo */}
       <div className="flex flex-wrap gap-2" role="tablist" aria-label="Filtra candidati per ruolo">
         {ruoliPresenti.map((ruolo) => {
-          const count = candidates.filter((c) => c.ruolo === ruolo).length
+          const count = candidates.filter(
+            (c) =>
+              c.ruolo === ruolo &&
+              (c.ruolo !== 'agenzia' ||
+                selected.has(c.id) ||
+                !agenzieCollegateAManager.has(c.id)),
+          ).length
           const active = ruolo === ruoloCorrente
           const dotClass = ruoloBreakdownDotClass(ruolo)
           return (
