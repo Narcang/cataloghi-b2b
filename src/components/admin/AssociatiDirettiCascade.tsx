@@ -380,9 +380,7 @@ function AssociaCandidatiPicker({
         })}
       </div>
 
-      {candidatiRuolo.length === 0 ? (
-        <span className="text-sm text-zinc-500">Nessun utente abilitato con questo ruolo.</span>
-      ) : usaGruppi ? (
+      {usaGruppi ? (
         <div className="space-y-3">
           {/* Secondo livello: entità di appartenenza */}
           <div className="flex flex-wrap gap-2">
@@ -404,7 +402,7 @@ function AssociaCandidatiPicker({
                     <span className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ${dotClass}`} aria-hidden />
                   ) : null}
                   {gruppo.label}
-                  <span className="rounded-full bg-zinc-200 px-1.5 text-xs font-semibold text-zinc-700">
+                  <span className="rounded-full bg-zinc-200 px-1.5 text-xs font-semibold text-black">
                     {gruppo.items.length}
                   </span>
                 </button>
@@ -434,6 +432,8 @@ function AssociaCandidatiPicker({
             </p>
           )}
         </div>
+      ) : candidatiRuolo.length === 0 ? (
+        <span className="text-sm text-zinc-500">Nessun utente abilitato con questo ruolo.</span>
       ) : (
         <div className="flex flex-wrap gap-3 max-h-48 overflow-y-auto border border-black/10 rounded-lg p-3 bg-white">
           {candidatiRuolo.map((candidate) => (
