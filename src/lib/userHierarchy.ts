@@ -861,17 +861,16 @@ function isLinkedByInviteOrRubrica(
 
 function managerShouldShowAgenzia(
   managerId: string,
-  managerRole: string,
   agenzia: ProfiloGerarchiaRow,
-  profili: ProfiloGerarchiaRow[],
   links: OperatoreLink[],
 ): boolean {
-  if (isLinkedByInviteOrRubrica(managerId, managerRole, agenzia, links)) return true
-  return profili.some((p) => {
-    if (!isProfiloVisibileInGerarchia(p) || !isAgenteLike(p.ruolo)) return false
-    if (!isLinkedByInviteOrRubrica(managerId, managerRole, p, links)) return false
-    return resolveAgenziaParentForAgent(p, profili, links)?.id === agenzia.id
-  })
+  // Nel pannello admin la spunta rappresenta la connessione esplicita.
+  // Un vecchio `invitato_da` non deve far ricomparire l'agenzia dopo la dissociazione.
+  return links.some(
+    (link) =>
+      (link.utente_id === managerId && link.operatore_id === agenzia.id) ||
+      (link.utente_id === agenzia.id && link.operatore_id === managerId),
+  )
 }
 
 function isDirectChild(
@@ -918,7 +917,7 @@ function isDirectChild(
     if (resolveAgenziaParentForAgent(child, profili, links)) return false
   }
   if (parentProfile.ruolo === 'manager' && child.ruolo === 'agenzia') {
-    return managerShouldShowAgenzia(parentId, parentProfile.ruolo, child, profili, links)
+    return managerShouldShowAgenzia(parentId, child, links)
   }
   if (parentProfile.ruolo === 'agenzia' && isAgenteLike(child.ruolo)) {
     const inviter = profili.find((p) => p.id === child.invitato_da)

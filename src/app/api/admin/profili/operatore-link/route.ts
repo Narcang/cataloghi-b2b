@@ -53,7 +53,11 @@ export async function POST(request: NextRequest) {
     return jsonResponse(false, 'Utente e operatore devono essere distinti', 400)
   }
 
-  const { data: utente } = await supabase.from('profili').select('id, ruolo').eq('id', utenteId).maybeSingle()
+  const { data: utente } = await supabase
+    .from('profili')
+    .select('id, ruolo, invitato_da')
+    .eq('id', utenteId)
+    .maybeSingle()
 
   if (!utente) {
     return jsonResponse(false, 'Profilo utente non trovato', 404)
@@ -63,7 +67,11 @@ export async function POST(request: NextRequest) {
     return jsonResponse(false, 'Non associare operatori a un account admin', 400)
   }
 
-  const { data: operatore } = await supabase.from('profili').select('id, ruolo').eq('id', operatoreId).maybeSingle()
+  const { data: operatore } = await supabase
+    .from('profili')
+    .select('id, ruolo, invitato_da')
+    .eq('id', operatoreId)
+    .maybeSingle()
 
   if (!operatore || !isRubricaRuolo(operatore.ruolo)) {
     return jsonResponse(false, 'Il contatto deve essere un agente, un venditore, uno studio o un promoter', 400)
@@ -129,6 +137,36 @@ export async function POST(request: NextRequest) {
     if (delRev) {
       console.error('operatore-link remove reciprocal', delRev)
       return jsonResponse(false, delRev.message, 500)
+    }
+  }
+
+  // La gerarchia usa anche `invitato_da`: eliminare solo la rubrica farebbe
+  // ricomparire il profilo sotto il vecchio genitore dopo il refresh.
+  if (operatore.invitato_da === utenteId) {
+    let nuovoParentId: string | null = null
+
+    // Un agente/back-office rimosso da un altro agente/back-office resta
+    // nell'agenzia comune, invece di diventare un profilo senza società.
+    if (
+      (utente.ruolo === 'agente' || utente.ruolo === 'back_office') &&
+      (operatore.ruolo === 'agente' || operatore.ruolo === 'back_office') &&
+      utente.invitato_da
+    ) {
+      const { data: agenzia } = await supabase
+        .from('profili')
+        .select('id, ruolo')
+        .eq('id', utente.invitato_da)
+        .maybeSingle()
+      if (agenzia?.ruolo === 'agenzia') nuovoParentId = agenzia.id
+    }
+
+    const { error: parentErr } = await supabase
+      .from('profili')
+      .update({ invitato_da: nuovoParentId })
+      .eq('id', operatoreId)
+    if (parentErr) {
+      console.error('operatore-link remove parent', parentErr)
+      return jsonResponse(false, parentErr.message, 500)
     }
   }
 
