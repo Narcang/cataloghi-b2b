@@ -163,7 +163,7 @@ function CascadeNode({
 }
 
 /** Ordine canonico dei ruoli nei tab del selettore di associazione. */
-const RUOLO_TAB_ORDER = ['agente', 'back_office', 'rivenditore', 'distributore', 'partner_dipendente', 'studio', 'studio_associato', 'agenzia', 'manager']
+const RUOLO_TAB_ORDER = ['agenzia', 'agente', 'back_office', 'rivenditore', 'distributore', 'partner_dipendente', 'studio', 'studio_associato', 'manager']
 
 /** Ruoli "persona" che raggruppiamo per entità di appartenenza (agenzia / rivenditore). */
 const RUOLI_CON_GRUPPO = new Set(['agente', 'back_office', 'distributore', 'partner_dipendente'])
@@ -266,12 +266,34 @@ function AssociaCandidatiPicker({
       if (!map.has(id)) map.set(id, { id, label, items: [] })
       map.get(id)!.items.push(candidate)
     }
-    return [...map.values()].sort((a, b) => {
-      if (a.id === SENZA_GRUPPO_ID) return 1
-      if (b.id === SENZA_GRUPPO_ID) return -1
-      return a.label.localeCompare(b.label, 'it', { sensitivity: 'base' })
-    })
-  }, [usaGruppi, ruoloCorrente, candidatiRuolo, profiliGerarchia, links])
+    if (!map.has(SENZA_GRUPPO_ID)) {
+      map.set(SENZA_GRUPPO_ID, {
+        id: SENZA_GRUPPO_ID,
+        label: 'Senza associazione',
+        items: [],
+      })
+    }
+    return [...map.values()]
+      .filter(
+        (gruppo) =>
+          gruppo.id === SENZA_GRUPPO_ID ||
+          gruppo.id === ownerProfileId ||
+          selected.has(gruppo.id),
+      )
+      .sort((a, b) => {
+        if (a.id === SENZA_GRUPPO_ID) return 1
+        if (b.id === SENZA_GRUPPO_ID) return -1
+        return a.label.localeCompare(b.label, 'it', { sensitivity: 'base' })
+      })
+  }, [
+    usaGruppi,
+    ruoloCorrente,
+    candidatiRuolo,
+    profiliGerarchia,
+    links,
+    ownerProfileId,
+    selected,
+  ])
 
   const gruppoCorrente = useMemo(
     () => gruppi.find((g) => g.id === gruppoAttivo) ?? null,
@@ -358,15 +380,19 @@ function AssociaCandidatiPicker({
 
           {gruppoCorrente ? (
             <div className="flex flex-wrap gap-3 max-h-48 overflow-y-auto border border-black/10 rounded-lg p-3 bg-white">
-              {sortCandidati(gruppoCorrente.items).map((candidate) => (
-                <CandidateCheckbox
-                  key={candidate.id}
-                  candidate={candidate}
-                  checked={selected.has(candidate.id)}
-                  readOnly={readOnly}
-                  onToggle={(on) => onToggleLink(on, ownerProfileId, candidate.id)}
-                />
-              ))}
+              {gruppoCorrente.items.length === 0 ? (
+                <span className="text-sm text-zinc-500">Nessun profilo in questo gruppo.</span>
+              ) : (
+                sortCandidati(gruppoCorrente.items).map((candidate) => (
+                  <CandidateCheckbox
+                    key={candidate.id}
+                    candidate={candidate}
+                    checked={selected.has(candidate.id)}
+                    readOnly={readOnly}
+                    onToggle={(on) => onToggleLink(on, ownerProfileId, candidate.id)}
+                  />
+                ))
+              )}
             </div>
           ) : (
             <p className="text-xs text-zinc-500">
