@@ -549,10 +549,35 @@ export function seguitoDaCatena(
 export function agenteAssegnatoASedeStudio(
   studio: ProfiloGerarchiaRow,
   profili: ProfiloGerarchiaRow[],
+  links: OperatoreLink[] = [],
 ): ProfiloGerarchiaRow | null {
   if (studio.ruolo !== 'studio') return null
-  const inviter = profili.find((p) => p.id === studio.invitato_da)
-  return inviter?.ruolo === 'agente' ? inviter : null
+  const byId = new Map(profili.map((p) => [p.id, p]))
+  const inviter = byId.get(studio.invitato_da ?? '')
+  if (inviter?.ruolo === 'agente') return inviter
+
+  const seguito = studio.seguito_da?.trim().toLocaleLowerCase('it')
+  if (seguito) {
+    const agente = profili.find(
+      (p) =>
+        p.ruolo === 'agente' &&
+        (p.nome_completo ?? '').trim().toLocaleLowerCase('it') === seguito,
+    )
+    if (agente) return agente
+  }
+
+  for (const link of links) {
+    const otherId =
+      link.utente_id === studio.id
+        ? link.operatore_id
+        : link.operatore_id === studio.id
+          ? link.utente_id
+          : null
+    const agente = otherId ? byId.get(otherId) : null
+    if (agente?.ruolo === 'agente') return agente
+  }
+
+  return null
 }
 
 /** Agente a cui il rivenditore è collegato: invito diretto oppure nome in «Seguito da». */
@@ -889,7 +914,7 @@ function isDirectChild(
     return agenteCheSegueRivenditore(child, profili)?.id === parentId
   }
   if (parentProfile.ruolo === 'agente' && child.ruolo === 'studio') {
-    return agenteAssegnatoASedeStudio(child, profili)?.id === parentId
+    return agenteAssegnatoASedeStudio(child, profili, links)?.id === parentId
   }
   if (parentProfile.ruolo === 'agente' && child.ruolo === 'partner_dipendente') {
     return child.invitato_da === parentId
@@ -934,7 +959,7 @@ function isDirectChild(
     if (agenzia?.id === parentId) return true
   }
   if (parentProfile.ruolo === 'agenzia' && child.ruolo === 'studio') {
-    const agente = agenteAssegnatoASedeStudio(child, profili)
+    const agente = agenteAssegnatoASedeStudio(child, profili, links)
     if (agente && resolveAgenziaParentForAgent(agente, profili, links)?.id === parentId) return false
     if (child.invitato_da === parentId) return true
   }
