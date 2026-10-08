@@ -570,7 +570,7 @@ export default async function Dashboard(props: {
                   p.ruolo === 'studio'
                     ? agenteAssegnatoASedeStudio(p, profiliGerarchiaDashboard, linksDashboard)?.id
                     : p.ruolo === 'rivenditore'
-                      ? agenteCheSegueRivenditore(p, profiliGerarchiaDashboard)?.id
+                      ? agenteCheSegueRivenditore(p, profiliGerarchiaDashboard, linksDashboard)?.id
                       : agenteDiretto?.id
                 return {
                   id: p.id,

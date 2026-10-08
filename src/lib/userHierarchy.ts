@@ -584,17 +584,32 @@ export function agenteAssegnatoASedeStudio(
 export function agenteCheSegueRivenditore(
   rivenditore: ProfiloGerarchiaRow,
   profili: ProfiloGerarchiaRow[],
+  links: OperatoreLink[] = [],
 ): ProfiloGerarchiaRow | null {
   if (rivenditore.ruolo !== 'rivenditore') return null
-  const inviter = profili.find((p) => p.id === rivenditore.invitato_da)
+  const byId = new Map(profili.map((p) => [p.id, p]))
+  const inviter = byId.get(rivenditore.invitato_da ?? '')
   if (inviter?.ruolo === 'agente') return inviter
   const seguito = rivenditore.seguito_da?.trim().toLocaleLowerCase('it')
-  if (!seguito) return null
-  return (
-    profili.find(
+  if (seguito) {
+    const agente = profili.find(
       (p) => p.ruolo === 'agente' && (p.nome_completo ?? '').trim().toLocaleLowerCase('it') === seguito,
-    ) ?? null
-  )
+    )
+    if (agente) return agente
+  }
+
+  for (const link of links) {
+    const otherId =
+      link.utente_id === rivenditore.id
+        ? link.operatore_id
+        : link.operatore_id === rivenditore.id
+          ? link.utente_id
+          : null
+    const agente = otherId ? byId.get(otherId) : null
+    if (agente?.ruolo === 'agente') return agente
+  }
+
+  return null
 }
 
 /** True se il rivenditore appartiene alla gerarchia dell'agenzia (invito diretto, agente o rubrica). */
@@ -617,19 +632,7 @@ export function isRivenditoreManagedByAgente(
   links: OperatoreLink[],
 ): boolean {
   if (rivenditore.ruolo !== 'rivenditore') return false
-  if (rivenditore.invitato_da === agenteId) return true
-  const agente = findAgenteParentForRivenditore(rivenditore, profili, links)
-  if (agente?.id === agenteId) return true
-  for (const link of links) {
-    const otherId =
-      link.utente_id === rivenditore.id
-        ? link.operatore_id
-        : link.operatore_id === rivenditore.id
-          ? link.utente_id
-          : null
-    if (otherId === agenteId) return true
-  }
-  return false
+  return agenteCheSegueRivenditore(rivenditore, profili, links)?.id === agenteId
 }
 
 function findAgenteParentForRivenditore(
@@ -911,13 +914,13 @@ function isDirectChild(
     return false
   }
   if (parentProfile.ruolo === 'agente' && child.ruolo === 'rivenditore') {
-    return agenteCheSegueRivenditore(child, profili)?.id === parentId
+    return agenteCheSegueRivenditore(child, profili, links)?.id === parentId
   }
   if (parentProfile.ruolo === 'agente' && child.ruolo === 'studio') {
     return agenteAssegnatoASedeStudio(child, profili, links)?.id === parentId
   }
   if (parentProfile.ruolo === 'agente' && child.ruolo === 'partner_dipendente') {
-    return child.invitato_da === parentId
+    return isLinkedByInviteOrRubrica(parentId, parentProfile.ruolo, child, links)
   }
   if (
     isAgenteLike(parentProfile.ruolo) &&
@@ -926,16 +929,16 @@ function isDirectChild(
       child.ruolo === 'distributore' ||
       child.ruolo === 'studio_associato')
   ) {
-    return child.invitato_da === parentId
+    return isLinkedByInviteOrRubrica(parentId, parentProfile.ruolo, child, links)
   }
   if (parentProfile.ruolo === 'distributore' && child.ruolo === 'distributore') {
-    return child.invitato_da === parentId
+    return isLinkedByInviteOrRubrica(parentId, parentProfile.ruolo, child, links)
   }
   if (
     parentProfile.ruolo === 'distributore' &&
     (child.ruolo === 'studio' || child.ruolo === 'studio_associato')
   ) {
-    return child.invitato_da === parentId
+    return isLinkedByInviteOrRubrica(parentId, parentProfile.ruolo, child, links)
   }
   // Manager: se l'agente ha un'agenzia, mostra l'agenzia (non l'agente sciolto).
   if (parentProfile.ruolo === 'manager' && isAgenteLike(child.ruolo)) {
@@ -952,7 +955,7 @@ function isDirectChild(
     }
   }
   if (parentProfile.ruolo === 'agenzia' && child.ruolo === 'rivenditore') {
-    const agente = agenteCheSegueRivenditore(child, profili)
+    const agente = agenteCheSegueRivenditore(child, profili, links)
     if (agente && resolveAgenziaParentForAgent(agente, profili, links)?.id === parentId) return false
     if (child.invitato_da === parentId) return true
     const agenzia = resolveAgenziaParentForRivenditore(child, profili, links)
