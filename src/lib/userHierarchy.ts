@@ -914,9 +914,15 @@ function isDirectChild(
     return false
   }
   if (parentProfile.ruolo === 'agente' && child.ruolo === 'rivenditore') {
+    if (hasDirectedParentChildLink(parentId, child.id, parentProfile.ruolo, child.ruolo, links)) {
+      return true
+    }
     return agenteCheSegueRivenditore(child, profili, links)?.id === parentId
   }
   if (parentProfile.ruolo === 'agente' && child.ruolo === 'studio') {
+    if (hasDirectedParentChildLink(parentId, child.id, parentProfile.ruolo, child.ruolo, links)) {
+      return true
+    }
     return agenteAssegnatoASedeStudio(child, profili, links)?.id === parentId
   }
   if (parentProfile.ruolo === 'agente' && child.ruolo === 'partner_dipendente') {
@@ -955,6 +961,13 @@ function isDirectChild(
     }
   }
   if (parentProfile.ruolo === 'agenzia' && child.ruolo === 'rivenditore') {
+    const agenteCollegato = profili.find(
+      (p) =>
+        p.ruolo === 'agente' &&
+        hasDirectedParentChildLink(p.id, child.id, p.ruolo, child.ruolo, links) &&
+        resolveAgenziaParentForAgent(p, profili, links)?.id === parentId,
+    )
+    if (agenteCollegato) return false
     const agente = agenteCheSegueRivenditore(child, profili, links)
     if (agente && resolveAgenziaParentForAgent(agente, profili, links)?.id === parentId) return false
     if (child.invitato_da === parentId) return true
@@ -962,6 +975,13 @@ function isDirectChild(
     if (agenzia?.id === parentId) return true
   }
   if (parentProfile.ruolo === 'agenzia' && child.ruolo === 'studio') {
+    const agenteCollegato = profili.find(
+      (p) =>
+        p.ruolo === 'agente' &&
+        hasDirectedParentChildLink(p.id, child.id, p.ruolo, child.ruolo, links) &&
+        resolveAgenziaParentForAgent(p, profili, links)?.id === parentId,
+    )
+    if (agenteCollegato) return false
     const agente = agenteAssegnatoASedeStudio(child, profili, links)
     if (agente && resolveAgenziaParentForAgent(agente, profili, links)?.id === parentId) return false
     if (child.invitato_da === parentId) return true
