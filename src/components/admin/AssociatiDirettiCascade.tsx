@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import {
   canHaveHierarchyChildren,
@@ -65,8 +65,16 @@ function CascadeNode({
   const expandable = canHaveHierarchyChildren(node.ruolo)
   const expanded = expandedIds.has(node.id)
   const selected = linksByUtente.get(linkOwnerId) ?? new Set<string>()
+  const checked = selected.has(node.id)
+  const [localChecked, setLocalChecked] = useState(checked)
+  const [saving, setSaving] = useState(false)
+  const savingRef = useRef(false)
   const nestedLabel = nestedAssociatiLabel(node.ruolo)
   const roleDotClass = ruoloGerarchiaDotClass(node.ruolo)
+
+  useEffect(() => {
+    setLocalChecked(checked)
+  }, [checked])
 
   return (
     <li className="list-none">
@@ -94,12 +102,21 @@ function CascadeNode({
             <input
               type="checkbox"
               className="mt-1 shrink-0"
-              checked={selected.has(node.id)}
-              disabled={readOnly}
+              checked={localChecked}
+              disabled={readOnly || saving}
               onChange={async (e) => {
+                if (savingRef.current) return
                 const on = e.target.checked
-                const ok = await onToggleLink(on, linkOwnerId, node.id)
-                if (!ok) e.target.checked = !on
+                savingRef.current = true
+                setSaving(true)
+                setLocalChecked(on)
+                try {
+                  const ok = await onToggleLink(on, linkOwnerId, node.id)
+                  if (!ok) setLocalChecked(!on)
+                } finally {
+                  savingRef.current = false
+                  setSaving(false)
+                }
               }}
             />
             <span className="min-w-0">
@@ -189,16 +206,33 @@ type CandidateCheckboxProps = {
 
 function CandidateCheckbox({ candidate, checked, readOnly, onToggle }: CandidateCheckboxProps) {
   const dotClass = ruoloBreakdownDotClass(candidate.ruolo)
+  const [localChecked, setLocalChecked] = useState(checked)
+  const [saving, setSaving] = useState(false)
+  const savingRef = useRef(false)
+
+  useEffect(() => {
+    setLocalChecked(checked)
+  }, [checked])
+
   return (
     <label className="flex items-center gap-2 text-sm text-zinc-800 min-w-[200px]">
       <input
         type="checkbox"
-        checked={checked}
-        disabled={readOnly}
+        checked={localChecked}
+        disabled={readOnly || saving}
         onChange={async (e) => {
+          if (savingRef.current) return
           const on = e.target.checked
-          const ok = await onToggle(on)
-          if (!ok) e.target.checked = !on
+          savingRef.current = true
+          setSaving(true)
+          setLocalChecked(on)
+          try {
+            const ok = await onToggle(on)
+            if (!ok) setLocalChecked(!on)
+          } finally {
+            savingRef.current = false
+            setSaving(false)
+          }
         }}
       />
       {dotClass ? (
