@@ -191,6 +191,26 @@ export async function register(formData: FormData) {
       }
 
       if (invitoCreatoDa && invitoCreatoDa !== invitoDa) {
+        const [{ data: creatore }, { data: parentScelto }] = await Promise.all([
+          svc.from('profili').select('ruolo').eq('id', invitoCreatoDa).maybeSingle(),
+          invitoDa
+            ? svc.from('profili').select('ruolo').eq('id', invitoDa).maybeSingle()
+            : Promise.resolve({ data: null }),
+        ])
+
+        // Se un agente sceglie un cliente dell'agenzia nell'invito, quel cliente
+        // diventa anche un suo collegamento diretto nella struttura organizzativa.
+        if (
+          creatore?.ruolo === 'agente' &&
+          parentScelto &&
+          (parentScelto.ruolo === 'rivenditore' || parentScelto.ruolo === 'studio')
+        ) {
+          await svc.from('connessioni_utente_operatore').upsert([
+            { utente_id: invitoCreatoDa, operatore_id: invitoDa },
+            { utente_id: invitoDa, operatore_id: invitoCreatoDa },
+          ], { onConflict: 'utente_id,operatore_id', ignoreDuplicates: true })
+        }
+
         await svc.from('connessioni_utente_operatore').upsert(
           { utente_id: invitoCreatoDa, operatore_id: newUserId },
           { onConflict: 'utente_id,operatore_id', ignoreDuplicates: true },

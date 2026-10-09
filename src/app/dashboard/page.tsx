@@ -308,6 +308,20 @@ export default async function Dashboard(props: {
     }
   }
 
+  const inviteParentOptions =
+    user && (isAgenzia || isAgente)
+      ? {
+          rivenditore: profiliGerarchiaDashboard
+            .filter((p) => p.ruolo === 'rivenditore')
+            .map((p) => ({ id: p.id, label: profiloGerarchiaDisplayLabel(p) }))
+            .sort((a, b) => a.label.localeCompare(b.label, 'it', { sensitivity: 'base' })),
+          studio: profiliGerarchiaDashboard
+            .filter((p) => p.ruolo === 'studio')
+            .map((p) => ({ id: p.id, label: profiloGerarchiaDisplayLabel(p) }))
+            .sort((a, b) => a.label.localeCompare(b.label, 'it', { sensitivity: 'base' })),
+        }
+      : undefined
+
   let ultimoAccessoByProfiloId: Record<string, string> = {}
   if (user && (isAgenzia || isAgente || isVenditoreLikeRole || isStudio)) {
     const svcAccesso = createServiceRoleSupabase()
@@ -662,7 +676,10 @@ export default async function Dashboard(props: {
             <p className="text-sm text-zinc-500 mb-4">
               {copy.invitaHelp}
             </p>
-            <InvitaUtente ruoloCorrente={ruoloCorrente} />
+            <InvitaUtente
+              ruoloCorrente={ruoloCorrente}
+              parentOptionsByCategoria={inviteParentOptions}
+            />
           </section>
         )}
 

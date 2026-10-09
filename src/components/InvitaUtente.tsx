@@ -9,7 +9,7 @@ type ParentOption = { id: string; label: string }
 
 type Props = {
   ruoloCorrente: string
-  /** Per admin/manager: elenchi di agenzie, rivenditori e sedi studio da associare. */
+  /** Entità disponibili nel perimetro dell'utente a cui collegare il nuovo profilo. */
   parentOptionsByCategoria?: Partial<Record<string, ParentOption[]>>
 }
 
@@ -28,8 +28,15 @@ export default function InvitaUtente({ ruoloCorrente, parentOptionsByCategoria }
   if (opzioni.length === 0) return null
 
   const parentCategoria = ruoloSelezionato ? INVITO_CATEGORIA_PARENT[ruoloSelezionato] : undefined
-  const parentOptions = parentCategoria ? (parentOptionsByCategoria?.[parentCategoria] ?? null) : null
-  const mostraCollegamento = Boolean(parentOptionsByCategoria && parentCategoria)
+  const mostraCollegamento = Boolean(
+    parentCategoria &&
+      parentOptionsByCategoria &&
+      Object.prototype.hasOwnProperty.call(parentOptionsByCategoria, parentCategoria),
+  )
+  const parentOptions =
+    mostraCollegamento && parentCategoria
+      ? (parentOptionsByCategoria?.[parentCategoria] ?? [])
+      : null
 
   async function handleCrea() {
     setLoading(true)
