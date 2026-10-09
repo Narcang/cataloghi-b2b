@@ -2,12 +2,14 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
+  agenteAssegnatoASedeStudio,
+  agenteCheSegueRivenditore,
   associatiUiRolesFor,
   ruoloGerarchiaLabel,
-  ruoloGerarchiaDotClass,
   ruoloBreakdownDotClass,
   profiloGerarchiaDisplayLabel,
   resolveAgenziaParentForAgent,
+  resolveAgenziaParentForRivenditore,
   resolveRivenditoreParentForDistributore,
   type ProfiloGerarchiaRow,
 } from '@/lib/userHierarchy'
@@ -28,10 +30,124 @@ type Props = {
 /** Ordine canonico dei ruoli nei tab del selettore di associazione. */
 const RUOLO_TAB_ORDER = ['agenzia', 'agente', 'back_office', 'rivenditore', 'distributore', 'partner_dipendente', 'studio', 'studio_associato', 'manager']
 
-/** Ruoli "persona" che raggruppiamo per entità di appartenenza (agenzia / rivenditore). */
-const RUOLI_CON_GRUPPO = new Set(['agente', 'back_office', 'distributore', 'partner_dipendente'])
+type OperatoreLink = { utente_id: string; operatore_id: string }
 
-const SENZA_GRUPPO_ID = '__senza_gruppo__'
+function resolveSedeStudioParent(
+  studioAssociato: ProfiloGerarchiaRow,
+  profili: ProfiloGerarchiaRow[],
+  links: OperatoreLink[],
+): ProfiloGerarchiaRow | null {
+  const byId = new Map(profili.map((p) => [p.id, p]))
+  const inviter = byId.get(studioAssociato.invitato_da ?? '')
+  if (inviter?.ruolo === 'studio') return inviter
+  for (const link of links) {
+    const otherId =
+      link.utente_id === studioAssociato.id
+        ? link.operatore_id
+        : link.operatore_id === studioAssociato.id
+          ? link.utente_id
+          : null
+    const parent = otherId ? byId.get(otherId) : null
+    if (parent?.ruolo === 'studio') return parent
+  }
+  return null
+}
+
+function parentEntitaCandidato(
+  candidate: ProfiloGerarchiaRow,
+  profili: ProfiloGerarchiaRow[],
+  links: OperatoreLink[],
+): ProfiloGerarchiaRow | null {
+  switch (candidate.ruolo) {
+    case 'agente':
+    case 'back_office':
+      return resolveAgenziaParentForAgent(candidate, profili, links)
+    case 'distributore':
+    case 'partner_dipendente':
+      return resolveRivenditoreParentForDistributore(candidate, profili, links)
+    case 'studio_associato':
+      return resolveSedeStudioParent(candidate, profili, links)
+    case 'rivenditore':
+      return (
+        agenteCheSegueRivenditore(candidate, profili, links) ??
+        resolveAgenziaParentForRivenditore(candidate, profili, links)
+      )
+    case 'studio': {
+      const agente = agenteAssegnatoASedeStudio(candidate, profili, links)
+      if (agente) return agente
+      const byId = new Map(profili.map((p) => [p.id, p]))
+      const inviter = byId.get(candidate.invitato_da ?? '')
+      return inviter?.ruolo === 'agenzia' ? inviter : null
+    }
+    default:
+      return null
+  }
+}
+
+function casaIdsPerOwner(
+  ownerProfileId: string,
+  ownerRuolo: string,
+  selected: Set<string>,
+  profili: ProfiloGerarchiaRow[],
+  links: OperatoreLink[],
+): Set<string> {
+  const ids = new Set<string>([ownerProfileId])
+  const owner = profili.find((p) => p.id === ownerProfileId)
+  if (!owner) return ids
+
+  if (ownerRuolo === 'agente' || ownerRuolo === 'back_office') {
+    const agenzia = resolveAgenziaParentForAgent(owner, profili, links)
+    if (agenzia) ids.add(agenzia.id)
+  }
+  if (ownerRuolo === 'distributore' || ownerRuolo === 'partner_dipendente') {
+    const rivenditore = resolveRivenditoreParentForDistributore(owner, profili, links)
+    if (rivenditore) {
+      ids.add(rivenditore.id)
+      const agenzia = resolveAgenziaParentForRivenditore(rivenditore, profili, links)
+      if (agenzia) ids.add(agenzia.id)
+    }
+  }
+  if (ownerRuolo === 'rivenditore') {
+    const agenzia = resolveAgenziaParentForRivenditore(owner, profili, links)
+    if (agenzia) ids.add(agenzia.id)
+  }
+  if (ownerRuolo === 'manager') {
+    for (const profilo of profili) {
+      if (profilo.ruolo === 'agenzia' && selected.has(profilo.id)) ids.add(profilo.id)
+    }
+  }
+
+  for (const id of selected) {
+    const profilo = profili.find((p) => p.id === id)
+    if (profilo && (profilo.ruolo === 'agenzia' || profilo.ruolo === 'rivenditore' || profilo.ruolo === 'studio')) {
+      ids.add(profilo.id)
+    }
+  }
+  return ids
+}
+
+function candidatoNellaCasa(
+  candidate: ProfiloGerarchiaRow,
+  casaIds: Set<string>,
+  profili: ProfiloGerarchiaRow[],
+  links: OperatoreLink[],
+): boolean {
+  if (casaIds.has(candidate.id)) return true
+  const parent = parentEntitaCandidato(candidate, profili, links)
+  if (parent && casaIds.has(parent.id)) return true
+  if (candidate.ruolo === 'rivenditore') {
+    const agenzia = resolveAgenziaParentForRivenditore(candidate, profili, links)
+    if (agenzia && casaIds.has(agenzia.id)) return true
+  }
+  if (candidate.ruolo === 'studio') {
+    const agente = agenteAssegnatoASedeStudio(candidate, profili, links)
+    if (!agente) return false
+    if (casaIds.has(agente.id)) return true
+    const agenzia = resolveAgenziaParentForAgent(agente, profili, links)
+    return Boolean(agenzia && casaIds.has(agenzia.id))
+  }
+  return false
+}
 
 function candidateSortLabel(p: ProfiloGerarchiaRow): string {
   return profiloGerarchiaDisplayLabel(p).toLocaleLowerCase('it')
@@ -214,7 +330,10 @@ function AssociaCandidatiPicker({
   )
 
   const [ruoloAttivo, setRuoloAttivo] = useState<string | null>(ruoliPresenti[0] ?? null)
-  const [gruppoAttivo, setGruppoAttivo] = useState<string | null>(null)
+  const [filtroCasa, setFiltroCasa] = useState<'associati' | 'non_associati'>('associati')
+  const [sceltaId, setSceltaId] = useState('')
+  const [saving, setSaving] = useState(false)
+  const savingRef = useRef(false)
 
   const ruoloCorrente = ruoloAttivo && ruoliPresenti.includes(ruoloAttivo) ? ruoloAttivo : ruoliPresenti[0] ?? null
 
@@ -237,74 +356,53 @@ function AssociaCandidatiPicker({
     return result
   }, [profiliGerarchia, links])
 
+  const casaIds = useMemo(
+    () => casaIdsPerOwner(ownerProfileId, ownerRuolo, selected, profiliGerarchia, links),
+    [ownerProfileId, ownerRuolo, selected, profiliGerarchia, links],
+  )
+
   const candidatiRuolo = useMemo(
     () =>
       sortCandidati(
         candidates.filter(
           (c) =>
             c.ruolo === ruoloCorrente &&
-            (c.ruolo !== 'agenzia' ||
-              selected.has(c.id) ||
-              !agenzieCollegateAManager.has(c.id)),
+            !selected.has(c.id) &&
+            (c.ruolo !== 'agenzia' || !agenzieCollegateAManager.has(c.id)),
         ),
       ),
     [candidates, ruoloCorrente, selected, agenzieCollegateAManager],
   )
 
-  const usaGruppi = ruoloCorrente ? RUOLI_CON_GRUPPO.has(ruoloCorrente) : false
-
-  const gruppoRuolo = ruoloCorrente === 'agente' || ruoloCorrente === 'back_office' ? 'agenzia' : 'rivenditore'
-
-  const gruppi = useMemo(() => {
-    if (!usaGruppi || !ruoloCorrente) return []
-    const map = new Map<string, { id: string; label: string; items: ProfiloGerarchiaRow[] }>()
-    for (const candidate of candidatiRuolo) {
-      const parent =
-        ruoloCorrente === 'agente' || ruoloCorrente === 'back_office'
-          ? resolveAgenziaParentForAgent(candidate, profiliGerarchia, links)
-          : resolveRivenditoreParentForDistributore(candidate, profiliGerarchia, links)
-      const id = parent?.id ?? SENZA_GRUPPO_ID
-      const label = parent ? profiloGerarchiaDisplayLabel(parent) : 'Senza associazione'
-      if (!map.has(id)) map.set(id, { id, label, items: [] })
-      map.get(id)!.items.push(candidate)
-    }
-    if (!map.has(SENZA_GRUPPO_ID)) {
-      map.set(SENZA_GRUPPO_ID, {
-        id: SENZA_GRUPPO_ID,
-        label: 'Senza associazione',
-        items: [],
-      })
-    }
-    return [...map.values()]
-      .filter(
-        (gruppo) =>
-          gruppo.id === SENZA_GRUPPO_ID ||
-          gruppo.id === ownerProfileId ||
-          selected.has(gruppo.id),
-      )
-      .sort((a, b) => {
-        if (a.id === SENZA_GRUPPO_ID) return 1
-        if (b.id === SENZA_GRUPPO_ID) return -1
-        return a.label.localeCompare(b.label, 'it', { sensitivity: 'base' })
-      })
-  }, [
-    usaGruppi,
-    ruoloCorrente,
-    candidatiRuolo,
-    profiliGerarchia,
-    links,
-    ownerProfileId,
-    selected,
-  ])
-
-  const gruppoCorrente = useMemo(
-    () => gruppi.find((g) => g.id === gruppoAttivo) ?? null,
-    [gruppi, gruppoAttivo],
+  const associatiCasa = useMemo(
+    () =>
+      candidatiRuolo.filter((c) => candidatoNellaCasa(c, casaIds, profiliGerarchia, links)),
+    [candidatiRuolo, casaIds, profiliGerarchia, links],
   )
+
+  const nonAssociati = useMemo(
+    () => candidatiRuolo.filter((c) => !parentEntitaCandidato(c, profiliGerarchia, links)),
+    [candidatiRuolo, profiliGerarchia, links],
+  )
+
+  const elencoTendina = filtroCasa === 'associati' ? associatiCasa : nonAssociati
 
   function selezionaRuolo(ruolo: string) {
     setRuoloAttivo(ruolo)
-    setGruppoAttivo(null)
+    setSceltaId('')
+  }
+
+  async function associaDaTendina(id: string) {
+    if (!id || savingRef.current || readOnly) return
+    savingRef.current = true
+    setSaving(true)
+    try {
+      const ok = await onToggleLink(true, ownerProfileId, id)
+      if (ok) setSceltaId('')
+    } finally {
+      savingRef.current = false
+      setSaving(false)
+    }
   }
 
   if (ruoliPresenti.length === 0) {
@@ -313,15 +411,13 @@ function AssociaCandidatiPicker({
 
   return (
     <div className="space-y-3">
-      {/* Selettore ruolo */}
       <div className="flex flex-wrap gap-2" role="tablist" aria-label="Filtra candidati per ruolo">
         {ruoliPresenti.map((ruolo) => {
           const count = candidates.filter(
             (c) =>
               c.ruolo === ruolo &&
-              (c.ruolo !== 'agenzia' ||
-                selected.has(c.id) ||
-                !agenzieCollegateAManager.has(c.id)),
+              !selected.has(c.id) &&
+              (c.ruolo !== 'agenzia' || !agenzieCollegateAManager.has(c.id)),
           ).length
           const active = ruolo === ruoloCorrente
           const dotClass = ruoloBreakdownDotClass(ruolo)
@@ -354,75 +450,72 @@ function AssociaCandidatiPicker({
         })}
       </div>
 
-      {usaGruppi ? (
-        <div className="space-y-3">
-          {/* Secondo livello: entità di appartenenza */}
-          <div className="flex flex-wrap gap-2">
-            {gruppi.map((gruppo) => {
-              const active = gruppo.id === gruppoCorrente?.id
-              const dotClass = gruppo.id === SENZA_GRUPPO_ID ? 'bg-zinc-400' : ruoloGerarchiaDotClass(gruppoRuolo)
-              return (
-                <button
-                  key={gruppo.id}
-                  type="button"
-                  onClick={() => setGruppoAttivo(active ? null : gruppo.id)}
-                  className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm transition-colors ${
-                    active
-                      ? 'border-[#060d41] bg-[#060d41]/10 text-[#060d41] font-semibold'
-                      : 'border-black/15 bg-zinc-50 text-zinc-700 hover:bg-zinc-100'
-                  }`}
-                >
-                  {dotClass ? (
-                    <span className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ${dotClass}`} aria-hidden />
-                  ) : null}
-                  {gruppo.label}
-                  <span className="rounded-full bg-zinc-200 px-1.5 text-xs font-semibold text-black">
-                    {gruppo.items.length}
-                  </span>
-                </button>
-              )
-            })}
-          </div>
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => {
+            setFiltroCasa('associati')
+            setSceltaId('')
+          }}
+          className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm transition-colors ${
+            filtroCasa === 'associati'
+              ? 'border-[#060d41] bg-[#060d41]/10 text-[#060d41] font-semibold'
+              : 'border-black/15 bg-zinc-50 text-zinc-700 hover:bg-zinc-100'
+          }`}
+        >
+          Associati
+          <span className="rounded-full bg-zinc-200 px-1.5 text-xs font-semibold text-black">
+            {associatiCasa.length}
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setFiltroCasa('non_associati')
+            setSceltaId('')
+          }}
+          className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm transition-colors ${
+            filtroCasa === 'non_associati'
+              ? 'border-[#060d41] bg-[#060d41]/10 text-[#060d41] font-semibold'
+              : 'border-black/15 bg-zinc-50 text-zinc-700 hover:bg-zinc-100'
+          }`}
+        >
+          Non associati
+          <span className="rounded-full bg-zinc-200 px-1.5 text-xs font-semibold text-black">
+            {nonAssociati.length}
+          </span>
+        </button>
+      </div>
 
-          {gruppoCorrente ? (
-            <div className="flex flex-wrap gap-3 max-h-48 overflow-y-auto border border-black/10 rounded-lg p-3 bg-white">
-              {gruppoCorrente.items.length === 0 ? (
-                <span className="text-sm text-zinc-500">Nessun profilo in questo gruppo.</span>
-              ) : (
-                sortCandidati(gruppoCorrente.items).map((candidate) => (
-                  <CandidateCheckbox
-                    key={candidate.id}
-                    candidate={candidate}
-                    checked={selected.has(candidate.id)}
-                    readOnly={readOnly}
-                    onToggle={(on) => onToggleLink(on, ownerProfileId, candidate.id)}
-                  />
-                ))
-              )}
-            </div>
-          ) : (
-            <p className="text-xs text-zinc-500">
-              Seleziona {ruoloCorrente === 'agente' || ruoloCorrente === 'back_office' ? 'un’agenzia' : 'un rivenditore'} per vedere i profili da associare.
-            </p>
-          )}
-        </div>
-      ) : candidatiRuolo.length === 0 ? (
-        <span className="text-sm text-zinc-500">Nessun utente abilitato con questo ruolo.</span>
-      ) : (
-        <div className="flex flex-wrap gap-3 max-h-48 overflow-y-auto border border-black/10 rounded-lg p-3 bg-white">
-          {candidatiRuolo.map((candidate) => (
-            <CandidateCheckbox
-              key={candidate.id}
-              candidate={candidate}
-              checked={selected.has(candidate.id)}
-              readOnly={readOnly}
-              onToggle={(on) => onToggleLink(on, ownerProfileId, candidate.id)}
-            />
-          ))}
-        </div>
-      )}
+      <select
+        value={sceltaId}
+        disabled={readOnly || saving || elencoTendina.length === 0}
+        onChange={(e) => {
+          const id = e.target.value
+          setSceltaId(id)
+          void associaDaTendina(id)
+        }}
+        className="h-9 rounded-md border border-black/20 bg-white px-3 text-sm text-zinc-900 min-w-[260px] max-w-full"
+        aria-label={filtroCasa === 'associati' ? 'Associati' : 'Non associati'}
+      >
+        <option value="">
+          {elencoTendina.length === 0
+            ? filtroCasa === 'associati'
+              ? 'Nessun associato della casa'
+              : 'Nessun profilo senza associazione'
+            : 'Seleziona un profilo'}
+        </option>
+        {elencoTendina.map((candidate) => (
+          <option key={candidate.id} value={candidate.id}>
+            {profiloGerarchiaDisplayLabel(candidate)}
+            {candidate.area_geografica ? ` · ${candidate.area_geografica}` : ''}
+          </option>
+        ))}
+      </select>
 
-      <p className="text-xs text-zinc-500">Spunta un profilo per collegarlo a questo utente.</p>
+      <p className="text-xs text-zinc-500">
+        Scegli il ruolo, poi Associati o Non associati, e seleziona un profilo da collegare.
+      </p>
     </div>
   )
 }
