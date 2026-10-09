@@ -306,6 +306,7 @@ function AssociatiAttualiPicker({
 type AssociaCandidatiPickerProps = {
   ownerProfileId: string
   ownerRuolo: string
+  roots: ProfiloGerarchiaRow[]
   candidates: ProfiloGerarchiaRow[]
   selected: Set<string>
   profiliGerarchia: ProfiloGerarchiaRow[]
@@ -317,6 +318,7 @@ type AssociaCandidatiPickerProps = {
 function AssociaCandidatiPicker({
   ownerProfileId,
   ownerRuolo,
+  roots,
   candidates,
   selected,
   profiliGerarchia,
@@ -413,12 +415,7 @@ function AssociaCandidatiPicker({
     <div className="space-y-3">
       <div className="flex flex-wrap gap-2" role="tablist" aria-label="Filtra candidati per ruolo">
         {ruoliPresenti.map((ruolo) => {
-          const count = candidates.filter(
-            (c) =>
-              c.ruolo === ruolo &&
-              !selected.has(c.id) &&
-              (c.ruolo !== 'agenzia' || !agenzieCollegateAManager.has(c.id)),
-          ).length
+          const count = roots.filter((root) => root.ruolo === ruolo).length
           const active = ruolo === ruoloCorrente
           const dotClass = ruoloBreakdownDotClass(ruolo)
           return (
@@ -551,6 +548,7 @@ export default function AssociatiDirettiCascade({
           <AssociaCandidatiPicker
             ownerProfileId={ownerProfileId}
             ownerRuolo={ownerRuolo}
+            roots={roots}
             candidates={candidates}
             selected={selected}
             profiliGerarchia={profiliGerarchia}
