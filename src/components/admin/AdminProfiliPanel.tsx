@@ -1077,6 +1077,7 @@ export default function AdminProfiliPanel({
                             <div className="border border-black/15 rounded-lg p-3 bg-zinc-50">
                               <AssociatiDirettiCascade
                                 ownerProfileId={p.id}
+                                ownerRuolo={p.ruolo}
                                 roots={directAssociati}
                                 candidates={candidateAssociati}
                                 aggiungiLabel={aggiungiLabel ?? copy.associaProfilo}

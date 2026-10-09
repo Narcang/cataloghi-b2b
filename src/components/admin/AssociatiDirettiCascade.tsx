@@ -1,12 +1,8 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ChevronDown, ChevronRight } from 'lucide-react'
 import {
-  canHaveHierarchyChildren,
-  countChildrenProfiles,
-  getChildrenProfiles,
-  nestedAssociatiLabel,
+  associatiUiRolesFor,
   ruoloGerarchiaLabel,
   ruoloGerarchiaDotClass,
   ruoloBreakdownDotClass,
@@ -18,6 +14,7 @@ import {
 
 type Props = {
   ownerProfileId: string
+  ownerRuolo: string
   roots: ProfiloGerarchiaRow[]
   candidates: ProfiloGerarchiaRow[]
   aggiungiLabel: string
@@ -26,157 +23,6 @@ type Props = {
   linksByUtente: Map<string, Set<string>>
   readOnly: boolean
   onToggleLink: (add: boolean, utenteId: string, operatoreId: string) => Promise<boolean>
-}
-
-type NodeProps = {
-  node: ProfiloGerarchiaRow
-  linkOwnerId: string
-  profiliGerarchia: ProfiloGerarchiaRow[]
-  links: { utente_id: string; operatore_id: string }[]
-  linksByUtente: Map<string, Set<string>>
-  readOnly: boolean
-  onToggleLink: (add: boolean, utenteId: string, operatoreId: string) => Promise<boolean>
-  depth: number
-  expandedIds: Set<string>
-  onToggleExpand: (id: string) => void
-}
-
-function CascadeNode({
-  node,
-  linkOwnerId,
-  profiliGerarchia,
-  links,
-  linksByUtente,
-  readOnly,
-  onToggleLink,
-  depth,
-  expandedIds,
-  onToggleExpand,
-}: NodeProps) {
-  const children = getChildrenProfiles(
-    node.id,
-    node,
-    node.id,
-    node.ruolo,
-    profiliGerarchia,
-    links,
-  )
-  const childCount = countChildrenProfiles(node.id, node, profiliGerarchia, links)
-  const expandable = canHaveHierarchyChildren(node.ruolo)
-  const expanded = expandedIds.has(node.id)
-  const selected = linksByUtente.get(linkOwnerId) ?? new Set<string>()
-  const checked = selected.has(node.id)
-  const [localChecked, setLocalChecked] = useState(checked)
-  const [saving, setSaving] = useState(false)
-  const savingRef = useRef(false)
-  const nestedLabel = nestedAssociatiLabel(node.ruolo)
-  const roleDotClass = ruoloGerarchiaDotClass(node.ruolo)
-
-  useEffect(() => {
-    setLocalChecked(checked)
-  }, [checked])
-
-  return (
-    <li className="list-none">
-      <div
-        className={`flex items-start gap-2 rounded-lg border border-black/10 bg-white p-3 ${
-          depth > 0 ? 'ml-2' : ''
-        }`}
-      >
-        {expandable ? (
-          <button
-            type="button"
-            onClick={() => onToggleExpand(node.id)}
-            className="mt-0.5 shrink-0 inline-flex h-7 w-7 items-center justify-center rounded-md border border-black/15 bg-zinc-50 text-zinc-700 hover:bg-zinc-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#060d41]"
-            aria-expanded={expanded}
-            aria-label={expanded ? 'Comprimi associati' : 'Espandi associati'}
-          >
-            {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-          </button>
-        ) : (
-          <span className="inline-flex h-7 w-7 shrink-0" aria-hidden />
-        )}
-
-        <div className="flex-1 min-w-0">
-          <label className="flex items-start gap-2 text-sm text-zinc-800 cursor-pointer">
-            <input
-              type="checkbox"
-              className="mt-1 shrink-0"
-              checked={localChecked}
-              disabled={readOnly || saving}
-              onChange={async (e) => {
-                if (savingRef.current) return
-                const on = e.target.checked
-                savingRef.current = true
-                setSaving(true)
-                setLocalChecked(on)
-                try {
-                  const ok = await onToggleLink(on, linkOwnerId, node.id)
-                  if (!ok) setLocalChecked(!on)
-                } finally {
-                  savingRef.current = false
-                  setSaving(false)
-                }
-              }}
-            />
-            <span className="min-w-0">
-              <button
-                type="button"
-                onClick={() => expandable && onToggleExpand(node.id)}
-                className={`text-left font-medium text-zinc-900 inline-flex items-center gap-2 ${
-                  expandable ? 'hover:text-[#060d41] hover:underline' : 'cursor-default'
-                }`}
-              >
-                {roleDotClass ? (
-                  <span
-                    className={`inline-block h-2 w-2 shrink-0 rounded-full ${roleDotClass}`}
-                    aria-hidden
-                  />
-                ) : null}
-                {profiloGerarchiaDisplayLabel(node)}
-              </button>
-              <span className="text-zinc-500 text-xs block mt-0.5">
-                {ruoloGerarchiaLabel(node.ruolo)}
-                {node.area_geografica ? ` · ${node.area_geografica}` : ''}
-                {expandable ? ` · ${childCount} associat${childCount === 1 ? 'o' : 'i'}` : ''}
-              </span>
-            </span>
-          </label>
-
-          {expandable && expanded ? (
-            <div className="mt-3 border-l-2 border-[#060d41]/20 pl-3">
-              {nestedLabel ? (
-                <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500 mb-2">
-                  {nestedLabel}
-                </p>
-              ) : null}
-              {children.length === 0 ? (
-                <p className="text-sm text-zinc-500 mb-1">Nessun associato a questo livello.</p>
-              ) : (
-                <ul className="space-y-2 m-0 p-0">
-                  {children.map((child) => (
-                    <CascadeNode
-                      key={child.id}
-                      node={child}
-                      linkOwnerId={node.id}
-                      profiliGerarchia={profiliGerarchia}
-                      links={links}
-                      linksByUtente={linksByUtente}
-                      readOnly={readOnly}
-                      onToggleLink={onToggleLink}
-                      depth={depth + 1}
-                      expandedIds={expandedIds}
-                      onToggleExpand={onToggleExpand}
-                    />
-                  ))}
-                </ul>
-              )}
-            </div>
-          ) : null}
-        </div>
-      </div>
-    </li>
-  )
 }
 
 /** Ordine canonico dei ruoli nei tab del selettore di associazione. */
@@ -249,8 +95,101 @@ function CandidateCheckbox({ candidate, checked, readOnly, onToggle }: Candidate
   )
 }
 
+type AssociatiAttualiPickerProps = {
+  ownerProfileId: string
+  ownerRuolo: string
+  roots: ProfiloGerarchiaRow[]
+  selected: Set<string>
+  readOnly: boolean
+  onToggleLink: (add: boolean, utenteId: string, operatoreId: string) => Promise<boolean>
+}
+
+function AssociatiAttualiPicker({
+  ownerProfileId,
+  ownerRuolo,
+  roots,
+  selected,
+  readOnly,
+  onToggleLink,
+}: AssociatiAttualiPickerProps) {
+  const ruoliTab = useMemo(
+    () => RUOLO_TAB_ORDER.filter((ruolo) => associatiUiRolesFor(ownerRuolo).includes(ruolo)),
+    [ownerRuolo],
+  )
+
+  const [ruoloAttivo, setRuoloAttivo] = useState<string | null>(null)
+  const ruoloCorrente =
+    ruoloAttivo && ruoliTab.includes(ruoloAttivo)
+      ? ruoloAttivo
+      : ruoliTab.find((ruolo) => roots.some((root) => root.ruolo === ruolo)) ?? ruoliTab[0] ?? null
+
+  const associatiRuolo = useMemo(
+    () => sortCandidati(roots.filter((root) => root.ruolo === ruoloCorrente)),
+    [roots, ruoloCorrente],
+  )
+
+  if (ruoliTab.length === 0) {
+    return <span className="text-sm text-zinc-500">Nessun associato diretto ancora collegato.</span>
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap gap-2" role="tablist" aria-label="Filtra associati diretti per ruolo">
+        {ruoliTab.map((ruolo) => {
+          const count = roots.filter((root) => root.ruolo === ruolo).length
+          const active = ruolo === ruoloCorrente
+          const dotClass = ruoloBreakdownDotClass(ruolo)
+          return (
+            <button
+              key={ruolo}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              onClick={() => setRuoloAttivo(ruolo)}
+              className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${
+                active
+                  ? 'border-[#060d41] bg-[#060d41] text-white'
+                  : 'border-black/20 bg-white text-zinc-800 hover:bg-zinc-100'
+              }`}
+            >
+              {dotClass ? (
+                <span className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ${dotClass}`} aria-hidden />
+              ) : null}
+              {ruoloGerarchiaLabel(ruolo)}
+              <span
+                className={`rounded-full px-1.5 text-xs font-semibold ${
+                  active ? 'bg-white/20 text-white' : 'bg-zinc-100 text-zinc-700'
+                }`}
+              >
+                {count}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+
+      {associatiRuolo.length === 0 ? (
+        <span className="text-sm text-zinc-500">Nessun associato diretto con questo ruolo.</span>
+      ) : (
+        <div className="flex flex-wrap gap-3 max-h-48 overflow-y-auto border border-black/10 rounded-lg p-3 bg-white">
+          {associatiRuolo.map((candidate) => (
+            <CandidateCheckbox
+              key={candidate.id}
+              candidate={candidate}
+              checked={selected.has(candidate.id)}
+              readOnly={readOnly}
+              onToggle={(on) => onToggleLink(on, ownerProfileId, candidate.id)}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 type AssociaCandidatiPickerProps = {
   ownerProfileId: string
+  ownerRuolo: string
   candidates: ProfiloGerarchiaRow[]
   selected: Set<string>
   profiliGerarchia: ProfiloGerarchiaRow[]
@@ -261,6 +200,7 @@ type AssociaCandidatiPickerProps = {
 
 function AssociaCandidatiPicker({
   ownerProfileId,
+  ownerRuolo,
   candidates,
   selected,
   profiliGerarchia,
@@ -268,10 +208,10 @@ function AssociaCandidatiPicker({
   readOnly,
   onToggleLink,
 }: AssociaCandidatiPickerProps) {
-  const ruoliPresenti = useMemo(() => {
-    const set = new Set(candidates.map((c) => c.ruolo))
-    return RUOLO_TAB_ORDER.filter((r) => set.has(r))
-  }, [candidates])
+  const ruoliPresenti = useMemo(
+    () => RUOLO_TAB_ORDER.filter((r) => associatiUiRolesFor(ownerRuolo).includes(r)),
+    [ownerRuolo],
+  )
 
   const [ruoloAttivo, setRuoloAttivo] = useState<string | null>(ruoliPresenti[0] ?? null)
   const [gruppoAttivo, setGruppoAttivo] = useState<string | null>(null)
@@ -489,6 +429,7 @@ function AssociaCandidatiPicker({
 
 export default function AssociatiDirettiCascade({
   ownerProfileId,
+  ownerRuolo,
   roots,
   candidates,
   aggiungiLabel,
@@ -498,47 +439,25 @@ export default function AssociatiDirettiCascade({
   readOnly,
   onToggleLink,
 }: Props) {
-  const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set())
   const selected = linksByUtente.get(ownerProfileId) ?? new Set<string>()
-
-  function toggleExpand(id: string) {
-    setExpandedIds((prev) => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
-  }
 
   return (
     <div className="space-y-4">
-      {roots.length === 0 ? (
-        <p className="text-sm text-zinc-500">Nessun associato diretto ancora collegato.</p>
-      ) : (
-        <ul className="space-y-2 m-0 p-0">
-          {roots.map((root) => (
-            <CascadeNode
-              key={root.id}
-              node={root}
-              linkOwnerId={ownerProfileId}
-              profiliGerarchia={profiliGerarchia}
-              links={links}
-              linksByUtente={linksByUtente}
-              readOnly={readOnly}
-              onToggleLink={onToggleLink}
-              depth={0}
-              expandedIds={expandedIds}
-              onToggleExpand={toggleExpand}
-            />
-          ))}
-        </ul>
-      )}
+      <AssociatiAttualiPicker
+        ownerProfileId={ownerProfileId}
+        ownerRuolo={ownerRuolo}
+        roots={roots}
+        selected={selected}
+        readOnly={readOnly}
+        onToggleLink={onToggleLink}
+      />
 
       {!readOnly && (
         <div className="border-t border-black/10 pt-4">
           <p className="text-xs font-medium uppercase text-zinc-600 mb-2">{aggiungiLabel}</p>
           <AssociaCandidatiPicker
             ownerProfileId={ownerProfileId}
+            ownerRuolo={ownerRuolo}
             candidates={candidates}
             selected={selected}
             profiliGerarchia={profiliGerarchia}

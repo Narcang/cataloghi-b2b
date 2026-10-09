@@ -58,7 +58,7 @@ const OPERATOR_ROLES = new Set(['agenzia', 'agente', 'back_office', 'rivenditore
 
 export const CHILD_ROLES_BY_PARENT: Record<string, string[]> = {
   admin: ['manager'],
-  manager: ['agenzia', 'agente', 'back_office'],
+  manager: ['agenzia', 'agente', 'back_office', 'rivenditore', 'distributore', 'partner_dipendente', 'studio', 'studio_associato'],
   agenzia: ['agente', 'back_office', 'rivenditore', 'studio'],
   agente: ['agente', 'back_office', 'rivenditore', 'distributore', 'partner_dipendente', 'studio_associato', 'studio'],
   back_office: ['agente', 'back_office', 'distributore', 'studio_associato', 'studio'],
@@ -66,6 +66,23 @@ export const CHILD_ROLES_BY_PARENT: Record<string, string[]> = {
   distributore: ['distributore', 'partner_dipendente', 'studio', 'studio_associato'],
   partner_dipendente: ['studio'],
   studio: ['studio_associato'],
+}
+
+const ASSOCIATI_UI_ROLES_BY_PARENT: Record<string, string[]> = {
+  admin: ['agenzia', 'agente', 'back_office', 'rivenditore', 'distributore', 'partner_dipendente', 'studio', 'studio_associato', 'manager'],
+  manager: ['agenzia', 'agente', 'back_office', 'rivenditore', 'distributore', 'partner_dipendente', 'studio', 'studio_associato'],
+  agenzia: ['agente', 'back_office', 'rivenditore', 'studio'],
+  agente: ['rivenditore', 'studio'],
+  back_office: ['agente', 'back_office', 'distributore', 'studio_associato', 'studio'],
+  rivenditore: ['distributore', 'partner_dipendente', 'studio', 'studio_associato'],
+  distributore: ['partner_dipendente', 'studio', 'studio_associato'],
+  partner_dipendente: ['studio'],
+  studio: ['studio_associato'],
+}
+
+/** Ruoli mostrati nei tasti di associazione admin, allineati a chi si può invitare. */
+export function associatiUiRolesFor(ruolo: string): string[] {
+  return ASSOCIATI_UI_ROLES_BY_PARENT[ruolo] ?? CHILD_ROLES_BY_PARENT[ruolo] ?? []
 }
 
 /** Ruoli di partenza selezionabili nell'albero Struttura Organizzativa (solo categorie principali). */
@@ -150,8 +167,12 @@ export function roleBreakdownBadgesForNode(ruolo: string): RoleBreakdownBadge[] 
     case 'manager':
       return [
         { ruolo: 'agenzia', label: 'Agenzie' },
+        { ruolo: 'agente', label: 'Agenti' },
+        { ruolo: 'back_office', label: 'Back-Office' },
         { ruolo: 'rivenditore', label: 'Rivenditori' },
+        { ruolo: 'distributore', label: 'Venditori' },
         { ruolo: 'studio', label: 'Sedi Studio' },
+        { ruolo: 'studio_associato', label: 'Studio' },
       ]
     case 'agenzia':
       return [
@@ -779,28 +800,7 @@ export function profiloToGerarchiaRow(
 export function associatiDirettiSectionLabel(ruolo: string): string | null {
   const childRoles = CHILD_ROLES_BY_PARENT[ruolo]
   if (!childRoles?.length) return null
-  switch (ruolo) {
-    case 'admin':
-      return 'Associati diretti (manager)'
-    case 'manager':
-      return 'Associati diretti (agenzie / agenti / back-office)'
-    case 'agenzia':
-      return 'Associati diretti (agenti / back-office / rivenditori / sedi studio)'
-    case 'agente':
-      return 'Associati diretti (agenti / venditori / studi / sedi studio)'
-    case 'back_office':
-      return 'Associati diretti (agenti / back-office / venditori / studi / sedi studio)'
-    case 'rivenditore':
-      return 'Associati diretti (venditori / promoter / studi / sedi studio)'
-    case 'distributore':
-      return 'Associati diretti (venditori / promoter / studi / sedi studio)'
-    case 'partner_dipendente':
-      return 'Associati diretti (sedi studio)'
-    case 'studio':
-      return 'Associati diretti (studio)'
-    default:
-      return 'Associati diretti'
-  }
+  return 'Associati diretti'
 }
 
 export function associatiAggiungiSectionLabel(ruolo: string): string | null {
@@ -810,16 +810,17 @@ export function associatiAggiungiSectionLabel(ruolo: string): string | null {
     case 'admin':
       return 'Associa manager'
     case 'manager':
-      return 'Associa agenzia / agente / back-office'
+      return 'Associa agenzia / agente / back-office / rivenditore / venditore / promoter / sede studio / studio'
     case 'agenzia':
       return 'Associa agente / back-office / rivenditore / sede studio'
     case 'agente':
+      return 'Associa rivenditore / sede studio'
     case 'back_office':
       return 'Associa sede studio'
     case 'rivenditore':
       return 'Associa venditore / promoter / studio / sede studio'
     case 'distributore':
-      return 'Associa venditore / promoter / studio / sede studio'
+      return 'Associa promoter / sede studio / studio'
     case 'partner_dipendente':
       return 'Associa sede studio'
     case 'studio':
@@ -1212,7 +1213,7 @@ export function nestedAssociatiLabel(ruolo: string): string | null {
   if (!childRoles?.length) return null
   switch (ruolo) {
     case 'manager':
-      return 'Agenzie / agenti / back-office associati'
+      return 'Agenzie / agenti / back-office / rivenditori / venditori / promoter / sedi studio / studi associati'
     case 'agenzia':
       return 'Agenti / back-office / rivenditori / sedi studio associati'
     case 'agente':
