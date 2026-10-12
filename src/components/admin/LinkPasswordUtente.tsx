@@ -12,6 +12,8 @@ export default function LinkPasswordUtente({ email }: Props) {
   const [message, setMessage] = useState<string | null>(null)
   const [recoveryLink, setRecoveryLink] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const [password, setPassword] = useState('')
+  const [passwordLoading, setPasswordLoading] = useState(false)
 
   async function genera() {
     setLoading(true)
@@ -44,6 +46,37 @@ export default function LinkPasswordUtente({ email }: Props) {
     }
   }
 
+  async function impostaPassword() {
+    if (password.length < 6) {
+      setError('La password deve contenere almeno 6 caratteri')
+      setMessage(null)
+      return
+    }
+    setPasswordLoading(true)
+    setError(null)
+    setMessage(null)
+    setRecoveryLink(null)
+    try {
+      const res = await fetch('/api/admin/profili/link-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ email, password }),
+      })
+      const data = (await res.json().catch(() => null)) as { ok?: boolean; message?: string } | null
+      if (!res.ok || !data?.ok) {
+        setError(data?.message ?? 'Password non impostata')
+        return
+      }
+      setPassword('')
+      setMessage(data.message ?? 'Password impostata')
+    } catch {
+      setError('Errore di rete')
+    } finally {
+      setPasswordLoading(false)
+    }
+  }
+
   async function copia() {
     if (!recoveryLink) return
     try {
@@ -56,6 +89,24 @@ export default function LinkPasswordUtente({ email }: Props) {
 
   return (
     <div className="space-y-2">
+      <div className="flex flex-wrap items-center gap-2">
+        <input
+          type="text"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          autoComplete="new-password"
+          placeholder="Nuova password"
+          className="h-9 min-w-[12rem] rounded-md border border-black bg-white px-2 text-sm text-zinc-900"
+        />
+        <button
+          type="button"
+          disabled={passwordLoading || password.length === 0}
+          onClick={() => void impostaPassword()}
+          className="h-9 rounded-md bg-[#060d41] text-white px-3 text-sm font-semibold hover:bg-[#0a155a] disabled:opacity-50"
+        >
+          {passwordLoading ? 'Salvataggio…' : 'Imposta password'}
+        </button>
+      </div>
       <button
         type="button"
         disabled={loading}

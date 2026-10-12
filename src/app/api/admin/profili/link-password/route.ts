@@ -24,15 +24,19 @@ export async function POST(request: NextRequest) {
     return jsonResponse(false, 'Operazione non consentita', 403)
   }
 
-  let body: { email?: string }
+  let body: { email?: string; password?: string }
   try {
-    body = (await request.json()) as { email?: string }
+    body = (await request.json()) as { email?: string; password?: string }
   } catch {
     return jsonResponse(false, 'JSON non valido', 400)
   }
 
   const email = String(body.email ?? '').trim().toLowerCase()
+  const password = String(body.password ?? '')
   if (!email.includes('@')) return jsonResponse(false, 'Email non valida', 400)
+  if (password && password.length < 6) {
+    return jsonResponse(false, 'La password deve contenere almeno 6 caratteri', 400)
+  }
 
   const svc = createServiceRoleSupabase()
   if (!svc) return jsonResponse(false, 'Configurazione server incompleta', 500)
@@ -40,6 +44,22 @@ export async function POST(request: NextRequest) {
   const authUser = await findAuthUserByEmail(svc, email)
   if (!authUser) {
     return jsonResponse(false, 'Nessun account Authentication con questa email', 404)
+  }
+
+  if (password) {
+    const { error: pwdErr } = await svc.auth.admin.updateUserById(authUser.id, {
+      password,
+      email_confirm: true,
+    })
+    if (pwdErr) {
+      console.error('link-password updateUser', pwdErr.message)
+      return jsonResponse(false, pwdErr.message, 500)
+    }
+    return jsonResponse(
+      true,
+      'Password impostata. Il ruolo non è stato modificato: può entrare con email e questa password.',
+      200,
+    )
   }
 
   await svc.auth.admin.updateUserById(authUser.id, { email_confirm: true })

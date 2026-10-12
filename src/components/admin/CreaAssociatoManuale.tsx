@@ -129,6 +129,7 @@ export default function CreaAssociatoManuale({
 
   const [nomeCompleto, setNomeCompleto] = useState('')
   const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [telefono, setTelefono] = useState('')
   const [areaGeografica, setAreaGeografica] = useState('')
   const [societa, setSocieta] = useState('')
@@ -152,6 +153,7 @@ export default function CreaAssociatoManuale({
   function reset() {
     setNomeCompleto('')
     setEmail('')
+    setPassword('')
     setTelefono('')
     setAreaGeografica('')
     setSocieta('')
@@ -170,6 +172,14 @@ export default function CreaAssociatoManuale({
       return
     }
     const parentToSend = (effectiveParentOptions ? selectedParentId : effectiveParentId)?.trim() || undefined
+    if (password && !email.trim()) {
+      setError('Per impostare la password serve un’email')
+      return
+    }
+    if (password && password.length < 6) {
+      setError('La password deve contenere almeno 6 caratteri')
+      return
+    }
     if (effectiveParentOptions && !effectiveAllowEmpty && !parentToSend) {
       setError(
         effectiveParentOptions.length === 0
@@ -189,6 +199,7 @@ export default function CreaAssociatoManuale({
           ruolo_nuovo: ruolo,
           nome_completo: nomeCompleto,
           email,
+          password,
           telefono,
           societa: societaLocked ? societaBloccata : societa,
           area_geografica: areaGeografica,
@@ -328,6 +339,17 @@ export default function CreaAssociatoManuale({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Se assente: account tecnico interno"
+            className={inputClass}
+          />
+        </label>
+        <label className="block text-xs font-medium uppercase text-zinc-600 md:col-span-2">
+          Password di accesso (opzionale)
+          <input
+            type="text"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="new-password"
+            placeholder="Se la indichi, entra subito con questa. Non parte nessuna email."
             className={inputClass}
           />
         </label>

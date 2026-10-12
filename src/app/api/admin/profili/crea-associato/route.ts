@@ -14,6 +14,7 @@ type Body = {
   telefono?: string | null
   societa?: string | null
   area_geografica?: string | null
+  password?: string | null
 }
 
 /** Ruoli che richiedono un genitore con ruolo fisso. */
@@ -97,6 +98,7 @@ export async function POST(request: NextRequest) {
   const telefono = pulisci(body.telefono)
   const societa = pulisci(body.societa)
   const areaGeografica = pulisci(body.area_geografica)
+  const passwordScelta = String(body.password ?? '')
 
   if (!ruoloNuovo || !RUOLI_CREABILI.has(ruoloNuovo)) {
     return jsonResponse(false, 'Ruolo da creare non valido', 400)
@@ -146,8 +148,14 @@ export async function POST(request: NextRequest) {
   }
 
   const emailReale = Boolean(emailInput)
+  if (passwordScelta && !emailReale) {
+    return jsonResponse(false, 'Per impostare la password serve un’email reale', 400)
+  }
+  if (passwordScelta && passwordScelta.length < 6) {
+    return jsonResponse(false, 'La password deve contenere almeno 6 caratteri', 400)
+  }
   const email = emailReale ? emailInput : generaEmailInterna(ruoloNuovo)
-  const password = crypto.randomUUID() + crypto.randomUUID()
+  const password = passwordScelta || crypto.randomUUID() + crypto.randomUUID()
 
   const { data: created, error: createErr } = await svc.auth.admin.createUser({
     email,
@@ -219,7 +227,9 @@ export async function POST(request: NextRequest) {
   return jsonResponse(
     true,
     emailReale
-      ? `${etichettaRuolo} creato e associato.`
+      ? passwordScelta
+        ? `${etichettaRuolo} creato e associato. Può entrare con l’email e la password che hai indicato.`
+        : `${etichettaRuolo} creato e associato.`
       : `${etichettaRuolo} creato (account tecnico interno) e associato.`,
     200,
     { nuovo_id: nuovoId },
