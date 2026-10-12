@@ -9,10 +9,15 @@ import AdminProfiliPanel, { type ProfiloGestioneRow } from '@/components/admin/A
 import GerarchiaUtentiTree from '@/components/admin/GerarchiaUtentiTree'
 import InvitaUtente from '@/components/InvitaUtente'
 import CreaAssociatoManuale from '@/components/admin/CreaAssociatoManuale'
+import RipristinaAccessoEmail from '@/components/admin/RipristinaAccessoEmail'
 import type { ProfiloGerarchiaRow } from '@/lib/userHierarchy'
 import { getDescendantsByRole, profiloGerarchiaDisplayLabel, profiloToGerarchiaRow } from '@/lib/userHierarchy'
 import { ruoliInvitabili } from '@/lib/inviteHierarchy'
-import { fetchUltimoAccessoMap, ultimoAccessoMapToRecord } from '@/lib/ultimoAccessoUtenti'
+import {
+  fetchUltimoAccessoMap,
+  findAuthUserByEmail,
+  ultimoAccessoMapToRecord,
+} from '@/lib/ultimoAccessoUtenti'
 import { getAppLocale } from '@/lib/localeServer'
 import { tAdmin, tRuolo } from '@/lib/i18nAdmin'
 
@@ -80,16 +85,18 @@ export default async function GestioneUtentiPage(props: {
   let listaQuery = dataSource
     .from('profili')
     .select(profiloSel)
-    .neq('ruolo', 'free')
-    .or('registrazione_approvata.eq.true,registrazione_approvata.is.null')
     .order('nome_completo', { ascending: true, nullsFirst: false })
     .limit(500)
 
-  if (ruoloFilter !== 'all') listaQuery = listaQuery.eq('ruolo', ruoloFilter)
-  if (nomeFilter.length > 0) {
+  if (nomeFilter.length === 0) {
+    listaQuery = listaQuery
+      .neq('ruolo', 'free')
+      .or('registrazione_approvata.eq.true,registrazione_approvata.is.null')
+  } else {
     const q = `%${escapeIlikePattern(nomeFilter).replace(/"/g, '')}%`
-    listaQuery = listaQuery.or(`nome_completo.ilike."${q}",societa.ilike."${q}"`)
+    listaQuery = listaQuery.or(`nome_completo.ilike."${q}",societa.ilike."${q}",email.ilike."${q}"`)
   }
+  if (ruoloFilter !== 'all') listaQuery = listaQuery.eq('ruolo', ruoloFilter)
 
   const pendQuery = dataSource
     .from('profili')
@@ -150,6 +157,27 @@ export default async function GestioneUtentiPage(props: {
       ultimoAccessoByProfiloId = ultimoAccessoMapToRecord(await fetchUltimoAccessoMap(svcAuthLastSignIn))
     } catch (error) {
       console.error('gestione-utenti: fetch ultimo accesso', error)
+    }
+  }
+
+  let ricercaAuthNotice: string | null = null
+  const emailCercata = nomeFilter.includes('@') ? nomeFilter.trim().toLowerCase() : ''
+  if (emailCercata && svcAuthLastSignIn) {
+    try {
+      const authUser = await findAuthUserByEmail(svcAuthLastSignIn, emailCercata)
+      const inLista = profiliGestioneAdmin.some(
+        (p) => p.id === authUser?.id || (p.email ?? '').toLowerCase() === emailCercata,
+      )
+      const inPendenti = profiliRegistrazionePendente.some(
+        (p) => p.id === authUser?.id || (p.email ?? '').toLowerCase() === emailCercata,
+      )
+      if (authUser && !inLista && !inPendenti) {
+        ricercaAuthNotice = `Account Authentication trovato (${authUser.email}) ma senza profilo in Gestione utenti. Per farlo accedere va ricreato il profilo (agente) e collegato a La Diva. Se l’email è ancora in Authentication, una nuova registrazione con lo stesso indirizzo non parte.`
+      } else if (!authUser && !inLista && !inPendenti) {
+        ricercaAuthNotice = `Nessun utente registrato con ${emailCercata}, né nei profili né in Authentication.`
+      }
+    } catch (error) {
+      console.error('gestione-utenti: ricerca email auth', error)
     }
   }
 
@@ -236,6 +264,14 @@ export default async function GestioneUtentiPage(props: {
           </div>
         ) : null}
 
+        {ricercaAuthNotice ? (
+          <div className="rounded-xl border border-amber-700 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+            {ricercaAuthNotice}
+          </div>
+        ) : null}
+
+        {isManager && emailCercata ? <RipristinaAccessoEmail email={emailCercata} /> : null}
+
         {isAgenzia ? (
           <AdminProfiliPanel
             currentUserId={user.id}
@@ -311,6 +347,7 @@ export default async function GestioneUtentiPage(props: {
           canManageCataloghi={isManager}
           canCreateAssociati={isManager}
           canManageSpecializzazioneOpzioni={isAdmin}
+          cercaAttiva={nomeFilter.length > 0}
         />
 
         <section className="border border-black rounded-2xl bg-white p-5 space-y-8">

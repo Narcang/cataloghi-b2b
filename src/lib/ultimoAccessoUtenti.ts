@@ -95,6 +95,38 @@ export async function fetchUltimoAccessoMap(svc: SupabaseClient): Promise<Map<st
   return map
 }
 
+/** Cerca un account Authentication per email, anche se manca la riga in `profili`. */
+export async function findAuthUserByEmail(
+  svc: SupabaseClient,
+  email: string,
+): Promise<{ id: string; email: string | undefined; last_sign_in_at: string | undefined; created_at: string } | null> {
+  const needle = email.trim().toLowerCase()
+  if (!needle.includes('@')) return null
+
+  let page = 1
+  const perPage = 1000
+  while (page <= 20) {
+    const { data, error } = await svc.auth.admin.listUsers({ page, perPage })
+    if (error) {
+      console.error('findAuthUserByEmail: listUsers', error.message)
+      break
+    }
+    if (!data?.users?.length) break
+    const hit = data.users.find((user) => (user.email ?? '').toLowerCase() === needle)
+    if (hit) {
+      return {
+        id: hit.id,
+        email: hit.email,
+        last_sign_in_at: hit.last_sign_in_at,
+        created_at: hit.created_at,
+      }
+    }
+    if (data.users.length < perPage) break
+    page++
+  }
+  return null
+}
+
 export function ultimoAccessoMapToRecord(map: Map<string, string>): Record<string, string> {
   return Object.fromEntries(map)
 }

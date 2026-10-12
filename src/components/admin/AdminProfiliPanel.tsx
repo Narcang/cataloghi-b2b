@@ -101,7 +101,7 @@ function puoPersonalizzareCataloghi(ruolo: string): boolean {
 
 type RuoloOption = (typeof RUOLI_OPTIONS)[number]
 
-type RuoloTabId = 'admin' | 'manager' | 'agenzia' | 'agente' | 'back_office' | 'rivenditore' | 'distributore' | 'studio' | 'studio_associato' | 'partner_dipendente'
+type RuoloTabId = 'admin' | 'manager' | 'agenzia' | 'agente' | 'back_office' | 'rivenditore' | 'distributore' | 'studio' | 'studio_associato' | 'partner_dipendente' | 'free'
 
 const RUOLI_TAB: { id: RuoloTabId }[] = [
   { id: 'admin' },
@@ -156,6 +156,8 @@ type Props = {
   apriProfiliDiDefault?: boolean
   /** Admin: aggiunge/rimuove voci nei menu a tendina specializzazione. */
   canManageSpecializzazioneOpzioni?: boolean
+  /** Con una ricerca nome/email mostra tutti i risultati, anche senza associazione. */
+  cercaAttiva?: boolean
 }
 
 const DEFAULT_SPECIALIZZAZIONE_OPZIONI = buildOpzioniSpecializzazioneMap([])
@@ -178,6 +180,7 @@ export default function AdminProfiliPanel({
   canEditRivenditoreAsAgente = false,
   apriProfiliDiDefault = false,
   canManageSpecializzazioneOpzioni = false,
+  cercaAttiva = false,
 }: Props) {
   const router = useRouter()
   const locale = useAppLocale()
@@ -191,7 +194,7 @@ export default function AdminProfiliPanel({
   const [ruoloAttivo, setRuoloAttivo] = useState<RuoloTabId>(
     agenziaRivenditoriMode ? 'rivenditore' : 'admin',
   )
-  const [soloAssociati, setSoloAssociati] = useState(true)
+  const [soloAssociati, setSoloAssociati] = useState(!cercaAttiva)
 
   const specializzazioneOpzioniFormProps = {
     opzioni: specializzazioneOpzioni,
@@ -203,7 +206,9 @@ export default function AdminProfiliPanel({
 
   const ruoliTab = agenziaRivenditoriMode
     ? RUOLI_TAB.filter((tab) => tab.id === 'rivenditore')
-    : RUOLI_TAB
+    : cercaAttiva && profiliLista.some((p) => p.ruolo === 'free')
+      ? [...RUOLI_TAB, { id: 'free' as const }]
+      : RUOLI_TAB
 
   const profiliPendentiOrdinati = useMemo(() => sortProfiliAlfabetico(profiliPendenti), [profiliPendenti])
 
@@ -230,20 +235,20 @@ export default function AdminProfiliPanel({
   }, [])
 
   const profiliListaGestione = useMemo(
-    () => profiliLista.filter((p) => p.ruolo !== 'free'),
-    [profiliLista],
+    () => (cercaAttiva ? profiliLista : profiliLista.filter((p) => p.ruolo !== 'free')),
+    [profiliLista, cercaAttiva],
   )
 
   const profiliPerRuolo = useMemo(() => {
     const map = new Map<RuoloTabId, ProfiloGestioneRow[]>()
-    for (const tab of RUOLI_TAB) map.set(tab.id, [])
+    for (const tab of ruoliTab) map.set(tab.id, [])
     for (const profilo of sortProfiliAlfabetico(profiliListaGestione)) {
       const ruolo = profilo.ruolo as RuoloTabId
       if (!map.has(ruolo)) continue
       map.get(ruolo)!.push(profilo)
     }
     return map
-  }, [profiliListaGestione])
+  }, [profiliListaGestione, ruoliTab])
 
   const profiliRuoloAttivo = profiliPerRuolo.get(ruoloAttivo) ?? []
 
@@ -300,11 +305,12 @@ export default function AdminProfiliPanel({
   const profiliNonAssociati = mostraStatoAssociazione
     ? profiliRuoloAttivo.filter((p) => !profiloHaAssociazione(p))
     : []
-  const profiliVisibili = mostraStatoAssociazione
-    ? soloAssociati
-      ? profiliAssociati
-      : profiliNonAssociati
-    : profiliRuoloAttivo
+  const profiliVisibili =
+    mostraStatoAssociazione && !cercaAttiva
+      ? soloAssociati
+        ? profiliAssociati
+        : profiliNonAssociati
+      : profiliRuoloAttivo
 
   useEffect(() => {
     const firstConUtenti = ruoliTab.find((tab) => (profiliPerRuolo.get(tab.id)?.length ?? 0) > 0)
@@ -709,7 +715,7 @@ export default function AdminProfiliPanel({
           </p>
         )}
 
-        {mostraStatoAssociazione ? (
+        {mostraStatoAssociazione && !cercaAttiva ? (
           <div className="flex flex-wrap gap-2" role="tablist" aria-label={copy.filtraPerRuolo}>
             {(
               [
