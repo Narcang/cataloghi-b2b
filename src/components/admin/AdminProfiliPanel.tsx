@@ -157,6 +157,8 @@ type Props = {
   apriProfiliDiDefault?: boolean
   /** Admin: aggiunge/rimuove voci nei menu a tendina specializzazione. */
   canManageSpecializzazioneOpzioni?: boolean
+  /** Eliminazione account. I manager gestiscono profilo e associazioni, senza cancellare. */
+  canDeleteUtenti?: boolean
   /** Con una ricerca nome/email mostra tutti i risultati, anche senza associazione. */
   cercaAttiva?: boolean
 }
@@ -181,6 +183,7 @@ export default function AdminProfiliPanel({
   canEditRivenditoreAsAgente = false,
   apriProfiliDiDefault = false,
   canManageSpecializzazioneOpzioni = false,
+  canDeleteUtenti = !readOnly,
   cercaAttiva = false,
 }: Props) {
   const router = useRouter()
@@ -1063,7 +1066,7 @@ export default function AdminProfiliPanel({
                             >
                               {copy.salvaProfilo}
                             </button>
-                            {p.ruolo !== 'admin' && p.id !== currentUserId ? (
+                            {canDeleteUtenti && p.ruolo !== 'admin' && p.id !== currentUserId ? (
                               <button
                                 type="button"
                                 disabled={deletingId === p.id}

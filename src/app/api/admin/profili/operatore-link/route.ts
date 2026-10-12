@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
+import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
 
 function jsonResponse(ok: boolean, message: string, status: number) {
   return NextResponse.json({ ok, message }, { status })
@@ -30,9 +31,16 @@ export async function POST(request: NextRequest) {
 
   const { data: profiloUtente } = await supabase.from('profili').select('ruolo').eq('id', user.id).single()
 
-  if (profiloUtente?.ruolo !== 'admin') {
+  const callerRuolo = profiloUtente?.ruolo ?? ''
+  if (callerRuolo !== 'admin' && callerRuolo !== 'manager') {
     return jsonResponse(false, 'Operazione non consentita', 403)
   }
+
+  const serviceRole = callerRuolo === 'manager' ? createServiceRoleSupabase() : null
+  if (callerRuolo === 'manager' && !serviceRole) {
+    return jsonResponse(false, 'Configurazione server incompleta', 500)
+  }
+  const db = serviceRole ?? supabase
 
   let body: Body
   try {
@@ -53,7 +61,7 @@ export async function POST(request: NextRequest) {
     return jsonResponse(false, 'Utente e operatore devono essere distinti', 400)
   }
 
-  const { data: utente } = await supabase
+  const { data: utente } = await db
     .from('profili')
     .select('id, ruolo, invitato_da')
     .eq('id', utenteId)
@@ -67,7 +75,7 @@ export async function POST(request: NextRequest) {
     return jsonResponse(false, 'Non associare operatori a un account admin', 400)
   }
 
-  const { data: operatore } = await supabase
+  const { data: operatore } = await db
     .from('profili')
     .select('id, ruolo, invitato_da')
     .eq('id', operatoreId)
@@ -78,7 +86,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (action === 'add') {
-    const { error: insErr } = await supabase.from('connessioni_utente_operatore').insert({
+    const { error: insErr } = await db.from('connessioni_utente_operatore').insert({
       utente_id: utenteId,
       operatore_id: operatoreId,
     })
@@ -93,14 +101,14 @@ export async function POST(request: NextRequest) {
     }
 
     if (isRubricaRuolo(utente.ruolo) && isRubricaRuolo(operatore.ruolo)) {
-      const { error: revErr } = await supabase.from('connessioni_utente_operatore').insert({
+      const { error: revErr } = await db.from('connessioni_utente_operatore').insert({
         utente_id: operatoreId,
         operatore_id: utenteId,
       })
       if (revErr && revErr.code !== '23505') {
         console.error('operatore-link add reciprocal', revErr)
         if (forwardNew) {
-          await supabase.from('connessioni_utente_operatore').delete().eq('utente_id', utenteId).eq('operatore_id', operatoreId)
+          await db.from('connessioni_utente_operatore').delete().eq('utente_id', utenteId).eq('operatore_id', operatoreId)
         }
         let revMsg = revErr.message
         if (revMsg.includes('permission denied')) {
@@ -113,7 +121,7 @@ export async function POST(request: NextRequest) {
     return jsonResponse(true, insErr?.code === '23505' ? 'Associazione già presente' : 'Contatto associato', 200)
   }
 
-  const { error: delErr } = await supabase
+  const { error: delErr } = await db
     .from('connessioni_utente_operatore')
     .delete()
     .eq('utente_id', utenteId)
@@ -129,7 +137,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (isRubricaRuolo(utente.ruolo) && isRubricaRuolo(operatore.ruolo)) {
-    const { error: delRev } = await supabase
+    const { error: delRev } = await db
       .from('connessioni_utente_operatore')
       .delete()
       .eq('utente_id', operatoreId)
@@ -152,7 +160,7 @@ export async function POST(request: NextRequest) {
       (operatore.ruolo === 'agente' || operatore.ruolo === 'back_office') &&
       utente.invitato_da
     ) {
-      const { data: agenzia } = await supabase
+      const { data: agenzia } = await db
         .from('profili')
         .select('id, ruolo')
         .eq('id', utente.invitato_da)
@@ -160,7 +168,7 @@ export async function POST(request: NextRequest) {
       if (agenzia?.ruolo === 'agenzia') nuovoParentId = agenzia.id
     }
 
-    const { error: parentErr } = await supabase
+    const { error: parentErr } = await db
       .from('profili')
       .update({ invitato_da: nuovoParentId })
       .eq('id', operatoreId)

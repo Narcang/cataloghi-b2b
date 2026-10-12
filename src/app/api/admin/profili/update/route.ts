@@ -96,18 +96,6 @@ const CATALOGO_DATA_FIELDS = [
   'agenzia_catalogo_4_data',
 ] as const
 
-/** Campi che un manager può aggiornare (solo specializzazione agenzia/rivenditore). */
-const MANAGER_PATCH_KEYS = new Set<string>([
-  ...CAMPIONI_FIELDS,
-  ...CATALOGHI_FIELDS,
-  ...ESPOSITORI_FIELDS,
-  ...BOX_FIELDS,
-  'agenzia_campioni_aggiornato_il',
-  'agenzia_cataloghi_aggiornato_il',
-  'espositori_aggiornato_il',
-  'box_aggiornato_il',
-])
-
 const RUOLI_OK = new Set(['admin', 'manager', 'agenzia', 'agente', 'back_office', 'fornitore', 'rivenditore', 'distributore', 'free', 'studio', 'studio_associato', 'partner_dipendente'])
 
 function jsonResponse(ok: boolean, message: string, status: number) {
@@ -236,9 +224,13 @@ export async function POST(request: NextRequest) {
     return jsonResponse(false, 'Non puoi modificare il tuo stesso profilo da questo modulo', 400)
   }
 
+  const serviceRole = createServiceRoleSupabase()
+  if (isManager && !serviceRole) {
+    return jsonResponse(false, 'Configurazione server incompleta', 500)
+  }
   const adminData = isAdmin ? await getAdminDataSupabase() : null
-  const db = adminData?.client ?? supabase
-  const svc = isAdmin ? adminData!.client : createServiceRoleSupabase()
+  const db = isAdmin ? adminData!.client : isManager && serviceRole ? serviceRole : supabase
+  const svc = isAdmin ? adminData!.client : serviceRole
 
   const patch: Record<string, unknown> = {}
 
@@ -382,13 +374,8 @@ export async function POST(request: NextRequest) {
   }
 
   if (isManager && !isAdmin) {
-    if (ruoloEffettivo !== 'agenzia' && ruoloEffettivo !== 'rivenditore') {
-      return jsonResponse(false, 'Il manager può modificare solo agenzie e rivenditori', 403)
-    }
-    for (const key of Object.keys(patch)) {
-      if (!MANAGER_PATCH_KEYS.has(key)) {
-        delete patch[key]
-      }
+    if (profiloEsistente?.ruolo === 'admin' || patch.ruolo === 'admin') {
+      return jsonResponse(false, 'Operazione non consentita', 403)
     }
   }
 

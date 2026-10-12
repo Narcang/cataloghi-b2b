@@ -341,7 +341,8 @@ export default async function GestioneUtentiPage(props: {
           profiliAssociazione={profiliAssociazione}
           links={connessioniUtenteOperatoreRows}
           allCataloghi={allCataloghi}
-          readOnly={!isAdmin}
+          readOnly={false}
+          canDeleteUtenti={isAdmin}
           canReviewPending={isManager}
           canEditSpecializzazione={isManager}
           canManageCataloghi={isManager}
