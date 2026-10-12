@@ -127,6 +127,33 @@ export async function findAuthUserByEmail(
   return null
 }
 
+export function recoveryRedirectTo(origin?: string | null): string | undefined {
+  const base = (origin || process.env.NEXT_PUBLIC_APP_URL || '').replace(/\/$/, '')
+  return base ? `${base}/reset-password` : undefined
+}
+
+/** Link per impostare la password: si copia e si manda a mano (WhatsApp/email). Non invia mail. */
+export async function generatePasswordRecoveryLink(
+  svc: SupabaseClient,
+  email: string,
+  redirectTo?: string,
+): Promise<{ link: string | null; error: string | null }> {
+  const needle = email.trim().toLowerCase()
+  if (!needle.includes('@')) return { link: null, error: 'Email non valida' }
+
+  const { data, error } = await svc.auth.admin.generateLink({
+    type: 'recovery',
+    email: needle,
+    ...(redirectTo ? { options: { redirectTo } } : {}),
+  })
+  if (error) {
+    console.error('generatePasswordRecoveryLink', error.message)
+    return { link: null, error: error.message }
+  }
+  const link = data?.properties?.action_link ?? null
+  return { link, error: link ? null : 'Link di recupero non generato' }
+}
+
 export function ultimoAccessoMapToRecord(map: Map<string, string>): Record<string, string> {
   return Object.fromEntries(map)
 }

@@ -53,8 +53,8 @@ export default function RipristinaAccessoEmail({ email }: Props) {
   return (
     <div className="rounded-xl border border-black bg-white px-4 py-3 space-y-3">
       <p className="text-sm text-zinc-800">
-        Ripristina <span className="font-medium">{email}</span> come agente collegato a La Diva,
-        così può accedere o impostare la password.
+        Se il profilo esiste già, il ruolo resta quello attuale. Il link va copiato e mandato
+        all’utente: in questo momento Supabase blocca le email di recupero dopo poche richieste.
       </p>
       {message ? <p className="text-sm text-emerald-800">{message}</p> : null}
       {error ? <p className="text-sm text-red-700">{error}</p> : null}

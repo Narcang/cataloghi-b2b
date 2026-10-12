@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Users, UserCheck } from 'lucide-react'
 import AssociatiDirettiCascade from '@/components/admin/AssociatiDirettiCascade'
 import CreaAssociatoManuale from '@/components/admin/CreaAssociatoManuale'
+import LinkPasswordUtente from '@/components/admin/LinkPasswordUtente'
 import CatalogoPermessiPanel, { type CatalogoDisponibile } from '@/components/admin/CatalogoPermessiPanel'
 import RivenditoreProfiloCampi from '@/components/admin/RivenditoreProfiloCampi'
 import AgenziaProfiloCampi from '@/components/admin/AgenziaProfiloCampi'
@@ -1072,6 +1073,7 @@ export default function AdminProfiliPanel({
                                 {deletingId === p.id ? copy.eliminazione : copy.eliminaUtente}
                               </button>
                             ) : null}
+                            {canCreateAssociati && p.email ? <LinkPasswordUtente email={p.email} /> : null}
                           </div>
                         </form>
 

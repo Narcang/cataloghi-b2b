@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { messaggioErroreRecupero } from '@/lib/recuperoPasswordMessaggio'
 import { createClient } from '@/utils/supabase/client'
 
 export default function RecuperoPasswordPage() {
@@ -23,10 +24,10 @@ export default function RecuperoPasswordPage() {
     setMessage(null)
 
     const redirectTo = `${window.location.origin}/reset-password`
-    await supabase.auth.resetPasswordForEmail(trimmedEmail, { redirectTo })
+    const { error } = await supabase.auth.resetPasswordForEmail(trimmedEmail, { redirectTo })
 
     setIsSubmitting(false)
-    setMessage(`Ti abbiamo inviato un'email di recupero password all'indirizzo ${trimmedEmail}.`)
+    setMessage(error ? messaggioErroreRecupero(error.message) : `Email di recupero inviata a ${trimmedEmail}. Controlla anche la posta indesiderata.`)
   }
 
   return (

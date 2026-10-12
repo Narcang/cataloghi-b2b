@@ -1,5 +1,6 @@
 'use server'
 
+import { messaggioErroreRecupero } from '@/lib/recuperoPasswordMessaggio'
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
@@ -16,26 +17,21 @@ export async function recuperoPassword(formData: FormData) {
 
   // Cast veloce: in prod userei Zod per validare input.
   const email = (formData.get('email') as string | null)?.trim() ?? ''
-  const message = email
-    ? `Ti abbiamo inviato un'email di recupero password all'indirizzo ${email}.`
-    : "Ti abbiamo inviato un'email di recupero password al tuo indirizzo email."
-
   if (!email) {
-    redirect(`/recupero-password?message=${encodeURIComponent(message)}`)
+    redirect(`/recupero-password?message=${encodeURIComponent('Inserisci un indirizzo email.')}`)
   }
 
-  try {
-    const siteBase = process.env.NEXT_PUBLIC_APP_URL
-    const baseUrl = siteBase ?? (await getOrigin()) ?? 'http://localhost:3000'
-    const redirectTo = new URL('/reset-password', baseUrl).href
+  const siteBase = process.env.NEXT_PUBLIC_APP_URL
+  const baseUrl = siteBase ?? (await getOrigin()) ?? 'http://localhost:3000'
+  const redirectTo = new URL('/reset-password', baseUrl).href
 
-    await supabase.auth.resetPasswordForEmail(email, {
-      // Supabase richiede una URL assoluta.
-      redirectTo,
-    })
-  } catch {
-    // Volutamente ignoriamo l’errore: mostriamo sempre lo stesso messaggio.
-  }
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo,
+  })
+
+  const message = error
+    ? messaggioErroreRecupero(error.message)
+    : `Email di recupero inviata a ${email}. Controlla anche la posta indesiderata.`
 
   redirect(`/recupero-password?message=${encodeURIComponent(message)}`)
 }

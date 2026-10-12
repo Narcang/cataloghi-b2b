@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
-import { findAuthUserByEmail } from '@/lib/ultimoAccessoUtenti'
+import {
+  findAuthUserByEmail,
+  generatePasswordRecoveryLink,
+  recoveryRedirectTo,
+} from '@/lib/ultimoAccessoUtenti'
 
 function jsonResponse(ok: boolean, message: string, status: number, data?: Record<string, unknown>) {
   return NextResponse.json({ ok, message, ...data }, { status })
@@ -104,22 +108,27 @@ export async function POST(request: NextRequest) {
     await svc.auth.admin.updateUserById(authUser.id, { email_confirm: true })
   }
 
+  const tieneRuolo = Boolean(profilo?.ruolo && profilo.ruolo !== 'free')
+
   if (profilo) {
-    const { error: updErr } = await svc
-      .from('profili')
-      .update({
-        ruolo: 'agente',
-        registrazione_approvata: true,
-        email,
-        nome_completo: profilo.nome_completo || nomeDaSalvare,
-        societa: societa || null,
-      })
-      .eq('id', profilo.id)
+    const patch: Record<string, unknown> = {
+      registrazione_approvata: true,
+      email,
+    }
+    if (!tieneRuolo) {
+      patch.ruolo = 'agente'
+      patch.nome_completo = profilo.nome_completo || nomeDaSalvare
+      if (societa) patch.societa = societa
+    }
+    const { error: updErr } = await svc.from('profili').update(patch).eq('id', profilo.id)
     if (updErr) {
       console.error('ripristina-email update profilo', updErr)
       return jsonResponse(false, updErr.message, 500)
     }
     profiloId = profilo.id
+    if (authUser) {
+      await svc.auth.admin.updateUserById(authUser.id, { email_confirm: true })
+    }
   }
 
   if (!profiloId && !authUser) {
@@ -158,20 +167,21 @@ export async function POST(request: NextRequest) {
 
   if (!profiloId) return jsonResponse(false, 'Impossibile creare o ripristinare il profilo', 500)
 
-  await collegaAGenitore(svc, profiloId, agenzia.id)
-
-  let recoveryLink: string | null = null
-  const { data: linkData, error: linkErr } = await svc.auth.admin.generateLink({
-    type: 'recovery',
-    email,
-  })
-  if (!linkErr) {
-    recoveryLink = linkData?.properties?.action_link ?? null
+  if (!tieneRuolo) {
+    await collegaAGenitore(svc, profiloId, agenzia.id)
   }
+
+  const { link: recoveryLink } = await generatePasswordRecoveryLink(
+    svc,
+    email,
+    recoveryRedirectTo(request.headers.get('origin')),
+  )
 
   return jsonResponse(
     true,
-    'Accesso agente ripristinato e collegato a La Diva. Può entrare con email e password, oppure impostare la password dal link di recupero.',
+    tieneRuolo
+      ? 'Link pronto. Ruolo e collegamenti non sono stati modificati: copialo e mandalo all’utente.'
+      : 'Accesso agente ripristinato e collegato a La Diva. Copi il link e lo manda all’utente per impostare la password.',
     200,
     {
       profilo_id: profiloId,
