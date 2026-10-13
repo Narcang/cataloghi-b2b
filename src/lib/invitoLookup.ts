@@ -5,7 +5,6 @@ export type InvitoValidato = {
   associatoA: string | null
   creatoDa: string
   multiUso: boolean
-  societa: string | null
 }
 
 type InvitoRow = {
@@ -34,14 +33,7 @@ async function fetchInvitoRow(svc: SupabaseClient, token: string): Promise<Invit
   return (fallback.data as InvitoRow | null) ?? null
 }
 
-function societaDaProfilo(p: { societa?: string | null; nome_completo?: string | null } | null): string | null {
-  const societa = p?.societa?.trim()
-  if (societa) return societa
-  const nome = p?.nome_completo?.trim()
-  return nome || null
-}
-
-/** Carica un invito valido e, se c’è un’entità collegata, la società da precompilare. */
+/** Carica un invito valido e l’entità a cui il nuovo profilo resta collegato. */
 export async function loadInvitoValidato(
   svc: SupabaseClient,
   token: string,
@@ -90,21 +82,10 @@ export async function loadInvitoValidato(
     }
   }
 
-  let societa: string | null = null
-  if (associatoA) {
-    const { data: parent } = await svc
-      .from('profili')
-      .select('societa, nome_completo')
-      .eq('id', associatoA)
-      .maybeSingle()
-    societa = societaDaProfilo(parent)
-  }
-
   return {
     ruolo: invito.ruolo_invitato,
     associatoA,
     creatoDa: invito.creato_da,
     multiUso: invito.multi_uso ?? false,
-    societa,
   }
 }

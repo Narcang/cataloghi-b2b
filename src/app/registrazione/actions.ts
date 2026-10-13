@@ -63,7 +63,6 @@ export async function register(formData: FormData) {
           `&token=${encodeURIComponent(invitoToken)}`,
       )
     }
-    if (!societa && invito.societa) societa = invito.societa
   }
 
   if (!nome || !cognome || !societa || !email || !password || !telefono) {

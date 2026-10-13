@@ -34,7 +34,6 @@ export default function RegistrazioneForm({
   tokenRaw,
   hasInvito,
   ruoloKey,
-  societaInvito,
   ok,
   message,
 }: {
@@ -42,7 +41,6 @@ export default function RegistrazioneForm({
   tokenRaw: string
   hasInvito: boolean
   ruoloKey: string | null
-  societaInvito: string | null
   ok: boolean
   message: string
 }) {
@@ -100,14 +98,8 @@ export default function RegistrazioneForm({
                   name="societa"
                   type="text"
                   autoComplete="organization"
-                  defaultValue={societaInvito ?? ''}
-                  readOnly={Boolean(societaInvito)}
                   required
-                  className={societaInvito ? 'bg-zinc-50' : undefined}
                 />
-                {societaInvito ? (
-                  <p className="text-xs text-zinc-500">{copy.societaDaInvito}</p>
-                ) : null}
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="email">{copy.email}</Label>

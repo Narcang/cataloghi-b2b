@@ -27,7 +27,6 @@ export default async function RegistrazionePage(props: {
   const tokenRaw = (searchParams?.token ?? '').trim()
 
   let ruoloKey: string | null = null
-  let societaInvito: string | null = null
   let hasInvito = false
   if (tokenRaw) {
     const svc = createServiceRoleSupabase()
@@ -35,7 +34,6 @@ export default async function RegistrazionePage(props: {
     if (invito) {
       hasInvito = true
       ruoloKey = invito.ruolo
-      societaInvito = invito.societa
     }
   }
 
@@ -47,7 +45,6 @@ export default async function RegistrazionePage(props: {
         tokenRaw={tokenRaw}
         hasInvito={hasInvito}
         ruoloKey={ruoloKey}
-        societaInvito={societaInvito}
         ok={ok}
         message={message}
       />
