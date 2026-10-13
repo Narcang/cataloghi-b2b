@@ -566,6 +566,79 @@ export function seguitoDaCatena(
   return parts.length > 0 ? parts.join(', ') : null
 }
 
+function ruoloPuoEssereGenitore(parentRuolo: string, childRuolo: string): boolean {
+  return (CHILD_ROLES_BY_PARENT[parentRuolo] ?? []).includes(childRuolo)
+}
+
+function profiliCollegati(idA: string, idB: string, links: OperatoreLink[]): boolean {
+  return links.some(
+    (link) =>
+      (link.utente_id === idA && link.operatore_id === idB) ||
+      (link.utente_id === idB && link.operatore_id === idA),
+  )
+}
+
+/** Chi segue questo profilo: persona e società a cui è collegato, staccabili con una dissociazione. */
+export function chiSegueQuestoProfilo(
+  profile: ProfiloGerarchiaRow,
+  profili: ProfiloGerarchiaRow[],
+  links: OperatoreLink[],
+): ProfiloGerarchiaRow[] {
+  const byId = new Map(profili.map((p) => [p.id, p]))
+  const candidates = new Map<string, ProfiloGerarchiaRow>()
+  const inviter = byId.get(profile.invitato_da ?? '')
+  if (inviter) candidates.set(inviter.id, inviter)
+
+  for (const link of links) {
+    const otherId =
+      link.utente_id === profile.id
+        ? link.operatore_id
+        : link.operatore_id === profile.id
+          ? link.utente_id
+          : null
+    const other = otherId ? byId.get(otherId) : null
+    if (other) candidates.set(other.id, other)
+  }
+
+  const seguito = profile.seguito_da?.trim().toLocaleLowerCase('it') ?? ''
+  if (seguito) {
+    const agente = profili.find(
+      (p) =>
+        isAgenteLike(p.ruolo) &&
+        (p.nome_completo ?? '').trim().toLocaleLowerCase('it') === seguito,
+    )
+    if (agente) candidates.set(agente.id, agente)
+  }
+
+  const ordered: ProfiloGerarchiaRow[] = []
+  const seen = new Set<string>()
+  for (const other of candidates.values()) {
+    if (other.id === profile.id || seen.has(other.id)) continue
+    if (other.ruolo === 'admin' || other.ruolo === 'manager' || other.ruolo === 'free') continue
+    if (other.invitato_da === profile.id) continue
+
+    const nome = (other.nome_completo ?? '').trim().toLocaleLowerCase('it')
+    const seguitoMatch = Boolean(seguito && nome && seguito === nome && isAgenteLike(other.ruolo))
+    const invito = profile.invitato_da === other.id
+    const linked = profiliCollegati(profile.id, other.id, links)
+    const otherParent = ruoloPuoEssereGenitore(other.ruolo, profile.ruolo)
+    const thisParent = ruoloPuoEssereGenitore(profile.ruolo, other.ruolo)
+    const superiore = linked && otherParent && !thisParent
+    const pari =
+      linked &&
+      otherParent &&
+      thisParent &&
+      !profile.invitato_da &&
+      other.invitato_da !== profile.id
+
+    if (!invito && !seguitoMatch && !superiore && !pari) continue
+    seen.add(other.id)
+    ordered.push(other)
+  }
+
+  return ordered
+}
+
 /** Sede studio assegnata a un agente dell'agenzia (invito diretto). */
 export function agenteAssegnatoASedeStudio(
   studio: ProfiloGerarchiaRow,
@@ -782,6 +855,7 @@ export function profiloToGerarchiaRow(
     area_geografica: string | null
     ruolo: string
     registrazione_approvata?: boolean | null
+    seguito_da?: string | null
   },
   invitato_da: string | null = null,
 ): ProfiloGerarchiaRow {
@@ -794,6 +868,7 @@ export function profiloToGerarchiaRow(
     ruolo: p.ruolo,
     invitato_da,
     registrazione_approvata: p.registrazione_approvata,
+    seguito_da: p.seguito_da ?? null,
   }
 }
 

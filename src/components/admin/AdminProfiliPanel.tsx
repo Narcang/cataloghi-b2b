@@ -19,6 +19,7 @@ import {
   associatiAggiungiSectionLabel,
   associatiDirettiSectionLabel,
   getCandidateAssociatiProfiles,
+  chiSegueQuestoProfilo,
   getChildrenProfiles,
   isRivenditoreManagedByAgenzia,
   isRivenditoreManagedByAgente,
@@ -191,6 +192,7 @@ export default function AdminProfiliPanel({
   const copy = tAdmin(locale)
   const dashCopy = tDashboard(locale)
   const [message, setMessage] = useState<string | null>(null)
+  const [unlinkingId, setUnlinkingId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [specializzazioneOpzioni, setSpecializzazioneOpzioni] =
@@ -403,6 +405,26 @@ export default function AdminProfiliPanel({
     }
     router.refresh()
     return true
+  }
+
+  async function dissociaSeguito(profilo: ProfiloGestioneRow, parent: ProfiloGerarchiaRow) {
+    const key = `${profilo.id}:${parent.id}`
+    setUnlinkingId(key)
+    try {
+      const ok = await postLink('remove', parent.id, profilo.id)
+      if (!ok) return
+      const seguito = (profilo.seguito_da ?? '').trim().toLocaleLowerCase('it')
+      const nome = (parent.nome_completo ?? '').trim().toLocaleLowerCase('it')
+      const ruoloConSeguito =
+        profilo.ruolo === 'rivenditore' ||
+        profilo.ruolo === 'studio' ||
+        profilo.ruolo === 'studio_associato'
+      if (ruoloConSeguito && seguito && nome && seguito === nome) {
+        await postUpdate({ profilo_id: profilo.id, seguito_da: null })
+      }
+    } finally {
+      setUnlinkingId(null)
+    }
   }
 
   function readForm(fd: FormData, profiloId: string) {
@@ -782,6 +804,8 @@ export default function AdminProfiliPanel({
                 : null
             const riferimentoInvito = agenteRiferimento ?? venditoreRiferimento
             const associatiLabel = associatiDirettiSectionLabel(p.ruolo)
+            const chiSegue = chiSegueQuestoProfilo(profiloGerarchia, profiliGerarchia, links)
+            const puoDissociare = canCreateAssociati && !profiloReadOnly
             const aggiungiLabel = associatiAggiungiSectionLabel(p.ruolo)
             const candidateAssociati = getCandidateAssociatiProfiles(p.id, p.ruolo, profiliAssociazione)
             const managerEditSpecializzazione =
@@ -834,6 +858,53 @@ export default function AdminProfiliPanel({
                     <span className="text-xs text-zinc-500">{p.area_geografica || copy.areaNonDefinita}</span>
                   </summary>
                   <div className="border-t border-black/10 px-4 py-4 space-y-4 bg-white">
+                    <div>
+                      <p className="text-xs font-medium uppercase text-zinc-600 mb-2">{copy.seguitoDa}</p>
+                      <div className="border border-black/15 rounded-lg p-3 bg-zinc-50">
+                        {chiSegue.length === 0 ? (
+                          <p className="text-sm text-zinc-500">{copy.nessunCollegamento}</p>
+                        ) : (
+                          <ul className="flex flex-wrap gap-2">
+                            {chiSegue.map((parent) => {
+                              const societa = parent.societa?.trim()
+                              const nome = parent.nome_completo?.trim()
+                              const persona =
+                                societa &&
+                                nome &&
+                                nome.toLocaleLowerCase('it') !== societa.toLocaleLowerCase('it')
+                                  ? `${societa} · ${nome}`
+                                  : societa || nome || parent.email || 'Utente'
+                              const busy = unlinkingId === `${p.id}:${parent.id}`
+                              return (
+                                <li
+                                  key={parent.id}
+                                  className="inline-flex items-center gap-1 rounded-full border border-black/20 bg-white pl-3 pr-1 py-1 text-sm text-zinc-800"
+                                >
+                                  <span>
+                                    {persona}
+                                    <span className="ml-1 text-xs text-zinc-500">
+                                      ({tRuolo(locale, parent.ruolo)})
+                                    </span>
+                                  </span>
+                                  {puoDissociare ? (
+                                    <button
+                                      type="button"
+                                      disabled={busy}
+                                      aria-label="Dissocia"
+                                      title="Dissocia"
+                                      onClick={() => void dissociaSeguito(p, parent)}
+                                      className="ml-1 inline-flex h-6 w-6 items-center justify-center rounded-full text-zinc-600 hover:bg-red-50 hover:text-red-700 disabled:opacity-50"
+                                    >
+                                      ×
+                                    </button>
+                                  ) : null}
+                                </li>
+                              )
+                            })}
+                          </ul>
+                        )}
+                      </div>
+                    </div>
                     {editSpecializzazione ? (
                       <>
                         <p className="text-sm text-zinc-600">
