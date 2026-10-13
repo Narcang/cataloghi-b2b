@@ -49,7 +49,7 @@ export async function updateSession(request: NextRequest) {
     return copyCookies(supabaseResponse, NextResponse.redirect(url))
   }
 
-  // Pagine pubbliche (free / ospite senza password): home, dove siamo, login, auth, dashboard ridotta, PDF cataloghi attivi
+  // Pagine pubbliche: home e cataloghi in vetrina. Menu e area riservata (/dashboard) richiedono il login.
   const publicPaths = [
     '/',
     '/dove-siamo',
@@ -59,7 +59,6 @@ export async function updateSession(request: NextRequest) {
     '/auth',
     '/recupero-password',
     '/reset-password',
-    '/dashboard',
     '/cataloghi',
     '/privacy',
     '/termini',

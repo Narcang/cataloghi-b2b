@@ -2,6 +2,7 @@ import {
   isAgentOnlyCatalogCategory,
   isCatalogCategoryAllowedForStudioRole,
   isLoginOnlyCatalogCategory,
+  isPublicHomeCatalogCategory,
 } from '@/lib/catalogCategories'
 import { isVenditoreLike, isAgenteLike, isStudioLike, isStudioFamily } from '@/lib/catalogRoles'
 
@@ -37,6 +38,14 @@ export function getCatalogAccessDenial(
 
   // Admin vede tutto, incluse bozze
   if (ruolo === 'admin') return null
+
+  // Linee in homepage: pubblicate, aperte anche senza account e senza spunta «free».
+  if (isPublicHomeCatalogCategory(catalogo.categoria)) {
+    if (catalogoNonPubblico) {
+      return { status: 403, message: 'Catalogo non pubblicato' }
+    }
+    return null
+  }
 
   // --- Sistema basato su ruoli_visibili (nuovo) ---
   const rv = catalogo.ruoli_visibili

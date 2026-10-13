@@ -108,6 +108,13 @@ export const PUBLIC_CATALOG_CATEGORIES = CATALOG_CATEGORIES.filter(
   (c) => !LOGIN_ONLY_CATALOG_CATEGORIES.has(c) && !UI_HIDDEN_CATEGORIES.has(c),
 )
 
+const PUBLIC_HOME_SET = new Set<string>(PUBLIC_CATALOG_CATEGORIES)
+
+/** Linee della homepage: visibili a ospiti, free e ogni altro ruolo, se pubblicate. */
+export function isPublicHomeCatalogCategory(categoria: string | null | undefined): boolean {
+  return Boolean(categoria && PUBLIC_HOME_SET.has(categoria))
+}
+
 /** Area riservata venditori (ex partner/distributore): listino + file tecnici. */
 export const VENDITORE_EXTRA_CATEGORIES = [
   LISTINI_CATALOG_CATEGORY,
@@ -167,18 +174,17 @@ export function agenteReservedDashboardCategories(): CatalogCategory[] {
 }
 
 /**
- * Sezioni cataloghi in dashboard:
- * - Ospite: niente Partner / Agenti / Studio (serve login).
- * - Ruoli `studio` (Sede Studio) e `studio_associato` (Studio): solo Family 15/20/Gres, Capsule Collection e linea Studio.
- * - Partner (distributore): categorie pubbliche; listini Partner/Studio in /dashboard/listini-partner.
- * - Agente: categorie pubbliche; Agenti e Scontistiche in /dashboard/documentazione-agente.
- * - Altri utenti autenticati: tutte le categorie (inclusa Studio).
+ * Sezioni cataloghi in dashboard (solo dopo login):
+ * - Free: solo le linee della homepage.
+ * - Ruoli `studio` (Sede Studio) e `studio_associato` (Studio): Family, Capsule e linea Studio.
+ * - Partner e agente: linee pubbliche; listini e documentazione stanno nel portale.
+ * - Admin e manager: tutte le categorie visibili in interfaccia.
  */
 export function categoriesVisibleOnDashboard(
   ruoloProfilo: string | null | undefined,
   isAuthenticated: boolean,
 ): CatalogCategory[] {
-  if (!isAuthenticated) {
+  if (!isAuthenticated || ruoloProfilo === 'free' || ruoloProfilo === 'fornitore') {
     return [...PUBLIC_CATALOG_CATEGORIES]
   }
   if (ruoloProfilo === 'studio' || ruoloProfilo === 'studio_associato' || ruoloProfilo === 'partner_dipendente') {

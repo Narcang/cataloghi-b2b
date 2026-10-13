@@ -11,6 +11,7 @@ import {
 } from '@/lib/catalogCategories'
 import { tHome } from '@/lib/i18n'
 import { catalogLingueForLocale, pickCatalogForLocale } from '@/lib/catalogLingua'
+import { fetchPublishedHomeCatalogRows } from '@/lib/publicHomeCataloghi'
 import { getAppLocale, getLocaleCookie } from '@/lib/localeServer'
 import { createClient } from '@/utils/supabase/server'
 
@@ -72,14 +73,22 @@ export default async function LandingPage(props: { searchParams?: Promise<{ mess
   const supabase = await createClient()
   const fotoCategorie = Object.values(FOTO_CATEGORY_MAP) as CatalogCategory[]
   const directLinkCategorie: CatalogCategory[] = [...fotoCategorie, 'Bricks']
-  const { data: directCataloghi } = await supabase
-    .from('cataloghi')
-    .select('id, categoria, lingua')
-    .in('categoria', directLinkCategorie)
-    .eq('stato_pubblicazione', 'attivo')
-    .in('lingua', catalogLingueForLocale(locale))
-    .order('creato_il', { ascending: false })
-    .limit(40)
+  const publicRows = await fetchPublishedHomeCatalogRows<{ id: string; categoria: string; lingua: string | null }>(
+    'id, categoria, lingua',
+  )
+  const { data: sessionRows } = publicRows
+    ? { data: null }
+    : await supabase
+        .from('cataloghi')
+        .select('id, categoria, lingua')
+        .in('categoria', directLinkCategorie)
+        .eq('stato_pubblicazione', 'attivo')
+        .in('lingua', catalogLingueForLocale(locale))
+        .order('creato_il', { ascending: false })
+        .limit(40)
+  const directCataloghi = (publicRows ?? sessionRows ?? []).filter((row) =>
+    directLinkCategorie.includes(row.categoria as CatalogCategory),
+  )
 
   // Mappa categoria → id catalogo (EN dedicato, altrimenti italiano)
   const directCatalogoIdMap: Partial<Record<CatalogCategory, string>> = {}

@@ -8,7 +8,9 @@ import {
   isAgentOnlyCatalogCategory,
   isCatalogCategoryAllowedForStudioRole,
   isLoginOnlyCatalogCategory,
+  isPublicHomeCatalogCategory,
 } from '@/lib/catalogCategories'
+import { fetchPublishedHomeCatalogo } from '@/lib/publicHomeCataloghi'
 import { isVenditoreLike } from '@/lib/catalogRoles'
 import { getCatalogDeliveryMode } from '@/lib/catalogFileKind'
 import {
@@ -30,13 +32,14 @@ export default async function CatalogoDetail({
   const { data: { user } } = await supabase.auth.getUser()
 
   // Fetch del catalogo (RLS: anon/authenticated free → solo attivi; agenti/manager secondo policy)
-  const { data: catalogo, error } = await supabase
+  const { data: sessionCatalogo } = await supabase
     .from('cataloghi')
     .select('*')
     .eq('id', catalogoId)
-    .single()
+    .maybeSingle()
+  const catalogo = sessionCatalogo ?? (await fetchPublishedHomeCatalogo(catalogoId))
 
-  if (error || !catalogo) {
+  if (!catalogo) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-8 text-center bg-[#fafafa]">
         <h1 className="text-3xl font-bold text-red-600 mb-4">Accesso Negato o Non Trovato</h1>
@@ -72,14 +75,17 @@ export default async function CatalogoDetail({
       <div className="flex flex-col items-center justify-center min-h-screen p-8 text-center bg-[#fafafa]">
         <h1 className="text-3xl font-bold text-red-600 mb-4">Catalogo non disponibile</h1>
         <p className="text-zinc-600 max-w-md">Questo catalogo non è pubblico oppure non è accessibile senza account.</p>
-        <Link href="/dashboard">
+        <Link href="/">
           <Button className="mt-8 bg-[#060d41] text-white hover:bg-[#0a155a]" variant="default">Torna ai cataloghi</Button>
         </Link>
       </div>
     )
   }
 
-  if (user) {
+  const apertoATutti =
+    isPublicHomeCatalogCategory(catalogo.categoria) && !catalogoNonPubblico
+
+  if (user && !apertoATutti) {
     const { data: profiloCatalogo } = await supabase.from('profili').select('ruolo').eq('id', user.id).maybeSingle()
     const ruolo = profiloCatalogo?.ruolo ?? 'free'
     if (isVenditoreLike(ruolo) && isAgentOnlyCatalogCategory(catalogo.categoria)) {

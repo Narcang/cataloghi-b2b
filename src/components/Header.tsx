@@ -64,7 +64,7 @@ function catalogMenuItemForRole(
   labels: ReturnType<typeof tHeader>,
 ): MenuItem {
   if (!loggedIn) {
-    return { label: labels.cataloghi, href: '/dashboard#cataloghi', icon: BookOpen }
+    return { label: labels.cataloghi, href: '/', icon: BookOpen }
   }
   const hasPortale = Boolean(ruolo && (PORTALE_TILES_PER_RUOLO[ruolo]?.length ?? 0) > 0)
   return {

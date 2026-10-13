@@ -4,7 +4,8 @@ import Image from 'next/image'
 import { FileText, ArrowLeft } from 'lucide-react'
 import Header from '@/components/Header'
 import { createClient } from '@/utils/supabase/server'
-import { categoryFromSlug, isLoginOnlyCatalogCategory } from '@/lib/catalogCategories'
+import { categoryFromSlug, isLoginOnlyCatalogCategory, isPublicHomeCatalogCategory } from '@/lib/catalogCategories'
+import { fetchPublishedHomeCatalogRows } from '@/lib/publicHomeCataloghi'
 import { catalogPdfHref, safeCatalogReturnTo, CATALOG_RETURN_TO_PARAM } from '@/lib/catalogNavigation'
 import { compareCatalogTitoli } from '@/lib/catalogSorting'
 import { getAppLocale } from '@/lib/localeServer'
@@ -63,12 +64,28 @@ export default async function CataloghiPerCategoriaPage({
     redirect('/login')
   }
 
-  const { data: rows, error } = await supabase
-    .from('cataloghi')
-    .select('*')
-    .eq('categoria', categoria)
-    .eq('stato_pubblicazione', 'attivo')
-    .in('lingua', catalogLingueForLocale(locale))
+  type CatalogoVetrina = {
+    id: string
+    titolo: string
+    categoria: string
+    lingua: string | null
+    url_immagine: string | null
+  }
+  const publicRows = isPublicHomeCatalogCategory(categoria)
+    ? await fetchPublishedHomeCatalogRows<CatalogoVetrina>('*', {
+        categoria,
+        lingue: catalogLingueForLocale(locale),
+      })
+    : null
+  const { data: sessionRows, error } = publicRows
+    ? { data: null, error: null }
+    : await supabase
+        .from('cataloghi')
+        .select('*')
+        .eq('categoria', categoria)
+        .eq('stato_pubblicazione', 'attivo')
+        .in('lingua', catalogLingueForLocale(locale))
+  const rows = (publicRows ?? sessionRows ?? []) as CatalogoVetrina[]
 
   if (error) {
     return (
