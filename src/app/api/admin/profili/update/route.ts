@@ -238,7 +238,8 @@ export async function POST(request: NextRequest) {
     patch.nome_completo = body.nome_completo === null ? null : String(body.nome_completo).trim() || null
   }
   if (body.email !== undefined) {
-    patch.email = body.email === null ? null : String(body.email).trim() || null
+    const raw = body.email === null ? '' : String(body.email).trim().toLowerCase()
+    patch.email = raw || null
   }
   if (body.telefono !== undefined) {
     patch.telefono = body.telefono === null ? null : String(body.telefono).trim() || null
@@ -469,6 +470,35 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  const loginEmail = typeof patch.email === 'string' ? patch.email : ''
+  let loginEmailAggiornata = false
+  if (loginEmail.includes('@')) {
+    if (!serviceRole) {
+      return jsonResponse(false, 'Profilo salvato, ma manca la configurazione per aggiornare l’email di login', 500)
+    }
+    const { data: authLookup, error: authLookupErr } = await serviceRole.auth.admin.getUserById(profiloId)
+    if (authLookupErr || !authLookup.user) {
+      console.error('admin profili update: getUserById', authLookupErr)
+      return jsonResponse(false, 'Profilo salvato, ma l’account di login non è stato trovato', 500)
+    }
+    const emailAttuale = (authLookup.user.email ?? '').trim().toLowerCase()
+    if (emailAttuale !== loginEmail) {
+      const { error: authEmailErr } = await serviceRole.auth.admin.updateUserById(profiloId, {
+        email: loginEmail,
+        email_confirm: true,
+      })
+      if (authEmailErr) {
+        console.error('admin profili update: email login', authEmailErr)
+        return jsonResponse(
+          false,
+          `Profilo salvato, ma l’email di login non è cambiata: ${authEmailErr.message}. La password non è stata modificata.`,
+          500,
+        )
+      }
+      loginEmailAggiornata = true
+    }
+  }
+
   if (patch.registrazione_approvata === true) {
     if (svc) {
       const { error: authErr } = await svc.auth.admin.updateUserById(profiloId, { email_confirm: true })
@@ -513,9 +543,10 @@ export async function POST(request: NextRequest) {
   }
 
   const abilitato = patch.registrazione_approvata === true
-  return jsonResponse(
-    true,
-    abilitato ? 'Utente abilitato: registrazione approvata e accesso ai cataloghi attivo.' : 'Profilo aggiornato.',
-    200
-  )
+  const message = loginEmailAggiornata
+    ? 'Profilo aggiornato. L’accesso ora usa questa email; la password è rimasta quella di prima.'
+    : abilitato
+      ? 'Utente abilitato: registrazione approvata e accesso ai cataloghi attivo.'
+      : 'Profilo aggiornato.'
+  return jsonResponse(true, message, 200)
 }
