@@ -29,7 +29,7 @@ const RUOLO_GENITORE_OBBLIGATORIO: Record<string, string> = {
 const PARENT_RUOLI_OPZIONALI: Record<string, string[]> = {
   agenzia: ['manager'],
   rivenditore: ['agenzia', 'agente', 'back_office', 'manager'],
-  studio: ['agenzia', 'agente', 'back_office', 'rivenditore', 'manager'],
+  studio: ['agenzia', 'agente', 'back_office', 'rivenditore', 'distributore', 'manager'],
 }
 
 const RUOLI_CREABILI = new Set([

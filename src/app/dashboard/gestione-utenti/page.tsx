@@ -11,7 +11,7 @@ import InvitaUtente from '@/components/InvitaUtente'
 import CreaAssociatoManuale from '@/components/admin/CreaAssociatoManuale'
 import RipristinaAccessoEmail from '@/components/admin/RipristinaAccessoEmail'
 import type { ProfiloGerarchiaRow } from '@/lib/userHierarchy'
-import { getDescendantsByRole, profiloGerarchiaDisplayLabel, profiloToGerarchiaRow } from '@/lib/userHierarchy'
+import { getChildrenProfiles, getDescendantsByRole, profiloGerarchiaDisplayLabel, profiloToGerarchiaRow } from '@/lib/userHierarchy'
 import { ruoliInvitabili } from '@/lib/inviteHierarchy'
 import { findAuthUserByEmail } from '@/lib/ultimoAccessoUtenti'
 import { getAppLocale } from '@/lib/localeServer'
@@ -223,6 +223,33 @@ export default async function GestioneUtentiPage(props: {
     .map((p) => ({ id: p.id, label: profiloGerarchiaDisplayLabel(p) }))
     .sort((a, b) => a.label.localeCompare(b.label, 'it', { sensitivity: 'base' }))
 
+  function operatoriDi(genitoreRuolo: string, figliRuoli: string[]) {
+    const map: Record<string, { id: string; label: string }[]> = {}
+    for (const genitore of profiliGerarchia.filter((p) => p.ruolo === genitoreRuolo)) {
+      map[genitore.id] = getChildrenProfiles(
+        genitore.id,
+        genitore,
+        user!.id,
+        ruoloCorrente,
+        profiliGerarchia,
+        connessioniUtenteOperatoreRows,
+      )
+        .filter((p) => figliRuoli.includes(p.ruolo))
+        .map((p) => ({
+          id: p.id,
+          label:
+            p.ruolo === 'back_office'
+              ? `${profiloGerarchiaDisplayLabel(p)} · Back-Office`
+              : profiloGerarchiaDisplayLabel(p),
+        }))
+        .sort((a, b) => a.label.localeCompare(b.label, 'it', { sensitivity: 'base' }))
+    }
+    return map
+  }
+
+  const agentiPerAgenzia = operatoriDi('agenzia', ['agente', 'back_office'])
+  const venditoriPerRivenditore = operatoriDi('rivenditore', ['distributore'])
+
   return (
     <div className="ladiva-root ladiva-root-app-dark min-h-screen flex flex-col">
       <Header />
@@ -366,16 +393,21 @@ export default async function GestioneUtentiPage(props: {
                       emptyParentLabel: copy.nessunCollegamento,
                     },
               rivenditore: {
-                options: agenziaOptions,
+                options: agenziaOptions.map((o) => ({ ...o, ruolo: 'agenzia' })),
                 selectLabel: copy.collegaAgenzia,
                 allowEmpty: true,
                 emptyParentLabel: copy.nessunCollegamento,
+                operatoriPerGenitore: agentiPerAgenzia,
               },
               studio: {
-                options: agenziaOptions,
-                selectLabel: copy.collegaAgenzia,
+                options: [
+                  ...agenziaOptions.map((o) => ({ ...o, ruolo: 'agenzia', label: `${o.label} · Agenzia` })),
+                  ...rivenditoreOptions.map((o) => ({ ...o, ruolo: 'rivenditore', label: `${o.label} · Rivenditore` })),
+                ].sort((a, b) => a.label.localeCompare(b.label, 'it', { sensitivity: 'base' })),
+                selectLabel: 'Collega a un’agenzia o a un rivenditore (opzionale)',
                 allowEmpty: true,
                 emptyParentLabel: copy.nessunCollegamento,
+                operatoriPerGenitore: { ...agentiPerAgenzia, ...venditoriPerRivenditore },
               },
               distributore: {
                 options: rivenditoreOptions,

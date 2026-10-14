@@ -6,7 +6,7 @@ import { ChevronDown, ChevronRight, UserPlus } from 'lucide-react'
 
 type RuoloNuovo = 'agente' | 'back_office' | 'distributore' | 'agenzia' | 'rivenditore' | 'studio' | 'studio_associato'
 
-type ParentOption = { id: string; label: string }
+type ParentOption = { id: string; label: string; ruolo?: string }
 
 type ParentByRuolo = {
   options?: ParentOption[]
@@ -15,6 +15,8 @@ type ParentByRuolo = {
   parentLabel?: string
   allowEmpty?: boolean
   emptyParentLabel?: string
+  /** Agenti dell'agenzia, o venditori del rivenditore, da scegliere sotto. */
+  operatoriPerGenitore?: Record<string, ParentOption[]>
 }
 
 type Props = {
@@ -136,6 +138,7 @@ export default function CreaAssociatoManuale({
   const [selectedParentId, setSelectedParentId] = useState(
     effectiveParentId ?? (effectiveAllowEmpty ? '' : (effectiveParentOptions?.[0]?.id ?? '')),
   )
+  const [selectedOperatoreId, setSelectedOperatoreId] = useState('')
   const [saving, setSaving] = useState(false)
   const [formAperto, setFormAperto] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
@@ -145,11 +148,16 @@ export default function CreaAssociatoManuale({
     setSelectedParentId(
       effectiveParentId ?? (effectiveAllowEmpty ? '' : (effectiveParentOptions?.[0]?.id ?? '')),
     )
+    setSelectedOperatoreId('')
     setMessage(null)
     setError(null)
     // Solo al cambio tipo: non re-inizializzare a ogni render delle options.
     // eslint-disable-next-line react-hooks/exhaustive-deps -- parent options sono liste statiche per ruolo
   }, [ruolo])
+
+  useEffect(() => {
+    setSelectedOperatoreId('')
+  }, [selectedParentId])
 
   function reset() {
     setNomeCompleto('')
@@ -172,7 +180,9 @@ export default function CreaAssociatoManuale({
       setError('Il nome è obbligatorio')
       return
     }
-    const parentToSend = (effectiveParentOptions ? selectedParentId : effectiveParentId)?.trim() || undefined
+    const parentToSend =
+      (selectedOperatoreId || (effectiveParentOptions ? selectedParentId : effectiveParentId))?.trim() ||
+      undefined
     if (password && !email.trim()) {
       setError('Per impostare la password serve un’email')
       return
@@ -220,8 +230,15 @@ export default function CreaAssociatoManuale({
   }
 
   const inputClass = 'mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm'
-  const selectedParentLabel =
-    effectiveParentOptions?.find((o) => o.id === selectedParentId)?.label ?? effectiveParentLabel
+  const parentScelto = effectiveParentOptions?.find((o) => o.id === selectedParentId)
+  const operatoriDelGenitore =
+    (ruolo === 'rivenditore' || ruolo === 'studio') && selectedParentId
+      ? parentCfg?.operatoriPerGenitore?.[selectedParentId]
+      : undefined
+  const operatoreScelto = operatoriDelGenitore?.find((o) => o.id === selectedOperatoreId)
+  const etichettaOperatore =
+    parentScelto?.ruolo === 'rivenditore' ? 'Venditore (opzionale)' : 'Agente (opzionale)'
+  const selectedParentLabel = operatoreScelto?.label ?? parentScelto?.label ?? effectiveParentLabel
   const spazioDopoArticolo = cfg.articolo.endsWith('’') ? '' : ' '
 
   return (
@@ -307,6 +324,31 @@ export default function CreaAssociatoManuale({
               >
                 {effectiveAllowEmpty ? <option value="">{effectiveEmptyLabel}</option> : null}
                 {effectiveParentOptions.map((opt) => (
+                  <option key={opt.id} value={opt.id}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            )}
+          </label>
+        ) : null}
+        {operatoriDelGenitore ? (
+          <label className="block text-xs font-medium uppercase text-zinc-600 md:col-span-2">
+            {etichettaOperatore}
+            {operatoriDelGenitore.length === 0 ? (
+              <p className="mt-1 text-sm font-normal normal-case text-zinc-500">
+                {parentScelto?.ruolo === 'rivenditore'
+                  ? 'Nessun venditore collegato a questo rivenditore.'
+                  : 'Nessun agente collegato a questa agenzia.'}
+              </p>
+            ) : (
+              <select
+                value={selectedOperatoreId}
+                onChange={(e) => setSelectedOperatoreId(e.target.value)}
+                className={inputClass}
+              >
+                <option value="">Nessuno, resta collegato sopra</option>
+                {operatoriDelGenitore.map((opt) => (
                   <option key={opt.id} value={opt.id}>
                     {opt.label}
                   </option>
