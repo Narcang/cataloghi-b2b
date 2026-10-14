@@ -398,6 +398,7 @@ export default function GerarchiaUtentiTree({
   const [rootRole, setRootRole] = useState<HierarchyRootRole>(() =>
     defaultHierarchyRootRole(viewerRole),
   )
+  const [listaAperta, setListaAperta] = useState(false)
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set())
   const [ultimoAccessoByProfiloId, setUltimoAccessoByProfiloId] = useState(ultimoAccessoIniziale)
   const [ultimoAccessoPronto, setUltimoAccessoPronto] = useState(false)
@@ -429,6 +430,7 @@ export default function GerarchiaUtentiTree({
 
   useEffect(() => {
     setExpandedIds(new Set())
+    setListaAperta(false)
   }, [rootRole])
 
   useEffect(() => {
@@ -597,33 +599,49 @@ export default function GerarchiaUtentiTree({
       </div>
 
       <div>
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-500 mb-4">
-          {tHierarchyRootHeading(locale, rootRole)}
-        </h3>
+        <button
+          type="button"
+          aria-expanded={listaAperta}
+          aria-controls="elenco-struttura-ruolo"
+          onClick={() => setListaAperta((aperta) => !aperta)}
+          className="flex w-full items-center justify-between gap-3 rounded-xl border border-black bg-white px-4 py-3 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#060d41]"
+        >
+          <span className="flex min-w-0 items-center gap-2 text-sm font-semibold uppercase tracking-wide text-zinc-800">
+            {listaAperta ? <ChevronDown size={16} aria-hidden /> : <ChevronRight size={16} aria-hidden />}
+            <span className="truncate">{tHierarchyRootHeading(locale, rootRole)}</span>
+          </span>
+          <span className="shrink-0 text-xs font-semibold text-zinc-600">
+            {listaAperta ? copy.chiudiElenco : copy.apriElenco}
+          </span>
+        </button>
 
-        {(rootNodes ?? []).length === 0 ? (
-          <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-6 text-center text-sm text-zinc-600">
-            {copy.nessunUtenteRuolo} {tHierarchyRootHeading(locale, rootRole).toLowerCase()} {copy.nelFiltroCorrente}
+        {listaAperta ? (
+          <div id="elenco-struttura-ruolo" className="mt-3">
+            {(rootNodes ?? []).length === 0 ? (
+              <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-6 text-center text-sm text-zinc-600">
+                {copy.nessunUtenteRuolo} {tHierarchyRootHeading(locale, rootRole).toLowerCase()} {copy.nelFiltroCorrente}
+              </div>
+            ) : (
+              <ul className="m-0 p-0 space-y-1">
+                {(rootNodes ?? []).map((node) => (
+                  <HierarchyNode
+                    key={node.id}
+                    profile={node}
+                    depth={0}
+                    currentUserId={currentUserId}
+                    viewerRole={viewerRole}
+                    profili={profili}
+                    links={links}
+                    ultimoAccessoByProfiloId={ultimoAccessoByProfiloId}
+                    ultimoAccessoPronto={ultimoAccessoPronto}
+                    expandedIds={expandedIds}
+                    onToggle={toggleExpanded}
+                  />
+                ))}
+              </ul>
+            )}
           </div>
-        ) : (
-          <ul className="m-0 p-0 space-y-1">
-            {(rootNodes ?? []).map((node) => (
-              <HierarchyNode
-                key={node.id}
-                profile={node}
-                depth={0}
-                currentUserId={currentUserId}
-                viewerRole={viewerRole}
-                profili={profili}
-                links={links}
-                ultimoAccessoByProfiloId={ultimoAccessoByProfiloId}
-                ultimoAccessoPronto={ultimoAccessoPronto}
-                expandedIds={expandedIds}
-                onToggle={toggleExpanded}
-              />
-            ))}
-          </ul>
-        )}
+        ) : null}
       </div>
     </section>
   )
