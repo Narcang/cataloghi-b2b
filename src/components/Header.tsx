@@ -253,13 +253,14 @@ export default function Header() {
                     href="/dashboard"
                     className="ladiva-account-link-main"
                     aria-label={labels.areaRiservata}
+                    title={labels.areaRiservata}
                     onClick={() => {
                       setAccountMenuOpen(false)
                       setDropdownOpen(false)
                     }}
                   >
                     <LayoutDashboard size={16} aria-hidden />
-                    <span className="ladiva-account-link-label">{labels.areaRiservata}</span>
+                    <span className="ladiva-account-link-label">{labels.areaRiservataBreve}</span>
                   </Link>
                   <button
                     type="button"
