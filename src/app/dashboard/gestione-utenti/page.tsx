@@ -439,8 +439,6 @@ export default async function GestioneUtentiPage(props: {
             operatoriPerGenitore={buildOperatoriInvitoMap(
               profiliGerarchia,
               connessioniUtenteOperatoreRows,
-              user.id,
-              ruoloCorrente,
             )}
           />
         </section>

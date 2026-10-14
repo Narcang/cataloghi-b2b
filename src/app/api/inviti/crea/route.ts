@@ -3,9 +3,8 @@ import { createClient } from '@/utils/supabase/server'
 import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
 import {
   INVITO_CATEGORIA_PARENT,
-  OPERATORI_INVITO_PER_SEDE,
-  operatoreAppartieneASede,
   puoInvitare,
+  seguitoAppartieneASede,
 } from '@/lib/inviteHierarchy'
 import {
   filterProfiliInHierarchySubtree,
@@ -91,12 +90,10 @@ export async function POST(request: NextRequest) {
     const rows = (profili ?? []) as ProfiloGerarchiaRow[]
     const linkRows = links ?? []
     const scelto = rows.find((row) => row.id === associatoA)
-    const ruoliOperatore = OPERATORI_INVITO_PER_SEDE[parentAtteso] ?? []
-    const eSede = scelto?.ruolo === parentAtteso
-    const eOperatore = Boolean(scelto && ruoliOperatore.includes(scelto.ruolo))
-    if (!scelto || (!eSede && !eOperatore)) {
+    if (!scelto) {
       return jsonResponse(false, 'Collegamento non valido per il ruolo scelto', 400)
     }
+    const eSede = scelto.ruolo === parentAtteso
 
     let sediConsentite = rows.filter((row) => row.ruolo === parentAtteso)
     if (!isPrivileged) {
@@ -123,16 +120,8 @@ export async function POST(request: NextRequest) {
     }
 
     if (
-      eOperatore &&
-      !operatoreAppartieneASede(
-        scelto.id,
-        parentAtteso,
-        sediConsentite,
-        rows,
-        linkRows,
-        user.id,
-        ruoloInvitante,
-      )
+      !eSede &&
+      !seguitoAppartieneASede(scelto.id, sediConsentite, rows, linkRows)
     ) {
       return jsonResponse(
         false,

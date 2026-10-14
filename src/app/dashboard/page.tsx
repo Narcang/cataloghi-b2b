@@ -309,12 +309,7 @@ export default async function Dashboard(props: {
 
   const operatoriInvito =
     user
-      ? buildOperatoriInvitoMap(
-          profiliGerarchiaDashboard,
-          linksDashboard,
-          user.id,
-          ruoloCorrente,
-        )
+      ? buildOperatoriInvitoMap(profiliGerarchiaDashboard, linksDashboard)
       : undefined
 
   const inviteParentOptions =
