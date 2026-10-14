@@ -834,7 +834,12 @@ export default function AdminProfiliPanel({
             const editSpecializzazione = managerEditSpecializzazione || rivenditoreEditEsterno
             return (
               <li key={p.id} className="rounded-xl border border-black bg-zinc-50/80">
-                <details className="group" open={apriProfiliDiDefault || undefined}>
+                <details
+                  className="group"
+                  open={apriProfiliDiDefault || undefined}
+                  // Safari su iPhone/iPad non apre un select dentro details senza un listener touch.
+                  onTouchStart={() => {}}
+                >
                   <summary className="cursor-pointer list-none px-4 py-3 flex flex-wrap items-center justify-between gap-2">
                     <span className="font-medium text-black">
                       {p.societa ? (

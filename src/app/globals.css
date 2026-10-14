@@ -774,11 +774,6 @@
 .ladiva-hamburger:hover { border-color: #000; color: #000; }
 @media (max-width: 768px) { .ladiva-hamburger { display: flex; } }
 @media (max-width: 768px) {
-  html,
-  body {
-    overflow-x: clip;
-    max-width: 100%;
-  }
   .ladiva-header,
   .ladiva-header-inner {
     max-width: 100%;

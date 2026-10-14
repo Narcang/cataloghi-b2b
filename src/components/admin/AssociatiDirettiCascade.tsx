@@ -487,12 +487,15 @@ function AssociaCandidatiPicker({
       <select
         value={sceltaId}
         disabled={readOnly || saving || elencoTendina.length === 0}
+        onTouchStart={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
         onChange={(e) => {
           const id = e.target.value
           setSceltaId(id)
           void associaDaTendina(id)
         }}
-        className="h-9 rounded-md border border-black/20 bg-white px-3 text-sm text-zinc-900 min-w-[260px] max-w-full"
+        className="relative z-10 h-9 w-full max-w-full rounded-md border border-black/20 bg-white px-3 text-base text-zinc-900 sm:text-sm"
         aria-label={filtroCasa === 'associati' ? 'Associati' : 'Non associati'}
       >
         <option value="">
