@@ -292,7 +292,7 @@ export default function AdminProfiliPanel({
         )
       }
       if (p.ruolo === 'studio_associato') {
-        if (inviter?.ruolo === 'studio') return true
+        if (inviter?.ruolo === 'studio' || inviter?.ruolo === 'studio_associato') return true
         return profiliGerarchia.some(
           (other) =>
             other.ruolo === 'studio' &&

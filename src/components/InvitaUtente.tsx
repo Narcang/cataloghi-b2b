@@ -11,14 +11,21 @@ type Props = {
   ruoloCorrente: string
   /** Entità disponibili nel perimetro dell'utente a cui collegare il nuovo profilo. */
   parentOptionsByCategoria?: Partial<Record<string, ParentOption[]>>
+  /** Operatori diretti di ogni sede, indicizzati per id della sede. */
+  operatoriPerGenitore?: Record<string, ParentOption[]>
 }
 
-export default function InvitaUtente({ ruoloCorrente, parentOptionsByCategoria }: Props) {
+export default function InvitaUtente({
+  ruoloCorrente,
+  parentOptionsByCategoria,
+  operatoriPerGenitore,
+}: Props) {
   const locale = useAppLocale()
   const copy = tAdmin(locale)
   const opzioni = ruoliInvitabili(ruoloCorrente)
   const [ruoloSelezionato, setRuoloSelezionato] = useState('')
   const [associatoA, setAssociatoA] = useState('')
+  const [operatoreId, setOperatoreId] = useState('')
   const [multiUso, setMultiUso] = useState(false)
   const [loading, setLoading] = useState(false)
   const [link, setLink] = useState<string | null>(null)
@@ -37,6 +44,19 @@ export default function InvitaUtente({ ruoloCorrente, parentOptionsByCategoria }
     mostraCollegamento && parentCategoria
       ? (parentOptionsByCategoria?.[parentCategoria] ?? [])
       : null
+  const operatoriDellaSede = associatoA ? (operatoriPerGenitore?.[associatoA] ?? []) : null
+  const etichettaOperatore =
+    parentCategoria === 'rivenditore'
+      ? copy.operatoreInvitoRivenditore
+      : parentCategoria === 'studio'
+        ? copy.operatoreInvitoStudio
+        : copy.operatoreInvitoAgenzia
+  const nessunOperatore =
+    parentCategoria === 'rivenditore'
+      ? copy.nessunVenditoreInvito
+      : parentCategoria === 'studio'
+        ? copy.nessunStudioInvito
+        : copy.nessunAgenteInvito
 
   async function handleCrea() {
     setLoading(true)
@@ -52,7 +72,7 @@ export default function InvitaUtente({ ruoloCorrente, parentOptionsByCategoria }
         body: JSON.stringify({
           ruolo_invitato: ruoloSelezionato,
           multi_uso: multiUso,
-          ...(associatoA ? { associato_a: associatoA } : {}),
+          ...((operatoreId || associatoA) ? { associato_a: operatoreId || associatoA } : {}),
         }),
       })
       const json = await res.json()
@@ -94,6 +114,7 @@ export default function InvitaUtente({ ruoloCorrente, parentOptionsByCategoria }
             onChange={(e) => {
               setRuoloSelezionato(e.target.value)
               setAssociatoA('')
+              setOperatoreId('')
               setLink(null)
             }}
             className="h-9 rounded-md border border-black/20 bg-white px-3 text-sm text-zinc-900 min-w-[220px]"
@@ -111,7 +132,11 @@ export default function InvitaUtente({ ruoloCorrente, parentOptionsByCategoria }
             </label>
             <select
               value={associatoA}
-              onChange={(e) => { setAssociatoA(e.target.value); setLink(null) }}
+              onChange={(e) => {
+                setAssociatoA(e.target.value)
+                setOperatoreId('')
+                setLink(null)
+              }}
               className="h-9 rounded-md border border-black/20 bg-white px-3 text-sm text-zinc-900"
             >
               <option value="">{copy.nessunCollegamentoDaAssociare}</option>
@@ -130,6 +155,31 @@ export default function InvitaUtente({ ruoloCorrente, parentOptionsByCategoria }
           {loading ? copy.generazione : copy.generaLink}
         </button>
       </div>
+
+      {associatoA && operatoriPerGenitore ? (
+        <div className="flex flex-col gap-1 max-w-xl">
+          <label className="text-xs font-medium text-zinc-600 uppercase tracking-wide">
+            {etichettaOperatore}
+          </label>
+          {operatoriDellaSede && operatoriDellaSede.length > 0 ? (
+            <select
+              value={operatoreId}
+              onChange={(e) => {
+                setOperatoreId(e.target.value)
+                setLink(null)
+              }}
+              className="h-9 rounded-md border border-black/20 bg-white px-3 text-sm text-zinc-900"
+            >
+              <option value="">{copy.nessunOperatoreRestaSede}</option>
+              {operatoriDellaSede.map((opt) => (
+                <option key={opt.id} value={opt.id}>{opt.label}</option>
+              ))}
+            </select>
+          ) : (
+            <p className="text-sm text-zinc-600">{nessunOperatore}</p>
+          )}
+        </div>
+      ) : null}
 
       <div className="flex items-center gap-2">
         <input

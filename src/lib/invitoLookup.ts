@@ -43,6 +43,7 @@ export async function loadInvitoValidato(
   const invito = await fetchInvitoRow(svc, token)
   if (!invito || (invito.usato && !invito.multi_uso)) return null
 
+  const associatoEsplicito = Boolean(invito.associato_a)
   let associatoA = invito.associato_a ?? null
   if (!associatoA && invito.creato_da) {
     const { data: creatore } = await svc
@@ -55,7 +56,7 @@ export async function loadInvitoValidato(
     }
   }
 
-  if (associatoA) {
+  if (!associatoEsplicito && associatoA) {
     const { data: collegato } = await svc
       .from('profili')
       .select('ruolo, invitato_da')

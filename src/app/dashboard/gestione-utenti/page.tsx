@@ -12,7 +12,7 @@ import CreaAssociatoManuale from '@/components/admin/CreaAssociatoManuale'
 import RipristinaAccessoEmail from '@/components/admin/RipristinaAccessoEmail'
 import type { ProfiloGerarchiaRow } from '@/lib/userHierarchy'
 import { getChildrenProfiles, getDescendantsByRole, profiloGerarchiaDisplayLabel, profiloToGerarchiaRow } from '@/lib/userHierarchy'
-import { ruoliInvitabili } from '@/lib/inviteHierarchy'
+import { buildOperatoriInvitoMap, ruoliInvitabili } from '@/lib/inviteHierarchy'
 import { findAuthUserByEmail } from '@/lib/ultimoAccessoUtenti'
 import { getAppLocale } from '@/lib/localeServer'
 import { tAdmin, tRuolo } from '@/lib/i18nAdmin'
@@ -436,6 +436,12 @@ export default async function GestioneUtentiPage(props: {
               rivenditore: rivenditoreOptions,
               studio: studioOptions,
             }}
+            operatoriPerGenitore={buildOperatoriInvitoMap(
+              profiliGerarchia,
+              connessioniUtenteOperatoreRows,
+              user.id,
+              ruoloCorrente,
+            )}
           />
         </section>
         ) : null}

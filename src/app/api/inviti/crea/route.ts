@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
-import { INVITO_CATEGORIA_PARENT, puoInvitare } from '@/lib/inviteHierarchy'
+import {
+  INVITO_CATEGORIA_PARENT,
+  OPERATORI_INVITO_PER_SEDE,
+  operatoreAppartieneASede,
+  puoInvitare,
+} from '@/lib/inviteHierarchy'
 import {
   filterProfiliInHierarchySubtree,
   profiloToGerarchiaRow,
@@ -72,34 +77,35 @@ export async function POST(request: NextRequest) {
     if (!parentAtteso) {
       return jsonResponse(false, 'Questo ruolo non prevede un collegamento', 400)
     }
-    const { data: parent } = await svc
-      .from('profili')
-      .select('id, ruolo')
-      .eq('id', associatoA)
-      .maybeSingle()
-    if (!parent || parent.ruolo !== parentAtteso) {
+    const [{ data: profili }, { data: links }] = await Promise.all([
+      svc
+        .from('profili')
+        .select('id, nome_completo, societa, email, area_geografica, ruolo, invitato_da, registrazione_approvata, seguito_da')
+        .neq('ruolo', 'free')
+        .limit(2000),
+      svc
+        .from('connessioni_utente_operatore')
+        .select('utente_id, operatore_id')
+        .limit(2000),
+    ])
+    const rows = (profili ?? []) as ProfiloGerarchiaRow[]
+    const linkRows = links ?? []
+    const scelto = rows.find((row) => row.id === associatoA)
+    const ruoliOperatore = OPERATORI_INVITO_PER_SEDE[parentAtteso] ?? []
+    const eSede = scelto?.ruolo === parentAtteso
+    const eOperatore = Boolean(scelto && ruoliOperatore.includes(scelto.ruolo))
+    if (!scelto || (!eSede && !eOperatore)) {
       return jsonResponse(false, 'Collegamento non valido per il ruolo scelto', 400)
     }
 
+    let sediConsentite = rows.filter((row) => row.ruolo === parentAtteso)
     if (!isPrivileged) {
-      const [{ data: profili }, { data: links }] = await Promise.all([
-        svc
-          .from('profili')
-          .select('id, nome_completo, societa, email, area_geografica, ruolo, invitato_da, registrazione_approvata, seguito_da')
-          .neq('ruolo', 'free')
-          .limit(2000),
-        svc
-          .from('connessioni_utente_operatore')
-          .select('utente_id, operatore_id')
-          .limit(2000),
-      ])
-      const rows = (profili ?? []) as ProfiloGerarchiaRow[]
       const caller = rows.find((row) => row.id === user.id)
       const agenzia =
         caller?.ruolo === 'agenzia'
           ? caller
           : caller
-            ? resolveAgenziaParentForAgent(caller, rows, links ?? [])
+            ? resolveAgenziaParentForAgent(caller, rows, linkRows)
             : null
       if (!agenzia) {
         return jsonResponse(false, 'Agenzia non trovata', 400)
@@ -107,13 +113,36 @@ export async function POST(request: NextRequest) {
       const profiliAgenzia = filterProfiliInHierarchySubtree(
         profiloToGerarchiaRow(agenzia, agenzia.invitato_da),
         rows,
-        links ?? [],
+        linkRows,
       )
-      if (!profiliAgenzia.some((row) => row.id === parent.id)) {
+      const idsAgenzia = new Set(profiliAgenzia.map((row) => row.id))
+      if (eSede && !idsAgenzia.has(scelto.id)) {
         return jsonResponse(false, 'Il collegamento scelto non appartiene alla tua agenzia', 403)
       }
+      sediConsentite = sediConsentite.filter((row) => idsAgenzia.has(row.id))
     }
-    associatoAValidato = parent.id
+
+    if (
+      eOperatore &&
+      !operatoreAppartieneASede(
+        scelto.id,
+        parentAtteso,
+        sediConsentite,
+        rows,
+        linkRows,
+        user.id,
+        ruoloInvitante,
+      )
+    ) {
+      return jsonResponse(
+        false,
+        isPrivileged
+          ? 'Collegamento non valido per il ruolo scelto'
+          : 'Il collegamento scelto non appartiene alla tua agenzia',
+        isPrivileged ? 400 : 403,
+      )
+    }
+    associatoAValidato = scelto.id
   }
 
   const token = crypto.randomUUID()

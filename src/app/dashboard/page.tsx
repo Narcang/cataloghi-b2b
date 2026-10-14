@@ -41,7 +41,7 @@ import {
   ruoloGerarchiaLabel,
   type ProfiloGerarchiaRow,
 } from '@/lib/userHierarchy'
-import { ruoliInvitabili } from '@/lib/inviteHierarchy'
+import { buildOperatoriInvitoMap, ruoliInvitabili } from '@/lib/inviteHierarchy'
 import { getAppLocale } from '@/lib/localeServer'
 import { catalogLingueForLocale, preferCatalogLingua } from '@/lib/catalogLingua'
 import { tDashboard } from '@/lib/i18n'
@@ -306,6 +306,16 @@ export default async function Dashboard(props: {
       }
     }
   }
+
+  const operatoriInvito =
+    user
+      ? buildOperatoriInvitoMap(
+          profiliGerarchiaDashboard,
+          linksDashboard,
+          user.id,
+          ruoloCorrente,
+        )
+      : undefined
 
   const inviteParentOptions =
     user && (isAgenzia || isAgente)
@@ -665,6 +675,7 @@ export default async function Dashboard(props: {
             <InvitaUtente
               ruoloCorrente={ruoloCorrente}
               parentOptionsByCategoria={inviteParentOptions}
+              operatoriPerGenitore={operatoriInvito}
             />
           </section>
         )}
