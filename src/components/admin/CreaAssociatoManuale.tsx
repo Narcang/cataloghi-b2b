@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { UserPlus } from 'lucide-react'
+import { ChevronDown, ChevronRight, UserPlus } from 'lucide-react'
 
 type RuoloNuovo = 'agente' | 'back_office' | 'distributore' | 'agenzia' | 'rivenditore' | 'studio' | 'studio_associato'
 
@@ -137,6 +137,7 @@ export default function CreaAssociatoManuale({
     effectiveParentId ?? (effectiveAllowEmpty ? '' : (effectiveParentOptions?.[0]?.id ?? '')),
   )
   const [saving, setSaving] = useState(false)
+  const [formAperto, setFormAperto] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -248,17 +249,31 @@ export default function CreaAssociatoManuale({
         non può accedere finché non gli configuri l’accesso).
       </p>
 
+      <button
+        type="button"
+        aria-expanded={formAperto}
+        onClick={() => setFormAperto((aperta) => !aperta)}
+        className="mt-1 flex w-full items-center justify-between gap-3 rounded-xl border border-black bg-white px-4 py-3 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#060d41]"
+      >
+        <span className="flex min-w-0 items-center gap-2 text-sm font-semibold text-zinc-800">
+          {formAperto ? <ChevronDown size={16} aria-hidden /> : <ChevronRight size={16} aria-hidden />}
+          {formAperto ? 'Chiudi creazione' : 'Apri creazione'}
+        </span>
+      </button>
+
+      {formAperto ? (
+      <>
       {message ? (
-        <div className="mb-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900">
+        <div className="mt-3 mb-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900">
           {message}
         </div>
       ) : null}
       {error ? (
-        <div className="mb-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">{error}</div>
+        <div className="mt-3 mb-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">{error}</div>
       ) : null}
 
       <form
-        className="grid grid-cols-1 md:grid-cols-2 gap-3 border border-black/15 rounded-lg p-3 bg-zinc-50"
+        className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 border border-black/15 rounded-lg p-3 bg-zinc-50"
         onSubmit={submit}
       >
         {showTipoSelect ? (
@@ -393,6 +408,8 @@ export default function CreaAssociatoManuale({
           </button>
         </div>
       </form>
+      </>
+      ) : null}
     </div>
   )
 }
