@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
-import { Users, UserCheck } from 'lucide-react'
+import { ChevronDown, ChevronRight, Users, UserCheck } from 'lucide-react'
 import AssociatiDirettiCascade from '@/components/admin/AssociatiDirettiCascade'
 import CreaAssociatoManuale from '@/components/admin/CreaAssociatoManuale'
 import LinkPasswordUtente from '@/components/admin/LinkPasswordUtente'
@@ -202,6 +202,7 @@ export default function AdminProfiliPanel({
     agenziaRivenditoriMode ? 'rivenditore' : 'admin',
   )
   const [soloAssociati, setSoloAssociati] = useState(!cercaAttiva)
+  const [listaAperta, setListaAperta] = useState(false)
 
   const specializzazioneOpzioniFormProps = {
     opzioni: specializzazioneOpzioni,
@@ -324,6 +325,10 @@ export default function AdminProfiliPanel({
     if ((profiliPerRuolo.get(ruoloAttivo)?.length ?? 0) > 0) return
     if (firstConUtenti) setRuoloAttivo(firstConUtenti.id)
   }, [profiliPerRuolo, ruoloAttivo, ruoliTab])
+
+  useEffect(() => {
+    setListaAperta(false)
+  }, [ruoloAttivo, soloAssociati])
 
   const linksByUtente = useMemo(() => {
     const m = new Map<string, Set<string>>()
@@ -477,6 +482,11 @@ export default function AdminProfiliPanel({
     }
     return body
   }
+
+  const etichettaElenco =
+    mostraStatoAssociazione && !cercaAttiva
+      ? `${tRuolo(locale, ruoloAttivo)} · ${soloAssociati ? copy.associati : copy.nonAssociati}`
+      : tRuolo(locale, ruoloAttivo)
 
   return (
     <section id="gestione-utenti" className="space-y-10 border border-black rounded-2xl bg-white p-6 md:p-8">
@@ -795,7 +805,24 @@ export default function AdminProfiliPanel({
           </div>
         ) : null}
 
-        <ul className="space-y-3 list-none p-0 m-0" role="tabpanel" aria-label={`Utenti ${ruoloAttivo}`}>
+        <button
+          type="button"
+          aria-expanded={listaAperta}
+          aria-controls="elenco-utenti-ruolo"
+          onClick={() => setListaAperta((aperta) => !aperta)}
+          className="flex w-full items-center justify-between gap-3 rounded-xl border border-black bg-white px-4 py-3 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#060d41]"
+        >
+          <span className="flex min-w-0 items-center gap-2 text-sm font-semibold uppercase tracking-wide text-zinc-800">
+            {listaAperta ? <ChevronDown size={16} aria-hidden /> : <ChevronRight size={16} aria-hidden />}
+            <span className="truncate">{etichettaElenco}</span>
+          </span>
+          <span className="shrink-0 text-xs font-semibold text-zinc-600">
+            {listaAperta ? copy.chiudiElenco : copy.apriElenco}
+          </span>
+        </button>
+
+        {listaAperta ? (
+        <ul id="elenco-utenti-ruolo" className="space-y-3 list-none p-0 m-0" role="tabpanel" aria-label={`Utenti ${ruoloAttivo}`}>
           {profiliVisibili.length === 0 ? (
             <li className="rounded-xl border border-dashed border-black/30 bg-zinc-50 px-4 py-6 text-center text-sm text-zinc-600">
               {agenziaRivenditoriMode
@@ -1289,6 +1316,7 @@ export default function AdminProfiliPanel({
             )
           })}
         </ul>
+        ) : null}
       </div>
     </section>
   )
