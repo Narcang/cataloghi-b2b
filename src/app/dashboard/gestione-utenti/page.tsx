@@ -348,7 +348,9 @@ export default async function GestioneUtentiPage(props: {
             ruoliSelezionabili={[
               { value: 'agenzia', label: 'Agenzia' },
               { value: 'rivenditore', label: 'Rivenditore' },
+              { value: 'distributore', label: 'Venditore' },
               { value: 'studio', label: 'Sede Studio' },
+              { value: 'studio_associato', label: 'Studio' },
             ]}
             parentByRuolo={{
               agenzia:
@@ -374,6 +376,16 @@ export default async function GestioneUtentiPage(props: {
                 selectLabel: copy.collegaAgenzia,
                 allowEmpty: true,
                 emptyParentLabel: copy.nessunCollegamento,
+              },
+              distributore: {
+                options: rivenditoreOptions,
+                selectLabel: 'Collega a rivenditore',
+                allowEmpty: false,
+              },
+              studio_associato: {
+                options: studioOptions,
+                selectLabel: 'Collega a sede studio',
+                allowEmpty: false,
               },
             }}
           />

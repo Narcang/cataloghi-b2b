@@ -297,9 +297,9 @@ const admin = {
     invitaUtenti: 'Invita utenti',
     invitaHelp:
       'Genera un link di registrazione per il ruolo scelto. Il nuovo utente sarà collegato al tuo profilo dopo l’approvazione.',
-    creaManualeAgenziaRivenditore: 'Inserisci agenzia, rivenditore o sede studio a mano',
+    creaManualeAgenziaRivenditore: 'Inserisci agenzia, rivenditore, venditore, sede studio o studio a mano',
     creaManualeAgenziaRivenditoreHelp:
-      'Scegli il tipo, compila i dati e, se vuoi, collegalo a un manager o a un’agenzia. Senza email viene creato un account tecnico interno: resta visibile ma non può accedere finché non gli configuri l’accesso.',
+      'Scegli il tipo e compila i dati. Senza email resta un account tecnico interno. Se inserisci un’email, in creazione o dopo sulla scheda, quella diventa l’email di login e puoi impostare la password.',
     collegaManager: 'Collega a un manager (opzionale)',
     collegaAgenzia: 'Collega a un’agenzia (opzionale)',
     nessunCollegamento: 'Nessun collegamento',

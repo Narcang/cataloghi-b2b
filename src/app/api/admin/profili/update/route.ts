@@ -20,6 +20,7 @@ import {
 } from '@/lib/rivenditoreProfiloOptions'
 import { agenziaCanEditRivenditoreSpecializzazione, agenteCanEditRivenditoreSpecializzazione } from '@/lib/agenziaRivenditoreAccess'
 import { isAgenteLike } from '@/lib/catalogRoles'
+import { isEmailTecnica } from '@/lib/emailTecnica'
 
 const ESPOSITORI_FIELDS = [
   'espositore_1',
@@ -106,6 +107,7 @@ type Body = {
   profilo_id?: string
   nome_completo?: string | null
   email?: string | null
+  password?: string | null
   telefono?: string | null
   societa?: string | null
   area_geografica?: string | null
@@ -265,7 +267,7 @@ export async function POST(request: NextRequest) {
   const { data: profiloEsistente } = await db
     .from('profili')
     .select(
-      'ruolo, espositore_1, espositore_2, box_show_room_1, box_show_room_2, box_show_room_3, box_show_room_4, agenzia_campione_1, agenzia_campione_2, agenzia_catalogo_1, agenzia_catalogo_2, espositore_1_qta, espositore_2_qta, box_show_room_1_qta, box_show_room_2_qta, box_show_room_3_qta, box_show_room_4_qta, agenzia_campione_1_qta, agenzia_campione_2_qta, agenzia_catalogo_1_qta, agenzia_catalogo_2_qta, espositore_1_data, espositore_2_data, box_show_room_1_data, box_show_room_2_data, box_show_room_3_data, box_show_room_4_data, agenzia_campione_1_data, agenzia_campione_2_data, agenzia_catalogo_1_data, agenzia_catalogo_2_data, agenzia_catalogo_3, agenzia_catalogo_4, agenzia_catalogo_3_qta, agenzia_catalogo_4_qta, agenzia_catalogo_3_data, agenzia_catalogo_4_data, agenzia_campioni_aggiornato_il, agenzia_cataloghi_aggiornato_il, espositori_aggiornato_il, box_aggiornato_il',
+      'ruolo, email, espositore_1, espositore_2, box_show_room_1, box_show_room_2, box_show_room_3, box_show_room_4, agenzia_campione_1, agenzia_campione_2, agenzia_catalogo_1, agenzia_catalogo_2, espositore_1_qta, espositore_2_qta, box_show_room_1_qta, box_show_room_2_qta, box_show_room_3_qta, box_show_room_4_qta, agenzia_campione_1_qta, agenzia_campione_2_qta, agenzia_catalogo_1_qta, agenzia_catalogo_2_qta, espositore_1_data, espositore_2_data, box_show_room_1_data, box_show_room_2_data, box_show_room_3_data, box_show_room_4_data, agenzia_campione_1_data, agenzia_campione_2_data, agenzia_catalogo_1_data, agenzia_catalogo_2_data, agenzia_catalogo_3, agenzia_catalogo_4, agenzia_catalogo_3_qta, agenzia_catalogo_4_qta, agenzia_catalogo_3_data, agenzia_catalogo_4_data, agenzia_campioni_aggiornato_il, agenzia_cataloghi_aggiornato_il, espositori_aggiornato_il, box_aggiornato_il',
     )
     .eq('id', profiloId)
     .maybeSingle()
@@ -412,12 +414,30 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  if (Object.keys(patch).length === 0) {
+  const passwordNuova = typeof body.password === 'string' ? body.password.trim() : ''
+  if (passwordNuova && passwordNuova.length < 6) {
+    return jsonResponse(false, 'La password deve contenere almeno 6 caratteri', 400)
+  }
+  const emailProfiloAttuale =
+    typeof (profiloEsistente as { email?: string | null } | null)?.email === 'string'
+      ? (profiloEsistente as { email: string }).email.trim().toLowerCase()
+      : ''
+  const emailLoginPrevista =
+    typeof patch.email === 'string' && patch.email.includes('@')
+      ? patch.email.trim().toLowerCase()
+      : emailProfiloAttuale
+  if (passwordNuova && (!emailLoginPrevista.includes('@') || isEmailTecnica(emailLoginPrevista))) {
+    return jsonResponse(false, 'Per impostare la password inserisci un’email di login', 400)
+  }
+
+  if (Object.keys(patch).length === 0 && !passwordNuova) {
     return jsonResponse(false, 'Nessun campo da aggiornare', 400)
   }
 
   // UPDATE con sessione admin (RLS), non service role: spesso manca GRANT UPDATE al service_role.
-  const { data: updatedRows, error } = await db
+  const { data: updatedRows, error } = Object.keys(patch).length === 0
+    ? { data: [{ id: profiloId }], error: null }
+    : await db
     .from('profili')
     .update(patch)
     .eq('id', profiloId)
@@ -470,9 +490,10 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const loginEmail = typeof patch.email === 'string' ? patch.email : ''
+  const loginEmail = typeof patch.email === 'string' ? patch.email.trim().toLowerCase() : ''
   let loginEmailAggiornata = false
-  if (loginEmail.includes('@')) {
+  let passwordImpostata = false
+  if (loginEmail.includes('@') || passwordNuova) {
     if (!serviceRole) {
       return jsonResponse(false, 'Profilo salvato, ma manca la configurazione per aggiornare l’email di login', 500)
     }
@@ -482,20 +503,23 @@ export async function POST(request: NextRequest) {
       return jsonResponse(false, 'Profilo salvato, ma l’account di login non è stato trovato', 500)
     }
     const emailAttuale = (authLookup.user.email ?? '').trim().toLowerCase()
-    if (emailAttuale !== loginEmail) {
+    const cambiaEmail = loginEmail.includes('@') && emailAttuale !== loginEmail
+    if (cambiaEmail || passwordNuova) {
       const { error: authEmailErr } = await serviceRole.auth.admin.updateUserById(profiloId, {
-        email: loginEmail,
+        ...(cambiaEmail ? { email: loginEmail } : {}),
+        ...(passwordNuova ? { password: passwordNuova } : {}),
         email_confirm: true,
       })
       if (authEmailErr) {
         console.error('admin profili update: email login', authEmailErr)
         return jsonResponse(
           false,
-          `Profilo salvato, ma l’email di login non è cambiata: ${authEmailErr.message}. La password non è stata modificata.`,
+          `Profilo salvato, ma l’accesso non è stato aggiornato: ${authEmailErr.message}`,
           500,
         )
       }
-      loginEmailAggiornata = true
+      loginEmailAggiornata = cambiaEmail
+      passwordImpostata = Boolean(passwordNuova)
     }
   }
 
@@ -543,10 +567,14 @@ export async function POST(request: NextRequest) {
   }
 
   const abilitato = patch.registrazione_approvata === true
-  const message = loginEmailAggiornata
-    ? 'Profilo aggiornato. L’accesso ora usa questa email; la password è rimasta quella di prima.'
-    : abilitato
-      ? 'Utente abilitato: registrazione approvata e accesso ai cataloghi attivo.'
-      : 'Profilo aggiornato.'
+  const message = loginEmailAggiornata && passwordImpostata
+    ? 'Profilo aggiornato. L’accesso ora usa questa email e la password che hai indicato.'
+    : loginEmailAggiornata
+      ? 'Profilo aggiornato. L’accesso ora usa questa email; la password è rimasta quella di prima.'
+      : passwordImpostata
+        ? 'Profilo aggiornato. La password di accesso è stata impostata.'
+        : abilitato
+          ? 'Utente abilitato: registrazione approvata e accesso ai cataloghi attivo.'
+          : 'Profilo aggiornato.'
   return jsonResponse(true, message, 200)
 }

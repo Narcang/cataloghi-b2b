@@ -297,7 +297,7 @@ export default function CreaAssociatoManuale({
             {effectiveSelectLabel ?? 'Collega a'}
             {effectiveParentOptions.length === 0 && !effectiveAllowEmpty ? (
               <p className="mt-1 text-sm font-normal normal-case text-zinc-500">
-                Nessun rivenditore collegato. Creane uno prima di aggiungere un venditore.
+                Nessun profilo a cui collegarlo. Creane uno prima.
               </p>
             ) : (
               <select
@@ -348,7 +348,7 @@ export default function CreaAssociatoManuale({
           />
         </label>
         <label className="block text-xs font-medium uppercase text-zinc-600">
-          Email (opzionale)
+          Email di login (opzionale)
           <input
             type="email"
             value={email}

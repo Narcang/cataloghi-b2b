@@ -30,6 +30,7 @@ import {
   type ProfiloGerarchiaRow,
 } from '@/lib/userHierarchy'
 import { isAgenteLike } from '@/lib/catalogRoles'
+import { isEmailTecnica, ruoloConEmailDiLogin } from '@/lib/emailTecnica'
 
 import { useAppLocale } from '@/lib/useAppLocale'
 import { tDashboard } from '@/lib/i18n'
@@ -427,9 +428,9 @@ export default function AdminProfiliPanel({
     }
   }
 
-  function readForm(fd: FormData, profiloId: string) {
+  function readForm(fd: FormData, profiloId: string, emailAttuale?: string | null) {
     const nome_completo = String(fd.get('nome_completo') ?? '').trim() || null
-    const email = String(fd.get('email') ?? '').trim() || null
+    const emailInserita = String(fd.get('email') ?? '').trim().toLowerCase()
     const telefono = String(fd.get('telefono') ?? '').trim() || null
     const societa = String(fd.get('societa') ?? '').trim() || null
     const area_geografica = String(fd.get('area_geografica') ?? '').trim() || null
@@ -440,12 +441,19 @@ export default function AdminProfiliPanel({
     const body: Record<string, unknown> = {
       profilo_id: profiloId,
       nome_completo,
-      email,
       telefono,
       societa,
       area_geografica,
       ruolo,
       registrazione_approvata,
+    }
+    // Campo vuoto su un account tecnico: non cancellare l’email interna.
+    if (!(ruoloConEmailDiLogin(ruolo) && !emailInserita && isEmailTecnica(emailAttuale))) {
+      body.email = emailInserita || null
+    }
+    if (ruoloConEmailDiLogin(ruolo)) {
+      const password = String(fd.get('password_accesso') ?? '').trim()
+      if (password) body.password = password
     }
     if (ruolo === 'rivenditore') {
       Object.assign(body, readRivenditoreCampiFromFormData(fd))
@@ -535,7 +543,7 @@ export default function AdminProfiliPanel({
                     onSubmit={async (e) => {
                       e.preventDefault()
                       const fd = new FormData(e.currentTarget)
-                      await postUpdate(readForm(fd, p.id))
+                      await postUpdate(readForm(fd, p.id, p.email))
                     }}
                   >
                     <label className="block text-xs font-medium uppercase text-zinc-600">
@@ -548,14 +556,27 @@ export default function AdminProfiliPanel({
                       />
                     </label>
                     <label className="block text-xs font-medium uppercase text-zinc-600">
-                      {copy.campoEmail}
+                      {ruoloConEmailDiLogin(p.ruolo) ? 'Email di login' : copy.campoEmail}
                       <input
                         name="email"
                         type="email"
-                        defaultValue={p.email ?? ''}
+                        defaultValue={ruoloConEmailDiLogin(p.ruolo) && isEmailTecnica(p.email) ? '' : (p.email ?? '')}
+                        placeholder={ruoloConEmailDiLogin(p.ruolo) ? 'Vuota: resta l’account tecnico' : undefined}
                         className="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
                       />
                     </label>
+                    {ruoloConEmailDiLogin(p.ruolo) ? (
+                      <label className="block text-xs font-medium uppercase text-zinc-600 md:col-span-2">
+                        Password di accesso (opzionale)
+                        <input
+                          name="password_accesso"
+                          type="text"
+                          autoComplete="new-password"
+                          placeholder="Con l’email di login entra subito. Non parte nessuna email."
+                          className="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
+                        />
+                      </label>
+                    ) : null}
                     <label className="block text-xs font-medium uppercase text-zinc-600">
                       {copy.campoTelefono}
                       <input
@@ -1000,7 +1021,7 @@ export default function AdminProfiliPanel({
                           onSubmit={async (e) => {
                             e.preventDefault()
                             const fd = new FormData(e.currentTarget)
-                            await postUpdate(readForm(fd, p.id))
+                            await postUpdate(readForm(fd, p.id, p.email))
                           }}
                         >
                           <label className="block text-xs font-medium uppercase text-zinc-600">
@@ -1013,14 +1034,27 @@ export default function AdminProfiliPanel({
                             />
                           </label>
                           <label className="block text-xs font-medium uppercase text-zinc-600">
-                            {copy.campoEmail}
+                            {ruoloConEmailDiLogin(p.ruolo) ? 'Email di login' : copy.campoEmail}
                             <input
                               name="email"
                               type="email"
-                              defaultValue={p.email ?? ''}
+                              defaultValue={ruoloConEmailDiLogin(p.ruolo) && isEmailTecnica(p.email) ? '' : (p.email ?? '')}
+                              placeholder={ruoloConEmailDiLogin(p.ruolo) ? 'Vuota: resta l’account tecnico' : undefined}
                               className="mt-1 w-full h-9 rounded-md border border-black bg-zinc-50 px-2 text-sm"
                             />
                           </label>
+                          {ruoloConEmailDiLogin(p.ruolo) ? (
+                            <label className="block text-xs font-medium uppercase text-zinc-600 md:col-span-2">
+                              Password di accesso (opzionale)
+                              <input
+                                name="password_accesso"
+                                type="text"
+                                autoComplete="new-password"
+                                placeholder="Con l’email di login entra subito. Non parte nessuna email."
+                                className="mt-1 w-full h-9 rounded-md border border-black bg-zinc-50 px-2 text-sm"
+                              />
+                            </label>
+                          ) : null}
                           <label className="block text-xs font-medium uppercase text-zinc-600">
                             {copy.campoTelefono}
                             <input
@@ -1152,7 +1186,9 @@ export default function AdminProfiliPanel({
                                 {deletingId === p.id ? copy.eliminazione : copy.eliminaUtente}
                               </button>
                             ) : null}
-                            {canCreateAssociati && p.email ? <LinkPasswordUtente email={p.email} /> : null}
+                            {canCreateAssociati && p.email && !(ruoloConEmailDiLogin(p.ruolo) && isEmailTecnica(p.email)) ? (
+                              <LinkPasswordUtente email={p.email} />
+                            ) : null}
                           </div>
                         </form>
 
