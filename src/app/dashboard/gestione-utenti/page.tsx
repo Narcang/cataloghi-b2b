@@ -13,11 +13,7 @@ import RipristinaAccessoEmail from '@/components/admin/RipristinaAccessoEmail'
 import type { ProfiloGerarchiaRow } from '@/lib/userHierarchy'
 import { getDescendantsByRole, profiloGerarchiaDisplayLabel, profiloToGerarchiaRow } from '@/lib/userHierarchy'
 import { ruoliInvitabili } from '@/lib/inviteHierarchy'
-import {
-  fetchUltimoAccessoMap,
-  findAuthUserByEmail,
-  ultimoAccessoMapToRecord,
-} from '@/lib/ultimoAccessoUtenti'
+import { findAuthUserByEmail } from '@/lib/ultimoAccessoUtenti'
 import { getAppLocale } from '@/lib/localeServer'
 import { tAdmin, tRuolo } from '@/lib/i18nAdmin'
 
@@ -149,22 +145,15 @@ export default async function GestioneUtentiPage(props: {
   const profiliAssociazione = (associazioneRes.data ?? []) as ProfiloGerarchiaRow[]
   const allCataloghi = (cataloghiRes.data ?? []) as { id: string; titolo: string | null; categoria: string | null; ruoli_visibili: string[] }[]
 
-  // Auth Admin (last_sign_in_at) richiede la service role: il client sessione admin non la vede.
+  // L'ultimo accesso arriva dopo, da /api/admin/ultimo-accesso: listUsers in questa
+  // risposta superava i 25s di Vercel e la pagina non si apriva.
   const svcAuthLastSignIn = createServiceRoleSupabase()
-  let ultimoAccessoByProfiloId: Record<string, string> = {}
-  if (svcAuthLastSignIn) {
-    try {
-      ultimoAccessoByProfiloId = ultimoAccessoMapToRecord(await fetchUltimoAccessoMap(svcAuthLastSignIn))
-    } catch (error) {
-      console.error('gestione-utenti: fetch ultimo accesso', error)
-    }
-  }
 
   let ricercaAuthNotice: string | null = null
   const emailCercata = nomeFilter.includes('@') ? nomeFilter.trim().toLowerCase() : ''
   if (emailCercata && svcAuthLastSignIn) {
     try {
-      const authUser = await findAuthUserByEmail(svcAuthLastSignIn, emailCercata)
+      const authUser = await findAuthUserByEmail(svcAuthLastSignIn, emailCercata, 4000)
       const inLista = profiliGestioneAdmin.some(
         (p) => p.id === authUser?.id || (p.email ?? '').toLowerCase() === emailCercata,
       )
@@ -329,7 +318,6 @@ export default async function GestioneUtentiPage(props: {
           viewerRole={ruoloCorrente}
           profili={profiliGerarchia}
           links={connessioniUtenteOperatoreRows}
-          ultimoAccessoByProfiloId={ultimoAccessoByProfiloId}
         />
 
         {/* Gestione profili */}

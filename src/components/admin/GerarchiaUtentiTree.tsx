@@ -64,6 +64,7 @@ type HierarchyNodeProps = {
   profili: ProfiloGerarchiaRow[]
   links: { utente_id: string; operatore_id: string }[]
   ultimoAccessoByProfiloId: Record<string, string | null>
+  ultimoAccessoPronto: boolean
   expandedIds: Set<string>
   onToggle: (id: string) => void
 }
@@ -124,6 +125,7 @@ function HierarchyNode({
   profili,
   links,
   ultimoAccessoByProfiloId,
+  ultimoAccessoPronto,
   expandedIds,
   onToggle,
 }: HierarchyNodeProps) {
@@ -333,7 +335,7 @@ function HierarchyNode({
               </>
             )}
           </div>
-          {mostraUltimoAccesso ? (
+          {mostraUltimoAccesso && ultimoAccessoPronto ? (
             <UltimoAccessoIndicatore
               iso={ultimoAccessoIso}
               label={copy.ultimoAccesso}
@@ -370,6 +372,7 @@ function HierarchyNode({
                   profili={profili}
                   links={links}
                   ultimoAccessoByProfiloId={ultimoAccessoByProfiloId}
+                  ultimoAccessoPronto={ultimoAccessoPronto}
                   expandedIds={expandedIds}
                   onToggle={onToggle}
                 />
@@ -388,7 +391,7 @@ export default function GerarchiaUtentiTree({
   profili,
   links,
   ownerProfile,
-  ultimoAccessoByProfiloId = {},
+  ultimoAccessoByProfiloId: ultimoAccessoIniziale = {},
 }: Props) {
   const locale = useAppLocale()
   const copy = tAdmin(locale)
@@ -396,6 +399,29 @@ export default function GerarchiaUtentiTree({
     defaultHierarchyRootRole(viewerRole),
   )
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set())
+  const [ultimoAccessoByProfiloId, setUltimoAccessoByProfiloId] = useState(ultimoAccessoIniziale)
+  const [ultimoAccessoPronto, setUltimoAccessoPronto] = useState(false)
+
+  useEffect(() => {
+    let annullato = false
+    fetch('/api/admin/ultimo-accesso')
+      .then(async (res) => {
+        if (!res.ok) return null
+        return (await res.json()) as {
+          ultimoAccessoByProfiloId?: Record<string, string>
+          completo?: boolean
+        }
+      })
+      .then((body) => {
+        if (annullato || !body?.completo || !body.ultimoAccessoByProfiloId) return
+        setUltimoAccessoByProfiloId(body.ultimoAccessoByProfiloId)
+        setUltimoAccessoPronto(true)
+      })
+      .catch(() => {})
+    return () => {
+      annullato = true
+    }
+  }, [])
 
   const agentViewsAgenzia = Boolean(
     ownerProfile && isAgenteLike(viewerRole) && ownerProfile.ruolo === 'agenzia',
@@ -489,6 +515,7 @@ export default function GerarchiaUtentiTree({
                 profili={profili}
                 links={links}
                 ultimoAccessoByProfiloId={ultimoAccessoByProfiloId}
+                ultimoAccessoPronto={ultimoAccessoPronto}
                 expandedIds={expandedIds}
                 onToggle={toggleExpanded}
               />
@@ -509,6 +536,7 @@ export default function GerarchiaUtentiTree({
                   profili={profili}
                   links={links}
                   ultimoAccessoByProfiloId={ultimoAccessoByProfiloId}
+                  ultimoAccessoPronto={ultimoAccessoPronto}
                   expandedIds={expandedIds}
                   onToggle={toggleExpanded}
                 />
@@ -589,6 +617,7 @@ export default function GerarchiaUtentiTree({
                 profili={profili}
                 links={links}
                 ultimoAccessoByProfiloId={ultimoAccessoByProfiloId}
+                ultimoAccessoPronto={ultimoAccessoPronto}
                 expandedIds={expandedIds}
                 onToggle={toggleExpanded}
               />

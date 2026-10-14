@@ -41,7 +41,6 @@ import {
   ruoloGerarchiaLabel,
   type ProfiloGerarchiaRow,
 } from '@/lib/userHierarchy'
-import { fetchUltimoAccessoMap, ultimoAccessoMapToRecord } from '@/lib/ultimoAccessoUtenti'
 import { ruoliInvitabili } from '@/lib/inviteHierarchy'
 import { getAppLocale } from '@/lib/localeServer'
 import { catalogLingueForLocale, preferCatalogLingua } from '@/lib/catalogLingua'
@@ -322,18 +321,6 @@ export default async function Dashboard(props: {
         }
       : undefined
 
-  let ultimoAccessoByProfiloId: Record<string, string> = {}
-  if (user && (isAgenzia || isAgente || isVenditoreLikeRole || isStudio)) {
-    const svcAccesso = createServiceRoleSupabase()
-    if (svcAccesso) {
-      try {
-        ultimoAccessoByProfiloId = ultimoAccessoMapToRecord(await fetchUltimoAccessoMap(svcAccesso))
-      } catch (error) {
-        console.error('dashboard: fetch ultimo accesso', error)
-      }
-    }
-  }
-
   // Recupera agenti della stessa zona se l'utente è un distributore
   let agentiZona: Pick<Operatore, 'id' | 'nome_completo' | 'email' | 'telefono'>[] = []
   if (isPartner && profilo?.area_geografica) {
@@ -556,7 +543,6 @@ export default async function Dashboard(props: {
             profili={profiliGerarchiaDashboard}
             links={linksDashboard}
             ownerProfile={gerarchiaOwnerProfile}
-            ultimoAccessoByProfiloId={ultimoAccessoByProfiloId}
           />
         )}
 
@@ -723,6 +709,7 @@ export default async function Dashboard(props: {
             {registrazioniInAttesaCount > 0 ? (
               <Link
                 href="/dashboard/gestione-utenti#gestione-utenti"
+                prefetch={false}
                 className="mb-6 flex items-center justify-between gap-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-950"
               >
                 <span>
@@ -734,6 +721,7 @@ export default async function Dashboard(props: {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <Link
                 href="/dashboard/gestione-utenti"
+                prefetch={false}
                 className="group flex flex-col justify-between rounded-2xl border border-black bg-white p-8 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#060d41]"
               >
                 <div>

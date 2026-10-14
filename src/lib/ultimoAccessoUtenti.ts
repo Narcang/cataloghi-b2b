@@ -69,50 +69,90 @@ export function isSessioneScadutaPerRiloggio(
   return now - date.getTime() > SESSIONE_MAX_MS
 }
 
-export async function fetchUltimoAccessoMap(svc: SupabaseClient): Promise<Map<string, string>> {
-  const map = new Map<string, string>()
-  let page = 1
-  const perPage = 1000
+const LIST_USERS_PER_PAGE = 100
+const LIST_USERS_MAX_PAGES = 40
 
-  while (page <= 20) {
-    const { data, error } = await svc.auth.admin.listUsers({ page, perPage })
-    if (error) {
-      console.error('fetchUltimoAccessoMap: listUsers', error.message)
+/**
+ * `listUsers` con perPage 1000 non risponde in tempo e Vercel chiude la funzione a 25s.
+ * Pagine piccole e un tetto di tempo: se Auth non risponde, si esce con quello già letto.
+ */
+async function listUsersEntro(
+  svc: SupabaseClient,
+  page: number,
+  budgetMs: number,
+) {
+  let timer: ReturnType<typeof setTimeout> | undefined
+  const pending = svc.auth.admin.listUsers({ page, perPage: LIST_USERS_PER_PAGE }).catch((error: unknown) => {
+    const message = error instanceof Error ? error.message : 'listUsers'
+    console.error('listUsers', message)
+    return null
+  })
+  try {
+    return await Promise.race([
+      pending,
+      new Promise<null>((resolve) => {
+        timer = setTimeout(() => resolve(null), Math.max(1, budgetMs))
+      }),
+    ])
+  } finally {
+    if (timer) clearTimeout(timer)
+  }
+}
+
+export async function fetchUltimoAccessoMap(
+  svc: SupabaseClient,
+  budgetMs = 8000,
+): Promise<{ map: Map<string, string>; completo: boolean }> {
+  const map = new Map<string, string>()
+  const deadline = Date.now() + budgetMs
+  let completo = false
+
+  for (let page = 1; page <= LIST_USERS_MAX_PAGES; page++) {
+    const remaining = deadline - Date.now()
+    if (remaining < 400) break
+    const result = await listUsersEntro(svc, page, remaining)
+    if (!result) break
+    if (result.error) {
+      console.error('fetchUltimoAccessoMap: listUsers', result.error.message)
       break
     }
-    if (!data?.users?.length) break
-
-    for (const user of data.users) {
+    const users = result.data?.users ?? []
+    for (const user of users) {
       if (user.last_sign_in_at) {
         map.set(user.id, user.last_sign_in_at)
       }
     }
-
-    if (data.users.length < perPage) break
-    page++
+    if (users.length < LIST_USERS_PER_PAGE) {
+      completo = true
+      break
+    }
   }
 
-  return map
+  return { map, completo }
 }
 
 /** Cerca un account Authentication per email, anche se manca la riga in `profili`. */
 export async function findAuthUserByEmail(
   svc: SupabaseClient,
   email: string,
+  budgetMs = 12000,
 ): Promise<{ id: string; email: string | undefined; last_sign_in_at: string | undefined; created_at: string } | null> {
   const needle = email.trim().toLowerCase()
   if (!needle.includes('@')) return null
 
-  let page = 1
-  const perPage = 1000
-  while (page <= 20) {
-    const { data, error } = await svc.auth.admin.listUsers({ page, perPage })
-    if (error) {
-      console.error('findAuthUserByEmail: listUsers', error.message)
+  const deadline = Date.now() + budgetMs
+  for (let page = 1; page <= LIST_USERS_MAX_PAGES; page++) {
+    const remaining = deadline - Date.now()
+    if (remaining < 400) break
+    const result = await listUsersEntro(svc, page, remaining)
+    if (!result) break
+    if (result.error) {
+      console.error('findAuthUserByEmail: listUsers', result.error.message)
       break
     }
-    if (!data?.users?.length) break
-    const hit = data.users.find((user) => (user.email ?? '').toLowerCase() === needle)
+    const users = result.data?.users ?? []
+    if (users.length === 0) break
+    const hit = users.find((user) => (user.email ?? '').toLowerCase() === needle)
     if (hit) {
       return {
         id: hit.id,
@@ -121,8 +161,7 @@ export async function findAuthUserByEmail(
         created_at: hit.created_at,
       }
     }
-    if (data.users.length < perPage) break
-    page++
+    if (users.length < LIST_USERS_PER_PAGE) break
   }
   return null
 }

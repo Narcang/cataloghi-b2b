@@ -286,6 +286,7 @@ export default function Header() {
                     {user && mostraGestioneUtenti ? (
                       <Link
                         href={gestioneUtentiHref}
+                        prefetch={false}
                         className="ladiva-dropdown-item"
                         role="menuitem"
                         onClick={() => setAccountMenuOpen(false)}
