@@ -412,7 +412,7 @@ function AssociaCandidatiPicker({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="w-full min-w-0 max-w-full space-y-3">
       <div className="flex flex-wrap gap-2" role="tablist" aria-label="Filtra candidati per ruolo">
         {ruoliPresenti.map((ruolo) => {
           const count = roots.filter((root) => root.ruolo === ruolo).length
@@ -454,10 +454,8 @@ function AssociaCandidatiPicker({
             setFiltroCasa('associati')
             setSceltaId('')
           }}
-          className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm transition-colors ${
-            filtroCasa === 'associati'
-              ? 'border-[#060d41] bg-[#060d41]/10 text-[#060d41] font-semibold'
-              : 'border-black/15 bg-zinc-50 text-zinc-700 hover:bg-zinc-100'
+          className={`ladiva-filtro-casa inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm transition-colors ${
+            filtroCasa === 'associati' ? 'ladiva-filtro-casa-active' : ''
           }`}
         >
           Associati
@@ -471,10 +469,8 @@ function AssociaCandidatiPicker({
             setFiltroCasa('non_associati')
             setSceltaId('')
           }}
-          className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm transition-colors ${
-            filtroCasa === 'non_associati'
-              ? 'border-[#060d41] bg-[#060d41]/10 text-[#060d41] font-semibold'
-              : 'border-black/15 bg-zinc-50 text-zinc-700 hover:bg-zinc-100'
+          className={`ladiva-filtro-casa inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm transition-colors ${
+            filtroCasa === 'non_associati' ? 'ladiva-filtro-casa-active' : ''
           }`}
         >
           Non associati
@@ -484,6 +480,7 @@ function AssociaCandidatiPicker({
         </button>
       </div>
 
+      <div className="w-full min-w-0 max-w-full">
       <select
         value={sceltaId}
         disabled={readOnly || saving || elencoTendina.length === 0}
@@ -495,7 +492,7 @@ function AssociaCandidatiPicker({
           setSceltaId(id)
           void associaDaTendina(id)
         }}
-        className="relative z-10 h-9 w-full max-w-full rounded-md border border-black/20 bg-white px-3 text-base text-zinc-900 sm:text-sm"
+        className="relative z-10 box-border block h-9 w-full min-w-0 max-w-full rounded-md border border-black/20 bg-white px-3 text-base text-zinc-900 sm:text-sm"
         aria-label={filtroCasa === 'associati' ? 'Associati' : 'Non associati'}
       >
         <option value="">
@@ -512,6 +509,7 @@ function AssociaCandidatiPicker({
           </option>
         ))}
       </select>
+      </div>
 
       <p className="text-xs text-zinc-500">
         Scegli il ruolo, poi Associati o Non associati, e seleziona un profilo da collegare.
@@ -535,7 +533,7 @@ export default function AssociatiDirettiCascade({
   const selected = linksByUtente.get(ownerProfileId) ?? new Set<string>()
 
   return (
-    <div className="space-y-4">
+    <div className="w-full min-w-0 max-w-full space-y-4">
       <AssociatiAttualiPicker
         ownerProfileId={ownerProfileId}
         ownerRuolo={ownerRuolo}

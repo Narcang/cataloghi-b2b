@@ -1161,7 +1161,7 @@ export default function AdminProfiliPanel({
                             <p className="text-xs font-medium uppercase text-zinc-600 mb-2">
                               {associatiLabel}
                             </p>
-                            <div className="border border-black/15 rounded-lg p-3 bg-zinc-50">
+                            <div className="w-full min-w-0 max-w-full border border-black/15 rounded-lg p-3 bg-zinc-50">
                               <AssociatiDirettiCascade
                                 ownerProfileId={p.id}
                                 ownerRuolo={p.ruolo}

@@ -228,6 +228,28 @@
   color: #fafafa !important;
 }
 
+.ladiva-filtro-casa {
+  border-color: rgba(0, 0, 0, 0.25);
+  background: #f4f4f5;
+  color: #18181b;
+}
+.ladiva-filtro-casa-active {
+  border-color: #dc2626;
+  background: rgba(220, 38, 38, 0.1);
+  color: #dc2626;
+  font-weight: 600;
+}
+.ladiva-root-app-dark .ladiva-filtro-casa {
+  border-color: rgba(255, 255, 255, 0.55) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+}
+.ladiva-root-app-dark .ladiva-filtro-casa-active {
+  border-color: #f87171 !important;
+  background: rgba(248, 113, 113, 0.16) !important;
+  color: #f87171 !important;
+}
+
 /* Filtri lingua in gestione cataloghi: testo bianco anche sui tasti non selezionati */
 .ladiva-filter-tab {
   border: 1px solid rgba(255, 255, 255, 0.45);
