@@ -627,7 +627,14 @@
   letter-spacing: 0.04em;
   color: #000;
   text-decoration: none;
+  white-space: nowrap;
+  min-width: 0;
   transition: background 0.15s, color 0.15s;
+}
+.ladiva-account-link-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .ladiva-account-link-main:hover {
   background: rgba(6, 13, 65, 0.06);
@@ -765,10 +772,36 @@
 .ladiva-hamburger:hover { border-color: #000; color: #000; }
 @media (max-width: 768px) { .ladiva-hamburger { display: flex; } }
 @media (max-width: 768px) {
+  html,
+  body {
+    overflow-x: clip;
+    max-width: 100%;
+  }
+  .ladiva-header,
+  .ladiva-header-inner {
+    max-width: 100%;
+  }
+  .ladiva-header-inner {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.6rem 0.75rem;
+    gap: 0.45rem 0.5rem;
+  }
+  .ladiva-logo {
+    flex-shrink: 1;
+    min-width: 0;
+  }
+  .ladiva-logo img {
+    width: 112px;
+    max-width: 100%;
+    height: auto;
+  }
   .ladiva-header-actions {
     flex-wrap: nowrap;
-    gap: 0.5rem;
+    gap: 0.35rem;
     align-items: center;
+    min-width: 0;
+    max-width: 100%;
   }
   .ladiva-header-auth-link {
     min-height: 40px;
@@ -777,6 +810,19 @@
   }
   .ladiva-account-trigger-row {
     min-height: 40px;
+    max-width: 100%;
+  }
+  .ladiva-account-link-main {
+    letter-spacing: 0;
+    padding: 0.4rem 0.55rem;
+    font-size: 0.8125rem;
+  }
+  .ladiva-split-trigger-label {
+    letter-spacing: 0;
+    padding: 0.4rem 0.45rem;
+  }
+  .ladiva-account-chevron-btn {
+    padding: 0 0.4rem;
   }
   .ladiva-hamburger {
     width: 40px;
@@ -785,6 +831,33 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+  }
+  .ladiva-dropdown-menu {
+    max-width: calc(100vw - 1.5rem);
+  }
+  .ladiva-locale-switch-menu {
+    left: 0;
+    right: auto;
+  }
+  .ladiva-mobile-menu {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+}
+@media (max-width: 520px) {
+  .ladiva-header-inner {
+    flex-wrap: wrap;
+  }
+  .ladiva-header-actions {
+    flex: 1 1 100%;
+    justify-content: flex-end;
+    margin-left: 0;
+  }
+  .ladiva-account-link-label {
+    max-width: 9.5rem;
   }
 }
 
