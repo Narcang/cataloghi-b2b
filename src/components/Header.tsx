@@ -260,7 +260,8 @@ export default function Header() {
                     }}
                   >
                     <LayoutDashboard size={16} aria-hidden />
-                    <span className="ladiva-account-link-label">{labels.areaRiservataBreve}</span>
+                    <span className="ladiva-account-link-label ladiva-account-link-label--full">{labels.areaRiservata}</span>
+                    <span className="ladiva-account-link-label ladiva-account-link-label--short">{labels.areaRiservataBreve}</span>
                   </Link>
                   <button
                     type="button"

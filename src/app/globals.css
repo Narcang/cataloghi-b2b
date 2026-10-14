@@ -655,10 +655,10 @@
 }
 .ladiva-account-link-label {
   display: inline-block;
-  max-width: 4.75rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
+}
+.ladiva-account-link-label--short {
+  display: none;
 }
 .ladiva-account-link-main:hover {
   background: rgba(6, 13, 65, 0.06);
@@ -837,6 +837,15 @@
     gap: 0.25rem;
     padding: 0.4rem 0.4rem;
     font-size: 0.8125rem;
+  }
+  .ladiva-account-link-label--full {
+    display: none;
+  }
+  .ladiva-account-link-label--short {
+    display: inline-block;
+    max-width: 4.75rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .ladiva-split-trigger-label {
     letter-spacing: 0;
