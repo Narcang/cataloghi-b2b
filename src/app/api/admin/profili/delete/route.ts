@@ -98,10 +98,24 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  const { error: authErr } = await svc.auth.admin.deleteUser(profiloId)
+  // deleteUser può tenere bloccato Auth a lungo: non aspettiamo oltre, il profilo è già rimosso.
+  let timer: ReturnType<typeof setTimeout> | undefined
+  const authResult = await Promise.race([
+    svc.auth.admin.deleteUser(profiloId).then(
+      (result) => result,
+      (error: unknown) => ({
+        error: { message: error instanceof Error ? error.message : 'deleteUser' },
+      }),
+    ),
+    new Promise<null>((resolve) => {
+      timer = setTimeout(() => resolve(null), 8000)
+    }),
+  ]).finally(() => {
+    if (timer) clearTimeout(timer)
+  })
 
-  if (authErr) {
-    console.error('admin profili delete: auth.admin.deleteUser', authErr)
+  if (!authResult || authResult.error) {
+    console.error('admin profili delete: auth.admin.deleteUser', authResult?.error ?? 'timeout')
     return jsonResponse(
       true,
       'Profilo rimosso dal database; verifica in Supabase → Authentication se l’utente va eliminato manualmente.',
