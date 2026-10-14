@@ -614,7 +614,9 @@ export function chiSegueQuestoProfilo(
   const seen = new Set<string>()
   for (const other of candidates.values()) {
     if (other.id === profile.id || seen.has(other.id)) continue
-    if (other.ruolo === 'admin' || other.ruolo === 'manager' || other.ruolo === 'free') continue
+    // L'admin è un account di sistema. Il manager invece è il genitore dell'agenzia
+    // creata dalla piattaforma e deve comparire in «Seguito da».
+    if (other.ruolo === 'admin' || other.ruolo === 'free') continue
     if (other.invitato_da === profile.id) continue
 
     const nome = (other.nome_completo ?? '').trim().toLocaleLowerCase('it')
