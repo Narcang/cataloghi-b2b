@@ -129,13 +129,19 @@ export default async function GestioneUtentiPage(props: {
     .eq('stato_pubblicazione', 'attivo')
     .order('titolo', { ascending: true, nullsFirst: false })
 
-  const [pendRes, listaRes, linksRes, gerarchiaRes, associazioneRes, cataloghiRes] = await Promise.all([
+  const permessiQuery = svc
+    .from('catalogo_permessi_utente')
+    .select('utente_id, catalogo_id')
+    .limit(5000)
+
+  const [pendRes, listaRes, linksRes, gerarchiaRes, associazioneRes, cataloghiRes, permessiRes] = await Promise.all([
     pendQuery,
     listaQuery,
     linksQuery,
     gerarchiaQuery,
     associazioneQuery,
     cataloghiQuery,
+    permessiQuery,
   ])
 
   const profiliRegistrazionePendente = (pendRes.data ?? []) as ProfiloGestioneRow[]
@@ -144,6 +150,15 @@ export default async function GestioneUtentiPage(props: {
   const profiliGerarchia = (gerarchiaRes.data ?? []) as ProfiloGerarchiaRow[]
   const profiliAssociazione = (associazioneRes.data ?? []) as ProfiloGerarchiaRow[]
   const allCataloghi = (cataloghiRes.data ?? []) as { id: string; titolo: string | null; categoria: string | null; ruoli_visibili: string[] }[]
+  const permessiPronti = !permessiRes.error
+  const permessiPerUtente: Record<string, string[]> = {}
+  if (permessiPronti) {
+    for (const row of permessiRes.data ?? []) {
+      const ids = permessiPerUtente[row.utente_id] ?? []
+      ids.push(row.catalogo_id)
+      permessiPerUtente[row.utente_id] = ids
+    }
+  }
 
   // L'ultimo accesso arriva dopo, da /api/admin/ultimo-accesso: listUsers in questa
   // risposta superava i 25s di Vercel e la pagina non si apriva.
@@ -356,6 +371,8 @@ export default async function GestioneUtentiPage(props: {
           profiliAssociazione={profiliAssociazione}
           links={connessioniUtenteOperatoreRows}
           allCataloghi={allCataloghi}
+          permessiPerUtente={permessiPerUtente}
+          permessiPronti={permessiPronti}
           readOnly={false}
           canDeleteUtenti={isAdmin}
           canReviewPending={isManager}

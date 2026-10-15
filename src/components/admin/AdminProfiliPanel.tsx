@@ -139,6 +139,10 @@ type Props = {
   links: { utente_id: string; operatore_id: string }[]
   /** Tutti i cataloghi attivi (con ruoli_visibili) per la gestione permessi per-utente. */
   allCataloghi: CatalogoDisponibile[]
+  /** Whitelist già letta in pagina, per utente. Evita una richiesta per ogni scheda. */
+  permessiPerUtente?: Record<string, string[]>
+  /** False se la lettura dei permessi in pagina non è riuscita: la scheda li richiede da sola. */
+  permessiPronti?: boolean
   /** Quando true (ruolo manager) i profili approvati restano in sola lettura. */
   readOnly?: boolean
   /** Admin e manager possono approvare o rifiutare le registrazioni pendenti. */
@@ -175,6 +179,8 @@ export default function AdminProfiliPanel({
   profiliAssociazione,
   links,
   allCataloghi,
+  permessiPerUtente = {},
+  permessiPronti = false,
   readOnly = false,
   canReviewPending = false,
   canEditSpecializzazione = false,
@@ -203,6 +209,7 @@ export default function AdminProfiliPanel({
   )
   const [soloAssociati, setSoloAssociati] = useState(!cercaAttiva)
   const [listaAperta, setListaAperta] = useState(false)
+  const [schedeAperte, setSchedeAperte] = useState<Set<string>>(() => new Set())
 
   const specializzazioneOpzioniFormProps = {
     opzioni: specializzazioneOpzioni,
@@ -955,6 +962,16 @@ export default function AdminProfiliPanel({
                   open={apriProfiliDiDefault || undefined}
                   // Safari su iPhone/iPad non apre un select dentro details senza un listener touch.
                   onTouchStart={() => {}}
+                  onToggle={(event) => {
+                    const open = event.currentTarget.open
+                    setSchedeAperte((prev) => {
+                      if (prev.has(p.id) === open) return prev
+                      const next = new Set(prev)
+                      if (open) next.add(p.id)
+                      else next.delete(p.id)
+                      return next
+                    })
+                  }}
                 >
                   <summary className="cursor-pointer list-none px-4 py-3 flex flex-wrap items-center justify-between gap-2">
                     <span className="font-medium text-black">
@@ -1311,7 +1328,7 @@ export default function AdminProfiliPanel({
                       />
                     ) : null}
 
-                    {canManageCataloghi && puoPersonalizzareCataloghi(p.ruolo) ? (
+                    {canManageCataloghi && puoPersonalizzareCataloghi(p.ruolo) && (apriProfiliDiDefault || schedeAperte.has(p.id)) ? (
                       <div>
                         <p className="text-xs font-medium uppercase text-zinc-600 mb-1">
                           Dashboard utente
@@ -1324,6 +1341,8 @@ export default function AdminProfiliPanel({
                             utenteId={p.id}
                             utenteRuolo={p.ruolo}
                             allCataloghi={allCataloghi}
+                            permessiIniziali={permessiPerUtente[p.id]}
+                            permessiPronti={permessiPronti}
                             readOnly={false}
                           />
                         </div>

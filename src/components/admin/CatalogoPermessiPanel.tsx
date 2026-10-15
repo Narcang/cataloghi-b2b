@@ -19,6 +19,9 @@ type Props = {
   utenteId: string
   utenteRuolo: string
   allCataloghi?: CatalogoDisponibile[]
+  /** Già noti dalla pagina: niente seconda richiesta. */
+  permessiIniziali?: string[]
+  permessiPronti?: boolean
   readOnly?: boolean
 }
 
@@ -32,6 +35,8 @@ export default function CatalogoPermessiPanel({
   utenteId,
   utenteRuolo,
   allCataloghi = [],
+  permessiIniziali,
+  permessiPronti = false,
   readOnly = false,
 }: Props) {
   const [cataloghi, setCataloghi] = useState<CatalogoPermessoRow[]>(allCataloghi)
@@ -46,7 +51,9 @@ export default function CatalogoPermessiPanel({
   const allAssignableIds = useMemo(() => tuttiIdsAssegnabili(gruppiConPdf), [gruppiConPdf])
 
   const [visibleIds, setVisibleIds] = useState<Set<string>>(new Set())
-  const [whitelistLoaded, setWhitelistLoaded] = useState<string[] | null>(null)
+  const [whitelistLoaded, setWhitelistLoaded] = useState<string[] | null>(
+    permessiPronti ? (permessiIniziali ?? []) : null,
+  )
   const [cataloghiReady, setCataloghiReady] = useState(allCataloghi.length > 0)
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
@@ -66,6 +73,7 @@ export default function CatalogoPermessiPanel({
   }, [allCataloghi])
 
   useEffect(() => {
+    if (allCataloghi.length > 0) return
     let cancelled = false
     fetch('/api/admin/catalogo-permessi/cataloghi', { credentials: 'same-origin' })
       .then(r => r.json())
@@ -83,20 +91,29 @@ export default function CatalogoPermessiPanel({
         if (!cancelled) setCataloghiError('Errore di rete nel caricamento cataloghi')
       })
     return () => { cancelled = true }
-  }, [])
+  }, [allCataloghi.length])
 
   useEffect(() => {
+    if (permessiPronti) {
+      setWhitelistLoaded(permessiIniziali ?? [])
+      return
+    }
+    let cancelled = false
     setWhitelistLoaded(null)
     fetch(`/api/admin/catalogo-permessi?utente_id=${encodeURIComponent(utenteId)}`, {
       credentials: 'same-origin',
     })
       .then(r => r.json())
       .then(data => {
+        if (cancelled) return
         if (data.ok) setWhitelistLoaded(Array.isArray(data.catalogo_ids) ? data.catalogo_ids : [])
         else setWhitelistLoaded([])
       })
-      .catch(() => setWhitelistLoaded([]))
-  }, [utenteId])
+      .catch(() => {
+        if (!cancelled) setWhitelistLoaded([])
+      })
+    return () => { cancelled = true }
+  }, [utenteId, permessiPronti, permessiIniziali])
 
   useEffect(() => {
     if (whitelistLoaded === null || allAssignableIds.length === 0) return
