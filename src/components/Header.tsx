@@ -164,6 +164,10 @@ export default function Header() {
     ? menuItemsBase(labels).filter((item) => item.href !== '/registrazione')
     : menuItemsBase(labels)
   const menuItems: MenuItem[] = [catalogMenuItem, ...visibleBaseItems]
+  const gestioneUtentiHref =
+    profiloRuolo === 'admin' || profiloRuolo === 'manager'
+      ? '/dashboard/gestione-utenti'
+      : '/dashboard'
 
   return (
     <header className="ladiva-header">
@@ -178,18 +182,9 @@ export default function Header() {
           <nav className="ladiva-nav-desktop">
             <div className="ladiva-dropdown" ref={dropdownRef}>
               <div className="ladiva-account-trigger-row">
-                <button
-                  type="button"
-                  className="ladiva-split-trigger-label"
-                  onClick={() => {
-                    setDropdownOpen(!dropdownOpen)
-                    setAccountMenuOpen(false)
-                  }}
-                  aria-expanded={dropdownOpen}
-                  aria-haspopup="menu"
-                >
+                <span className="ladiva-split-trigger-label ladiva-account-link-static">
                   {labels.menu}
-                </button>
+                </span>
                 <button
                   type="button"
                   className="ladiva-account-chevron-btn"
@@ -264,7 +259,7 @@ export default function Header() {
                     role="menu"
                   >
                     <Link
-                      href="/dashboard"
+                      href={gestioneUtentiHref}
                       prefetch={false}
                       className="ladiva-dropdown-item"
                       role="menuitem"

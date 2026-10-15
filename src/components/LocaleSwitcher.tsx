@@ -54,16 +54,9 @@ export default function LocaleSwitcher() {
   return (
     <div className="ladiva-dropdown ladiva-locale-switch" ref={rootRef}>
       <div className="ladiva-account-trigger-row">
-        <button
-          type="button"
-          className="ladiva-split-trigger-label ladiva-locale-switch-label"
-          onClick={toggle}
-          aria-expanded={open}
-          aria-haspopup="listbox"
-          aria-label={labels.lingua}
-        >
+        <span className="ladiva-split-trigger-label ladiva-locale-switch-label ladiva-account-link-static">
           {LOCALE_SHORT[locale]}
-        </button>
+        </span>
         <button
           type="button"
           className="ladiva-account-chevron-btn"
