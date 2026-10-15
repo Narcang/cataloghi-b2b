@@ -164,18 +164,6 @@ export default function Header() {
     ? menuItemsBase(labels).filter((item) => item.href !== '/registrazione')
     : menuItemsBase(labels)
   const menuItems: MenuItem[] = [catalogMenuItem, ...visibleBaseItems]
-  const gestioneUtentiHref =
-    profiloRuolo === 'agenzia' || profiloRuolo === 'agente' || profiloRuolo === 'back_office'
-      ? '/dashboard#gestione-utenti'
-      : profiloRuolo === 'admin' || profiloRuolo === 'manager'
-        ? '/dashboard/gestione-utenti'
-        : '/dashboard'
-  const mostraGestioneUtenti =
-    profiloRuolo === 'admin' ||
-    profiloRuolo === 'manager' ||
-    profiloRuolo === 'agenzia' ||
-    profiloRuolo === 'agente' ||
-    profiloRuolo === 'back_office'
 
   return (
     <header className="ladiva-header">
@@ -249,20 +237,11 @@ export default function Header() {
             {user ? (
               <div className="ladiva-account-menu" ref={accountMenuRef}>
                 <div className="ladiva-account-trigger-row">
-                  <Link
-                    href="/dashboard"
-                    className="ladiva-account-link-main"
-                    aria-label={labels.areaRiservata}
-                    title={labels.areaRiservata}
-                    onClick={() => {
-                      setAccountMenuOpen(false)
-                      setDropdownOpen(false)
-                    }}
-                  >
+                  <span className="ladiva-account-link-main ladiva-account-link-static" title={labels.areaRiservata}>
                     <LayoutDashboard size={16} aria-hidden />
                     <span className="ladiva-account-link-label ladiva-account-link-label--full">{labels.areaRiservata}</span>
                     <span className="ladiva-account-link-label ladiva-account-link-label--short">{labels.areaRiservataBreve}</span>
-                  </Link>
+                  </span>
                   <button
                     type="button"
                     className="ladiva-account-chevron-btn"
@@ -273,7 +252,7 @@ export default function Header() {
                     aria-expanded={accountMenuOpen}
                     aria-haspopup="menu"
                     aria-controls="ladiva-account-menu-panel"
-                    aria-label={labels.apriMenuEsci}
+                    aria-label={labels.areaRiservata}
                   >
                     <ChevronDown size={16} className={`ladiva-chevron ${accountMenuOpen ? 'open' : ''}`} />
                   </button>
@@ -284,18 +263,16 @@ export default function Header() {
                     className="ladiva-dropdown-menu ladiva-account-dropdown-panel"
                     role="menu"
                   >
-                    {user && mostraGestioneUtenti ? (
-                      <Link
-                        href={gestioneUtentiHref}
-                        prefetch={false}
-                        className="ladiva-dropdown-item"
-                        role="menuitem"
-                        onClick={() => setAccountMenuOpen(false)}
-                      >
-                        <Users size={16} aria-hidden />
-                        {labels.gestioneUtenti}
-                      </Link>
-                    ) : null}
+                    <Link
+                      href="/dashboard"
+                      prefetch={false}
+                      className="ladiva-dropdown-item"
+                      role="menuitem"
+                      onClick={() => setAccountMenuOpen(false)}
+                    >
+                      <Users size={16} aria-hidden />
+                      {labels.gestioneUtenti}
+                    </Link>
                     {profiloRuolo === 'admin' && (
                       <Link
                         href="/dashboard/gestione-cataloghi"

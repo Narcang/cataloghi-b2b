@@ -664,6 +664,17 @@
   background: rgba(6, 13, 65, 0.06);
   color: var(--ladiva-home-ink);
 }
+.ladiva-account-link-static,
+.ladiva-split-trigger-label.ladiva-account-link-static {
+  cursor: default;
+  pointer-events: none;
+  user-select: none;
+}
+.ladiva-account-link-static:hover,
+.ladiva-split-trigger-label.ladiva-account-link-static:hover {
+  background: transparent;
+  color: #000;
+}
 .ladiva-account-chevron-btn {
   display: inline-flex;
   align-items: center;
