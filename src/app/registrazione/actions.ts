@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
 import { loadInvitoValidato } from '@/lib/invitoLookup'
+import { propagaAssociazioneSede } from '@/lib/propagaSeguitoSede'
 
 function sanitize(s: unknown): string {
   return String(s ?? '').trim()
@@ -180,6 +181,14 @@ export async function register(formData: FormData) {
               { utente_id: invitoDa,  operatore_id: newUserId },
               { utente_id: newUserId, operatore_id: invitoDa },
             ], { onConflict: 'utente_id,operatore_id', ignoreDuplicates: true })
+            if (invitoRuolo) {
+              await propagaAssociazioneSede(
+                svc,
+                { id: invitoDa, ruolo: profiloInvitante.ruolo },
+                { id: newUserId, ruolo: invitoRuolo },
+                'add',
+              )
+            }
           } else {
             await svc.from('connessioni_utente_operatore').upsert(
               { utente_id: invitoDa, operatore_id: newUserId },

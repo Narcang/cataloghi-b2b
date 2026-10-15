@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
+import { propagaAssociazioneSede } from '@/lib/propagaSeguitoSede'
 
 function jsonResponse(ok: boolean, message: string, status: number, data?: Record<string, unknown>) {
   return NextResponse.json({ ok, message, ...data }, { status })
@@ -127,6 +128,7 @@ export async function POST(request: NextRequest) {
   }
 
   const collegamentoId = parentId || user.id
+  let ruoloCollegamento = callerRuolo
 
   if (parentId) {
     const { data: genitore } = await svc
@@ -145,6 +147,7 @@ export async function POST(request: NextRequest) {
     if (parentRuoliOpzionali && !parentRuoliOpzionali.includes(genitore.ruolo)) {
       return jsonResponse(false, 'Entità di appartenenza non trovata o ruolo non valido', 404)
     }
+    ruoloCollegamento = genitore.ruolo
   }
 
   const emailReale = Boolean(emailInput)
@@ -208,6 +211,13 @@ export async function POST(request: NextRequest) {
   )
   if (linkErr) {
     console.error('crea-associato connessioni', linkErr)
+  } else {
+    await propagaAssociazioneSede(
+      svc,
+      { id: collegamentoId, ruolo: ruoloCollegamento },
+      { id: nuovoId, ruolo: ruoloNuovo },
+      'add',
+    )
   }
 
   const etichettaRuolo =

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
+import { propagaAssociazioneSede } from '@/lib/propagaSeguitoSede'
 
 function jsonResponse(ok: boolean, message: string, status: number) {
   return NextResponse.json({ ok, message }, { status })
@@ -118,6 +119,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    await propagaAssociazioneSede(
+      db,
+      { id: utente.id, ruolo: utente.ruolo },
+      { id: operatore.id, ruolo: operatore.ruolo },
+      'add',
+    )
+
     return jsonResponse(true, insErr?.code === '23505' ? 'Associazione già presente' : 'Contatto associato', 200)
   }
 
@@ -177,6 +185,13 @@ export async function POST(request: NextRequest) {
       return jsonResponse(false, parentErr.message, 500)
     }
   }
+
+  await propagaAssociazioneSede(
+    db,
+    { id: utente.id, ruolo: utente.ruolo },
+    { id: operatore.id, ruolo: operatore.ruolo },
+    'remove',
+  )
 
   return jsonResponse(true, 'Associazione rimossa', 200)
 }

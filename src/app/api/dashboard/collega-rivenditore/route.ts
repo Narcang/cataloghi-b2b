@@ -6,6 +6,7 @@ import {
   profiloToGerarchiaRow,
   resolveAgenziaParentForAgent,
 } from '@/lib/userHierarchy'
+import { propagaAssociazioneSede } from '@/lib/propagaSeguitoSede'
 
 const CLIENTI_RUOLI = new Set([
   'back_office',
@@ -81,5 +82,14 @@ export async function POST(request: NextRequest) {
 
   const { error } = await svc.from('profili').update({ invitato_da: nuovoParent }).eq('id', profiloId)
   if (error) return json(false, error.message, 500)
+  const parentRow = rows.find((p) => p.id === nuovoParent)
+  if (parentRow) {
+    await propagaAssociazioneSede(
+      svc,
+      { id: parentRow.id, ruolo: parentRow.ruolo },
+      { id: target.id, ruolo: target.ruolo },
+      'add',
+    )
+  }
   return json(true, 'Collegamento aggiornato', 200)
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
+import { propagaAssociazioneSede } from '@/lib/propagaSeguitoSede'
 import { getAdminDataSupabase } from '@/lib/mercatoServer'
 import { loadProfiloSpecializzazioneOpzioni } from '@/lib/loadProfiloSpecializzazioneOpzioni'
 import {
@@ -555,6 +556,14 @@ export async function POST(request: NextRequest) {
             { utente_id: invitantId,  operatore_id: profiloId },
             { utente_id: profiloId,   operatore_id: invitantId },
           ], { onConflict: 'utente_id,operatore_id', ignoreDuplicates: true })
+          if (ruoloNuovoUtente) {
+            await propagaAssociazioneSede(
+              svc,
+              { id: invitantId, ruolo: profiloInvitante.ruolo },
+              { id: profiloId, ruolo: ruoloNuovoUtente },
+              'add',
+            )
+          }
         } else {
           // L'invitante è admin/manager: solo l'utente invitato vede l'invitante in rubrica (se ha ruolo connessione)
           await svc.from('connessioni_utente_operatore').upsert(
