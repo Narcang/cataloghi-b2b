@@ -72,7 +72,8 @@ export default function InvitaUtente({
         body: JSON.stringify({
           ruolo_invitato: ruoloSelezionato,
           multi_uso: multiUso,
-          ...((operatoreId || associatoA) ? { associato_a: operatoreId || associatoA } : {}),
+          ...(associatoA ? { associato_a: associatoA } : {}),
+          ...(operatoreId ? { seguito_id: operatoreId } : {}),
         }),
       })
       const json = await res.json()

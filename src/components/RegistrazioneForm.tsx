@@ -32,6 +32,7 @@ function flashMessage(copy: ReturnType<typeof tRegistrazione>, message: string):
 export default function RegistrazioneForm({
   initialLocale,
   tokenRaw,
+  seguitoRaw = '',
   hasInvito,
   ruoloKey,
   ok,
@@ -39,6 +40,7 @@ export default function RegistrazioneForm({
 }: {
   initialLocale: AppLocale
   tokenRaw: string
+  seguitoRaw?: string
   hasInvito: boolean
   ruoloKey: string | null
   ok: boolean
@@ -58,6 +60,7 @@ export default function RegistrazioneForm({
         <Card className="w-full border border-black bg-white shadow-sm">
           <form action={register}>
             {hasInvito && tokenRaw ? <input type="hidden" name="invito_token" value={tokenRaw} /> : null}
+            {hasInvito && seguitoRaw ? <input type="hidden" name="invito_seguito" value={seguitoRaw} /> : null}
 
             <CardHeader>
               <CardTitle className="text-2xl text-zinc-900">{copy.titolo}</CardTitle>

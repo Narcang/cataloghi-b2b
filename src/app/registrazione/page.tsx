@@ -18,13 +18,14 @@ export async function generateMetadata() {
 }
 
 export default async function RegistrazionePage(props: {
-  searchParams: Promise<{ message?: string; ok?: string; token?: string }>
+  searchParams: Promise<{ message?: string; ok?: string; token?: string; seguito?: string }>
 }) {
   const searchParams = await props.searchParams
   const locale = await getAppLocale()
   const ok = searchParams?.ok === '1'
   const message = searchParams?.message ?? ''
   const tokenRaw = (searchParams?.token ?? '').trim()
+  const seguitoRaw = (searchParams?.seguito ?? '').trim()
 
   let ruoloKey: string | null = null
   let hasInvito = false
@@ -43,6 +44,7 @@ export default async function RegistrazionePage(props: {
       <RegistrazioneForm
         initialLocale={locale}
         tokenRaw={tokenRaw}
+        seguitoRaw={hasInvito ? seguitoRaw : ''}
         hasInvito={hasInvito}
         ruoloKey={ruoloKey}
         ok={ok}

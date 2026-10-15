@@ -6,9 +6,52 @@ import { createClient } from '@/utils/supabase/server'
 import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
 import { loadInvitoValidato } from '@/lib/invitoLookup'
 import { propagaAssociazioneSede } from '@/lib/propagaSeguitoSede'
+import { chiSegueQuestoProfilo, type ProfiloGerarchiaRow } from '@/lib/userHierarchy'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 function sanitize(s: unknown): string {
   return String(s ?? '').trim()
+}
+
+function queryRitorno(token: string, seguito: string): string {
+  const parts: string[] = []
+  if (token) parts.push(`token=${encodeURIComponent(token)}`)
+  if (seguito) parts.push(`seguito=${encodeURIComponent(seguito)}`)
+  return parts.length ? `&${parts.join('&')}` : ''
+}
+
+/** La sede resta il collegamento diretto; la persona scelta resta in «Seguito da». */
+async function collegaInvitoSeguito(
+  svc: SupabaseClient,
+  sedeId: string,
+  seguitoId: string,
+  nuovoId: string,
+) {
+  if (!seguitoId || seguitoId === sedeId || seguitoId === nuovoId) return
+  const [{ data: profili }, { data: links }] = await Promise.all([
+    svc
+      .from('profili')
+      .select('id, nome_completo, societa, email, area_geografica, ruolo, invitato_da, registrazione_approvata, seguito_da')
+      .neq('ruolo', 'free')
+      .limit(2000),
+    svc.from('connessioni_utente_operatore').select('utente_id, operatore_id').limit(2000),
+  ])
+  const rows = (profili ?? []) as ProfiloGerarchiaRow[]
+  const sede = rows.find((p) => p.id === sedeId)
+  if (!sede) return
+  const persona = chiSegueQuestoProfilo(sede, rows, links ?? []).find((p) => p.id === seguitoId)
+  if (!persona) return
+  await svc.from('connessioni_utente_operatore').upsert(
+    [
+      { utente_id: persona.id, operatore_id: nuovoId },
+      { utente_id: nuovoId, operatore_id: persona.id },
+    ],
+    { onConflict: 'utente_id,operatore_id', ignoreDuplicates: true },
+  )
+  const nome = persona.nome_completo?.trim() || persona.societa?.trim() || persona.email?.trim() || ''
+  if (nome) {
+    await svc.from('profili').update({ seguito_da: nome }).eq('id', nuovoId)
+  }
 }
 
 export async function register(formData: FormData) {
@@ -19,15 +62,16 @@ export async function register(formData: FormData) {
   const password = String(formData.get('password') ?? '')
   const telefono = sanitize(formData.get('telefono'))
   const invitoToken = sanitize(formData.get('invito_token'))
+  const invitoSeguito = sanitize(formData.get('invito_seguito'))
   const consenso = formData.get('consenso')
 
   if (!consenso) {
-    const q = invitoToken ? `&token=${invitoToken}` : ''
+    const q = queryRitorno(invitoToken, invitoSeguito)
     redirect('/registrazione?message=' + encodeURIComponent('consenso') + q)
   }
 
   if (password.length < 8) {
-    const q = invitoToken ? `&token=${encodeURIComponent(invitoToken)}` : ''
+    const q = queryRitorno(invitoToken, invitoSeguito)
     redirect('/registrazione?message=' + encodeURIComponent('password') + q)
   }
 
@@ -39,35 +83,23 @@ export async function register(formData: FormData) {
   if (invitoToken) {
     const svc = createServiceRoleSupabase()
     if (!svc) {
-      redirect(
-        '/registrazione?message=' +
-          encodeURIComponent('server') +
-          `&token=${encodeURIComponent(invitoToken)}`,
-      )
+      redirect('/registrazione?message=' + encodeURIComponent('server') + queryRitorno(invitoToken, invitoSeguito))
     }
     const invito = await loadInvitoValidato(svc, invitoToken)
     if (!invito) {
-      redirect(
-        '/registrazione?message=' +
-          encodeURIComponent('invito') +
-          `&token=${encodeURIComponent(invitoToken)}`,
-      )
+      redirect('/registrazione?message=' + encodeURIComponent('invito') + queryRitorno(invitoToken, invitoSeguito))
     }
     invitoRuolo = invito.ruolo
     invitoMultiUso = invito.multiUso
     invitoDa = invito.associatoA
     invitoCreatoDa = invito.creatoDa
     if (!invitoRuolo) {
-      redirect(
-        '/registrazione?message=' +
-          encodeURIComponent('invito') +
-          `&token=${encodeURIComponent(invitoToken)}`,
-      )
+      redirect('/registrazione?message=' + encodeURIComponent('invito') + queryRitorno(invitoToken, invitoSeguito))
     }
   }
 
   if (!nome || !cognome || !societa || !email || !password || !telefono) {
-    const q = invitoToken ? `&token=${encodeURIComponent(invitoToken)}` : ''
+    const q = queryRitorno(invitoToken, invitoSeguito)
     redirect('/registrazione?message=' + encodeURIComponent('campi') + q)
   }
 
@@ -89,7 +121,7 @@ export async function register(formData: FormData) {
     // Flusso con invito valido: usa l'API admin per creare l'utente senza inviare email di conferma
     const svc = createServiceRoleSupabase()
     if (!svc) {
-      const q = invitoToken ? `&token=${encodeURIComponent(invitoToken)}` : ''
+      const q = queryRitorno(invitoToken, invitoSeguito)
       redirect('/registrazione?message=' + encodeURIComponent('server') + q)
     }
 
@@ -107,7 +139,7 @@ export async function register(formData: FormData) {
         adminError.message.includes('already been registered')
           ? 'email_exists'
           : adminError.message
-      const q = invitoToken ? `&token=${encodeURIComponent(invitoToken)}` : ''
+      const q = queryRitorno(invitoToken, invitoSeguito)
       redirect('/registrazione?message=' + encodeURIComponent(msg) + q)
     }
 
@@ -130,7 +162,7 @@ export async function register(formData: FormData) {
           .select('id')
 
         if (profiloErr) {
-          const q = invitoToken ? `&token=${encodeURIComponent(invitoToken)}` : ''
+          const q = queryRitorno(invitoToken, invitoSeguito)
           redirect('/registrazione?message=' + encodeURIComponent(profiloErr.message) + q)
         }
         if (updated && updated.length > 0) {
@@ -152,7 +184,7 @@ export async function register(formData: FormData) {
           { onConflict: 'id' },
         )
         if (upsertErr) {
-          const q = invitoToken ? `&token=${encodeURIComponent(invitoToken)}` : ''
+          const q = queryRitorno(invitoToken, invitoSeguito)
           redirect('/registrazione?message=' + encodeURIComponent(upsertErr.message) + q)
         }
       }
@@ -181,7 +213,10 @@ export async function register(formData: FormData) {
               { utente_id: invitoDa,  operatore_id: newUserId },
               { utente_id: newUserId, operatore_id: invitoDa },
             ], { onConflict: 'utente_id,operatore_id', ignoreDuplicates: true })
-            if (invitoRuolo) {
+            const sedeInvito = profiloInvitante.ruolo === 'agenzia' || profiloInvitante.ruolo === 'rivenditore' || profiloInvitante.ruolo === 'studio'
+            if (sedeInvito && invitoSeguito) {
+              await collegaInvitoSeguito(svc, invitoDa, invitoSeguito, newUserId)
+            } else if (!sedeInvito && invitoRuolo) {
               await propagaAssociazioneSede(
                 svc,
                 { id: invitoDa, ruolo: profiloInvitante.ruolo },

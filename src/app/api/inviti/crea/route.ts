@@ -7,6 +7,7 @@ import {
   seguitoAppartieneASede,
 } from '@/lib/inviteHierarchy'
 import {
+  chiSegueQuestoProfilo,
   filterProfiliInHierarchySubtree,
   profiloToGerarchiaRow,
   resolveAgenziaParentForAgent,
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest) {
     return jsonResponse(false, 'Profilo non trovato', 403)
   }
 
-  let body: { ruolo_invitato?: string; multi_uso?: boolean; associato_a?: string }
+  let body: { ruolo_invitato?: string; multi_uso?: boolean; associato_a?: string; seguito_id?: string }
   try {
     body = await request.json()
   } catch {
@@ -58,6 +59,7 @@ export async function POST(request: NextRequest) {
 
   const multiUso = body.multi_uso === true
   const associatoA = pulisci(body.associato_a)
+  const seguitoId = pulisci(body.seguito_id)
   const isPrivileged = ruoloInvitante === 'admin' || ruoloInvitante === 'manager'
   const canChooseCompanyParent =
     ruoloInvitante === 'agenzia' || ruoloInvitante === 'agente' || ruoloInvitante === 'back_office'
@@ -68,6 +70,10 @@ export async function POST(request: NextRequest) {
   }
 
   let associatoAValidato: string | null = null
+  let seguitoValidato: string | null = null
+  let sedeScelta: ProfiloGerarchiaRow | null = null
+  let rowsInvito: ProfiloGerarchiaRow[] = []
+  let linkRowsInvito: { utente_id: string; operatore_id: string }[] = []
   if (associatoA) {
     if (!isPrivileged && !canChooseCompanyParent) {
       return jsonResponse(false, 'Non puoi scegliere il collegamento per questo invito', 403)
@@ -89,6 +95,8 @@ export async function POST(request: NextRequest) {
     ])
     const rows = (profili ?? []) as ProfiloGerarchiaRow[]
     const linkRows = links ?? []
+    rowsInvito = rows
+    linkRowsInvito = linkRows
     const scelto = rows.find((row) => row.id === associatoA)
     if (!scelto) {
       return jsonResponse(false, 'Collegamento non valido per il ruolo scelto', 400)
@@ -132,6 +140,18 @@ export async function POST(request: NextRequest) {
       )
     }
     associatoAValidato = scelto.id
+    if (eSede) sedeScelta = scelto
+  }
+
+  if (seguitoId) {
+    if (!sedeScelta) {
+      return jsonResponse(false, 'Scegli prima la sede, poi chi la segue', 400)
+    }
+    const segue = chiSegueQuestoProfilo(sedeScelta, rowsInvito, linkRowsInvito)
+    if (!segue.some((p) => p.id === seguitoId)) {
+      return jsonResponse(false, 'La persona scelta non segue questa sede', 400)
+    }
+    seguitoValidato = seguitoId
   }
 
   const token = crypto.randomUUID()
@@ -152,7 +172,9 @@ export async function POST(request: NextRequest) {
   }
 
   const baseUrl = request.headers.get('origin') ?? process.env.NEXT_PUBLIC_APP_URL ?? ''
-  const link = `${baseUrl}/registrazione?token=${token}`
+  const link = seguitoValidato
+    ? `${baseUrl}/registrazione?token=${token}&seguito=${seguitoValidato}`
+    : `${baseUrl}/registrazione?token=${token}`
 
   return jsonResponse(true, 'Link creato', 200, { link, token })
 }

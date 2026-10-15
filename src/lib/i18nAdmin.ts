@@ -454,7 +454,7 @@ const admin = {
     invitaFormHelp:
       'Genera un link monouso. Chi si registra tramite questo link ottiene il ruolo selezionato e viene collegato automaticamente al tuo profilo dopo l’approvazione.',
     invitaFormHelpEntita:
-      'Genera un link monouso. Se scegli un’agenzia, un rivenditore o una sede studio, chi si registra resta associato a quella. Se sotto scegli chi la segue, chi si registra resta associato a quella persona. Se lasci il collegamento vuoto, andrà associato a mano.',
+      'Genera un link monouso. Se scegli un’agenzia, un rivenditore o una sede studio, chi si registra resta associato a quella. Se sotto scegli chi la segue, resta associato alla sede e anche a quella persona. Se lasci il collegamento vuoto, andrà associato a mano.',
     collegaInvitoA: 'Collega a',
     opzionaleInvito: 'opzionale',
     nessunCollegamentoDaAssociare: 'Nessun collegamento — da associare a mano',
@@ -655,7 +655,7 @@ const admin = {
     invitaFormHelp:
       'Создайте одноразовую ссылку. Зарегистрированный пользователь получит выбранную роль и будет связан с вашим профилем после одобрения.',
     invitaFormHelpEntita:
-      'Создайте одноразовую ссылку. Если выбрать агентство, дилера или студию (офис), новый пользователь будет связан с ним. Если ниже выбрать, кто его ведёт, новый пользователь будет связан с этим человеком. Если оставить поле пустым, связь нужно будет назначить вручную.',
+      'Создайте одноразовую ссылку. Если выбрать агентство, дилера или студию (офис), новый пользователь будет связан с ним. Если ниже выбрать, кто его ведёт, новый пользователь остаётся связан и с организацией, и с этим человеком. Если оставить поле пустым, связь нужно будет назначить вручную.',
     collegaInvitoA: 'Связать с',
     opzionaleInvito: 'необязательно',
     nessunCollegamentoDaAssociare: 'Без связи — назначить вручную',
@@ -858,7 +858,7 @@ const admin = {
     invitaFormHelp:
       'Generate a one-time link. Anyone who registers with it gets the selected role and is linked to your profile after approval.',
     invitaFormHelpEntita:
-      'Generate a one-time link. If you pick an agency, reseller or studio location, the new user is linked to it. If you also pick who follows it, the new user is linked to that person. If you leave the link empty, they will need to be associated by hand.',
+      'Generate a one-time link. If you pick an agency, reseller or studio location, the new user is linked to it. If you also pick who follows it, the new user stays linked to the location and also to that person. If you leave the link empty, they will need to be associated by hand.',
     collegaInvitoA: 'Link to',
     opzionaleInvito: 'optional',
     nessunCollegamentoDaAssociare: 'No link — associate later by hand',
@@ -1070,7 +1070,7 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     invitaFormHelp:
       'Genera un enlace de un solo uso. Quien se registre con este enlace obtiene el rol seleccionado y se vincula automáticamente a tu perfil tras la aprobación.',
     invitaFormHelpEntita:
-      'Genera un enlace de un solo uso. Si eliges una agencia, un revendedor o una sede estudio, el nuevo usuario queda vinculado a ella. Si debajo eliges quién la sigue, queda vinculado a esa persona. Si dejas el enlace vacío, habrá que asociarlo a mano.',
+      'Genera un enlace de un solo uso. Si eliges una agencia, un revendedor o una sede estudio, el nuevo usuario queda vinculado a ella. Si debajo eliges quién la sigue, queda vinculado a la sede y también a esa persona. Si dejas el enlace vacío, habrá que asociarlo a mano.',
     collegaInvitoA: 'Vincular a',
     opzionaleInvito: 'opcional',
     nessunCollegamentoDaAssociare: 'Sin vínculo — asociar a mano después',
@@ -1273,7 +1273,7 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     invitaFormHelp:
       'Générez un lien à usage unique. La personne inscrite obtient le rôle choisi et est liée à votre profil après approbation.',
     invitaFormHelpEntita:
-      'Générez un lien à usage unique. Si vous choisissez une agence, un revendeur ou un siège studio, la personne inscrite y est liée. Si vous choisissez aussi qui la suit, la personne inscrite est liée à elle. Si vous laissez le champ vide, l’association se fera à la main.',
+      'Générez un lien à usage unique. Si vous choisissez une agence, un revendeur ou un siège studio, la personne inscrite y est liée. Si vous choisissez aussi qui la suit, la personne inscrite reste liée au siège et aussi à cette personne. Si vous laissez le champ vide, l’association se fera à la main.',
     collegaInvitoA: 'Lier à',
     opzionaleInvito: 'facultatif',
     nessunCollegamentoDaAssociare: 'Aucun lien — à associer à la main',
@@ -1476,7 +1476,7 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     invitaFormHelp:
       'Einmal-Link erzeugen. Wer sich registriert, erhält die Rolle und wird nach Freigabe verknüpft.',
     invitaFormHelpEntita:
-      'Einmal-Link erzeugen. Wenn Sie eine Agentur, einen Händler oder einen Studio-Standort wählen, wird der neue Benutzer damit verknüpft. Wenn Sie darunter auch wählen, wer den Standort betreut, wird der neue Benutzer dieser Person zugeordnet. Bleibt das Feld leer, muss die Zuordnung später manuell erfolgen.',
+      'Einmal-Link erzeugen. Wenn Sie eine Agentur, einen Händler oder einen Studio-Standort wählen, wird der neue Benutzer damit verknüpft. Wenn Sie darunter auch wählen, wer den Standort betreut, bleibt der neue Benutzer mit dem Standort und auch mit dieser Person verknüpft. Bleibt das Feld leer, muss die Zuordnung später manuell erfolgen.',
     collegaInvitoA: 'Verknüpfen mit',
     opzionaleInvito: 'optional',
     nessunCollegamentoDaAssociare: 'Keine Verknüpfung — später manuell zuordnen',
@@ -1683,7 +1683,7 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     invitaFormHelp:
       'Genereer een eenmalige link. Wie zich via deze link registreert, krijgt de geselecteerde rol en wordt na goedkeuring automatisch aan uw profiel gekoppeld.',
     invitaFormHelpEntita:
-      'Genereer een eenmalige link. Als u een agentschap, wederverkoper of studiovestiging kiest, wordt de nieuwe gebruiker daaraan gekoppeld. Kiest u daaronder ook wie die volgt, dan wordt de nieuwe gebruiker aan die persoon gekoppeld. Laat u het veld leeg, dan moet de koppeling later handmatig gebeuren.',
+      'Genereer een eenmalige link. Als u een agentschap, wederverkoper of studiovestiging kiest, wordt de nieuwe gebruiker daaraan gekoppeld. Kiest u daaronder ook wie die volgt, dan blijft de nieuwe gebruiker gekoppeld aan de vestiging en ook aan die persoon. Laat u het veld leeg, dan moet de koppeling later handmatig gebeuren.',
     collegaInvitoA: 'Koppelen aan',
     opzionaleInvito: 'optioneel',
     nessunCollegamentoDaAssociare: 'Geen koppeling — later handmatig koppelen',
@@ -1886,7 +1886,7 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     invitaFormHelp:
       'Δημιουργήστε σύνδεσμο μίας χρήσης. Όποιος εγγραφεί παίρνει τον ρόλο και συνδέεται μετά την έγκριση.',
     invitaFormHelpEntita:
-      'Δημιουργήστε σύνδεσμο μίας χρήσης. Αν επιλέξετε πρακτορείο, μεταπωλητή ή έδρα στούντιο, ο νέος χρήστης συνδέεται εκεί. Αν από κάτω επιλέξετε ποιος την ακολουθεί, ο νέος χρήστης συνδέεται με αυτό το άτομο. Αν αφήσετε το πεδίο κενό, η σύνδεση γίνεται χειροκίνητα αργότερα.',
+      'Δημιουργήστε σύνδεσμο μίας χρήσης. Αν επιλέξετε πρακτορείο, μεταπωλητή ή έδρα στούντιο, ο νέος χρήστης συνδέεται εκεί. Αν από κάτω επιλέξετε ποιος την ακολουθεί, ο νέος χρήστης μένει συνδεδεμένος με την έδρα και επίσης με αυτό το άτομο. Αν αφήσετε το πεδίο κενό, η σύνδεση γίνεται χειροκίνητα αργότερα.',
     collegaInvitoA: 'Σύνδεση με',
     opzionaleInvito: 'προαιρετικό',
     nessunCollegamentoDaAssociare: 'Χωρίς σύνδεση — να συνδεθεί χειροκίνητα',
@@ -2089,7 +2089,7 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     invitaFormHelp:
       'Wygeneruj jednorazowy link. Osoba, która się zarejestruje, otrzyma rolę i zostanie powiązana po zatwierdzeniu.',
     invitaFormHelpEntita:
-      'Wygeneruj jednorazowy link. Jeśli wybierzesz agencję, dystrybutora lub siedzibę studia, nowy użytkownik zostanie z nią powiązany. Jeśli poniżej wybierzesz też, kto ją prowadzi, nowy użytkownik zostanie powiązany z tą osobą. Jeśli zostawisz pole puste, powiązanie trzeba będzie zrobić ręcznie.',
+      'Wygeneruj jednorazowy link. Jeśli wybierzesz agencję, dystrybutora lub siedzibę studia, nowy użytkownik zostanie z nią powiązany. Jeśli poniżej wybierzesz też, kto ją prowadzi, nowy użytkownik zostaje powiązany z siedzibą i także z tą osobą. Jeśli zostawisz pole puste, powiązanie trzeba będzie zrobić ręcznie.',
     collegaInvitoA: 'Powiąż z',
     opzionaleInvito: 'opcjonalnie',
     nessunCollegamentoDaAssociare: 'Brak powiązania — powiąż ręcznie później',
@@ -2292,7 +2292,7 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     invitaFormHelp:
       'Створіть одноразове посилання. Хто зареєструється, отримає роль і буде пов’язаний після схвалення.',
     invitaFormHelpEntita:
-      'Створіть одноразове посилання. Якщо вибрати агентство, дилера або осередок студії, новий користувач буде з ним пов’язаний. Якщо нижче вибрати, хто його веде, нового користувача буде пов’язано з цією людиною. Якщо залишити поле порожнім, зв’язок треба буде призначити вручну.',
+      'Створіть одноразове посилання. Якщо вибрати агентство, дилера або осередок студії, новий користувач буде з ним пов’язаний. Якщо нижче вибрати, хто його веде, новий користувач лишається пов’язаним і з організацією, і з цією людиною. Якщо залишити поле порожнім, зв’язок треба буде призначити вручну.',
     collegaInvitoA: 'Зв’язати з',
     opzionaleInvito: 'необов’язково',
     nessunCollegamentoDaAssociare: 'Без зв’язку — призначити вручну пізніше',
