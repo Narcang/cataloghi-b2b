@@ -483,6 +483,77 @@ export default function AdminProfiliPanel({
     return body
   }
 
+  function bloccoSeguitoDa(
+    profilo: ProfiloGestioneRow,
+    seguaci: ProfiloGerarchiaRow[],
+    conCampoTesto: boolean,
+    inputClassName: string,
+  ) {
+    return (
+      <div className="block text-xs font-medium uppercase text-zinc-600">
+        {copy.seguitoDa}
+        <div className="mt-1 space-y-2 font-normal normal-case">
+          {seguaci.length === 0 ? (
+            <p className="text-sm text-zinc-500">{copy.nessunCollegamento}</p>
+          ) : (
+            <ul className="flex flex-wrap gap-2">
+              {seguaci.map((parent) => {
+                const societa = parent.societa?.trim()
+                const nome = parent.nome_completo?.trim()
+                const persona =
+                  societa &&
+                  nome &&
+                  nome.toLocaleLowerCase('it') !== societa.toLocaleLowerCase('it')
+                    ? `${societa} · ${nome}`
+                    : societa || nome || parent.email || 'Utente'
+                const busy = unlinkingId === `${profilo.id}:${parent.id}`
+                const puoDissociare =
+                  canCreateAssociati &&
+                  !readOnly &&
+                  profilo.id !== currentUserId &&
+                  profilo.ruolo !== 'admin'
+                return (
+                  <li
+                    key={parent.id}
+                    className="inline-flex items-center gap-1 rounded-full border border-black/20 bg-white pl-3 pr-1 py-1 text-sm text-zinc-800"
+                  >
+                    <span>
+                      {persona}
+                      <span className="ml-1 text-xs text-zinc-500">
+                        ({tRuolo(locale, parent.ruolo)})
+                      </span>
+                    </span>
+                    {puoDissociare ? (
+                      <button
+                        type="button"
+                        disabled={busy}
+                        aria-label="Dissocia"
+                        title="Dissocia"
+                        onClick={() => void dissociaSeguito(profilo, parent)}
+                        className="ml-1 inline-flex h-6 w-6 items-center justify-center rounded-full text-zinc-600 hover:bg-red-50 hover:text-red-700 disabled:opacity-50"
+                      >
+                        ×
+                      </button>
+                    ) : null}
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+          {conCampoTesto ? (
+            <input
+              name="seguito_da"
+              type="text"
+              placeholder={copy.placeholderSeguito}
+              defaultValue={profilo.seguito_da ?? ''}
+              className={inputClassName}
+            />
+          ) : null}
+        </div>
+      </div>
+    )
+  }
+
   const etichettaElenco =
     mostraStatoAssociazione && !cercaAttiva
       ? `${tRuolo(locale, ruoloAttivo)} · ${soloAssociati ? copy.associati : copy.nonAssociati}`
@@ -629,18 +700,16 @@ export default function AdminProfiliPanel({
                         ))}
                       </select>
                     </label>
-                    {p.ruolo === 'rivenditore' || p.ruolo === 'studio' || p.ruolo === 'studio_associato' ? (
-                      <label className="block text-xs font-medium uppercase text-zinc-600">
-                        {copy.seguitoDa}
-                        <input
-                          name="seguito_da"
-                          type="text"
-                          placeholder={copy.placeholderSeguito}
-                          defaultValue={p.seguito_da ?? ''}
-                          className="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
-                        />
-                      </label>
-                    ) : null}
+                    {bloccoSeguitoDa(
+                      p,
+                      chiSegueQuestoProfilo(
+                        profiloToGerarchiaRow(p, p.invitato_da ?? invitatoDaById.get(p.id) ?? null),
+                        profiliGerarchia,
+                        links,
+                      ),
+                      p.ruolo === 'rivenditore' || p.ruolo === 'studio' || p.ruolo === 'studio_associato',
+                      'w-full h-9 rounded-md border border-black bg-white px-2 text-sm',
+                    )}
                     <label className="md:col-span-2 flex items-center gap-2 text-sm text-zinc-800">
                       <input type="checkbox" name="registrazione_approvata" value="on" defaultChecked={false} className="rounded border-black" />
                       {copy.approvaReg}
@@ -853,7 +922,6 @@ export default function AdminProfiliPanel({
             const riferimentoInvito = agenteRiferimento ?? venditoreRiferimento
             const associatiLabel = associatiDirettiSectionLabel(p.ruolo)
             const chiSegue = chiSegueQuestoProfilo(profiloGerarchia, profiliGerarchia, links)
-            const puoDissociare = canCreateAssociati && !profiloReadOnly
             const aggiungiLabel = associatiAggiungiSectionLabel(p.ruolo)
             const candidateAssociati = getCandidateAssociatiProfiles(p.id, p.ruolo, profiliAssociazione)
             const managerEditSpecializzazione =
@@ -911,55 +979,9 @@ export default function AdminProfiliPanel({
                     <span className="text-xs text-zinc-500">{p.area_geografica || copy.areaNonDefinita}</span>
                   </summary>
                   <div className="border-t border-black/10 px-4 py-4 space-y-4 bg-white">
-                    <div>
-                      <p className="text-xs font-medium uppercase text-zinc-600 mb-2">{copy.seguitoDa}</p>
-                      <div className="border border-black/15 rounded-lg p-3 bg-zinc-50">
-                        {chiSegue.length === 0 ? (
-                          <p className="text-sm text-zinc-500">{copy.nessunCollegamento}</p>
-                        ) : (
-                          <ul className="flex flex-wrap gap-2">
-                            {chiSegue.map((parent) => {
-                              const societa = parent.societa?.trim()
-                              const nome = parent.nome_completo?.trim()
-                              const persona =
-                                societa &&
-                                nome &&
-                                nome.toLocaleLowerCase('it') !== societa.toLocaleLowerCase('it')
-                                  ? `${societa} · ${nome}`
-                                  : societa || nome || parent.email || 'Utente'
-                              const busy = unlinkingId === `${p.id}:${parent.id}`
-                              return (
-                                <li
-                                  key={parent.id}
-                                  className="inline-flex items-center gap-1 rounded-full border border-black/20 bg-white pl-3 pr-1 py-1 text-sm text-zinc-800"
-                                >
-                                  <span>
-                                    {persona}
-                                    <span className="ml-1 text-xs text-zinc-500">
-                                      ({tRuolo(locale, parent.ruolo)})
-                                    </span>
-                                  </span>
-                                  {puoDissociare ? (
-                                    <button
-                                      type="button"
-                                      disabled={busy}
-                                      aria-label="Dissocia"
-                                      title="Dissocia"
-                                      onClick={() => void dissociaSeguito(p, parent)}
-                                      className="ml-1 inline-flex h-6 w-6 items-center justify-center rounded-full text-zinc-600 hover:bg-red-50 hover:text-red-700 disabled:opacity-50"
-                                    >
-                                      ×
-                                    </button>
-                                  ) : null}
-                                </li>
-                              )
-                            })}
-                          </ul>
-                        )}
-                      </div>
-                    </div>
                     {editSpecializzazione ? (
                       <>
+                        {bloccoSeguitoDa(p, chiSegue, false, '')}
                         <p className="text-sm text-zinc-600">
                           {rivenditoreEditEsterno
                             ? copy.editRivenditoreHelp
@@ -1034,13 +1056,16 @@ export default function AdminProfiliPanel({
                         </form>
                       </>
                     ) : profiloReadOnly ? (
-                      <p className="text-sm text-zinc-600">
+                      <>
+                        {bloccoSeguitoDa(p, chiSegue, false, '')}
+                        <p className="text-sm text-zinc-600">
                         {agenziaRivenditoriMode
                           ? copy.profiloSolaLettura
                           : readOnly
                             ? copy.visualizzazioneManager
                             : copy.profiloAdminAccount}
-                      </p>
+                        </p>
+                      </>
                     ) : (
                       <>
                         <form
@@ -1123,18 +1148,12 @@ export default function AdminProfiliPanel({
                               ))}
                             </select>
                           </label>
-                          {p.ruolo === 'rivenditore' || p.ruolo === 'studio' || p.ruolo === 'studio_associato' ? (
-                            <label className="block text-xs font-medium uppercase text-zinc-600">
-                              {copy.seguitoDa}
-                              <input
-                                name="seguito_da"
-                                type="text"
-                                placeholder={copy.placeholderSeguito}
-                                defaultValue={p.seguito_da ?? ''}
-                                className="mt-1 w-full h-9 rounded-md border border-black bg-zinc-50 px-2 text-sm"
-                              />
-                            </label>
-                          ) : null}
+                          {bloccoSeguitoDa(
+                            p,
+                            chiSegue,
+                            p.ruolo === 'rivenditore' || p.ruolo === 'studio' || p.ruolo === 'studio_associato',
+                            'w-full h-9 rounded-md border border-black bg-zinc-50 px-2 text-sm',
+                          )}
                           {p.ruolo === 'rivenditore' ? (
                             <RivenditoreProfiloCampi
                               profilo={{
