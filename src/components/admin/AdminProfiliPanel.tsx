@@ -995,7 +995,7 @@ export default function AdminProfiliPanel({
                     </span>
                     <span className="text-xs text-zinc-500">{p.area_geografica || copy.areaNonDefinita}</span>
                   </summary>
-                  <div className="border-t border-black/10 px-4 py-4 space-y-4 bg-white">
+                  <div className="border-t border-black/10 px-4 py-4 flex flex-col gap-4 bg-white">
                     {editSpecializzazione ? (
                       <>
                         {bloccoSeguitoDa(p, chiSegue, false, '')}
@@ -1086,13 +1086,14 @@ export default function AdminProfiliPanel({
                     ) : (
                       <>
                         <form
-                          className="grid grid-cols-1 md:grid-cols-2 gap-3"
+                          className="contents"
                           onSubmit={async (e) => {
                             e.preventDefault()
                             const fd = new FormData(e.currentTarget)
                             await postUpdate(readForm(fd, p.id, p.email))
                           }}
                         >
+                          <div className="order-1 grid grid-cols-1 md:grid-cols-2 gap-3">
                           <label className="block text-xs font-medium uppercase text-zinc-600">
                             {copy.campoNome}
                             <input
@@ -1171,7 +1172,43 @@ export default function AdminProfiliPanel({
                             p.ruolo === 'rivenditore' || p.ruolo === 'studio' || p.ruolo === 'studio_associato',
                             'w-full h-9 rounded-md border border-black bg-zinc-50 px-2 text-sm',
                           )}
+                          </div>
+                          <div className="order-2 space-y-3">
+                          <label className="flex items-center gap-2 text-sm text-zinc-800">
+                            <input
+                              type="checkbox"
+                              name="registrazione_approvata"
+                              value="on"
+                              defaultChecked={p.registrazione_approvata !== false}
+                              className="rounded border-black"
+                            />
+                            {copy.registrazioneApprovata}
+                          </label>
+                          <div className="flex flex-wrap items-center gap-3">
+                            <button
+                              type="submit"
+                              disabled={deletingId === p.id}
+                              className="h-9 rounded-md bg-[#060d41] text-white px-3 text-sm font-semibold hover:bg-[#0a155a] disabled:opacity-50"
+                            >
+                              {copy.salvaProfilo}
+                            </button>
+                            {canDeleteUtenti && p.ruolo !== 'admin' && p.id !== currentUserId ? (
+                              <button
+                                type="button"
+                                disabled={deletingId === p.id}
+                                onClick={() => void postDelete(p.id)}
+                                className="h-9 rounded-md border border-red-600 bg-white px-3 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50"
+                              >
+                                {deletingId === p.id ? copy.eliminazione : copy.eliminaUtente}
+                              </button>
+                            ) : null}
+                            {canCreateAssociati && p.email && !(ruoloConEmailDiLogin(p.ruolo) && isEmailTecnica(p.email)) ? (
+                              <LinkPasswordUtente email={p.email} />
+                            ) : null}
+                          </div>
+                          </div>
                           {p.ruolo === 'rivenditore' ? (
+                            <div className="order-5">
                             <RivenditoreProfiloCampi
                               profilo={{
                                 espositore_1: p.espositore_1 ?? null,
@@ -1195,8 +1232,10 @@ export default function AdminProfiliPanel({
                               }}
                               {...specializzazioneOpzioniFormProps}
                             />
+                            </div>
                           ) : null}
                           {p.ruolo === 'agenzia' ? (
+                            <div className="order-5">
                             <AgenziaProfiloCampi
                               profilo={{
                                 agenzia_campione_1: p.agenzia_campione_1 ?? null,
@@ -1220,43 +1259,12 @@ export default function AdminProfiliPanel({
                               }}
                               {...specializzazioneOpzioniFormProps}
                             />
+                            </div>
                           ) : null}
-                          <label className="md:col-span-2 flex items-center gap-2 text-sm text-zinc-800">
-                            <input
-                              type="checkbox"
-                              name="registrazione_approvata"
-                              value="on"
-                              defaultChecked={p.registrazione_approvata !== false}
-                              className="rounded border-black"
-                            />
-                            {copy.registrazioneApprovata}
-                          </label>
-                          <div className="md:col-span-2 flex flex-wrap items-center gap-3">
-                            <button
-                              type="submit"
-                              disabled={deletingId === p.id}
-                              className="h-9 rounded-md bg-[#060d41] text-white px-3 text-sm font-semibold hover:bg-[#0a155a] disabled:opacity-50"
-                            >
-                              {copy.salvaProfilo}
-                            </button>
-                            {canDeleteUtenti && p.ruolo !== 'admin' && p.id !== currentUserId ? (
-                              <button
-                                type="button"
-                                disabled={deletingId === p.id}
-                                onClick={() => void postDelete(p.id)}
-                                className="h-9 rounded-md border border-red-600 bg-white px-3 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50"
-                              >
-                                {deletingId === p.id ? copy.eliminazione : copy.eliminaUtente}
-                              </button>
-                            ) : null}
-                            {canCreateAssociati && p.email && !(ruoloConEmailDiLogin(p.ruolo) && isEmailTecnica(p.email)) ? (
-                              <LinkPasswordUtente email={p.email} />
-                            ) : null}
-                          </div>
                         </form>
 
                         {associatiLabel ? (
-                          <div>
+                          <div className="order-3">
                             <p className="text-xs font-medium uppercase text-zinc-600 mb-2">
                               {associatiLabel}
                             </p>
@@ -1282,13 +1290,16 @@ export default function AdminProfiliPanel({
                     )}
 
                     {canCreateAssociati && p.ruolo === 'manager' ? (
+                      <div className="order-4">
                       <CreaAssociatoManuale
                         parentId={p.id}
                         parentLabel={p.societa || p.nome_completo || p.email || 'questo manager'}
                         ruoloNuovo="agenzia"
                       />
+                      </div>
                     ) : null}
                     {canCreateAssociati && p.ruolo === 'agenzia' ? (
+                      <div className="order-4">
                       <CreaAssociatoManuale
                         parentId={p.id}
                         parentLabel={p.societa || p.nome_completo || p.email || 'questa agenzia'}
@@ -1312,24 +1323,29 @@ export default function AdminProfiliPanel({
                           },
                         }}
                       />
+                      </div>
                     ) : null}
                     {canCreateAssociati && p.ruolo === 'rivenditore' ? (
+                      <div className="order-4">
                       <CreaAssociatoManuale
                         parentId={p.id}
                         parentLabel={p.societa || p.nome_completo || p.email || 'questo rivenditore'}
                         ruoloNuovo="distributore"
                       />
+                      </div>
                     ) : null}
                     {canCreateAssociati && p.ruolo === 'studio' ? (
+                      <div className="order-4">
                       <CreaAssociatoManuale
                         parentId={p.id}
                         parentLabel={p.societa || p.nome_completo || p.email || 'questa sede studio'}
                         ruoloNuovo="studio_associato"
                       />
+                      </div>
                     ) : null}
 
                     {canManageCataloghi && puoPersonalizzareCataloghi(p.ruolo) && (apriProfiliDiDefault || schedeAperte.has(p.id)) ? (
-                      <div>
+                      <div className="order-6">
                         <p className="text-xs font-medium uppercase text-zinc-600 mb-1">
                           Dashboard utente
                         </p>
