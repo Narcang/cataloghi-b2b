@@ -1,9 +1,13 @@
 'use client'
 
+import { useId, useState } from 'react'
+import { ChevronDown, ChevronRight } from 'lucide-react'
 import type { RivenditoreProfiloCampi as RivenditoreProfiloCampiValues } from '@/lib/rivenditoreProfiloOptions'
 import type { OpzioniSpecializzazioneMap } from '@/lib/profiloSpecializzazioneOpzioni'
 import ProfiloOpzioniCategoriaAdmin from '@/components/admin/ProfiloOpzioniCategoriaAdmin'
 import ProfiloSelectCampo from '@/components/admin/ProfiloSelectCampo'
+import { tAdmin } from '@/lib/i18nAdmin'
+import { useAppLocale } from '@/lib/useAppLocale'
 
 type Props = {
   profilo: Omit<RivenditoreProfiloCampiValues, 'seguito_da'>
@@ -20,14 +24,34 @@ export default function RivenditoreProfiloCampi({
   canManageOpzioni = false,
   onOpzioniChange,
 }: Props) {
+  const locale = useAppLocale()
+  const copy = tAdmin(locale)
+  const [aperto, setAperto] = useState(false)
+  const panelId = useId()
+
   return (
-    <div className="md:col-span-2 space-y-4 rounded-lg border border-black/20 p-4">
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-wide">Espositori e Box Show Room</p>
-        <p className="text-xs opacity-80 mt-0.5">
-          Solo per profili Rivenditori — scelta singola, quantità e data per ogni voce.
-        </p>
-      </div>
+    <div className="md:col-span-2 rounded-lg border border-black/20">
+      <button
+        type="button"
+        aria-expanded={aperto}
+        aria-controls={panelId}
+        onClick={() => setAperto((value) => !value)}
+        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#060d41]"
+      >
+        <span className="min-w-0">
+          <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide">
+            {aperto ? <ChevronDown size={16} aria-hidden /> : <ChevronRight size={16} aria-hidden />}
+            Espositori e Box Show Room
+          </span>
+          <span className="mt-0.5 block pl-6 text-xs opacity-80">
+            Solo per profili Rivenditori — scelta singola, quantità e data per ogni voce.
+          </span>
+        </span>
+        <span className="shrink-0 text-xs font-semibold">
+          {aperto ? copy.chiudiElenco : copy.apriElenco}
+        </span>
+      </button>
+      <div id={panelId} className={aperto ? 'space-y-4 px-4 pb-4' : 'hidden'}>
       <div>
         <p className="text-xs font-medium uppercase opacity-90 mb-2">Espositori</p>
         {canManageOpzioni && onOpzioniChange ? (
@@ -119,6 +143,7 @@ export default function RivenditoreProfiloCampi({
             dataValue={profilo.box_show_room_4_data ?? null}
           />
         </div>
+      </div>
       </div>
     </div>
   )
