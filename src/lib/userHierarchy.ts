@@ -493,12 +493,37 @@ function agenteDaSeguitoDa(
   )
 }
 
+function etichetteManager(
+  profile: ProfiloGerarchiaRow,
+  profili: ProfiloGerarchiaRow[],
+  links: OperatoreLink[],
+): string[] {
+  const visti = new Set<string>()
+  const labels: string[] = []
+  for (const manager of chiSegueQuestoProfilo(profile, profili, links)) {
+    if (manager.ruolo !== 'manager' || visti.has(manager.id)) continue
+    visti.add(manager.id)
+    const label = etichettaPersona(manager)
+    if (label) labels.push(label)
+  }
+  return labels
+}
+
 /** Catena "Seguito da" nella struttura: venditore, rivenditore, agente, agenzia. */
 export function seguitoDaCatena(
   profile: ProfiloGerarchiaRow,
   profili: ProfiloGerarchiaRow[],
   links: OperatoreLink[],
 ): string | null {
+  if (profile.ruolo === 'agenzia' || profile.ruolo === 'agente' || profile.ruolo === 'back_office') {
+    let managers = etichetteManager(profile, profili, links)
+    if (managers.length === 0 && profile.ruolo !== 'agenzia') {
+      const agenzia = resolveAgenziaParentForAgent(profile, profili, links)
+      if (agenzia) managers = etichetteManager(agenzia, profili, links)
+    }
+    return managers.length > 0 ? managers.join(', ') : null
+  }
+
   if (
     profile.ruolo !== 'rivenditore' &&
     profile.ruolo !== 'distributore' &&
