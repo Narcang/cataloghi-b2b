@@ -16,9 +16,7 @@ import {
   type OpzioniSpecializzazioneMap,
 } from '@/lib/profiloSpecializzazioneOpzioni'
 import {
-  associatiAggiungiSectionLabel,
   associatiDirettiSectionLabel,
-  getCandidateAssociatiProfiles,
   chiSegueQuestoProfilo,
   getChildrenProfiles,
   isRivenditoreManagedByAgenzia,
@@ -136,8 +134,6 @@ type Props = {
   profiliPendenti: ProfiloGestioneRow[]
   profiliLista: ProfiloGestioneRow[]
   profiliGerarchia: ProfiloGerarchiaRow[]
-  /** Tutti gli utenti approvati (senza filtro area): elenco per associare il ruolo inferiore. */
-  profiliAssociazione: ProfiloGerarchiaRow[]
   links: { utente_id: string; operatore_id: string }[]
   /** Tutti i cataloghi attivi (con ruoli_visibili) per la gestione permessi per-utente. */
   allCataloghi: CatalogoDisponibile[]
@@ -178,7 +174,6 @@ export default function AdminProfiliPanel({
   profiliPendenti,
   profiliLista,
   profiliGerarchia,
-  profiliAssociazione,
   links,
   allCataloghi,
   permessiPerUtente = {},
@@ -338,15 +333,6 @@ export default function AdminProfiliPanel({
   useEffect(() => {
     setListaAperta(false)
   }, [ruoloAttivo, soloAssociati])
-
-  const linksByUtente = useMemo(() => {
-    const m = new Map<string, Set<string>>()
-    for (const row of links) {
-      if (!m.has(row.utente_id)) m.set(row.utente_id, new Set())
-      m.get(row.utente_id)!.add(row.operatore_id)
-    }
-    return m
-  }, [links])
 
   function getDirectAssociati(profilo: ProfiloGestioneRow): ProfiloGerarchiaRow[] {
     const row = profiloToGerarchiaRow(
@@ -980,8 +966,6 @@ export default function AdminProfiliPanel({
             const riferimentoInvito = agenteRiferimento ?? venditoreRiferimento
             const associatiLabel = associatiDirettiSectionLabel(p.ruolo)
             const chiSegue = chiSegueQuestoProfilo(profiloGerarchia, profiliGerarchia, links)
-            const aggiungiLabel = associatiAggiungiSectionLabel(p.ruolo)
-            const candidateAssociati = getCandidateAssociatiProfiles(p.id, p.ruolo, profiliAssociazione)
             const managerEditSpecializzazione =
               profiloReadOnly &&
               canEditSpecializzazione &&
@@ -1331,11 +1315,6 @@ export default function AdminProfiliPanel({
                                 ownerProfileId={p.id}
                                 ownerRuolo={p.ruolo}
                                 roots={directAssociati}
-                                candidates={candidateAssociati}
-                                aggiungiLabel={aggiungiLabel ?? copy.associaProfilo}
-                                profiliGerarchia={profiliGerarchia}
-                                links={links}
-                                linksByUtente={linksByUtente}
                                 readOnly={readOnly || p.id === currentUserId || p.ruolo === 'admin'}
                                 onToggleLink={async (add, utenteId, operatoreId) =>
                                   postLink(add ? 'add' : 'remove', utenteId, operatoreId)

@@ -309,7 +309,6 @@ export default async function GestioneUtentiPage(props: {
             profiliPendenti={[]}
             profiliLista={profiliGestioneAgenzia}
             profiliGerarchia={profiliGerarchiaAgenzia}
-            profiliAssociazione={[]}
             links={linksAgenzia}
             allCataloghi={[]}
             readOnly
@@ -368,7 +367,6 @@ export default async function GestioneUtentiPage(props: {
           profiliPendenti={profiliRegistrazionePendente}
           profiliLista={profiliGestioneAdmin}
           profiliGerarchia={profiliGerarchia}
-          profiliAssociazione={profiliAssociazione}
           links={connessioniUtenteOperatoreRows}
           allCataloghi={allCataloghi}
           permessiPerUtente={permessiPerUtente}

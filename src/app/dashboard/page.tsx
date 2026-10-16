@@ -650,7 +650,6 @@ export default async function Dashboard(props: {
               isAgenzia ? profiliGestioneAgenziaRivenditori : profiliGestioneAgenteRivenditori
             }
             profiliGerarchia={profiliGerarchiaDashboard}
-            profiliAssociazione={[]}
             links={linksDashboard}
             allCataloghi={[]}
             readOnly
