@@ -72,9 +72,9 @@ type HierarchyNodeProps = {
 /** Indentazione orizzontale per livello (matrioska). */
 const DEPTH_INDENT_REM = 1
 const NESTED_BRANCH_OFFSET_REM = 1
-/** Griglia card: identità compatta; colonne specializzazione più larghe a destra. */
+/** Griglia card: la prima colonna tiene l’email tecnica; le altre partono più a destra. */
 const CARD_GRID_CLASS =
-  'grid gap-2 items-start grid-cols-1 md:grid-cols-[minmax(0,0.65fr)_minmax(0,0.52fr)_minmax(0,1fr)_minmax(0,1.35fr)]'
+  'grid gap-x-6 gap-y-2 items-start grid-cols-1 md:grid-cols-[minmax(0,1.15fr)_minmax(0,0.52fr)_minmax(0,1fr)_minmax(0,1.35fr)]'
 const VENDITORE_CARD_GRID_CLASS =
   'grid gap-4 items-start grid-cols-1 md:grid-cols-[minmax(0,1.6fr)_minmax(10rem,0.7fr)]'
 /** Offset colonna centrale (strumenti / espositori) verso destra. */
@@ -243,7 +243,7 @@ function HierarchyNode({
                   {dashCopy.associatoA}: {profiloGerarchiaDisplayLabel(riferimentoInvito)} ({tRuolo(locale, riferimentoInvito.ruolo)})
                 </p>
               ) : null}
-              <p className="text-sm text-zinc-600 mt-0.5">{profile.email}</p>
+              <p className="text-sm text-zinc-600 mt-0.5 break-all">{profile.email}</p>
               <p className="text-xs text-zinc-500 mt-1">
                 {profile.area_geografica || copy.areaNonIndicata}
               </p>
@@ -254,7 +254,7 @@ function HierarchyNode({
               ) : null}
             </div>
 
-            <div className="flex flex-col items-start gap-1 min-w-0">
+            <div className="flex flex-col items-start gap-1 min-w-0 md:pl-2">
               {!isVenditoreCard ? (
                 <>
                   <span className="text-xs font-semibold uppercase tracking-wide text-zinc-700">
