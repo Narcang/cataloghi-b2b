@@ -31,6 +31,8 @@ import {
 } from '@/lib/userHierarchy'
 import { isAgenteLike } from '@/lib/catalogRoles'
 import { isEmailTecnica, ruoloConEmailDiLogin } from '@/lib/emailTecnica'
+import AssociazioneMonteCampi from '@/components/admin/AssociazioneMonteCampi'
+import { regolaAssociazioneMonte } from '@/lib/associazioneMonte'
 
 import { useAppLocale } from '@/lib/useAppLocale'
 import { tDashboard } from '@/lib/i18n'
@@ -354,7 +356,7 @@ export default function AdminProfiliPanel({
     return getChildrenProfiles(profilo.id, row, profilo.id, profilo.ruolo, profiliGerarchia, links)
   }
 
-  async function postUpdate(body: Record<string, unknown>) {
+  async function postUpdate(body: Record<string, unknown>, refresh = true) {
     setError(null)
     setMessage(null)
     const res = await fetch('/api/admin/profili/update', {
@@ -369,6 +371,28 @@ export default function AdminProfiliPanel({
       return false
     }
     setMessage(data.message ?? 'Salvato')
+    if (refresh) router.refresh()
+    return true
+  }
+
+  async function postAssociazioneMonte(profiloId: string, sedeId: string, personaId: string) {
+    const res = await fetch('/api/admin/profili/associa-monte', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({
+        profilo_id: profiloId,
+        sede_id: sedeId || null,
+        persona_id: personaId || null,
+      }),
+    })
+    const data = (await res.json().catch(() => null)) as { ok?: boolean; message?: string } | null
+    if (!res.ok || !data?.ok) {
+      setMessage(null)
+      setError(data?.message ?? 'Associazione non salvata')
+      router.refresh()
+      return false
+    }
     router.refresh()
     return true
   }
@@ -561,6 +585,26 @@ export default function AdminProfiliPanel({
     )
   }
 
+  function campiAssociazione(profilo: ProfiloGestioneRow, inputClassName: string) {
+    if (!canCreateAssociati || !regolaAssociazioneMonte(profilo.ruolo)) return null
+    return (
+      <AssociazioneMonteCampi
+        profilo={profiloToGerarchiaRow(
+          profilo,
+          profilo.invitato_da ?? invitatoDaById.get(profilo.id) ?? null,
+        )}
+        profili={profiliGerarchia}
+        links={links}
+        ruoloLabel={(ruolo) => tRuolo(locale, ruolo)}
+        sedeLabel={copy.associaSede}
+        sedeVuotaLabel={copy.associaSedeVuota}
+        personaLabel={copy.associaPersona}
+        personaVuotaLabel={copy.associaPersonaVuota}
+        inputClassName={inputClassName}
+      />
+    )
+  }
+
   const etichettaElenco =
     mostraStatoAssociazione && !cercaAttiva
       ? `${tRuolo(locale, ruoloAttivo)} · ${soloAssociati ? copy.associati : copy.nonAssociati}`
@@ -631,7 +675,13 @@ export default function AdminProfiliPanel({
                     onSubmit={async (e) => {
                       e.preventDefault()
                       const fd = new FormData(e.currentTarget)
-                      await postUpdate(readForm(fd, p.id, p.email))
+                      const ok = await postUpdate(readForm(fd, p.id, p.email), fd.has('monte_sede_id') ? false : true)
+                      if (!ok || !fd.has('monte_sede_id')) return
+                      await postAssociazioneMonte(
+                        p.id,
+                        String(fd.get('monte_sede_id') ?? ''),
+                        String(fd.get('monte_persona_id') ?? ''),
+                      )
                     }}
                   >
                     <label className="block text-xs font-medium uppercase text-zinc-600">
@@ -693,6 +743,7 @@ export default function AdminProfiliPanel({
                         className="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
                       />
                     </label>
+                    {campiAssociazione(p, 'mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm')}
                     <label className="block text-xs font-medium uppercase text-zinc-600">
                       {copy.campoRuolo}
                       <select
@@ -1090,7 +1141,13 @@ export default function AdminProfiliPanel({
                           onSubmit={async (e) => {
                             e.preventDefault()
                             const fd = new FormData(e.currentTarget)
-                            await postUpdate(readForm(fd, p.id, p.email))
+                            const ok = await postUpdate(readForm(fd, p.id, p.email), fd.has('monte_sede_id') ? false : true)
+                            if (!ok || !fd.has('monte_sede_id')) return
+                            await postAssociazioneMonte(
+                              p.id,
+                              String(fd.get('monte_sede_id') ?? ''),
+                              String(fd.get('monte_persona_id') ?? ''),
+                            )
                           }}
                         >
                           <div className="order-1 grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1152,6 +1209,7 @@ export default function AdminProfiliPanel({
                               className="mt-1 w-full h-9 rounded-md border border-black bg-zinc-50 px-2 text-sm"
                             />
                           </label>
+                          {campiAssociazione(p, 'mt-1 w-full h-9 rounded-md border border-black bg-zinc-50 px-2 text-sm')}
                           <label className="block text-xs font-medium uppercase text-zinc-600">
                             {copy.campoRuolo}
                             <select
