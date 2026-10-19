@@ -729,7 +729,6 @@ export default function AdminProfiliPanel({
                         className="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
                       />
                     </label>
-                    {campiAssociazione(p, 'mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm')}
                     <label className="block text-xs font-medium uppercase text-zinc-600">
                       {copy.campoRuolo}
                       <select
@@ -744,6 +743,7 @@ export default function AdminProfiliPanel({
                         ))}
                       </select>
                     </label>
+                    {campiAssociazione(p, 'mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm')}
                     {bloccoSeguitoDa(
                       p,
                       chiSegueQuestoProfilo(
@@ -1193,7 +1193,6 @@ export default function AdminProfiliPanel({
                               className="mt-1 w-full h-9 rounded-md border border-black bg-zinc-50 px-2 text-sm"
                             />
                           </label>
-                          {campiAssociazione(p, 'mt-1 w-full h-9 rounded-md border border-black bg-zinc-50 px-2 text-sm')}
                           <label className="block text-xs font-medium uppercase text-zinc-600">
                             {copy.campoRuolo}
                             <select
@@ -1208,6 +1207,7 @@ export default function AdminProfiliPanel({
                               ))}
                             </select>
                           </label>
+                          {campiAssociazione(p, 'mt-1 w-full h-9 rounded-md border border-black bg-zinc-50 px-2 text-sm')}
                           {bloccoSeguitoDa(
                             p,
                             chiSegue,
