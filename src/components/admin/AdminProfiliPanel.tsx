@@ -23,6 +23,7 @@ import {
   isRivenditoreManagedByAgente,
   profiloGerarchiaDisplayLabel,
   profiloToGerarchiaRow,
+  ruoloChipBorderClass,
   resolveAgenziaParentForAgent,
   resolveRivenditoreParentForDistributore,
   type ProfiloGerarchiaRow,
@@ -532,7 +533,7 @@ export default function AdminProfiliPanel({
                 return (
                   <li
                     key={parent.id}
-                    className="inline-flex items-center gap-1 rounded-full border border-black/20 bg-white pl-3 pr-1 py-1 text-sm text-zinc-800"
+                    className={`inline-flex items-center gap-1 rounded-full border-2 bg-white pl-3 pr-1 py-1 text-sm text-zinc-800 ${ruoloChipBorderClass(parent.ruolo)}`}
                   >
                     <span>
                       {persona}

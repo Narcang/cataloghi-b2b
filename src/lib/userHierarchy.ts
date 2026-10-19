@@ -159,6 +159,13 @@ export function ruoloBreakdownDotClass(ruolo: string): string | null {
   return ruoloGerarchiaDotClass(ruolo)
 }
 
+/** Bordo dello stesso colore del pallino di ruolo. */
+export function ruoloChipBorderClass(ruolo: string): string {
+  const dot = ruoloBreakdownDotClass(ruolo)
+  if (!dot?.startsWith('bg-')) return 'border-white/30'
+  return dot.replace('bg-', 'border-')
+}
+
 export type RoleBreakdownBadge = { ruolo: string; label: string }
 
 /** Badge conteggio discendenti da mostrare nel box di un profilo in struttura organizzativa. */
