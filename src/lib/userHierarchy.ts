@@ -159,11 +159,28 @@ export function ruoloBreakdownDotClass(ruolo: string): string | null {
   return ruoloGerarchiaDotClass(ruolo)
 }
 
-/** Bordo dello stesso colore del pallino di ruolo. */
+/** Bordo dello stesso colore del pallino di ruolo. Classi intere: Tailwind non genera quelle costruite a runtime. */
 export function ruoloChipBorderClass(ruolo: string): string {
-  const dot = ruoloBreakdownDotClass(ruolo)
-  if (!dot?.startsWith('bg-')) return 'border-white/30'
-  return dot.replace('bg-', 'border-')
+  switch (ruolo) {
+    case 'manager':
+      return 'border-zinc-400'
+    case 'agenzia':
+      return 'border-blue-500'
+    case 'agente':
+      return 'border-blue-400'
+    case 'back_office':
+      return 'border-sky-400'
+    case 'rivenditore':
+      return 'border-green-500'
+    case 'distributore':
+      return 'border-violet-500'
+    case 'studio':
+      return 'border-orange-500'
+    case 'studio_associato':
+      return 'border-orange-400'
+    default:
+      return 'border-zinc-400'
+  }
 }
 
 export type RoleBreakdownBadge = { ruolo: string; label: string }
