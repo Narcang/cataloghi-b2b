@@ -356,8 +356,8 @@ function HierarchyNode({
             </div>
 
             {profile.ruolo === 'agenzia' ? (
-              <>
-                <div className={COLONNA_CENTRALE_CLASS}>
+              <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)] gap-x-6 items-stretch">
+                <div className={`${COLONNA_CENTRALE_CLASS} flex flex-col`}>
                   <AgenziaCampioniColonna
                     profilo={profile}
                     profiloId={profile.id}
@@ -365,7 +365,7 @@ function HierarchyNode({
                     canEliminareVociStorico={canEliminareVociStorico}
                   />
                   {mostraGiroTelefonata ? (
-                    <>
+                    <div className="mt-auto">
                       <ScadenzaData
                         className="mt-2"
                         iso={profile.giro_visita}
@@ -374,10 +374,10 @@ function HierarchyNode({
                         mai={copy.ultimoAccessoMai}
                       />
                       <NoteMicroBox testo={profile.note_visita} />
-                    </>
+                    </div>
                   ) : null}
                 </div>
-                <div className={COLONNA_DESTRA_CLASS}>
+                <div className={`${COLONNA_DESTRA_CLASS} flex flex-col`}>
                   <AgenziaCataloghiColonna
                     profilo={profile}
                     profiloId={profile.id}
@@ -385,7 +385,7 @@ function HierarchyNode({
                     canEliminareVociStorico={canEliminareVociStorico}
                   />
                   {mostraGiroTelefonata ? (
-                    <>
+                    <div className="mt-auto">
                       <ScadenzaData
                         className="mt-2"
                         iso={profile.telefonata}
@@ -394,10 +394,10 @@ function HierarchyNode({
                         mai={copy.ultimoAccessoMai}
                       />
                       <NoteMicroBox testo={profile.note_telefonata} />
-                    </>
+                    </div>
                   ) : null}
                 </div>
-              </>
+              </div>
             ) : profile.ruolo === 'rivenditore' ? (
               <>
                 <RivenditoreEspositoriColonna
