@@ -373,7 +373,7 @@ function HierarchyNode({
                         label="Visita"
                         mai={copy.ultimoAccessoMai}
                       />
-                      <NoteMicroBox testo={profile.note_manager} />
+                      <NoteMicroBox testo={profile.note_visita} />
                     </>
                   ) : null}
                 </div>
@@ -385,13 +385,16 @@ function HierarchyNode({
                     canEliminareVociStorico={canEliminareVociStorico}
                   />
                   {mostraGiroTelefonata ? (
-                    <ScadenzaData
-                      className="mt-2"
-                      iso={profile.telefonata}
-                      soglia={GIORNI_TELEFONATA_ROSSO}
-                      label="Telefonata"
-                      mai={copy.ultimoAccessoMai}
-                    />
+                    <>
+                      <ScadenzaData
+                        className="mt-2"
+                        iso={profile.telefonata}
+                        soglia={GIORNI_TELEFONATA_ROSSO}
+                        label="Telefonata"
+                        mai={copy.ultimoAccessoMai}
+                      />
+                      <NoteMicroBox testo={profile.note_telefonata} />
+                    </>
                   ) : null}
                 </div>
               </>
@@ -421,7 +424,7 @@ function HierarchyNode({
                     label="Giro visita"
                     mai={copy.ultimoAccessoMai}
                   />
-                  <NoteMicroBox testo={profile.note_manager} />
+                  <NoteMicroBox testo={profile.note_visita} />
                 </div>
                 <div className={COLONNA_DESTRA_CLASS}>
                   <ScadenzaData
@@ -430,6 +433,7 @@ function HierarchyNode({
                     label="Telefonata"
                     mai={copy.ultimoAccessoMai}
                   />
+                  <NoteMicroBox testo={profile.note_telefonata} />
                 </div>
               </>
             ) : isVenditoreCard ? null : (

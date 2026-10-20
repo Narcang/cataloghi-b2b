@@ -153,7 +153,8 @@ type Body = {
   agenzia_catalogo_4_data?: string | null
   giro_visita?: string | null
   telefonata?: string | null
-  note_manager?: string | null
+  note_visita?: string | null
+  note_telefonata?: string | null
 }
 
 function applySelectPatch(
@@ -300,12 +301,13 @@ export async function POST(request: NextRequest) {
       }
       patch[field] = data
     }
-    if (body.note_manager !== undefined) {
-      const nota = body.note_manager == null ? '' : String(body.note_manager).trim()
-      if (nota.length > 4000) {
-        return jsonResponse(false, 'Le note superano i 4000 caratteri', 400)
+    for (const field of ['note_visita', 'note_telefonata'] as const) {
+      if (body[field] === undefined) continue
+      const nota = body[field] == null ? '' : String(body[field]).trim()
+      if (nota.length > 400) {
+        return jsonResponse(false, 'La nota supera i 400 caratteri', 400)
       }
-      patch.note_manager = nota || null
+      patch[field] = nota || null
     }
   }
 

@@ -53,7 +53,8 @@ export type ProfiloGestioneRow = {
   seguito_da?: string | null
   giro_visita?: string | null
   telefonata?: string | null
-  note_manager?: string | null
+  note_visita?: string | null
+  note_telefonata?: string | null
   box_show_room_1?: string | null
   box_show_room_2?: string | null
   box_show_room_3?: string | null
@@ -489,10 +490,11 @@ export default function AdminProfiliPanel({
     if (ruolo === 'agenzia') {
       Object.assign(body, readAgenziaCampiFromFormData(fd))
     }
-    if (fd.has('giro_visita') || fd.has('telefonata') || fd.has('note_manager')) {
+    if (fd.has('giro_visita') || fd.has('telefonata') || fd.has('note_visita') || fd.has('note_telefonata')) {
       body.giro_visita = String(fd.get('giro_visita') ?? '').trim() || null
       body.telefonata = String(fd.get('telefonata') ?? '').trim() || null
-      body.note_manager = String(fd.get('note_manager') ?? '').trim() || null
+      body.note_visita = String(fd.get('note_visita') ?? '').trim() || null
+      body.note_telefonata = String(fd.get('note_telefonata') ?? '').trim() || null
     }
     return body
   }
@@ -626,14 +628,24 @@ export default function AdminProfiliPanel({
         <p className="md:col-span-2 text-xs font-normal normal-case text-zinc-500">
           La visita diventa rossa dopo 90 giorni, la telefonata dopo 10.
         </p>
-        <label className="md:col-span-2 block text-xs font-medium uppercase text-zinc-600">
-          Note
+        <label className="block text-xs font-medium uppercase text-zinc-600">
+          Nota giro visita
           <textarea
-            name="note_manager"
-            rows={3}
-            maxLength={4000}
-            defaultValue={profilo.note_manager ?? ''}
-            className="mt-1 w-full rounded-md border border-black bg-zinc-50 px-2 py-2 text-sm font-normal normal-case"
+            name="note_visita"
+            rows={2}
+            maxLength={400}
+            defaultValue={profilo.note_visita ?? ''}
+            className="mt-1 w-full resize-none rounded-md border border-black bg-zinc-50 px-2 py-1.5 text-sm font-normal normal-case"
+          />
+        </label>
+        <label className="block text-xs font-medium uppercase text-zinc-600">
+          Nota telefonata
+          <textarea
+            name="note_telefonata"
+            rows={2}
+            maxLength={400}
+            defaultValue={profilo.note_telefonata ?? ''}
+            className="mt-1 w-full resize-none rounded-md border border-black bg-zinc-50 px-2 py-1.5 text-sm font-normal normal-case"
           />
         </label>
       </div>
