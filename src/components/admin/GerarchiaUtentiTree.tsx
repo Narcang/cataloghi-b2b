@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { ChevronDown, ChevronRight, Clock, Users } from 'lucide-react'
+import { ChevronDown, ChevronRight, Clock, StickyNote, Users } from 'lucide-react'
 import {
   canHaveHierarchyChildren,
   countChildrenProfiles,
@@ -126,13 +126,13 @@ function ScadenzaData({
   soglia,
   label,
   mai,
-  compatta,
+  className = '',
 }: {
   iso: string | null | undefined
   soglia: number
   label: string
   mai: string
-  compatta?: boolean
+  className?: string
 }) {
   const stato = statoDaDataCampo(iso, soglia)
   const data = formattaDataCampo(iso)
@@ -140,25 +140,39 @@ function ScadenzaData({
   const textClass = stato === 'verde' ? 'text-zinc-800' : 'text-red-700'
   const testo = data ?? mai
 
-  if (compatta) {
-    return (
-      <div className="flex items-center gap-1.5" title={`${label}: ${testo}`}>
-        <Clock size={18} strokeWidth={2.25} className={iconClass} aria-hidden />
-        <div className="text-right leading-tight">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">{label}</p>
-          <p className={`text-xs font-medium ${textClass}`}>{testo}</p>
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <div title={`${label}: ${testo}`}>
+    <div className={className} title={`${label}: ${testo}`}>
       <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">{label}</p>
       <div className="mt-1 flex items-center gap-2">
         <Clock size={18} strokeWidth={2.25} className={iconClass} aria-hidden />
         <p className={`text-sm font-medium ${textClass}`}>{testo}</p>
       </div>
+    </div>
+  )
+}
+
+function NoteMicroBox({ testo }: { testo: string | null | undefined }) {
+  const [aperto, setAperto] = useState(false)
+  const valore = testo?.trim() ?? ''
+
+  return (
+    <div className="mt-1">
+      <button
+        type="button"
+        onClick={() => setAperto((apertoOra) => !apertoOra)}
+        className="inline-flex items-center gap-1 text-[10px] font-medium uppercase tracking-wide text-white hover:underline"
+      >
+        {aperto ? <ChevronDown size={12} aria-hidden /> : <ChevronRight size={12} aria-hidden />}
+        <StickyNote size={12} aria-hidden />
+        Note
+      </button>
+      {aperto ? (
+        <div className="mt-1 rounded-md border border-black/10 bg-zinc-50 p-2 w-fit max-w-full">
+          <p className="text-[11px] text-zinc-700 leading-snug whitespace-pre-wrap">
+            {valore || 'Nessuna nota.'}
+          </p>
+        </div>
+      ) : null}
     </div>
   )
 }
@@ -343,20 +357,43 @@ function HierarchyNode({
 
             {profile.ruolo === 'agenzia' ? (
               <>
-                <AgenziaCampioniColonna
-                  className={COLONNA_CENTRALE_CLASS}
-                  profilo={profile}
-                  profiloId={profile.id}
-                  mostraDateAggiornamento={mostraDateAggiornamento}
-                  canEliminareVociStorico={canEliminareVociStorico}
-                />
-                <AgenziaCataloghiColonna
-                  className={COLONNA_DESTRA_CLASS}
-                  profilo={profile}
-                  profiloId={profile.id}
-                  mostraDateAggiornamento={mostraDateAggiornamento}
-                  canEliminareVociStorico={canEliminareVociStorico}
-                />
+                <div className={COLONNA_CENTRALE_CLASS}>
+                  <AgenziaCampioniColonna
+                    profilo={profile}
+                    profiloId={profile.id}
+                    mostraDateAggiornamento={mostraDateAggiornamento}
+                    canEliminareVociStorico={canEliminareVociStorico}
+                  />
+                  {mostraGiroTelefonata ? (
+                    <>
+                      <ScadenzaData
+                        className="mt-2"
+                        iso={profile.giro_visita}
+                        soglia={GIORNI_VISITA_ROSSO}
+                        label="Visita"
+                        mai={copy.ultimoAccessoMai}
+                      />
+                      <NoteMicroBox testo={profile.note_manager} />
+                    </>
+                  ) : null}
+                </div>
+                <div className={COLONNA_DESTRA_CLASS}>
+                  <AgenziaCataloghiColonna
+                    profilo={profile}
+                    profiloId={profile.id}
+                    mostraDateAggiornamento={mostraDateAggiornamento}
+                    canEliminareVociStorico={canEliminareVociStorico}
+                  />
+                  {mostraGiroTelefonata ? (
+                    <ScadenzaData
+                      className="mt-2"
+                      iso={profile.telefonata}
+                      soglia={GIORNI_TELEFONATA_ROSSO}
+                      label="Telefonata"
+                      mai={copy.ultimoAccessoMai}
+                    />
+                  ) : null}
+                </div>
               </>
             ) : profile.ruolo === 'rivenditore' ? (
               <>
@@ -384,6 +421,7 @@ function HierarchyNode({
                     label="Giro visita"
                     mai={copy.ultimoAccessoMai}
                   />
+                  <NoteMicroBox testo={profile.note_manager} />
                 </div>
                 <div className={COLONNA_DESTRA_CLASS}>
                   <ScadenzaData
@@ -407,24 +445,6 @@ function HierarchyNode({
               label={copy.ultimoAccesso}
               mai={copy.ultimoAccessoMai}
             />
-          ) : null}
-          {mostraGiroTelefonata && profile.ruolo === 'agenzia' ? (
-            <div className="shrink-0 self-end md:self-stretch flex flex-col items-end justify-center gap-2 md:min-w-[7.5rem] md:pl-3 md:border-l md:border-black/10">
-              <ScadenzaData
-                compatta
-                iso={profile.giro_visita}
-                soglia={GIORNI_VISITA_ROSSO}
-                label="Visita"
-                mai={copy.ultimoAccessoMai}
-              />
-              <ScadenzaData
-                compatta
-                iso={profile.telefonata}
-                soglia={GIORNI_TELEFONATA_ROSSO}
-                label="Telefonata"
-                mai={copy.ultimoAccessoMai}
-              />
-            </div>
           ) : null}
           </div>
         </div>

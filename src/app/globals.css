@@ -215,6 +215,10 @@
   border-color: rgba(255, 255, 255, 0.22) !important;
 }
 
+.ladiva-root-app-dark input[type='date'] {
+  color-scheme: dark;
+}
+
 .ladiva-root-app-dark .bg-white,
 .ladiva-root-app-dark .bg-zinc-50,
 .ladiva-root-app-dark .bg-zinc-100 {
