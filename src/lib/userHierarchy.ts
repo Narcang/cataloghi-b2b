@@ -10,6 +10,8 @@ export type ProfiloGerarchiaRow = {
   invitato_da: string | null
   registrazione_approvata?: boolean | null
   seguito_da?: string | null
+  giro_visita?: string | null
+  telefonata?: string | null
   espositore_1?: string | null
   espositore_2?: string | null
   box_show_room_1?: string | null
@@ -907,6 +909,8 @@ export function profiloToGerarchiaRow(
     ruolo: string
     registrazione_approvata?: boolean | null
     seguito_da?: string | null
+    giro_visita?: string | null
+    telefonata?: string | null
   },
   invitato_da: string | null = null,
 ): ProfiloGerarchiaRow {
@@ -920,6 +924,8 @@ export function profiloToGerarchiaRow(
     invitato_da,
     registrazione_approvata: p.registrazione_approvata,
     seguito_da: p.seguito_da ?? null,
+    giro_visita: p.giro_visita ?? null,
+    telefonata: p.telefonata ?? null,
   }
 }
 

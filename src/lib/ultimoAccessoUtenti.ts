@@ -5,6 +5,9 @@ import type { AppLocale } from '@/lib/locale'
 export const SESSIONE_MAX_MS = 24 * 60 * 60 * 1000
 /** Da 10 giorni di inattività in poi l'icona è rossa (0–9 = verde). */
 export const INATTIVITA_GIORNI_ROSSO = 10
+/** Giro visita rosso da 90 giorni, telefonata da 10. Data assente = rossa. */
+export const GIORNI_VISITA_ROSSO = 90
+export const GIORNI_TELEFONATA_ROSSO = 10
 
 const MS_GIORNO = 24 * 60 * 60 * 1000
 
@@ -58,6 +61,29 @@ export function ultimoAccessoStato(iso: string | null | undefined, now = Date.no
   const giorni = giorniDaUltimoAccesso(iso, now)
   if (giorni === null || giorni >= INATTIVITA_GIORNI_ROSSO) return 'rosso'
   return 'verde'
+}
+
+/** Visita rossa da 90 giorni, telefonata da 10. Data vuota o assente = rossa. */
+export function statoDaDataCampo(
+  iso: string | null | undefined,
+  sogliaGiorni: number,
+  now = new Date(),
+): UltimoAccessoStato {
+  const s = iso?.slice(0, 10) ?? ''
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return 'rosso'
+  const [anno, mese, giorno] = s.split('-').map(Number)
+  const data = new Date(anno, mese - 1, giorno)
+  const oggi = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const giorni = Math.floor((oggi.getTime() - data.getTime()) / MS_GIORNO)
+  if (giorni >= sogliaGiorni) return 'rosso'
+  return 'verde'
+}
+
+export function formattaDataCampo(iso: string | null | undefined): string | null {
+  const s = iso?.slice(0, 10) ?? ''
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return null
+  const [anno, mese, giorno] = s.split('-')
+  return `${giorno}/${mese}/${anno}`
 }
 
 export function isSessioneScadutaPerRiloggio(

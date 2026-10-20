@@ -31,6 +31,10 @@ import { canViewProfiloSpecializzazioneAggiornato, canDeleteProfiloSpecializzazi
 import {
   canViewerSeeUltimoAccessoForProfile,
   formatUltimoAccessoOrario,
+  formattaDataCampo,
+  GIORNI_TELEFONATA_ROSSO,
+  GIORNI_VISITA_ROSSO,
+  statoDaDataCampo,
   ultimoAccessoStato,
 } from '@/lib/ultimoAccessoUtenti'
 import { tDashboard } from '@/lib/i18n'
@@ -117,6 +121,48 @@ function UltimoAccessoIndicatore({
   )
 }
 
+function ScadenzaData({
+  iso,
+  soglia,
+  label,
+  mai,
+  compatta,
+}: {
+  iso: string | null | undefined
+  soglia: number
+  label: string
+  mai: string
+  compatta?: boolean
+}) {
+  const stato = statoDaDataCampo(iso, soglia)
+  const data = formattaDataCampo(iso)
+  const iconClass = stato === 'verde' ? 'text-emerald-500' : 'text-red-600'
+  const textClass = stato === 'verde' ? 'text-zinc-800' : 'text-red-700'
+  const testo = data ?? mai
+
+  if (compatta) {
+    return (
+      <div className="flex items-center gap-1.5" title={`${label}: ${testo}`}>
+        <Clock size={18} strokeWidth={2.25} className={iconClass} aria-hidden />
+        <div className="text-right leading-tight">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">{label}</p>
+          <p className={`text-xs font-medium ${textClass}`}>{testo}</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div title={`${label}: ${testo}`}>
+      <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">{label}</p>
+      <div className="mt-1 flex items-center gap-2">
+        <Clock size={18} strokeWidth={2.25} className={iconClass} aria-hidden />
+        <p className={`text-sm font-medium ${textClass}`}>{testo}</p>
+      </div>
+    </div>
+  )
+}
+
 function HierarchyNode({
   profile,
   depth,
@@ -163,6 +209,7 @@ function HierarchyNode({
   const mostraDateAggiornamento = canViewProfiloSpecializzazioneAggiornato(viewerRole)
   const canEliminareVociStorico = canDeleteProfiloSpecializzazioneStoricoVoce(viewerRole)
   const seguitoDa = seguitoDaCatena(profile, profili, links)
+  const mostraGiroTelefonata = viewerRole === 'admin' || viewerRole === 'manager'
   const mostraUltimoAccesso = canViewerSeeUltimoAccessoForProfile(viewerRole, profile.ruolo)
   const ultimoAccessoIso = mostraUltimoAccesso
     ? ultimoAccessoByProfiloId[profile.id] ?? null
@@ -328,6 +375,25 @@ function HierarchyNode({
                   canEliminareVociStorico={canEliminareVociStorico}
                 />
               </>
+            ) : profile.ruolo === 'agente' && mostraGiroTelefonata ? (
+              <>
+                <div className={COLONNA_CENTRALE_CLASS}>
+                  <ScadenzaData
+                    iso={profile.giro_visita}
+                    soglia={GIORNI_VISITA_ROSSO}
+                    label="Giro visita"
+                    mai={copy.ultimoAccessoMai}
+                  />
+                </div>
+                <div className={COLONNA_DESTRA_CLASS}>
+                  <ScadenzaData
+                    iso={profile.telefonata}
+                    soglia={GIORNI_TELEFONATA_ROSSO}
+                    label="Telefonata"
+                    mai={copy.ultimoAccessoMai}
+                  />
+                </div>
+              </>
             ) : isVenditoreCard ? null : (
               <>
                 <div className="hidden md:block" aria-hidden />
@@ -341,6 +407,24 @@ function HierarchyNode({
               label={copy.ultimoAccesso}
               mai={copy.ultimoAccessoMai}
             />
+          ) : null}
+          {mostraGiroTelefonata && profile.ruolo === 'agenzia' ? (
+            <div className="shrink-0 self-end md:self-stretch flex flex-col items-end justify-center gap-2 md:min-w-[7.5rem] md:pl-3 md:border-l md:border-black/10">
+              <ScadenzaData
+                compatta
+                iso={profile.giro_visita}
+                soglia={GIORNI_VISITA_ROSSO}
+                label="Visita"
+                mai={copy.ultimoAccessoMai}
+              />
+              <ScadenzaData
+                compatta
+                iso={profile.telefonata}
+                soglia={GIORNI_TELEFONATA_ROSSO}
+                label="Telefonata"
+                mai={copy.ultimoAccessoMai}
+              />
+            </div>
           ) : null}
           </div>
         </div>

@@ -51,6 +51,8 @@ export type ProfiloGestioneRow = {
   espositore_1?: string | null
   espositore_2?: string | null
   seguito_da?: string | null
+  giro_visita?: string | null
+  telefonata?: string | null
   box_show_room_1?: string | null
   box_show_room_2?: string | null
   box_show_room_3?: string | null
@@ -486,6 +488,10 @@ export default function AdminProfiliPanel({
     if (ruolo === 'agenzia') {
       Object.assign(body, readAgenziaCampiFromFormData(fd))
     }
+    if (fd.has('giro_visita') || fd.has('telefonata')) {
+      body.giro_visita = String(fd.get('giro_visita') ?? '').trim() || null
+      body.telefonata = String(fd.get('telefonata') ?? '').trim() || null
+    }
     return body
   }
 
@@ -589,6 +595,36 @@ export default function AdminProfiliPanel({
         personaVuotaLabel={copy.associaPersonaVuota}
         inputClassName={inputClassName}
       />
+    )
+  }
+
+  function campiGiroTelefonata(profilo: ProfiloGestioneRow, inputClassName: string) {
+    if (!canCreateAssociati) return null
+    if (profilo.ruolo !== 'agenzia' && profilo.ruolo !== 'agente') return null
+    return (
+      <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-3">
+        <label className="block text-xs font-medium uppercase text-zinc-600">
+          Giro visita
+          <input
+            name="giro_visita"
+            type="date"
+            defaultValue={(profilo.giro_visita ?? '').slice(0, 10)}
+            className={inputClassName}
+          />
+        </label>
+        <label className="block text-xs font-medium uppercase text-zinc-600">
+          Telefonata
+          <input
+            name="telefonata"
+            type="date"
+            defaultValue={(profilo.telefonata ?? '').slice(0, 10)}
+            className={inputClassName}
+          />
+        </label>
+        <p className="md:col-span-2 text-xs font-normal normal-case text-zinc-500">
+          La visita diventa rossa dopo 90 giorni, la telefonata dopo 10.
+        </p>
+      </div>
     )
   }
 
@@ -1209,6 +1245,7 @@ export default function AdminProfiliPanel({
                             </select>
                           </label>
                           {campiAssociazione(p, 'mt-1 w-full h-9 rounded-md border border-black bg-zinc-50 px-2 text-sm')}
+                          {campiGiroTelefonata(p, 'mt-1 w-full h-9 rounded-md border border-black bg-zinc-50 px-2 text-sm')}
                           {bloccoSeguitoDa(
                             p,
                             chiSegue,

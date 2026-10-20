@@ -151,6 +151,8 @@ type Body = {
   agenzia_catalogo_4_qta?: number | string | null
   agenzia_catalogo_3_data?: string | null
   agenzia_catalogo_4_data?: string | null
+  giro_visita?: string | null
+  telefonata?: string | null
 }
 
 function applySelectPatch(
@@ -275,6 +277,29 @@ export async function POST(request: NextRequest) {
 
   const ruoloEffettivo =
     typeof patch.ruolo === 'string' ? patch.ruolo : (profiloEsistente?.ruolo ?? null)
+
+  if (
+    (isAdmin || isManager) &&
+    (ruoloEffettivo === 'agenzia' || ruoloEffettivo === 'agente')
+  ) {
+    for (const field of ['giro_visita', 'telefonata'] as const) {
+      if (body[field] === undefined) continue
+      const raw = body[field]
+      if (raw == null || String(raw).trim() === '') {
+        patch[field] = null
+        continue
+      }
+      const data = String(raw).trim().slice(0, 10)
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(data)) {
+        return jsonResponse(
+          false,
+          field === 'giro_visita' ? 'Data giro visita non valida' : 'Data telefonata non valida',
+          400,
+        )
+      }
+      patch[field] = data
+    }
+  }
 
   const opzioniClient = svc ?? supabase
   const opzioniSpecializzazione = await loadProfiloSpecializzazioneOpzioni(opzioniClient)
