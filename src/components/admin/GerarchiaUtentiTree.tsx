@@ -15,6 +15,7 @@ import {
   countDescendantsByRoles,
   profiloGerarchiaDisplayLabel,
   seguitoDaCatena,
+  seguitoDaPerRuolo,
   type HierarchyRootRole,
   type ProfiloGerarchiaRow,
 } from '@/lib/userHierarchy'
@@ -223,6 +224,8 @@ function HierarchyNode({
   const mostraDateAggiornamento = canViewProfiloSpecializzazioneAggiornato(viewerRole)
   const canEliminareVociStorico = canDeleteProfiloSpecializzazioneStoricoVoce(viewerRole)
   const seguitoDa = seguitoDaCatena(profile, profili, links)
+  const mostraCatenaCompleta = viewerRole === 'admin' || viewerRole === 'manager'
+  const catenaPerRuolo = mostraCatenaCompleta ? seguitoDaPerRuolo(profile, profili, links) : []
   const mostraGiroTelefonata = viewerRole === 'admin' || viewerRole === 'manager'
   const mostraUltimoAccesso = canViewerSeeUltimoAccessoForProfile(viewerRole, profile.ruolo)
   const ultimoAccessoIso = mostraUltimoAccesso
@@ -308,7 +311,23 @@ function HierarchyNode({
               <p className="text-xs text-zinc-500 mt-1">
                 {profile.area_geografica || copy.areaNonIndicata}
               </p>
-              {seguitoDa ? (
+              {mostraCatenaCompleta && catenaPerRuolo.length > 0 ? (
+                <div className="mt-1 space-y-0.5">
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">{copy.seguitoDa}</p>
+                  {catenaPerRuolo.map((riga) => (
+                    <p key={riga.ruolo} className="flex items-start gap-1.5 text-xs text-zinc-600">
+                      <span
+                        className={`mt-1 h-2 w-2 shrink-0 rounded-full ${ruoloBreakdownDotClass(riga.ruolo) ?? 'bg-zinc-400'}`}
+                        aria-hidden
+                      />
+                      <span>
+                        <span className="font-semibold">{tRuolo(locale, riga.ruolo)}:</span>{' '}
+                        <span className="font-medium text-zinc-800">{riga.etichette.join(', ')}</span>
+                      </span>
+                    </p>
+                  ))}
+                </div>
+              ) : seguitoDa ? (
                 <p className="text-xs text-zinc-600 mt-1">
                   {copy.seguitoDa}: <span className="font-medium text-zinc-800">{seguitoDa}</span>
                 </p>

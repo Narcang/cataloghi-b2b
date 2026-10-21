@@ -619,6 +619,72 @@ export function seguitoDaCatena(
   return parts.length > 0 ? parts.join(', ') : null
 }
 
+const RANGO_CATENA: Record<string, number> = {
+  manager: 0,
+  agenzia: 1,
+  agente: 2,
+  back_office: 2,
+  rivenditore: 3,
+  distributore: 4,
+  partner_dipendente: 4,
+  studio: 5,
+  studio_associato: 6,
+}
+
+const RUOLI_CATENA_VISIBILI = ['manager', 'agenzia', 'agente', 'rivenditore', 'distributore'] as const
+
+export type SeguitoDaPerRuolo = {
+  ruolo: (typeof RUOLI_CATENA_VISIBILI)[number]
+  etichette: string[]
+}
+
+/** Catena verso l'alto, divisa per ruolo: manager, agenzia, agente, rivenditore, venditore. */
+export function seguitoDaPerRuolo(
+  profile: ProfiloGerarchiaRow,
+  profili: ProfiloGerarchiaRow[],
+  links: OperatoreLink[],
+): SeguitoDaPerRuolo[] {
+  const rankOf = (ruolo: string) => RANGO_CATENA[ruolo] ?? 99
+  const gruppi = new Map<string, ProfiloGerarchiaRow[]>()
+  const seen = new Set<string>([profile.id])
+  const queue: ProfiloGerarchiaRow[] = [profile]
+
+  while (queue.length > 0) {
+    const current = queue.shift()
+    if (!current) break
+    const currentRank = rankOf(current.ruolo)
+    for (const parent of chiSegueQuestoProfilo(current, profili, links)) {
+      if (seen.has(parent.id)) continue
+      const parentRank = rankOf(parent.ruolo)
+      const stessoRuoloInvito = parentRank === currentRank && current.invitato_da === parent.id
+      if (parentRank > currentRank) continue
+      if (parentRank === currentRank && !stessoRuoloInvito) continue
+      seen.add(parent.id)
+      if ((RUOLI_CATENA_VISIBILI as readonly string[]).includes(parent.ruolo)) {
+        const lista = gruppi.get(parent.ruolo) ?? []
+        lista.push(parent)
+        gruppi.set(parent.ruolo, lista)
+      }
+      queue.push(parent)
+    }
+  }
+
+  return RUOLI_CATENA_VISIBILI.flatMap((ruolo) => {
+    const persone = gruppi.get(ruolo)
+    if (!persone?.length) return []
+    const etichette = [
+      ...new Set(
+        persone
+          .map((persona) => profiloGerarchiaDisplayLabel(persona))
+          .map((label) => label.trim())
+          .filter(Boolean),
+      ),
+    ].sort((a, b) => a.localeCompare(b, 'it', { sensitivity: 'base' }))
+    if (etichette.length === 0) return []
+    return [{ ruolo, etichette }]
+  })
+}
+
 function ruoloPuoEssereGenitore(parentRuolo: string, childRuolo: string): boolean {
   return (CHILD_ROLES_BY_PARENT[parentRuolo] ?? []).includes(childRuolo)
 }
