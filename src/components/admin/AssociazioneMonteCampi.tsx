@@ -77,7 +77,12 @@ export default function AssociazioneMonteCampi({
   }
 
   const sedeScelta = sedi.find((sede) => sede.id === sedeId)
-  const etichettaCollegamento = sedeScelta ? ruoloLabel(sedeScelta.ruolo) : sedeLabel
+  const ruoliPossibili = [...new Set(sedi.map((sede) => sede.ruolo))]
+  const etichettaCollegamento = sedeScelta
+    ? ruoloLabel(sedeScelta.ruolo)
+    : ruoliPossibili.length === 1
+      ? ruoloLabel(ruoliPossibili[0])
+      : sedeLabel
 
   return (
     <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-3">

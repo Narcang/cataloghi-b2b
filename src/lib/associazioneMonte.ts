@@ -44,6 +44,10 @@ const REGOLA: Record<string, Regola> = {
     sedeRuoli: ['agenzia'],
     personaRuoliPerSede: {},
   },
+  agenzia: {
+    sedeRuoli: ['manager'],
+    personaRuoliPerSede: {},
+  },
   back_office: {
     sedeRuoli: ['agenzia'],
     personaRuoliPerSede: {},
