@@ -76,10 +76,13 @@ export default function AssociazioneMonteCampi({
     if (!opzioni.some((p) => p.id === personaId)) setPersonaId('')
   }
 
+  const sedeScelta = sedi.find((sede) => sede.id === sedeId)
+  const etichettaCollegamento = sedeScelta ? ruoloLabel(sedeScelta.ruolo) : sedeLabel
+
   return (
     <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-3">
       <label className="block text-xs font-medium uppercase text-zinc-600">
-        {sedeLabel}
+        {etichettaCollegamento}
         <select
           name="monte_sede_id"
           value={sedeId}
