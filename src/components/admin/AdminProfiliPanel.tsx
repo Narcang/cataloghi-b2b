@@ -37,6 +37,14 @@ import { useAppLocale } from '@/lib/useAppLocale'
 import { tDashboard } from '@/lib/i18n'
 import { tAdmin, tRuolo, tRivenditoriCount } from '@/lib/i18nAdmin'
 
+function ruoloHaSede(ruolo: string) {
+  return ruolo === 'agenzia' || ruolo === 'rivenditore' || ruolo === 'studio'
+}
+
+function nomeSedeProfilo(p: { societa: string | null; nome_completo: string | null }) {
+  return (p.societa || p.nome_completo || '').trim()
+}
+
 export type ProfiloGestioneRow = {
   id: string
   nome_completo: string | null
@@ -467,7 +475,7 @@ export default function AdminProfiliPanel({
       rawApprovazione === 'on' || rawApprovazione === 'true' || rawApprovazione === '1'
     const body: Record<string, unknown> = {
       profilo_id: profiloId,
-      nome_completo,
+      nome_completo: ruoloHaSede(ruolo) ? societa : nome_completo,
       telefono,
       societa,
       area_geografica,
@@ -732,11 +740,11 @@ export default function AdminProfiliPanel({
                     }}
                   >
                     <label className="block text-xs font-medium uppercase text-zinc-600">
-                      {copy.campoNome}
+                      {ruoloHaSede(p.ruolo) ? 'Sede' : copy.campoNome}
                       <input
-                        name="nome_completo"
+                        name={ruoloHaSede(p.ruolo) ? 'societa' : 'nome_completo'}
                         type="text"
-                        defaultValue={p.nome_completo ?? ''}
+                        defaultValue={ruoloHaSede(p.ruolo) ? nomeSedeProfilo(p) : (p.nome_completo ?? '')}
                         className="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
                       />
                     </label>
@@ -771,6 +779,7 @@ export default function AdminProfiliPanel({
                         className="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
                       />
                     </label>
+                    {ruoloHaSede(p.ruolo) ? null : (
                     <label className="block text-xs font-medium uppercase text-zinc-600">
                       {copy.campoSocieta}
                       <input
@@ -780,6 +789,7 @@ export default function AdminProfiliPanel({
                         className="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
                       />
                     </label>
+                    )}
                     <label className="block text-xs font-medium uppercase text-zinc-600">
                       {copy.campoArea}
                       <input
@@ -1071,7 +1081,9 @@ export default function AdminProfiliPanel({
                 >
                   <summary className="cursor-pointer list-none px-4 py-3 flex flex-wrap items-center justify-between gap-2">
                     <span className="font-medium text-black">
-                      {p.societa ? (
+                      {ruoloHaSede(p.ruolo) ? (
+                        nomeSedeProfilo(p) || p.email || p.id
+                      ) : p.societa ? (
                         <>
                           {p.societa}
                           <span className="ml-2 text-xs font-normal text-gray-700">{p.nome_completo || ''}</span>
@@ -1197,11 +1209,11 @@ export default function AdminProfiliPanel({
                         >
                           <div className="order-1 grid grid-cols-1 md:grid-cols-2 gap-3">
                           <label className="block text-xs font-medium uppercase text-zinc-600">
-                            {copy.campoNome}
+                            {ruoloHaSede(p.ruolo) ? 'Sede' : copy.campoNome}
                             <input
-                              name="nome_completo"
+                              name={ruoloHaSede(p.ruolo) ? 'societa' : 'nome_completo'}
                               type="text"
-                              defaultValue={p.nome_completo ?? ''}
+                              defaultValue={ruoloHaSede(p.ruolo) ? nomeSedeProfilo(p) : (p.nome_completo ?? '')}
                               className="mt-1 w-full h-9 rounded-md border border-black bg-zinc-50 px-2 text-sm"
                             />
                           </label>
@@ -1236,6 +1248,7 @@ export default function AdminProfiliPanel({
                               className="mt-1 w-full h-9 rounded-md border border-black bg-zinc-50 px-2 text-sm"
                             />
                           </label>
+                          {ruoloHaSede(p.ruolo) ? null : (
                           <label className="block text-xs font-medium uppercase text-zinc-600">
                             {copy.campoSocieta}
                             <input
@@ -1245,6 +1258,7 @@ export default function AdminProfiliPanel({
                               className="mt-1 w-full h-9 rounded-md border border-black bg-zinc-50 px-2 text-sm"
                             />
                           </label>
+                          )}
                           <label className="block text-xs font-medium uppercase text-zinc-600">
                             {copy.campoArea}
                             <input
