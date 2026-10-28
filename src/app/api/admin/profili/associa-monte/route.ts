@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { createServiceRoleSupabase } from '@/utils/supabase/service-role'
-import { diffAssociazioneMonte } from '@/lib/associazioneMonte'
+import { diffFasceAssociazione, type FasciaScelta } from '@/lib/associazioneMonte'
 import { propagaAssociazioneSede } from '@/lib/propagaSeguitoSede'
 import type { ProfiloGerarchiaRow } from '@/lib/userHierarchy'
 import type { SupabaseClient } from '@supabase/supabase-js'
@@ -32,6 +32,7 @@ type Body = {
   profilo_id?: string
   sede_id?: string | null
   persona_id?: string | null
+  fasce?: { id?: string; sede_id?: string | null; persona_id?: string | null }[]
 }
 
 export async function POST(request: NextRequest) {
@@ -61,8 +62,6 @@ export async function POST(request: NextRequest) {
   }
 
   const profiloId = String(body.profilo_id ?? '').trim()
-  const sedeId = String(body.sede_id ?? '').trim() || null
-  const personaId = String(body.persona_id ?? '').trim() || null
   if (!profiloId) return jsonResponse(false, 'Profilo mancante', 400)
 
   const [{ data: profili }, { data: links }] = await Promise.all([
@@ -79,57 +78,50 @@ export async function POST(request: NextRequest) {
   const profilo = rows.find((p) => p.id === profiloId)
   if (!profilo) return jsonResponse(false, 'Profilo non trovato', 404)
 
-  const piano = diffAssociazioneMonte(profilo, rows, linkRows, sedeId, personaId)
-  if (!piano.ok) return jsonResponse(false, piano.message, 400)
-  const diff = piano.diff
-  const vuoto =
-    diff.rimuoviSedi.length === 0 &&
-    diff.rimuoviPersone.length === 0 &&
-    !diff.aggiungiSede &&
-    !diff.aggiungiPersona &&
-    diff.invitatoDa === undefined &&
-    diff.seguitoDa === undefined
-  if (vuoto) return jsonResponse(true, 'Associazione invariata', 200)
+  if (Array.isArray(body.fasce)) {
+    const scelte: FasciaScelta[] = body.fasce.map((fascia) => ({
+      id: String(fascia.id ?? '').trim(),
+      sedeId: String(fascia.sede_id ?? '').trim() || null,
+      personaId: String(fascia.persona_id ?? '').trim() || null,
+    }))
+    const piano = diffFasceAssociazione(profilo, rows, linkRows, scelte)
+    if (!piano.ok) return jsonResponse(false, piano.message, 400)
+    const diff = piano.diff
+    const vuoto = diff.rimuoviIds.length === 0 && diff.aggiungiIds.length === 0 && diff.invitatoDa === undefined
+    if (vuoto) return jsonResponse(true, 'Associazione invariata', 200)
 
-  const byId = new Map(rows.map((p) => [p.id, p]))
-
-  for (const id of diff.rimuoviPersone) {
-    const err = await scollega(db, profilo.id, id)
-    if (err) return jsonResponse(false, err.message, 500)
-    if (diff.propagaRemoveIds.includes(id)) {
-      const persona = byId.get(id)
+    for (const id of diff.rimuoviIds) {
+      const err = await scollega(db, profilo.id, id)
+      if (err) return jsonResponse(false, err.message, 500)
+      const persona = diff.propagaRemove.find((item) => item.id === id)
       if (persona) {
-        await propagaAssociazioneSede(db, { id: profilo.id, ruolo: profilo.ruolo }, { id: persona.id, ruolo: persona.ruolo }, 'remove')
+        await propagaAssociazioneSede(
+          db,
+          { id: profilo.id, ruolo: profilo.ruolo },
+          { id: persona.id, ruolo: persona.ruolo },
+          'remove',
+        )
       }
     }
-  }
-  for (const id of diff.rimuoviSedi) {
-    const err = await scollega(db, profilo.id, id)
-    if (err) return jsonResponse(false, err.message, 500)
-  }
-  if (diff.aggiungiSede) {
-    const err = await collega(db, profilo.id, diff.aggiungiSede)
-    if (err) return jsonResponse(false, err.message, 500)
-  }
-  if (diff.aggiungiPersona) {
-    const err = await collega(db, profilo.id, diff.aggiungiPersona)
-    if (err) return jsonResponse(false, err.message, 500)
-    if (diff.propagaAddId) {
-      const persona = byId.get(diff.propagaAddId)
+    for (const id of diff.aggiungiIds) {
+      const err = await collega(db, profilo.id, id)
+      if (err) return jsonResponse(false, err.message, 500)
+      const persona = diff.propagaAdd.find((item) => item.id === id)
       if (persona) {
-        await propagaAssociazioneSede(db, { id: profilo.id, ruolo: profilo.ruolo }, { id: persona.id, ruolo: persona.ruolo }, 'add')
+        await propagaAssociazioneSede(
+          db,
+          { id: profilo.id, ruolo: profilo.ruolo },
+          { id: persona.id, ruolo: persona.ruolo },
+          'add',
+        )
       }
     }
+    if (diff.invitatoDa !== undefined) {
+      const { error } = await db.from('profili').update({ invitato_da: diff.invitatoDa }).eq('id', profilo.id)
+      if (error) return jsonResponse(false, error.message, 500)
+    }
+    return jsonResponse(true, 'Associazione aggiornata', 200)
   }
 
-  if (diff.invitatoDa !== undefined) {
-    const { error } = await db.from('profili').update({ invitato_da: diff.invitatoDa }).eq('id', profilo.id)
-    if (error) return jsonResponse(false, error.message, 500)
-  }
-  if (diff.seguitoDa !== undefined) {
-    const { error } = await db.from('profili').update({ seguito_da: diff.seguitoDa }).eq('id', profilo.id)
-    if (error) return jsonResponse(false, error.message, 500)
-  }
-
-  return jsonResponse(true, 'Associazione aggiornata', 200)
+  return jsonResponse(false, 'Associazioni mancanti', 400)
 }

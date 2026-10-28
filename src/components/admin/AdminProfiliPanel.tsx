@@ -31,7 +31,7 @@ import {
 import { isAgenteLike } from '@/lib/catalogRoles'
 import { isEmailTecnica, ruoloConEmailDiLogin } from '@/lib/emailTecnica'
 import AssociazioneMonteCampi from '@/components/admin/AssociazioneMonteCampi'
-import { regolaAssociazioneMonte } from '@/lib/associazioneMonte'
+import { fasceAssociazione, regolaAssociazioneMonte } from '@/lib/associazioneMonte'
 
 import { useAppLocale } from '@/lib/useAppLocale'
 import { tDashboard } from '@/lib/i18n'
@@ -43,6 +43,14 @@ function ruoloHaSede(ruolo: string) {
 
 function nomeSedeProfilo(p: { societa: string | null; nome_completo: string | null }) {
   return (p.societa || p.nome_completo || '').trim()
+}
+
+function leggiFasce(fd: FormData, ruolo: string) {
+  return fasceAssociazione(ruolo).map((fascia) => ({
+    id: fascia.id,
+    sede_id: String(fd.get(`fascia_${fascia.id}_sede`) ?? '').trim() || null,
+    persona_id: String(fd.get(`fascia_${fascia.id}_persona`) ?? '').trim() || null,
+  }))
 }
 
 export type ProfiloGestioneRow = {
@@ -374,15 +382,17 @@ export default function AdminProfiliPanel({
     return true
   }
 
-  async function postAssociazioneMonte(profiloId: string, sedeId: string, personaId: string) {
+  async function postAssociazioneMonte(
+    profiloId: string,
+    fasce: { id: string; sede_id: string | null; persona_id: string | null }[],
+  ) {
     const res = await fetch('/api/admin/profili/associa-monte', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'same-origin',
       body: JSON.stringify({
         profilo_id: profiloId,
-        sede_id: sedeId || null,
-        persona_id: personaId || null,
+        fasce,
       }),
     })
     const data = (await res.json().catch(() => null)) as { ok?: boolean; message?: string } | null
@@ -601,10 +611,7 @@ export default function AdminProfiliPanel({
         profili={profiliGerarchia}
         links={links}
         ruoloLabel={(ruolo) => tRuolo(locale, ruolo)}
-        sedeLabel={copy.associaSede}
-        sedeVuotaLabel={copy.associaSedeVuota}
         personaLabel={copy.associaPersona}
-        personaVuotaLabel={copy.associaPersonaVuota}
         inputClassName={inputClassName}
       />
     )
@@ -730,13 +737,9 @@ export default function AdminProfiliPanel({
                     onSubmit={async (e) => {
                       e.preventDefault()
                       const fd = new FormData(e.currentTarget)
-                      const ok = await postUpdate(readForm(fd, p.id, p.email), fd.has('monte_sede_id') ? false : true)
-                      if (!ok || !fd.has('monte_sede_id')) return
-                      await postAssociazioneMonte(
-                        p.id,
-                        String(fd.get('monte_sede_id') ?? ''),
-                        String(fd.get('monte_persona_id') ?? ''),
-                      )
+                      const ok = await postUpdate(readForm(fd, p.id, p.email), fd.has('fascia_associazione') ? false : true)
+                      if (!ok || !fd.has('fascia_associazione')) return
+                      await postAssociazioneMonte(p.id, leggiFasce(fd, p.ruolo))
                     }}
                   >
                     <label className="block text-xs font-medium uppercase text-zinc-600">
@@ -1198,13 +1201,9 @@ export default function AdminProfiliPanel({
                           onSubmit={async (e) => {
                             e.preventDefault()
                             const fd = new FormData(e.currentTarget)
-                            const ok = await postUpdate(readForm(fd, p.id, p.email), fd.has('monte_sede_id') ? false : true)
-                            if (!ok || !fd.has('monte_sede_id')) return
-                            await postAssociazioneMonte(
-                              p.id,
-                              String(fd.get('monte_sede_id') ?? ''),
-                              String(fd.get('monte_persona_id') ?? ''),
-                            )
+                            const ok = await postUpdate(readForm(fd, p.id, p.email), fd.has('fascia_associazione') ? false : true)
+                            if (!ok || !fd.has('fascia_associazione')) return
+                            await postAssociazioneMonte(p.id, leggiFasce(fd, p.ruolo))
                           }}
                         >
                           <div className="order-1 grid grid-cols-1 md:grid-cols-2 gap-3">

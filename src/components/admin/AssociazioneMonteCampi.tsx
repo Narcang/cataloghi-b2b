@@ -2,10 +2,11 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import {
-  associazioneMonteAttuale,
-  haPersonaAssociazione,
-  personeDisponibili,
-  sediDisponibili,
+  fasceAssociazione,
+  personeFascia,
+  sediFascia,
+  selezioneFascia,
+  type FasciaAssociazione,
 } from '@/lib/associazioneMonte'
 import { profiloGerarchiaDisplayLabel, type ProfiloGerarchiaRow } from '@/lib/userHierarchy'
 
@@ -14,27 +15,29 @@ type Props = {
   profili: ProfiloGerarchiaRow[]
   links: { utente_id: string; operatore_id: string }[]
   ruoloLabel: (ruolo: string) => string
-  sedeLabel: string
-  sedeVuotaLabel: string
   personaLabel: string
-  personaVuotaLabel: string
   inputClassName: string
 }
 
-export default function AssociazioneMonteCampi({
+function etichettaPersona(fascia: FasciaAssociazione, personaLabel: string): string {
+  if (fascia.personaRuoli.includes('distributore') || fascia.personaRuoli.includes('partner_dipendente')) {
+    return 'Venditori e promoter'
+  }
+  return personaLabel
+}
+
+function RigaFascia({
+  fascia,
   profilo,
   profili,
   links,
   ruoloLabel,
-  sedeLabel,
-  sedeVuotaLabel,
   personaLabel,
-  personaVuotaLabel,
   inputClassName,
-}: Props) {
+}: Props & { fascia: FasciaAssociazione }) {
   const attuale = useMemo(
-    () => associazioneMonteAttuale(profilo, profili, links),
-    [profilo, profili, links],
+    () => selezioneFascia(fascia, profilo, profili, links),
+    [fascia, profilo, profili, links],
   )
   const [sedeId, setSedeId] = useState(attuale.sedeId ?? '')
   const [personaId, setPersonaId] = useState(attuale.personaId ?? '')
@@ -42,10 +45,10 @@ export default function AssociazioneMonteCampi({
   useEffect(() => {
     setSedeId(attuale.sedeId ?? '')
     setPersonaId(attuale.personaId ?? '')
-  }, [attuale.sedeId, attuale.personaId, profilo.id])
+  }, [attuale.sedeId, attuale.personaId, profilo.id, fascia.id])
 
   const sedi = useMemo(() => {
-    const lista = sediDisponibili(profilo, profili, ruoloLabel)
+    const lista = sediFascia(fascia, profilo, profili, ruoloLabel)
     if (attuale.sedeId && !lista.some((sede) => sede.id === attuale.sedeId)) {
       const extra = profili.find((p) => p.id === attuale.sedeId)
       if (extra) {
@@ -57,13 +60,14 @@ export default function AssociazioneMonteCampi({
       }
     }
     return lista
-  }, [profilo, profili, ruoloLabel, attuale.sedeId])
-  const conPersona = haPersonaAssociazione(profilo.ruolo)
+  }, [fascia, profilo, profili, ruoloLabel, attuale.sedeId])
+
+  const conPersona = fascia.personaRuoli.length > 0
   const persone = useMemo(() => {
     if (!conPersona || !sedeId) return []
     const includi = sedeId === (attuale.sedeId ?? '') ? attuale.personaId : null
-    return personeDisponibili(profilo, sedeId, profili, links, ruoloLabel, includi)
-  }, [conPersona, sedeId, profilo, profili, links, ruoloLabel, attuale.sedeId, attuale.personaId])
+    return personeFascia(fascia, sedeId, profilo, profili, links, ruoloLabel, includi)
+  }, [conPersona, sedeId, fascia, profilo, profili, links, ruoloLabel, attuale.sedeId, attuale.personaId])
 
   function cambiaSede(next: string) {
     setSedeId(next)
@@ -72,31 +76,23 @@ export default function AssociazioneMonteCampi({
       return
     }
     const includi = next === (attuale.sedeId ?? '') ? attuale.personaId : null
-    const opzioni = personeDisponibili(profilo, next, profili, links, ruoloLabel, includi)
+    const opzioni = personeFascia(fascia, next, profilo, profili, links, ruoloLabel, includi)
     if (!opzioni.some((p) => p.id === personaId)) setPersonaId('')
   }
-
-  const sedeScelta = sedi.find((sede) => sede.id === sedeId)
-  const ruoliPossibili = [...new Set(sedi.map((sede) => sede.ruolo))]
-  const etichettaCollegamento = sedeScelta
-    ? ruoloLabel(sedeScelta.ruolo)
-    : ruoliPossibili.length === 1
-      ? ruoloLabel(ruoliPossibili[0])
-      : sedeLabel
 
   return (
     <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-3">
       <label className="block text-xs font-medium uppercase text-zinc-600">
-        {etichettaCollegamento}
+        {ruoloLabel(fascia.sedeRuolo)}
         <select
-          name="monte_sede_id"
+          name={`fascia_${fascia.id}_sede`}
           value={sedeId}
           onChange={(e) => cambiaSede(e.target.value)}
           onTouchStart={(e) => e.stopPropagation()}
           onMouseDown={(e) => e.stopPropagation()}
           className={inputClassName}
         >
-          <option value="">{sedeVuotaLabel}</option>
+          <option value="">Nessuno</option>
           {sedi.map((sede) => (
             <option key={sede.id} value={sede.id}>
               {sede.label}
@@ -106,9 +102,9 @@ export default function AssociazioneMonteCampi({
       </label>
       {conPersona ? (
         <label className="block text-xs font-medium uppercase text-zinc-600">
-          {personaLabel}
+          {etichettaPersona(fascia, personaLabel)}
           <select
-            name="monte_persona_id"
+            name={`fascia_${fascia.id}_persona`}
             value={persone.some((p) => p.id === personaId) ? personaId : ''}
             onChange={(e) => setPersonaId(e.target.value)}
             onTouchStart={(e) => e.stopPropagation()}
@@ -116,7 +112,7 @@ export default function AssociazioneMonteCampi({
             disabled={!sedeId}
             className={inputClassName}
           >
-            <option value="">{personaVuotaLabel}</option>
+            <option value="">Nessuno</option>
             {persone.map((persona) => (
               <option key={persona.id} value={persona.id}>
                 {persona.label}
@@ -125,8 +121,22 @@ export default function AssociazioneMonteCampi({
           </select>
         </label>
       ) : (
-        <input type="hidden" name="monte_persona_id" value="" />
+        <input type="hidden" name={`fascia_${fascia.id}_persona`} value="" />
       )}
+    </div>
+  )
+}
+
+export default function AssociazioneMonteCampi(props: Props) {
+  const fasce = fasceAssociazione(props.profilo.ruolo)
+  if (fasce.length === 0) return null
+
+  return (
+    <div className="md:col-span-2 space-y-3">
+      <input type="hidden" name="fascia_associazione" value="1" />
+      {fasce.map((fascia) => (
+        <RigaFascia key={fascia.id} fascia={fascia} {...props} />
+      ))}
     </div>
   )
 }

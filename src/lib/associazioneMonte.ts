@@ -124,7 +124,6 @@ function ordina(lista: ProfiloGerarchiaRow[]): ProfiloGerarchiaRow[] {
   )
 }
 
-/** Cambiare la persona su una sede sposta venditori, promoter e studi di quella sede. */
 export function personaSpostaLaSede(profiloRuolo: string, personaRuolo: string): boolean {
   if (profiloRuolo === 'rivenditore') return personaRuolo === 'agente' || personaRuolo === 'back_office'
   if (profiloRuolo === 'studio') {
@@ -320,6 +319,207 @@ export function diffAssociazioneMonte(
       seguitoDa,
       propagaRemoveIds,
       propagaAddId,
+    },
+  }
+}
+
+export type FasciaAssociazione = {
+  id: string
+  sedeRuolo: string
+  personaRuoli: string[]
+}
+
+const FASCIA_MANAGER: FasciaAssociazione = { id: 'manager', sedeRuolo: 'manager', personaRuoli: [] }
+const FASCIA_AGENZIA: FasciaAssociazione = { id: 'agenzia', sedeRuolo: 'agenzia', personaRuoli: [] }
+const FASCIA_AGENZIA_PERSONE: FasciaAssociazione = {
+  id: 'agenzia',
+  sedeRuolo: 'agenzia',
+  personaRuoli: ['agente', 'back_office'],
+}
+const FASCIA_RIVENDITORE: FasciaAssociazione = { id: 'rivenditore', sedeRuolo: 'rivenditore', personaRuoli: [] }
+const FASCIA_RIVENDITORE_PERSONE: FasciaAssociazione = {
+  id: 'rivenditore',
+  sedeRuolo: 'rivenditore',
+  personaRuoli: ['distributore', 'partner_dipendente'],
+}
+const FASCIA_STUDIO: FasciaAssociazione = { id: 'studio', sedeRuolo: 'studio', personaRuoli: [] }
+
+/** Righe di associazione verso l'alto, dal ruolo più alto al più vicino. */
+export function fasceAssociazione(ruolo: string | null | undefined): FasciaAssociazione[] {
+  switch (ruolo) {
+    case 'agenzia':
+      return [FASCIA_MANAGER]
+    case 'agente':
+    case 'back_office':
+      return [FASCIA_MANAGER, FASCIA_AGENZIA]
+    case 'rivenditore':
+      return [FASCIA_MANAGER, FASCIA_AGENZIA_PERSONE]
+    case 'distributore':
+    case 'partner_dipendente':
+      return [FASCIA_MANAGER, FASCIA_AGENZIA_PERSONE, FASCIA_RIVENDITORE]
+    case 'studio':
+      return [FASCIA_MANAGER, FASCIA_AGENZIA_PERSONE, FASCIA_RIVENDITORE_PERSONE]
+    case 'studio_associato':
+      return [FASCIA_MANAGER, FASCIA_AGENZIA_PERSONE, FASCIA_RIVENDITORE_PERSONE, FASCIA_STUDIO]
+    default:
+      return []
+  }
+}
+
+function profiloVisibile(p: ProfiloGerarchiaRow): boolean {
+  return p.ruolo !== 'free' && p.registrazione_approvata !== false
+}
+
+export function sediFascia(
+  fascia: FasciaAssociazione,
+  profilo: ProfiloGerarchiaRow,
+  profili: ProfiloGerarchiaRow[],
+  ruoloLabel: (ruolo: string) => string,
+): VoceAssociazione[] {
+  const lista = profili.filter((p) => p.id !== profilo.id && p.ruolo === fascia.sedeRuolo && profiloVisibile(p))
+  return ordina(lista).map((p) => voce(p, ruoloLabel))
+}
+
+export function personeFascia(
+  fascia: FasciaAssociazione,
+  sedeId: string,
+  profilo: ProfiloGerarchiaRow,
+  profili: ProfiloGerarchiaRow[],
+  links: Link[],
+  ruoloLabel: (ruolo: string) => string,
+  includiId?: string | null,
+): VoceAssociazione[] {
+  if (!fascia.personaRuoli.length || !sedeId) return []
+  const sede = profili.find((p) => p.id === sedeId && p.ruolo === fascia.sedeRuolo)
+  if (!sede) return []
+  const lista = profili.filter(
+    (p) =>
+      p.id !== profilo.id &&
+      p.id !== sede.id &&
+      fascia.personaRuoli.includes(p.ruolo) &&
+      profiloVisibile(p) &&
+      appartieneAllaSede(p, sede.id, links),
+  )
+  if (includiId && !lista.some((p) => p.id === includiId)) {
+    const extra = profili.find(
+      (p) => p.id === includiId && fascia.personaRuoli.includes(p.ruolo) && p.id !== profilo.id,
+    )
+    if (extra) lista.push(extra)
+  }
+  const unici = new Map<string, ProfiloGerarchiaRow>()
+  for (const p of lista) unici.set(p.id, p)
+  return ordina([...unici.values()]).map((p) => voce(p, ruoloLabel))
+}
+
+export function selezioneFascia(
+  fascia: FasciaAssociazione,
+  profilo: ProfiloGerarchiaRow,
+  profili: ProfiloGerarchiaRow[],
+  links: Link[],
+): { sedeId: string | null; personaId: string | null } {
+  const segue = chiSegueQuestoProfilo(profilo, profili, links)
+  const sedi = segue.filter((p) => p.ruolo === fascia.sedeRuolo)
+  const sede = sedi.find((p) => p.id === profilo.invitato_da) ?? sedi[0] ?? null
+  const persone = segue.filter((p) => fascia.personaRuoli.includes(p.ruolo))
+  const persona = sede
+    ? (persone.find((p) => appartieneAllaSede(p, sede.id, links)) ?? persone[0] ?? null)
+    : (persone[0] ?? null)
+  return { sedeId: sede?.id ?? null, personaId: persona?.id ?? null }
+}
+
+export type FasciaScelta = { id: string; sedeId: string | null; personaId: string | null }
+
+export type DiffFasceAssociazione = {
+  rimuoviIds: string[]
+  aggiungiIds: string[]
+  propagaRemove: { id: string; ruolo: string }[]
+  propagaAdd: { id: string; ruolo: string }[]
+  invitatoDa: string | null | undefined
+}
+
+export function diffFasceAssociazione(
+  profilo: ProfiloGerarchiaRow,
+  profili: ProfiloGerarchiaRow[],
+  links: Link[],
+  scelte: FasciaScelta[],
+): { ok: true; diff: DiffFasceAssociazione } | { ok: false; message: string } {
+  const fasce = fasceAssociazione(profilo.ruolo)
+  if (fasce.length === 0) return { ok: false, message: 'Questo ruolo non ha associazioni verso l’alto' }
+
+  const byId = new Map(profili.map((p) => [p.id, p]))
+  const segue = chiSegueQuestoProfilo(profilo, profili, links)
+  const rimuovi = new Set<string>()
+  const aggiungi = new Set<string>()
+  const propagaRemove: { id: string; ruolo: string }[] = []
+  const propagaAdd: { id: string; ruolo: string }[] = []
+  const sediScelte: (string | null)[] = []
+
+  for (const fascia of fasce) {
+    const scelta = scelte.find((item) => item.id === fascia.id)
+    const sedeId = scelta?.sedeId?.trim() || null
+    let personaId = fascia.personaRuoli.length > 0 ? scelta?.personaId?.trim() || null : null
+    const sede = sedeId ? (byId.get(sedeId) ?? null) : null
+    if (sedeId && !sede) return { ok: false, message: 'Profilo da associare non trovato' }
+    if (sede && sede.id === profilo.id) return { ok: false, message: 'Il collegamento deve essere un altro profilo' }
+    if (sede && sede.ruolo !== fascia.sedeRuolo) {
+      return { ok: false, message: 'Questo profilo non si può associare in questa casella' }
+    }
+    if (!sede) personaId = null
+
+    const persona = personaId ? (byId.get(personaId) ?? null) : null
+    if (personaId && !persona) return { ok: false, message: 'Persona non trovata' }
+    if (persona && !fascia.personaRuoli.includes(persona.ruolo)) {
+      return { ok: false, message: 'Questa persona non si può associare in questa casella' }
+    }
+    if (persona && sede) {
+      const attuale = selezioneFascia(fascia, profilo, profili, links)
+      const consentite = new Set(
+        personeFascia(fascia, sede.id, profilo, profili, links, (ruolo) => ruolo).map((p) => p.id),
+      )
+      const giaQuesta = persona.id === attuale.personaId && sede.id === attuale.sedeId
+      if (!consentite.has(persona.id) && !giaQuesta) {
+        return { ok: false, message: 'Questa persona non fa parte della sede scelta' }
+      }
+    }
+
+    const sediAttuali = segue.filter((p) => p.ruolo === fascia.sedeRuolo)
+    const personeAttuali = segue.filter((p) => fascia.personaRuoli.includes(p.ruolo))
+    for (const attuale of sediAttuali) {
+      if (attuale.id !== sede?.id) rimuovi.add(attuale.id)
+    }
+    for (const attuale of personeAttuali) {
+      if (attuale.id !== persona?.id) rimuovi.add(attuale.id)
+    }
+    if (sede && !collegati(profilo.id, sede.id, links)) aggiungi.add(sede.id)
+    if (persona && !collegati(profilo.id, persona.id, links)) aggiungi.add(persona.id)
+
+    for (const id of personeAttuali.map((p) => p.id)) {
+      if (id === persona?.id) continue
+      const vecchia = byId.get(id)
+      if (vecchia && personaSpostaLaSede(profilo.ruolo, vecchia.ruolo)) {
+        propagaRemove.push({ id: vecchia.id, ruolo: vecchia.ruolo })
+      }
+    }
+    if (persona && !collegati(profilo.id, persona.id, links) && personaSpostaLaSede(profilo.ruolo, persona.ruolo)) {
+      propagaAdd.push({ id: persona.id, ruolo: persona.ruolo })
+    }
+
+    sediScelte.push(sede?.id ?? null)
+  }
+
+  for (const id of aggiungi) rimuovi.delete(id)
+
+  const piuVicina = [...sediScelte].reverse().find((id) => id) ?? null
+  const invitatoDa = piuVicina === (profilo.invitato_da ?? null) ? undefined : piuVicina
+
+  return {
+    ok: true,
+    diff: {
+      rimuoviIds: [...rimuovi],
+      aggiungiIds: [...aggiungi],
+      propagaRemove,
+      propagaAdd,
+      invitatoDa,
     },
   }
 }
