@@ -17,13 +17,11 @@ import {
 } from '@/lib/profiloSpecializzazioneOpzioni'
 import {
   associatiDirettiSectionLabel,
-  chiSegueQuestoProfilo,
   getChildrenProfiles,
   isRivenditoreManagedByAgenzia,
   isRivenditoreManagedByAgente,
   profiloGerarchiaDisplayLabel,
   profiloToGerarchiaRow,
-  ruoloChipBorderClass,
   resolveAgenziaParentForAgent,
   resolveRivenditoreParentForDistributore,
   type ProfiloGerarchiaRow,
@@ -217,7 +215,6 @@ export default function AdminProfiliPanel({
   const copy = tAdmin(locale)
   const dashCopy = tDashboard(locale)
   const [message, setMessage] = useState<string | null>(null)
-  const [unlinkingId, setUnlinkingId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [specializzazioneOpzioni, setSpecializzazioneOpzioni] =
@@ -453,26 +450,6 @@ export default function AdminProfiliPanel({
     return true
   }
 
-  async function dissociaSeguito(profilo: ProfiloGestioneRow, parent: ProfiloGerarchiaRow) {
-    const key = `${profilo.id}:${parent.id}`
-    setUnlinkingId(key)
-    try {
-      const ok = await postLink('remove', parent.id, profilo.id)
-      if (!ok) return
-      const seguito = (profilo.seguito_da ?? '').trim().toLocaleLowerCase('it')
-      const nome = (parent.nome_completo ?? '').trim().toLocaleLowerCase('it')
-      const ruoloConSeguito =
-        profilo.ruolo === 'rivenditore' ||
-        profilo.ruolo === 'studio' ||
-        profilo.ruolo === 'studio_associato'
-      if (ruoloConSeguito && seguito && nome && seguito === nome) {
-        await postUpdate({ profilo_id: profilo.id, seguito_da: null })
-      }
-    } finally {
-      setUnlinkingId(null)
-    }
-  }
-
   function readForm(fd: FormData, profiloId: string, emailAttuale?: string | null) {
     const nome_completo = String(fd.get('nome_completo') ?? '').trim() || null
     const emailInserita = String(fd.get('email') ?? '').trim().toLowerCase()
@@ -502,7 +479,7 @@ export default function AdminProfiliPanel({
     }
     if (ruolo === 'rivenditore') {
       Object.assign(body, readRivenditoreCampiFromFormData(fd))
-    } else if (ruolo === 'studio' || ruolo === 'studio_associato') {
+    } else if ((ruolo === 'studio' || ruolo === 'studio_associato') && fd.has('seguito_da')) {
       body.seguito_da = String(fd.get('seguito_da') ?? '').trim() || null
     }
     if (ruolo === 'agenzia') {
@@ -527,77 +504,6 @@ export default function AdminProfiliPanel({
       Object.assign(body, readAgenziaCampiFromFormData(fd))
     }
     return body
-  }
-
-  function bloccoSeguitoDa(
-    profilo: ProfiloGestioneRow,
-    seguaci: ProfiloGerarchiaRow[],
-    conCampoTesto: boolean,
-    inputClassName: string,
-  ) {
-    return (
-      <div className="block text-xs font-medium uppercase text-zinc-600">
-        {copy.seguitoDa}
-        <div className="mt-1 space-y-2 font-normal normal-case">
-          {seguaci.length === 0 ? (
-            <p className="text-sm text-zinc-500">{copy.nessunCollegamento}</p>
-          ) : (
-            <ul className="flex flex-wrap gap-2">
-              {seguaci.map((parent) => {
-                const societa = parent.societa?.trim()
-                const nome = parent.nome_completo?.trim()
-                const persona =
-                  societa &&
-                  nome &&
-                  nome.toLocaleLowerCase('it') !== societa.toLocaleLowerCase('it')
-                    ? `${societa} · ${nome}`
-                    : societa || nome || parent.email || 'Utente'
-                const busy = unlinkingId === `${profilo.id}:${parent.id}`
-                const puoDissociare =
-                  canCreateAssociati &&
-                  !readOnly &&
-                  profilo.id !== currentUserId &&
-                  profilo.ruolo !== 'admin'
-                return (
-                  <li
-                    key={parent.id}
-                    className={`inline-flex items-center gap-1 rounded-full border-2 bg-white pl-3 pr-1 py-1 text-sm text-zinc-800 ${ruoloChipBorderClass(parent.ruolo)}`}
-                  >
-                    <span>
-                      {persona}
-                      <span className="ml-1 text-xs text-zinc-500">
-                        ({tRuolo(locale, parent.ruolo)})
-                      </span>
-                    </span>
-                    {puoDissociare ? (
-                      <button
-                        type="button"
-                        disabled={busy}
-                        aria-label="Dissocia"
-                        title="Dissocia"
-                        onClick={() => void dissociaSeguito(profilo, parent)}
-                        className="ml-1 inline-flex h-6 w-6 items-center justify-center rounded-full text-zinc-600 hover:bg-red-50 hover:text-red-700 disabled:opacity-50"
-                      >
-                        ×
-                      </button>
-                    ) : null}
-                  </li>
-                )
-              })}
-            </ul>
-          )}
-          {conCampoTesto ? (
-            <input
-              name="seguito_da"
-              type="text"
-              placeholder={copy.placeholderSeguito}
-              defaultValue={profilo.seguito_da ?? ''}
-              className={inputClassName}
-            />
-          ) : null}
-        </div>
-      </div>
-    )
   }
 
   function campiAssociazione(profilo: ProfiloGestioneRow, inputClassName: string) {
@@ -818,16 +724,6 @@ export default function AdminProfiliPanel({
                       </select>
                     </label>
                     {campiAssociazione(p, 'mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm')}
-                    {bloccoSeguitoDa(
-                      p,
-                      chiSegueQuestoProfilo(
-                        profiloToGerarchiaRow(p, p.invitato_da ?? invitatoDaById.get(p.id) ?? null),
-                        profiliGerarchia,
-                        links,
-                      ),
-                      p.ruolo === 'rivenditore' || p.ruolo === 'studio' || p.ruolo === 'studio_associato',
-                      'w-full h-9 rounded-md border border-black bg-white px-2 text-sm',
-                    )}
                     <label className="md:col-span-2 flex items-center gap-2 text-sm text-zinc-800">
                       <input type="checkbox" name="registrazione_approvata" value="on" defaultChecked={false} className="rounded border-black" />
                       {copy.approvaReg}
@@ -1039,7 +935,6 @@ export default function AdminProfiliPanel({
                 : null
             const riferimentoInvito = agenteRiferimento ?? venditoreRiferimento
             const associatiLabel = associatiDirettiSectionLabel(p.ruolo)
-            const chiSegue = chiSegueQuestoProfilo(profiloGerarchia, profiliGerarchia, links)
             const managerEditSpecializzazione =
               profiloReadOnly &&
               canEditSpecializzazione &&
@@ -1109,7 +1004,6 @@ export default function AdminProfiliPanel({
                   <div className="border-t border-black/10 px-4 py-4 flex flex-col gap-4 bg-white">
                     {editSpecializzazione ? (
                       <>
-                        {bloccoSeguitoDa(p, chiSegue, false, '')}
                         <p className="text-sm text-zinc-600">
                           {rivenditoreEditEsterno
                             ? copy.editRivenditoreHelp
@@ -1185,7 +1079,6 @@ export default function AdminProfiliPanel({
                       </>
                     ) : profiloReadOnly ? (
                       <>
-                        {bloccoSeguitoDa(p, chiSegue, false, '')}
                         <p className="text-sm text-zinc-600">
                         {agenziaRivenditoriMode
                           ? copy.profiloSolaLettura
@@ -1283,12 +1176,6 @@ export default function AdminProfiliPanel({
                           </label>
                           {campiAssociazione(p, 'mt-1 w-full h-9 rounded-md border border-black bg-zinc-50 px-2 text-sm')}
                           {campiGiroTelefonata(p, 'mt-1 w-full h-9 rounded-md border border-black bg-zinc-50 px-2 text-sm')}
-                          {bloccoSeguitoDa(
-                            p,
-                            chiSegue,
-                            p.ruolo === 'rivenditore' || p.ruolo === 'studio' || p.ruolo === 'studio_associato',
-                            'w-full h-9 rounded-md border border-black bg-zinc-50 px-2 text-sm',
-                          )}
                           </div>
                           <div className="order-2 space-y-3">
                           <label className="flex items-center gap-2 text-sm text-zinc-800">
