@@ -311,14 +311,18 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const opzioniClient = svc ?? supabase
-  const opzioniSpecializzazione = await loadProfiloSpecializzazioneOpzioni(opzioniClient)
-  const allowedSelect = {
-    campioni: opzioniToAllowedSet(opzioniSpecializzazione.campioni),
-    cataloghi: opzioniToAllowedSet(opzioniSpecializzazione.cataloghi),
-    espositori: opzioniToAllowedSet(opzioniSpecializzazione.espositori),
-    box: opzioniToAllowedSet(opzioniSpecializzazione.box),
-  }
+  const haSpecializzazione = ruoloEffettivo === 'rivenditore' || ruoloEffettivo === 'agenzia'
+  const opzioniSpecializzazione = haSpecializzazione
+    ? await loadProfiloSpecializzazioneOpzioni(svc ?? supabase)
+    : null
+  const allowedSelect = opzioniSpecializzazione
+    ? {
+        campioni: opzioniToAllowedSet(opzioniSpecializzazione.campioni),
+        cataloghi: opzioniToAllowedSet(opzioniSpecializzazione.cataloghi),
+        espositori: opzioniToAllowedSet(opzioniSpecializzazione.espositori),
+        box: opzioniToAllowedSet(opzioniSpecializzazione.box),
+      }
+    : null
 
   if (
     (ruoloEffettivo === 'studio' || ruoloEffettivo === 'studio_associato') &&
@@ -328,7 +332,7 @@ export async function POST(request: NextRequest) {
       body.seguito_da === null ? null : String(body.seguito_da).trim() || null
   }
 
-  if (ruoloEffettivo === 'rivenditore') {
+  if (ruoloEffettivo === 'rivenditore' && allowedSelect) {
     const rivenditoreCampi = readRivenditoreCampiFromBody(body as Record<string, unknown>)
     if ('seguito_da' in rivenditoreCampi) {
       patch.seguito_da = rivenditoreCampi.seguito_da ?? null
@@ -360,7 +364,7 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  if (ruoloEffettivo === 'agenzia') {
+  if (ruoloEffettivo === 'agenzia' && allowedSelect) {
     for (const field of ['agenzia_campione_1', 'agenzia_campione_2'] as const) {
       const err = applySelectPatch(
         patch,
@@ -529,7 +533,8 @@ export async function POST(request: NextRequest) {
   const loginEmail = typeof patch.email === 'string' ? patch.email.trim().toLowerCase() : ''
   let loginEmailAggiornata = false
   let passwordImpostata = false
-  if (loginEmail.includes('@') || passwordNuova) {
+  const emailLoginDiversa = loginEmail.includes('@') && loginEmail !== emailProfiloAttuale
+  if (emailLoginDiversa || passwordNuova) {
     if (!serviceRole) {
       return jsonResponse(false, 'Profilo salvato, ma manca la configurazione per aggiornare l’email di login', 500)
     }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { ChevronDown, ChevronRight, Users, UserCheck } from 'lucide-react'
 import CreaAssociatoManuale from '@/components/admin/CreaAssociatoManuale'
 import LinkPasswordUtente from '@/components/admin/LinkPasswordUtente'
@@ -26,7 +26,7 @@ import {
 import { isAgenteLike } from '@/lib/catalogRoles'
 import { isEmailTecnica, ruoloConEmailDiLogin } from '@/lib/emailTecnica'
 import AssociazioneMonteCampi from '@/components/admin/AssociazioneMonteCampi'
-import { fasceAssociazione, regolaAssociazioneMonte } from '@/lib/associazioneMonte'
+import { fasceAssociazione, regolaAssociazioneMonte, selezioneFascia } from '@/lib/associazioneMonte'
 
 import { useAppLocale } from '@/lib/useAppLocale'
 import { tDashboard } from '@/lib/i18n'
@@ -46,6 +46,20 @@ function leggiFasce(fd: FormData, ruolo: string) {
     sede_id: String(fd.get(`fascia_${fascia.id}_sede`) ?? '').trim() || null,
     persona_id: String(fd.get(`fascia_${fascia.id}_persona`) ?? '').trim() || null,
   }))
+}
+
+function fasceInvariate(
+  profilo: ProfiloGerarchiaRow,
+  profili: ProfiloGerarchiaRow[],
+  links: { utente_id: string; operatore_id: string }[],
+  scelte: { id: string; sede_id: string | null; persona_id: string | null }[],
+) {
+  return fasceAssociazione(profilo.ruolo).every((fascia) => {
+    const scelta = scelte.find((item) => item.id === fascia.id)
+    const attuale = selezioneFascia(fascia, profilo, profili, links)
+    const persona = fascia.personaRuoli.length > 0 ? (scelta?.persona_id ?? null) : null
+    return (scelta?.sede_id ?? null) === (attuale.sedeId ?? null) && persona === (attuale.personaId ?? null)
+  })
 }
 
 export type ProfiloGestioneRow = {
@@ -214,6 +228,9 @@ export default function AdminProfiliPanel({
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [savingId, setSavingId] = useState<string | null>(null)
+  const [isRefreshing, startRefresh] = useTransition()
+  const salvaPermessiById = useRef(new Map<string, () => Promise<boolean>>())
   const [specializzazioneOpzioni, setSpecializzazioneOpzioni] =
     useState<OpzioniSpecializzazioneMap>(DEFAULT_SPECIALIZZAZIONE_OPZIONI)
   const [ruoloAttivo, setRuoloAttivo] = useState<RuoloTabId>(
@@ -371,6 +388,7 @@ export default function AdminProfiliPanel({
   async function postAssociazioneMonte(
     profiloId: string,
     fasce: { id: string; sede_id: string | null; persona_id: string | null }[],
+    refresh = true,
   ) {
     const res = await fetch('/api/admin/profili/associa-monte', {
       method: 'POST',
@@ -385,11 +403,43 @@ export default function AdminProfiliPanel({
     if (!res.ok || !data?.ok) {
       setMessage(null)
       setError(data?.message ?? 'Associazione non salvata')
-      router.refresh()
+      if (refresh) router.refresh()
       return false
     }
-    router.refresh()
+    if (refresh) router.refresh()
     return true
+  }
+
+  async function salvaScheda(
+    profiloId: string,
+    fd: FormData,
+    emailAttuale: string | null | undefined,
+    ruolo: string,
+    profilo: ProfiloGerarchiaRow,
+  ) {
+    setSavingId(profiloId)
+    try {
+      const fasce = fd.has('fascia_associazione') ? leggiFasce(fd, ruolo) : null
+      const aggiornaFasce = Boolean(fasce && !fasceInvariate(profilo, profiliGerarchia, links, fasce))
+      const salvaPermessi = salvaPermessiById.current.get(profiloId)
+      const [ok, permessiOk] = await Promise.all([
+        postUpdate(readForm(fd, profiloId, emailAttuale), false),
+        salvaPermessi ? salvaPermessi() : Promise.resolve(true),
+      ])
+      if (!ok) return
+      if (aggiornaFasce && fasce) {
+        const assocOk = await postAssociazioneMonte(profiloId, fasce, false)
+        if (!assocOk) return
+      }
+      if (!permessiOk) {
+        setError('Profilo salvato, ma la dashboard non è stata aggiornata')
+      }
+      startRefresh(() => {
+        router.refresh()
+      })
+    } finally {
+      setSavingId(null)
+    }
   }
 
   async function postDelete(profiloId: string) {
@@ -614,9 +664,13 @@ export default function AdminProfiliPanel({
                     onSubmit={async (e) => {
                       e.preventDefault()
                       const fd = new FormData(e.currentTarget)
-                      const ok = await postUpdate(readForm(fd, p.id, p.email), fd.has('fascia_associazione') ? false : true)
-                      if (!ok || !fd.has('fascia_associazione')) return
-                      await postAssociazioneMonte(p.id, leggiFasce(fd, p.ruolo))
+                      await salvaScheda(
+                        p.id,
+                        fd,
+                        p.email,
+                        p.ruolo,
+                        profiloToGerarchiaRow(p, p.invitato_da ?? invitatoDaById.get(p.id) ?? null),
+                      )
                     }}
                   >
                     <label className="block text-xs font-medium uppercase text-zinc-600">
@@ -754,10 +808,10 @@ export default function AdminProfiliPanel({
                     <div className="md:col-span-2 flex flex-wrap items-center gap-3">
                       <button
                         type="submit"
-                        disabled={deletingId === p.id}
+                        disabled={deletingId === p.id || savingId !== null || isRefreshing}
                         className="h-10 rounded-lg bg-[#060d41] text-white px-4 text-sm font-semibold hover:bg-[#0a155a] disabled:opacity-50"
                       >
-                        {copy.salvaConferma}
+                        {savingId === p.id || isRefreshing ? copy.salvataggio : copy.salvaConferma}
                       </button>
                       {p.ruolo !== 'admin' && p.id !== currentUserId ? (
                         <button
@@ -1063,9 +1117,7 @@ export default function AdminProfiliPanel({
                           onSubmit={async (e) => {
                             e.preventDefault()
                             const fd = new FormData(e.currentTarget)
-                            const ok = await postUpdate(readForm(fd, p.id, p.email), fd.has('fascia_associazione') ? false : true)
-                            if (!ok || !fd.has('fascia_associazione')) return
-                            await postAssociazioneMonte(p.id, leggiFasce(fd, p.ruolo))
+                            await salvaScheda(p.id, fd, p.email, p.ruolo, profiloGerarchia)
                           }}
                         >
                           <div className="order-1 grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1160,10 +1212,10 @@ export default function AdminProfiliPanel({
                           <div className="flex flex-wrap items-center gap-3">
                             <button
                               type="submit"
-                              disabled={deletingId === p.id}
+                              disabled={deletingId === p.id || savingId !== null || isRefreshing}
                               className="h-9 rounded-md bg-[#060d41] text-white px-3 text-sm font-semibold hover:bg-[#0a155a] disabled:opacity-50"
                             >
-                              {copy.salvaProfilo}
+                              {savingId === p.id || isRefreshing ? copy.salvataggio : copy.salvaProfilo}
                             </button>
                             {canDeleteUtenti && p.ruolo !== 'admin' && p.id !== currentUserId ? (
                               <button
@@ -1309,6 +1361,11 @@ export default function AdminProfiliPanel({
                             permessiIniziali={permessiPerUtente[p.id]}
                             permessiPronti={permessiPronti}
                             readOnly={false}
+                            salvaConProfilo
+                            onRegistraSalva={(salva) => {
+                              if (salva) salvaPermessiById.current.set(p.id, salva)
+                              else salvaPermessiById.current.delete(p.id)
+                            }}
                           />
                         </div>
                       </div>

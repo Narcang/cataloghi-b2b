@@ -23,12 +23,21 @@ type Props = {
   permessiIniziali?: string[]
   permessiPronti?: boolean
   readOnly?: boolean
+  /** Il pulsante Salva della scheda profilo persiste anche queste spunte. */
+  salvaConProfilo?: boolean
+  onRegistraSalva?: (salva: (() => Promise<boolean>) | null) => void
 }
 
 const CATEGORY_LABEL: Record<string, string> = {}
 
 function catLabel(cat: string): string {
   return CATEGORY_LABEL[cat] ?? portaleCategoryDisplayLabel(cat)
+}
+
+function stessiIds(a: string[], b: string[]) {
+  if (a.length !== b.length) return false
+  const altri = new Set(b)
+  return a.every((id) => altri.has(id))
 }
 
 export default function CatalogoPermessiPanel({
@@ -38,6 +47,8 @@ export default function CatalogoPermessiPanel({
   permessiIniziali,
   permessiPronti = false,
   readOnly = false,
+  salvaConProfilo = false,
+  onRegistraSalva,
 }: Props) {
   const [cataloghi, setCataloghi] = useState<CatalogoPermessoRow[]>(allCataloghi)
   const [cataloghiError, setCataloghiError] = useState<string | null>(null)
@@ -136,30 +147,54 @@ export default function CatalogoPermessiPanel({
     setMsg(null)
   }, [gruppiConPdf])
 
-  const handleSave = useCallback(async () => {
+  const persisti = useCallback(async (catalogo_ids: string[]) => {
+    const res = await fetch('/api/admin/catalogo-permessi', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({ utente_id: utenteId, catalogo_ids }),
+    })
+    const data = await res.json()
+    if (data.ok) {
+      const saved = Array.isArray(data.catalogo_ids) ? data.catalogo_ids : catalogo_ids
+      setWhitelistLoaded(saved)
+      setVisibleIds(idsVisibiliDaWhitelist(saved, allAssignableIds))
+    }
+    return { ok: Boolean(data.ok), message: data.ok ? 'Permessi salvati' : (data.message ?? 'Errore') }
+  }, [utenteId, allAssignableIds])
+
+  const salvaSeCambiato = useCallback(async () => {
+    if (whitelistLoaded === null) return true
+    const catalogo_ids = whitelistDaIdsVisibili(visibleIds, allAssignableIds)
+    if (stessiIds(catalogo_ids, whitelistLoaded)) {
+      if (!salvaConProfilo) setMsg({ type: 'ok', text: 'Permessi salvati' })
+      return true
+    }
     setSaving(true)
     setMsg(null)
-    const catalogo_ids = whitelistDaIdsVisibili(visibleIds, allAssignableIds)
     try {
-      const res = await fetch('/api/admin/catalogo-permessi', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'same-origin',
-        body: JSON.stringify({ utente_id: utenteId, catalogo_ids }),
-      })
-      const data = await res.json()
-      if (data.ok) {
-        const saved = Array.isArray(data.catalogo_ids) ? data.catalogo_ids : catalogo_ids
-        setWhitelistLoaded(saved)
-        setVisibleIds(idsVisibiliDaWhitelist(saved, allAssignableIds))
+      const esito = await persisti(catalogo_ids)
+      if (!salvaConProfilo) {
+        setMsg({ type: esito.ok ? 'ok' : 'err', text: esito.message })
       }
-      setMsg({ type: data.ok ? 'ok' : 'err', text: data.ok ? 'Permessi salvati' : (data.message ?? 'Errore') })
+      return esito.ok
     } catch {
-      setMsg({ type: 'err', text: 'Errore di rete' })
+      if (!salvaConProfilo) setMsg({ type: 'err', text: 'Errore di rete' })
+      return false
     } finally {
       setSaving(false)
     }
-  }, [utenteId, visibleIds, allAssignableIds])
+  }, [whitelistLoaded, visibleIds, allAssignableIds, persisti, salvaConProfilo])
+
+  useEffect(() => {
+    if (!onRegistraSalva) return
+    onRegistraSalva(salvaSeCambiato)
+    return () => onRegistraSalva(null)
+  }, [onRegistraSalva, salvaSeCambiato])
+
+  const handleSave = useCallback(async () => {
+    await salvaSeCambiato()
+  }, [salvaSeCambiato])
 
   const handleResetAllVisible = useCallback(async () => {
     setSaving(true)
@@ -246,18 +281,27 @@ export default function CatalogoPermessiPanel({
 
           {!readOnly && (
             <div className="flex flex-wrap items-center gap-3 pt-1">
-              <button
-                type="button"
-                onClick={handleSave}
-                disabled={saving || gruppiConPdf.length === 0}
-                className="h-9 px-4 rounded-md bg-[#060d41] text-white text-sm font-semibold hover:bg-[#0a155a] disabled:opacity-60 transition-colors"
-              >
-                {saving ? 'Salvataggio…' : 'Salva dashboard'}
-              </button>
+              {salvaConProfilo ? null : (
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={saving || gruppiConPdf.length === 0}
+                  className="h-9 px-4 rounded-md bg-[#060d41] text-white text-sm font-semibold hover:bg-[#0a155a] disabled:opacity-60 transition-colors"
+                >
+                  {saving ? 'Salvataggio…' : 'Salva dashboard'}
+                </button>
+              )}
               {hasRestrictions && (
                 <button
                   type="button"
-                  onClick={handleResetAllVisible}
+                  onClick={() => {
+                    if (salvaConProfilo) {
+                      setVisibleIds(new Set(allAssignableIds))
+                      setMsg(null)
+                      return
+                    }
+                    void handleResetAllVisible()
+                  }}
                   disabled={saving}
                   className="h-9 px-4 rounded-md border border-zinc-300 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
                 >

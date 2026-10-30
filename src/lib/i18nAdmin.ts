@@ -440,7 +440,8 @@ const admin = {
     approvaReg: 'Approva registrazione (accesso ai cataloghi secondo ruolo e area)',
     registrazioneApprovata: 'Registrazione approvata',
     salvaConferma: 'Salva e conferma',
-    salvaProfilo: 'Salva profilo',
+    salvaProfilo: 'Salva',
+    salvataggio: 'Salvataggio…',
     eliminaConfirm:
       'Eliminare definitivamente questo utente? Verranno rimossi profilo, accesso al portale e collegamenti in rubrica. L’operazione non è annullabile.',
     profiloSolaLettura: 'Profilo in sola lettura.',
@@ -645,7 +646,8 @@ const admin = {
     approvaReg: 'Одобрить регистрацию (доступ к каталогам по роли и региону)',
     registrazioneApprovata: 'Регистрация одобрена',
     salvaConferma: 'Сохранить и подтвердить',
-    salvaProfilo: 'Сохранить профиль',
+    salvaProfilo: 'Сохранить',
+    salvataggio: 'Сохранение…',
     eliminaConfirm:
       'Удалить этого пользователя навсегда? Будут удалены профиль, доступ к порталу и связи. Операцию нельзя отменить.',
     profiloSolaLettura: 'Профиль только для чтения.',
@@ -852,7 +854,8 @@ const admin = {
     approvaReg: 'Approve registration (catalog access by role and area)',
     registrazioneApprovata: 'Registration approved',
     salvaConferma: 'Save and confirm',
-    salvaProfilo: 'Save profile',
+    salvaProfilo: 'Save',
+    salvataggio: 'Saving…',
     eliminaConfirm:
       'Permanently delete this user? Profile, portal access and directory links will be removed. This cannot be undone.',
     profiloSolaLettura: 'Read-only profile.',
@@ -1068,7 +1071,8 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     approvaReg: 'Aprobar registro (acceso a catálogos según rol y área)',
     registrazioneApprovata: 'Registro aprobado',
     salvaConferma: 'Guardar y confirmar',
-    salvaProfilo: 'Guardar perfil',
+    salvaProfilo: 'Guardar',
+    salvataggio: 'Guardando…',
     eliminaConfirm:
       '¿Eliminar definitivamente este usuario? Se quitarán el perfil, el acceso al portal y los vínculos de la agenda. La operación no se puede deshacer.',
     profiloSolaLettura: 'Perfil en solo lectura.',
@@ -1275,7 +1279,8 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     approvaReg: 'Approuver l’inscription (accès catalogues selon rôle et zone)',
     registrazioneApprovata: 'Inscription approuvée',
     salvaConferma: 'Enregistrer et confirmer',
-    salvaProfilo: 'Enregistrer le profil',
+    salvaProfilo: 'Enregistrer',
+    salvataggio: 'Enregistrement…',
     eliminaConfirm:
       'Supprimer définitivement cet utilisateur ? Profil, accès portail et liens d’annuaire seront retirés. Irréversible.',
     profiloSolaLettura: 'Profil en lecture seule.',
@@ -1482,7 +1487,8 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     approvaReg: 'Registrierung freigeben (Katalogzugang nach Rolle und Gebiet)',
     registrazioneApprovata: 'Registrierung freigegeben',
     salvaConferma: 'Speichern und bestätigen',
-    salvaProfilo: 'Profil speichern',
+    salvaProfilo: 'Speichern',
+    salvataggio: 'Speichern…',
     eliminaConfirm:
       'Diesen Benutzer endgültig löschen? Profil, Portalzugang und Verzeichnislinks werden entfernt. Nicht rückgängig.',
     profiloSolaLettura: 'Profil nur lesend.',
@@ -1693,7 +1699,8 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     approvaReg: 'Registratie goedkeuren (catalogustoegang volgens rol en gebied)',
     registrazioneApprovata: 'Registratie goedgekeurd',
     salvaConferma: 'Opslaan en bevestigen',
-    salvaProfilo: 'Profiel opslaan',
+    salvaProfilo: 'Opslaan',
+    salvataggio: 'Opslaan…',
     eliminaConfirm:
       'Deze gebruiker definitief verwijderen? Profiel, portaaltoegang en adresboekkoppelingen worden verwijderd. Dit kan niet ongedaan worden gemaakt.',
     profiloSolaLettura: 'Profiel alleen-lezen.',
@@ -1900,7 +1907,8 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     approvaReg: 'Έγκριση εγγραφής (πρόσβαση καταλόγων ανά ρόλο και περιοχή)',
     registrazioneApprovata: 'Η εγγραφή εγκρίθηκε',
     salvaConferma: 'Αποθήκευση και επιβεβαίωση',
-    salvaProfilo: 'Αποθήκευση προφίλ',
+    salvaProfilo: 'Αποθήκευση',
+    salvataggio: 'Αποθήκευση…',
     eliminaConfirm:
       'Οριστική διαγραφή αυτού του χρήστη; Θα αφαιρεθούν προφίλ, πρόσβαση πύλης και σύνδεσμοι. Μη αναστρέψιμο.',
     profiloSolaLettura: 'Προφίλ μόνο για ανάγνωση.',
@@ -2107,7 +2115,8 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     approvaReg: 'Zatwierdź rejestrację (dostęp do katalogów według roli i obszaru)',
     registrazioneApprovata: 'Rejestracja zatwierdzona',
     salvaConferma: 'Zapisz i potwierdź',
-    salvaProfilo: 'Zapisz profil',
+    salvaProfilo: 'Zapisz',
+    salvataggio: 'Zapisywanie…',
     eliminaConfirm:
       'Trwale usunąć tego użytkownika? Profil, dostęp do portalu i powiązania zostaną usunięte. Nieodwracalne.',
     profiloSolaLettura: 'Profil tylko do odczytu.',
@@ -2314,7 +2323,8 @@ const adminMore: Record<Exclude<AppLocale, 'it' | 'ru' | 'en'>, AdminCopy> = {
     approvaReg: 'Схвалити реєстрацію (доступ до каталогів за роллю та регіоном)',
     registrazioneApprovata: 'Реєстрацію схвалено',
     salvaConferma: 'Зберегти й підтвердити',
-    salvaProfilo: 'Зберегти профіль',
+    salvaProfilo: 'Зберегти',
+    salvataggio: 'Збереження…',
     eliminaConfirm:
       'Остаточно видалити цього користувача? Буде видалено профіль, доступ до порталу та зв’язки. Незворотно.',
     profiloSolaLettura: 'Профіль лише для читання.',
