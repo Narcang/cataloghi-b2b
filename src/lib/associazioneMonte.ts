@@ -106,6 +106,48 @@ function appartieneAllaSede(persona: ProfiloGerarchiaRow, sedeId: string, links:
   return collegati(persona.id, sedeId, links)
 }
 
+function ordinaProfili(lista: ProfiloGerarchiaRow[]): ProfiloGerarchiaRow[] {
+  return [...lista].sort((a, b) =>
+    profiloGerarchiaDisplayLabel(a).localeCompare(profiloGerarchiaDisplayLabel(b), 'it', {
+      sensitivity: 'base',
+    }),
+  )
+}
+
+/**
+ * Collegamenti diretti dei ruoli di questa fascia.
+ * chiSegueQuestoProfilo esclude, per esempio, l'agenzia di un venditore:
+ * in anagrafica l'agenzia non è genitore del venditore, ma dalla scheda il legame c'è.
+ */
+function profiliFasciaCollegati(
+  fascia: FasciaAssociazione,
+  profilo: ProfiloGerarchiaRow,
+  profili: ProfiloGerarchiaRow[],
+  links: Link[],
+): ProfiloGerarchiaRow[] {
+  const ruoli = new Set([fascia.sedeRuolo, ...fascia.personaRuoli])
+  const byId = new Map(profili.map((p) => [p.id, p]))
+  const scelti = new Map<string, ProfiloGerarchiaRow>()
+  const aggiungi = (p: ProfiloGerarchiaRow | null | undefined) => {
+    if (!p || p.id === profilo.id || !ruoli.has(p.ruolo)) return
+    if (p.ruolo === 'admin' || p.ruolo === 'free') return
+    scelti.set(p.id, p)
+  }
+
+  for (const p of chiSegueQuestoProfilo(profilo, profili, links)) aggiungi(p)
+  aggiungi(byId.get(profilo.invitato_da ?? ''))
+  for (const link of links) {
+    const otherId =
+      link.utente_id === profilo.id
+        ? link.operatore_id
+        : link.operatore_id === profilo.id
+          ? link.utente_id
+          : null
+    if (otherId) aggiungi(byId.get(otherId))
+  }
+  return [...scelti.values()]
+}
+
 function nomeProfilo(p: Pick<ProfiloGerarchiaRow, 'nome_completo' | 'societa' | 'email'>): string {
   return p.nome_completo?.trim() || p.societa?.trim() || p.email?.trim() || ''
 }
@@ -417,13 +459,27 @@ export function selezioneFascia(
   profili: ProfiloGerarchiaRow[],
   links: Link[],
 ): { sedeId: string | null; personaId: string | null } {
-  const segue = chiSegueQuestoProfilo(profilo, profili, links)
-  const sedi = segue.filter((p) => p.ruolo === fascia.sedeRuolo)
-  const sede = sedi.find((p) => p.id === profilo.invitato_da) ?? sedi[0] ?? null
-  const persone = segue.filter((p) => fascia.personaRuoli.includes(p.ruolo))
-  const persona = sede
-    ? (persone.find((p) => appartieneAllaSede(p, sede.id, links)) ?? persone[0] ?? null)
-    : (persone[0] ?? null)
+  const collegatiFascia = profiliFasciaCollegati(fascia, profilo, profili, links)
+  const sedi = collegatiFascia.filter((p) => p.ruolo === fascia.sedeRuolo)
+  const persone = collegatiFascia.filter((p) => fascia.personaRuoli.includes(p.ruolo))
+  let sede = sedi.find((p) => p.id === profilo.invitato_da) ?? null
+  const sedeInvito = sede
+  let persona: ProfiloGerarchiaRow | null = sedeInvito
+    ? (persone.find((p) => appartieneAllaSede(p, sedeInvito.id, links)) ?? null)
+    : null
+  if (!sede) {
+    const personaNota = ordinaProfili(persone).find((p) =>
+      sedi.some((candidata) => appartieneAllaSede(p, candidata.id, links)),
+    )
+    if (personaNota) {
+      persona = personaNota
+      sede = sedi.find((candidata) => appartieneAllaSede(personaNota, candidata.id, links)) ?? null
+    }
+  }
+  if (!sede && sedi.length > 0) sede = ordinaProfili(sedi)[0]
+  if (sede && !persona) {
+    persona = persone.find((p) => appartieneAllaSede(p, sede.id, links)) ?? null
+  }
   return { sedeId: sede?.id ?? null, personaId: persona?.id ?? null }
 }
 
@@ -447,7 +503,6 @@ export function diffFasceAssociazione(
   if (fasce.length === 0) return { ok: false, message: 'Questo ruolo non ha associazioni verso l’alto' }
 
   const byId = new Map(profili.map((p) => [p.id, p]))
-  const segue = chiSegueQuestoProfilo(profilo, profili, links)
   const rimuovi = new Set<string>()
   const aggiungi = new Set<string>()
   const propagaRemove: { id: string; ruolo: string }[] = []
@@ -482,8 +537,9 @@ export function diffFasceAssociazione(
       }
     }
 
-    const sediAttuali = segue.filter((p) => p.ruolo === fascia.sedeRuolo)
-    const personeAttuali = segue.filter((p) => fascia.personaRuoli.includes(p.ruolo))
+    const dellaFascia = profiliFasciaCollegati(fascia, profilo, profili, links)
+    const sediAttuali = dellaFascia.filter((p) => p.ruolo === fascia.sedeRuolo)
+    const personeAttuali = dellaFascia.filter((p) => fascia.personaRuoli.includes(p.ruolo))
     for (const attuale of sediAttuali) {
       if (attuale.id !== sede?.id) rimuovi.add(attuale.id)
     }
