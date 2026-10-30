@@ -3,7 +3,6 @@
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import { ChevronDown, ChevronRight, Users, UserCheck } from 'lucide-react'
-import AssociatiDirettiCascade from '@/components/admin/AssociatiDirettiCascade'
 import CreaAssociatoManuale from '@/components/admin/CreaAssociatoManuale'
 import LinkPasswordUtente from '@/components/admin/LinkPasswordUtente'
 import CatalogoPermessiPanel, { type CatalogoDisponibile } from '@/components/admin/CatalogoPermessiPanel'
@@ -16,8 +15,6 @@ import {
   type OpzioniSpecializzazioneMap,
 } from '@/lib/profiloSpecializzazioneOpzioni'
 import {
-  associatiDirettiSectionLabel,
-  getChildrenProfiles,
   isRivenditoreManagedByAgenzia,
   isRivenditoreManagedByAgente,
   profiloGerarchiaDisplayLabel,
@@ -352,14 +349,6 @@ export default function AdminProfiliPanel({
     setListaAperta(false)
   }, [ruoloAttivo, soloAssociati])
 
-  function getDirectAssociati(profilo: ProfiloGestioneRow): ProfiloGerarchiaRow[] {
-    const row = profiloToGerarchiaRow(
-      profilo,
-      profilo.invitato_da ?? invitatoDaById.get(profilo.id) ?? null,
-    )
-    return getChildrenProfiles(profilo.id, row, profilo.id, profilo.ruolo, profiliGerarchia, links)
-  }
-
   async function postUpdate(body: Record<string, unknown>, refresh = true) {
     setError(null)
     setMessage(null)
@@ -430,24 +419,6 @@ export default function AdminProfiliPanel({
     } finally {
       setDeletingId(null)
     }
-  }
-
-  async function postLink(action: 'add' | 'remove', utente_id: string, operatore_id: string) {
-    setError(null)
-    setMessage(null)
-    const res = await fetch('/api/admin/profili/operatore-link', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'same-origin',
-      body: JSON.stringify({ action, utente_id, operatore_id }),
-    })
-    const data = (await res.json().catch(() => null)) as { ok?: boolean; message?: string } | null
-    if (!res.ok || !data?.ok) {
-      setError(data?.message ?? 'Operazione non riuscita')
-      return false
-    }
-    router.refresh()
-    return true
   }
 
   function readForm(fd: FormData, profiloId: string, emailAttuale?: string | null) {
@@ -923,7 +894,6 @@ export default function AdminProfiliPanel({
               p.invitato_da ?? invitatoDaById.get(p.id) ?? null,
             )
             const profiloReadOnly = readOnly || p.id === currentUserId || p.ruolo === 'admin'
-            const directAssociati = getDirectAssociati(p)
             const agenziaAssociata = isAgenteLike(p.ruolo)
               ? resolveAgenziaParentForAgent(profiloGerarchia, profiliGerarchia, links)
               : null
@@ -934,7 +904,6 @@ export default function AdminProfiliPanel({
                 ? inviterRow
                 : null
             const riferimentoInvito = agenteRiferimento ?? venditoreRiferimento
-            const associatiLabel = associatiDirettiSectionLabel(p.ruolo)
             const managerEditSpecializzazione =
               profiloReadOnly &&
               canEditSpecializzazione &&
@@ -1266,25 +1235,6 @@ export default function AdminProfiliPanel({
                             </div>
                           ) : null}
                         </form>
-
-                        {associatiLabel ? (
-                          <div className="order-3">
-                            <p className="text-xs font-medium uppercase text-zinc-600 mb-2">
-                              {associatiLabel}
-                            </p>
-                            <div className="w-full min-w-0 max-w-full border border-black/15 rounded-lg p-3 bg-zinc-50">
-                              <AssociatiDirettiCascade
-                                ownerProfileId={p.id}
-                                ownerRuolo={p.ruolo}
-                                roots={directAssociati}
-                                readOnly={readOnly || p.id === currentUserId || p.ruolo === 'admin'}
-                                onToggleLink={async (add, utenteId, operatoreId) =>
-                                  postLink(add ? 'add' : 'remove', utenteId, operatoreId)
-                                }
-                              />
-                            </div>
-                          </div>
-                        ) : null}
                       </>
                     )}
 

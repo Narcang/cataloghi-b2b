@@ -1001,12 +1001,6 @@ export function profiloToGerarchiaRow(
   }
 }
 
-export function associatiDirettiSectionLabel(ruolo: string): string | null {
-  const childRoles = CHILD_ROLES_BY_PARENT[ruolo]
-  if (!childRoles?.length) return null
-  return 'Associati diretti'
-}
-
 export function associatiAggiungiSectionLabel(ruolo: string): string | null {
   const childRoles = CHILD_ROLES_BY_PARENT[ruolo]
   if (!childRoles?.length) return null
