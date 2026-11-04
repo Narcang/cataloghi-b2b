@@ -16,6 +16,7 @@ import {
   Download,
   UserPlus,
   Users,
+  Map,
   type LucideIcon,
 } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
@@ -268,6 +269,18 @@ export default function Header() {
                       <Users size={16} aria-hidden />
                       {labels.gestioneUtenti}
                     </Link>
+                    {profiloRuolo === 'admin' || profiloRuolo === 'manager' ? (
+                      <Link
+                        href="/dashboard/mappa"
+                        prefetch={false}
+                        className="ladiva-dropdown-item"
+                        role="menuitem"
+                        onClick={() => setAccountMenuOpen(false)}
+                      >
+                        <Map size={16} aria-hidden />
+                        {labels.mappa}
+                      </Link>
+                    ) : null}
                     {profiloRuolo === 'admin' && (
                       <Link
                         href="/dashboard/gestione-cataloghi"

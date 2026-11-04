@@ -22,6 +22,7 @@ import {
 import { agenziaCanEditRivenditoreSpecializzazione, agenteCanEditRivenditoreSpecializzazione } from '@/lib/agenziaRivenditoreAccess'
 import { isAgenteLike } from '@/lib/catalogRoles'
 import { isEmailTecnica } from '@/lib/emailTecnica'
+import { coordinateDaCitta } from '@/lib/geocodingCitta'
 
 const ESPOSITORI_FIELDS = [
   'espositore_1',
@@ -112,6 +113,7 @@ type Body = {
   telefono?: string | null
   societa?: string | null
   area_geografica?: string | null
+  citta?: string | null
   ruolo?: string | null
   registrazione_approvata?: boolean | null
   seguito_da?: string | null
@@ -272,13 +274,37 @@ export async function POST(request: NextRequest) {
   const { data: profiloEsistente } = await db
     .from('profili')
     .select(
-      'ruolo, email, espositore_1, espositore_2, box_show_room_1, box_show_room_2, box_show_room_3, box_show_room_4, agenzia_campione_1, agenzia_campione_2, agenzia_catalogo_1, agenzia_catalogo_2, espositore_1_qta, espositore_2_qta, box_show_room_1_qta, box_show_room_2_qta, box_show_room_3_qta, box_show_room_4_qta, agenzia_campione_1_qta, agenzia_campione_2_qta, agenzia_catalogo_1_qta, agenzia_catalogo_2_qta, espositore_1_data, espositore_2_data, box_show_room_1_data, box_show_room_2_data, box_show_room_3_data, box_show_room_4_data, agenzia_campione_1_data, agenzia_campione_2_data, agenzia_catalogo_1_data, agenzia_catalogo_2_data, agenzia_catalogo_3, agenzia_catalogo_4, agenzia_catalogo_3_qta, agenzia_catalogo_4_qta, agenzia_catalogo_3_data, agenzia_catalogo_4_data, agenzia_campioni_aggiornato_il, agenzia_cataloghi_aggiornato_il, espositori_aggiornato_il, box_aggiornato_il',
+      'ruolo, email, espositore_1, espositore_2, box_show_room_1, box_show_room_2, box_show_room_3, box_show_room_4, agenzia_campione_1, agenzia_campione_2, agenzia_catalogo_1, agenzia_catalogo_2, espositore_1_qta, espositore_2_qta, box_show_room_1_qta, box_show_room_2_qta, box_show_room_3_qta, box_show_room_4_qta, agenzia_campione_1_qta, agenzia_campione_2_qta, agenzia_catalogo_1_qta, agenzia_catalogo_2_qta, espositore_1_data, espositore_2_data, box_show_room_1_data, box_show_room_2_data, box_show_room_3_data, box_show_room_4_data, agenzia_campione_1_data, agenzia_campione_2_data, agenzia_catalogo_1_data, agenzia_catalogo_2_data, agenzia_catalogo_3, agenzia_catalogo_4, agenzia_catalogo_3_qta, agenzia_catalogo_4_qta, agenzia_catalogo_3_data, agenzia_catalogo_4_data, agenzia_campioni_aggiornato_il, agenzia_cataloghi_aggiornato_il, espositori_aggiornato_il, box_aggiornato_il, citta, latitudine, longitudine',
     )
     .eq('id', profiloId)
     .maybeSingle()
 
   const ruoloEffettivo =
     typeof patch.ruolo === 'string' ? patch.ruolo : (profiloEsistente?.ruolo ?? null)
+
+  let cittaNonTrovata = false
+  if (body.citta !== undefined && (isAdmin || isManager)) {
+    const citta = body.citta == null ? '' : String(body.citta).trim()
+    const attuale = String((profiloEsistente as { citta?: string | null } | null)?.citta ?? '').trim()
+    const latAttuale = (profiloEsistente as { latitudine?: number | null } | null)?.latitudine
+    const lngAttuale = (profiloEsistente as { longitudine?: number | null } | null)?.longitudine
+    patch.citta = citta || null
+    const invariata = citta.toLocaleLowerCase('it') === attuale.toLocaleLowerCase('it')
+    if (!citta) {
+      patch.latitudine = null
+      patch.longitudine = null
+    } else if (!invariata || typeof latAttuale !== 'number' || typeof lngAttuale !== 'number') {
+      const punto = await coordinateDaCitta(citta)
+      if (punto) {
+        patch.latitudine = punto.lat
+        patch.longitudine = punto.lng
+      } else {
+        patch.latitudine = null
+        patch.longitudine = null
+        cittaNonTrovata = true
+      }
+    }
+  }
 
   if (
     (isAdmin || isManager) &&
@@ -616,7 +642,7 @@ export async function POST(request: NextRequest) {
   }
 
   const abilitato = patch.registrazione_approvata === true
-  const message = loginEmailAggiornata && passwordImpostata
+  const messageBase = loginEmailAggiornata && passwordImpostata
     ? 'Profilo aggiornato. L’accesso ora usa questa email e la password che hai indicato.'
     : loginEmailAggiornata
       ? 'Profilo aggiornato. L’accesso ora usa questa email; la password è rimasta quella di prima.'
@@ -625,5 +651,8 @@ export async function POST(request: NextRequest) {
         : abilitato
           ? 'Utente abilitato: registrazione approvata e accesso ai cataloghi attivo.'
           : 'Profilo aggiornato.'
+  const message = cittaNonTrovata
+    ? `${messageBase} La città non è stata trovata sulla mappa: riprova con città e nazione, ad esempio Milano, Italia.`
+    : messageBase
   return jsonResponse(true, message, 200)
 }

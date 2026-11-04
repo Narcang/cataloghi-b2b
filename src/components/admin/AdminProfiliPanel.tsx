@@ -69,6 +69,7 @@ export type ProfiloGestioneRow = {
   telefono: string | null
   societa: string | null
   area_geografica: string | null
+  citta?: string | null
   ruolo: string
   invitato_da?: string | null
   registrazione_approvata: boolean | null
@@ -477,6 +478,7 @@ export default function AdminProfiliPanel({
     const telefono = String(fd.get('telefono') ?? '').trim() || null
     const societa = String(fd.get('societa') ?? '').trim() || null
     const area_geografica = String(fd.get('area_geografica') ?? '').trim() || null
+    const cittaInserita = fd.has('citta') ? String(fd.get('citta') ?? '').trim() || null : undefined
     const ruolo = String(fd.get('ruolo') ?? '').trim()
     const rawApprovazione = fd.get('registrazione_approvata')
     const registrazione_approvata =
@@ -487,6 +489,7 @@ export default function AdminProfiliPanel({
       telefono,
       societa,
       area_geografica,
+      ...(cittaInserita !== undefined ? { citta: cittaInserita } : {}),
       ruolo,
       registrazione_approvata,
     }
@@ -734,6 +737,18 @@ export default function AdminProfiliPanel({
                         className="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
                       />
                     </label>
+                    {ruoloHaSede(p.ruolo) ? (
+                      <label className="block text-xs font-medium uppercase text-zinc-600">
+                        Città
+                        <input
+                          name="citta"
+                          type="text"
+                          placeholder="Es. Milano, Italia"
+                          defaultValue={p.citta ?? ''}
+                          className="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
+                        />
+                      </label>
+                    ) : null}
                     <label className="block text-xs font-medium uppercase text-zinc-600">
                       {copy.campoRuolo}
                       <select
@@ -1181,6 +1196,18 @@ export default function AdminProfiliPanel({
                               className="mt-1 w-full h-9 rounded-md border border-black bg-zinc-50 px-2 text-sm"
                             />
                           </label>
+                          {ruoloHaSede(p.ruolo) ? (
+                            <label className="block text-xs font-medium uppercase text-zinc-600">
+                              Città
+                              <input
+                                name="citta"
+                                type="text"
+                                placeholder="Es. Milano, Italia"
+                                defaultValue={p.citta ?? ''}
+                                className="mt-1 w-full h-9 rounded-md border border-black bg-zinc-50 px-2 text-sm"
+                              />
+                            </label>
+                          ) : null}
                           <label className="block text-xs font-medium uppercase text-zinc-600">
                             {copy.campoRuolo}
                             <select
