@@ -41,26 +41,24 @@ const COLORE_RUOLO: Record<string, string> = {
   studio: '#f97316',
 }
 
-type LeafletMap = { remove: () => void; fitBounds: (bounds: unknown, options: object) => void }
+type LeafletMap = {
+  remove: () => void
+  fitBounds: (bounds: unknown, options: object) => void
+  invalidateSize: () => void
+}
+
+type MarkerMappa = {
+  addTo: (map: LeafletMap) => MarkerMappa
+  bindPopup: (html: string) => void
+  bindTooltip: (html: string, options: object) => void
+}
 
 type LeafletLib = {
   map: (el: HTMLElement, options: object) => LeafletMap
   tileLayer: (url: string, options: object) => { addTo: (map: LeafletMap) => void }
-  circleMarker: (
-    latlng: [number, number],
-    options: object,
-  ) => { addTo: (map: LeafletMap) => { bindPopup: (html: string) => void } }
-  geoJSON: (data: object, options: object) => { addTo: (map: LeafletMap) => void }
-  latLngBounds: (latlngs: [number, number][]) => unknown
-}
-
-function angoliGeometria(coordinates: unknown, out: [number, number][]) {
-  if (!Array.isArray(coordinates) || coordinates.length === 0) return
-  if (typeof coordinates[0] === 'number' && typeof coordinates[1] === 'number') {
-    out.push([Number(coordinates[1]), Number(coordinates[0])])
-    return
-  }
-  for (const child of coordinates) angoliGeometria(child, out)
+  circleMarker: (latlng: [number, number], options: object) => MarkerMappa
+  geoJSON: (data: object, options: object) => { addTo: (map: LeafletMap) => { getBounds: () => unknown } }
+  latLngBounds: (latlngs: [number, number][]) => { extend: (bounds: unknown) => unknown }
 }
 
 function caricaLeaflet(): Promise<void> {
@@ -124,21 +122,20 @@ export default function MappaAziende({ punti, zone }: { punti: PuntoMappa[]; zon
           maxZoom: 19,
         }).addTo(map)
 
-        const angoli: [number, number][] = []
+        const riquadri: { extend: (bounds: unknown) => { extend: (bounds: unknown) => unknown } }[] = []
         for (const zona of zone) {
           const features = zona.regioni
             .map((id) => REGIONI_PER_ID.get(id))
-            .filter((feature): feature is FeatureRegione => Boolean(feature))
+            .filter((feature): feature is FeatureRegione => Boolean(feature?.geometry))
           if (!features.length) continue
-          for (const feature of features) angoliGeometria(feature.geometry.coordinates, angoli)
-          L.geoJSON(
+          const livello = L.geoJSON(
             { type: 'FeatureCollection', features },
             {
               style: {
                 color: zona.colore,
                 weight: 1.5,
                 fillColor: zona.colore,
-                fillOpacity: 0.32,
+                fillOpacity: 0.35,
               },
               onEachFeature: (
                 feature: { properties?: { id?: string } },
@@ -151,36 +148,54 @@ export default function MappaAziende({ punti, zone }: { punti: PuntoMappa[]; zon
               },
             },
           ).addTo(map)
+          riquadri.push(livello.getBounds() as { extend: (bounds: unknown) => { extend: (bounds: unknown) => unknown } })
         }
 
         for (const punto of punti) {
-          angoli.push([punto.lat, punto.lng])
           const colore = COLORE_RUOLO[punto.ruolo] ?? '#ef4444'
           const marker = L.circleMarker([punto.lat, punto.lng], {
-            radius: 8,
-            color: '#111',
-            weight: 1,
+            pane: 'markerPane',
+            radius: 9,
+            color: '#ffffff',
+            weight: 2,
             fillColor: colore,
-            fillOpacity: 0.95,
+            fillOpacity: 1,
           }).addTo(map)
-          marker.bindPopup(
+          const scheda =
             `<strong>${testoSicuro(punto.nome)}</strong><br>${testoSicuro(punto.ruoloLabel)}` +
-              rigaPopup('Via', punto.indirizzo) +
-              rigaPopup('CAP', punto.cap) +
-              rigaPopup('Città', punto.citta) +
-              rigaPopup('Area', punto.area),
+            rigaPopup('Via', punto.indirizzo) +
+            rigaPopup('CAP', punto.cap) +
+            rigaPopup('Città', punto.citta) +
+            rigaPopup('Area', punto.area)
+          marker.bindPopup(scheda)
+          marker.bindTooltip(testoSicuro(punto.nome), {
+            permanent: true,
+            direction: 'top',
+            offset: [0, -10],
+            className: 'ladiva-mappa-etichetta',
+            opacity: 1,
+          })
+          riquadri.push(
+            L.latLngBounds([[punto.lat, punto.lng]]) as {
+              extend: (bounds: unknown) => { extend: (bounds: unknown) => unknown }
+            },
           )
         }
 
-        if (angoli.length === 0) {
+        if (riquadri.length === 0) {
           map.fitBounds(L.latLngBounds([[46, 10], [42, 14]]), { padding: [24, 24] })
-        } else if (zone.length > 0) {
-          map.fitBounds(L.latLngBounds(angoli), { padding: [28, 28], maxZoom: 7 })
-        } else if (punti.length === 1) {
-          map.fitBounds(L.latLngBounds([[punti[0].lat, punti[0].lng]]), { maxZoom: 16, padding: [48, 48] })
         } else {
-          map.fitBounds(L.latLngBounds(angoli), { padding: [36, 36], maxZoom: 12 })
+          let tutto = riquadri[0]
+          for (const riquadro of riquadri.slice(1)) tutto = tutto.extend(riquadro) as typeof tutto
+          const unaSede = punti.length === 1 && zone.length === 0
+          map.fitBounds(tutto, {
+            padding: [36, 36],
+            maxZoom: unaSede ? 16 : zone.length > 0 ? 7 : 12,
+          })
         }
+        requestAnimationFrame(() => {
+          if (!annullato) map.invalidateSize()
+        })
       })
       .catch(() => {
         if (el) el.dataset.errore = '1'
@@ -195,10 +210,38 @@ export default function MappaAziende({ punti, zone }: { punti: PuntoMappa[]; zon
   return (
     <>
       <style>{`
-        .leaflet-container img { max-width: none !important; }
-        .leaflet-container { background: #d7e3ef; font: inherit; }
+        .ladiva-mappa.leaflet-container {
+          background: #d7e3ef;
+          color: #111;
+          font: 12px/1.4 Arial, Helvetica, sans-serif;
+        }
+        .ladiva-mappa .leaflet-tile,
+        .ladiva-mappa .leaflet-container img,
+        .ladiva-mappa.leaflet-container img {
+          max-width: none !important;
+          max-height: none !important;
+        }
+        .ladiva-mappa .leaflet-overlay-pane svg,
+        .ladiva-mappa .leaflet-marker-pane svg {
+          max-width: none !important;
+          max-height: none !important;
+        }
+        .ladiva-mappa .leaflet-popup-content-wrapper,
+        .ladiva-mappa .leaflet-popup-content,
+        .ladiva-mappa .leaflet-tooltip,
+        .ladiva-mappa .leaflet-tooltip.ladiva-mappa-etichetta {
+          color: #111 !important;
+          background: #fff !important;
+        }
+        .ladiva-mappa .leaflet-tooltip.ladiva-mappa-etichetta {
+          border: 1px solid rgba(0, 0, 0, 0.35) !important;
+          border-radius: 6px;
+          box-shadow: none;
+          font-weight: 650;
+          padding: 2px 7px;
+        }
       `}</style>
-      <div ref={nodo} className="h-[70vh] min-h-[420px] w-full rounded-xl border border-white/15" />
+      <div ref={nodo} className="ladiva-mappa h-[70vh] min-h-[420px] w-full rounded-xl border border-white/15" />
     </>
   )
 }
