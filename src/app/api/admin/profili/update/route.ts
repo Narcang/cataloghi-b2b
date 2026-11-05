@@ -23,6 +23,7 @@ import { agenziaCanEditRivenditoreSpecializzazione, agenteCanEditRivenditoreSpec
 import { isAgenteLike } from '@/lib/catalogRoles'
 import { isEmailTecnica } from '@/lib/emailTecnica'
 import { coordinateDaIndirizzo } from '@/lib/geocodingCitta'
+import { areeInteresseValide, coloreAreaValido, colorePredefinitoRuolo } from '@/lib/areaInteresse'
 
 const ESPOSITORI_FIELDS = [
   'espositore_1',
@@ -116,6 +117,8 @@ type Body = {
   citta?: string | null
   indirizzo?: string | null
   cap?: string | null
+  aree_interesse?: string[] | null
+  colore_area?: string | null
   ruolo?: string | null
   registrazione_approvata?: boolean | null
   seguito_da?: string | null
@@ -325,6 +328,11 @@ export async function POST(request: NextRequest) {
         cittaNonTrovata = true
       }
     }
+  }
+
+  if ((isAdmin || isManager) && Array.isArray(body.aree_interesse)) {
+    patch.aree_interesse = areeInteresseValide(body.aree_interesse)
+    patch.colore_area = coloreAreaValido(body.colore_area) ?? colorePredefinitoRuolo(ruoloEffettivo ?? '')
   }
 
   if (

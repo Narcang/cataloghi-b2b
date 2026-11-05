@@ -5,9 +5,10 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import Header from '@/components/Header'
-import MappaAziende, { type PuntoMappa } from '@/components/admin/MappaAziende'
+import MappaAziende, { type PuntoMappa, type ZonaMappa } from '@/components/admin/MappaAziende'
 import { getAppLocale } from '@/lib/localeServer'
 import { tRuolo } from '@/lib/i18nAdmin'
+import { areeInteresseValide, hexColoreArea, nomeRegione } from '@/lib/areaInteresse'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,6 +28,8 @@ type Riga = {
   cap: string | null
   latitudine: number | null
   longitudine: number | null
+  aree_interesse: string[] | null
+  colore_area: string | null
   registrazione_approvata: boolean | null
 }
 
@@ -51,13 +54,14 @@ export default async function MappaPage() {
 
   const { data, error } = await db
     .from('profili')
-    .select('id, nome_completo, societa, ruolo, citta, indirizzo, cap, latitudine, longitudine, registrazione_approvata')
+    .select('id, nome_completo, societa, ruolo, citta, indirizzo, cap, latitudine, longitudine, aree_interesse, colore_area, registrazione_approvata')
     .in('ruolo', [...RUOLI_MAPPA])
     .or('registrazione_approvata.eq.true,registrazione_approvata.is.null')
     .limit(2000)
 
   const righe = (error ? [] : (data ?? [])) as Riga[]
   const punti: PuntoMappa[] = []
+  const zone: ZonaMappa[] = []
   const senzaCoordinate: { id: string; nome: string; dove: string }[] = []
   let senzaIndirizzo = 0
 
@@ -65,6 +69,17 @@ export default async function MappaPage() {
     const citta = row.citta?.trim() ?? ''
     const indirizzo = row.indirizzo?.trim() ?? ''
     const cap = row.cap?.trim() ?? ''
+    const aree = areeInteresseValide(row.aree_interesse)
+    const area = aree.map((id) => nomeRegione(id)).filter((nome): nome is string => Boolean(nome)).join(', ')
+    if (aree.length) {
+      zone.push({
+        id: row.id,
+        nome: nomeSede(row),
+        ruoloLabel: tRuolo(locale, row.ruolo),
+        colore: hexColoreArea(row.colore_area, row.ruolo),
+        regioni: aree,
+      })
+    }
     if (!citta && !indirizzo && !cap) {
       senzaIndirizzo += 1
       continue
@@ -78,6 +93,7 @@ export default async function MappaPage() {
         citta,
         indirizzo,
         cap,
+        area,
         lat: row.latitudine,
         lng: row.longitudine,
       })
@@ -105,13 +121,13 @@ export default async function MappaPage() {
           </Link>
           <h1 className="text-3xl md:text-4xl font-semibold text-zinc-900 tracking-tight mt-3">Mappa</h1>
           <p className="text-sm text-zinc-600 mt-2 max-w-2xl">
-            Agenzie, rivenditori e sedi studio. Il puntino usa via, CAP e città salvati in gestione utenti. Zoom con i pulsanti o con la rotella.
+            Agenzie, rivenditori e sedi studio. Il puntino usa via, CAP e città. Il velo colorato è l’area di interesse, con il colore scelto sulla sede.
           </p>
         </div>
 
         {error ? (
           <p className="rounded-xl border border-red-700 bg-red-50 px-4 py-3 text-sm text-red-900">
-            Mappa non disponibile. Esegui su Supabase il file supabase_alter_profili_indirizzo_cap.sql e ricarica.
+            Mappa non disponibile. Esegui su Supabase il file supabase_alter_profili_aree_interesse.sql e ricarica.
           </p>
         ) : (
           <>
@@ -127,7 +143,7 @@ export default async function MappaPage() {
               </span>
               <span className="text-zinc-500">{punti.length} in mappa</span>
             </div>
-            <MappaAziende punti={punti} />
+            <MappaAziende punti={punti} zone={zone} />
             {senzaIndirizzo > 0 || senzaCoordinate.length > 0 ? (
               <div className="rounded-xl border border-white/15 bg-zinc-950/40 px-4 py-3 text-sm text-zinc-300 space-y-2">
                 {senzaIndirizzo > 0 ? (

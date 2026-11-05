@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import regioniItalia from '@/data/regioniItalia.json'
+import { nomeRegione } from '@/lib/areaInteresse'
 
 export type PuntoMappa = {
   id: string
@@ -10,9 +12,28 @@ export type PuntoMappa = {
   citta: string
   indirizzo: string
   cap: string
+  area: string
   lat: number
   lng: number
 }
+
+export type ZonaMappa = {
+  id: string
+  nome: string
+  ruoloLabel: string
+  colore: string
+  regioni: string[]
+}
+
+type FeatureRegione = {
+  type: 'Feature'
+  properties: { id: string; nome: string }
+  geometry: { type: string; coordinates: unknown }
+}
+
+const REGIONI_PER_ID = new Map(
+  (regioniItalia.features as FeatureRegione[]).map((feature) => [feature.properties.id, feature]),
+)
 
 const COLORE_RUOLO: Record<string, string> = {
   agenzia: '#3b82f6',
@@ -29,7 +50,17 @@ type LeafletLib = {
     latlng: [number, number],
     options: object,
   ) => { addTo: (map: LeafletMap) => { bindPopup: (html: string) => void } }
+  geoJSON: (data: object, options: object) => { addTo: (map: LeafletMap) => void }
   latLngBounds: (latlngs: [number, number][]) => unknown
+}
+
+function angoliGeometria(coordinates: unknown, out: [number, number][]) {
+  if (!Array.isArray(coordinates) || coordinates.length === 0) return
+  if (typeof coordinates[0] === 'number' && typeof coordinates[1] === 'number') {
+    out.push([Number(coordinates[1]), Number(coordinates[0])])
+    return
+  }
+  for (const child of coordinates) angoliGeometria(child, out)
 }
 
 function caricaLeaflet(): Promise<void> {
@@ -73,7 +104,7 @@ function rigaPopup(etichetta: string, valore: string): string {
   return `<br>${etichetta}: ${testoSicuro(testo)}`
 }
 
-export default function MappaAziende({ punti }: { punti: PuntoMappa[] }) {
+export default function MappaAziende({ punti, zone }: { punti: PuntoMappa[]; zone: ZonaMappa[] }) {
   const nodo = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -93,7 +124,37 @@ export default function MappaAziende({ punti }: { punti: PuntoMappa[] }) {
           maxZoom: 19,
         }).addTo(map)
 
+        const angoli: [number, number][] = []
+        for (const zona of zone) {
+          const features = zona.regioni
+            .map((id) => REGIONI_PER_ID.get(id))
+            .filter((feature): feature is FeatureRegione => Boolean(feature))
+          if (!features.length) continue
+          for (const feature of features) angoliGeometria(feature.geometry.coordinates, angoli)
+          L.geoJSON(
+            { type: 'FeatureCollection', features },
+            {
+              style: {
+                color: zona.colore,
+                weight: 1.5,
+                fillColor: zona.colore,
+                fillOpacity: 0.32,
+              },
+              onEachFeature: (
+                feature: { properties?: { id?: string } },
+                layer: { bindPopup: (html: string) => void },
+              ) => {
+                const regione = nomeRegione(feature.properties?.id ?? '') ?? ''
+                layer.bindPopup(
+                  `<strong>${testoSicuro(zona.nome)}</strong><br>${testoSicuro(zona.ruoloLabel)}<br>${testoSicuro(regione)}`,
+                )
+              },
+            },
+          ).addTo(map)
+        }
+
         for (const punto of punti) {
+          angoli.push([punto.lat, punto.lng])
           const colore = COLORE_RUOLO[punto.ruolo] ?? '#ef4444'
           const marker = L.circleMarker([punto.lat, punto.lng], {
             radius: 8,
@@ -106,19 +167,19 @@ export default function MappaAziende({ punti }: { punti: PuntoMappa[] }) {
             `<strong>${testoSicuro(punto.nome)}</strong><br>${testoSicuro(punto.ruoloLabel)}` +
               rigaPopup('Via', punto.indirizzo) +
               rigaPopup('CAP', punto.cap) +
-              rigaPopup('Città', punto.citta),
+              rigaPopup('Città', punto.citta) +
+              rigaPopup('Area', punto.area),
           )
         }
 
-        if (punti.length === 1) {
-          map.fitBounds(L.latLngBounds([[punti[0].lat, punti[0].lng]]), { maxZoom: 16, padding: [48, 48] })
-        } else if (punti.length > 1) {
-          map.fitBounds(
-            L.latLngBounds(punti.map((punto) => [punto.lat, punto.lng])),
-            { padding: [36, 36], maxZoom: 12 },
-          )
-        } else {
+        if (angoli.length === 0) {
           map.fitBounds(L.latLngBounds([[46, 10], [42, 14]]), { padding: [24, 24] })
+        } else if (zone.length > 0) {
+          map.fitBounds(L.latLngBounds(angoli), { padding: [28, 28], maxZoom: 7 })
+        } else if (punti.length === 1) {
+          map.fitBounds(L.latLngBounds([[punti[0].lat, punti[0].lng]]), { maxZoom: 16, padding: [48, 48] })
+        } else {
+          map.fitBounds(L.latLngBounds(angoli), { padding: [36, 36], maxZoom: 12 })
         }
       })
       .catch(() => {
@@ -129,7 +190,7 @@ export default function MappaAziende({ punti }: { punti: PuntoMappa[] }) {
       annullato = true
       mappa?.remove()
     }
-  }, [punti])
+  }, [punti, zone])
 
   return (
     <>

@@ -26,6 +26,7 @@ import {
 import { isAgenteLike } from '@/lib/catalogRoles'
 import { isEmailTecnica, ruoloConEmailDiLogin } from '@/lib/emailTecnica'
 import AssociazioneMonteCampi from '@/components/admin/AssociazioneMonteCampi'
+import AreaInteresseCampi from '@/components/admin/AreaInteresseCampi'
 import { fasceAssociazione, regolaAssociazioneMonte, selezioneFascia } from '@/lib/associazioneMonte'
 
 import { useAppLocale } from '@/lib/useAppLocale'
@@ -72,6 +73,8 @@ export type ProfiloGestioneRow = {
   citta?: string | null
   indirizzo?: string | null
   cap?: string | null
+  aree_interesse?: string[] | null
+  colore_area?: string | null
   ruolo: string
   invitato_da?: string | null
   registrazione_approvata: boolean | null
@@ -483,6 +486,10 @@ export default function AdminProfiliPanel({
     const cittaInserita = fd.has('citta') ? String(fd.get('citta') ?? '').trim() || null : undefined
     const indirizzoInserito = fd.has('indirizzo') ? String(fd.get('indirizzo') ?? '').trim() || null : undefined
     const capInserito = fd.has('cap') ? String(fd.get('cap') ?? '').trim() || null : undefined
+    const areeInviate = fd.has('aree_interesse_invio')
+      ? fd.getAll('area_interesse').map((valore) => String(valore))
+      : undefined
+    const coloreInviato = areeInviate !== undefined ? String(fd.get('colore_area') ?? '').trim() || null : undefined
     const ruolo = String(fd.get('ruolo') ?? '').trim()
     const rawApprovazione = fd.get('registrazione_approvata')
     const registrazione_approvata =
@@ -494,6 +501,7 @@ export default function AdminProfiliPanel({
       societa,
       area_geografica,
       ...(cittaInserita !== undefined ? { citta: cittaInserita, indirizzo: indirizzoInserito ?? null, cap: capInserito ?? null } : {}),
+      ...(areeInviate !== undefined ? { aree_interesse: areeInviate, colore_area: coloreInviato ?? null } : {}),
       ruolo,
       registrazione_approvata,
     }
@@ -773,6 +781,7 @@ export default function AdminProfiliPanel({
                             className="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
                           />
                         </label>
+                        <AreaInteresseCampi aree={p.aree_interesse} colore={p.colore_area} ruolo={p.ruolo} />
                       </>
                     ) : null}
                     <label className="block text-xs font-medium uppercase text-zinc-600">
@@ -1254,6 +1263,7 @@ export default function AdminProfiliPanel({
                                   className="mt-1 w-full h-9 rounded-md border border-black bg-zinc-50 px-2 text-sm"
                                 />
                               </label>
+                              <AreaInteresseCampi aree={p.aree_interesse} colore={p.colore_area} ruolo={p.ruolo} />
                             </>
                           ) : null}
                           <label className="block text-xs font-medium uppercase text-zinc-600">
