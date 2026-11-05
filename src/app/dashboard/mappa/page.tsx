@@ -23,6 +23,8 @@ type Riga = {
   societa: string | null
   ruolo: string
   citta: string | null
+  indirizzo: string | null
+  cap: string | null
   latitudine: number | null
   longitudine: number | null
   registrazione_approvata: boolean | null
@@ -49,20 +51,22 @@ export default async function MappaPage() {
 
   const { data, error } = await db
     .from('profili')
-    .select('id, nome_completo, societa, ruolo, citta, latitudine, longitudine, registrazione_approvata')
+    .select('id, nome_completo, societa, ruolo, citta, indirizzo, cap, latitudine, longitudine, registrazione_approvata')
     .in('ruolo', [...RUOLI_MAPPA])
     .or('registrazione_approvata.eq.true,registrazione_approvata.is.null')
     .limit(2000)
 
   const righe = (error ? [] : (data ?? [])) as Riga[]
   const punti: PuntoMappa[] = []
-  const senzaCoordinate: { id: string; nome: string; citta: string }[] = []
-  let senzaCitta = 0
+  const senzaCoordinate: { id: string; nome: string; dove: string }[] = []
+  let senzaIndirizzo = 0
 
   for (const row of righe) {
     const citta = row.citta?.trim() ?? ''
-    if (!citta) {
-      senzaCitta += 1
+    const indirizzo = row.indirizzo?.trim() ?? ''
+    const cap = row.cap?.trim() ?? ''
+    if (!citta && !indirizzo && !cap) {
+      senzaIndirizzo += 1
       continue
     }
     if (typeof row.latitudine === 'number' && typeof row.longitudine === 'number') {
@@ -72,11 +76,17 @@ export default async function MappaPage() {
         ruolo: row.ruolo,
         ruoloLabel: tRuolo(locale, row.ruolo),
         citta,
+        indirizzo,
+        cap,
         lat: row.latitudine,
         lng: row.longitudine,
       })
     } else {
-      senzaCoordinate.push({ id: row.id, nome: nomeSede(row), citta })
+      senzaCoordinate.push({
+        id: row.id,
+        nome: nomeSede(row),
+        dove: [indirizzo, cap, citta].filter(Boolean).join(', '),
+      })
     }
   }
 
@@ -95,13 +105,13 @@ export default async function MappaPage() {
           </Link>
           <h1 className="text-3xl md:text-4xl font-semibold text-zinc-900 tracking-tight mt-3">Mappa</h1>
           <p className="text-sm text-zinc-600 mt-2 max-w-2xl">
-            Agenzie, rivenditori e sedi studio. Il puntino usa la città salvata in gestione utenti, non l’area geografica.
+            Agenzie, rivenditori e sedi studio. Il puntino usa via, CAP e città salvati in gestione utenti. Zoom con i pulsanti o con la rotella.
           </p>
         </div>
 
         {error ? (
           <p className="rounded-xl border border-red-700 bg-red-50 px-4 py-3 text-sm text-red-900">
-            Mappa non disponibile. Esegui su Supabase il file supabase_alter_profili_citta.sql e ricarica.
+            Mappa non disponibile. Esegui su Supabase il file supabase_alter_profili_indirizzo_cap.sql e ricarica.
           </p>
         ) : (
           <>
@@ -118,18 +128,20 @@ export default async function MappaPage() {
               <span className="text-zinc-500">{punti.length} in mappa</span>
             </div>
             <MappaAziende punti={punti} />
-            {senzaCitta > 0 || senzaCoordinate.length > 0 ? (
+            {senzaIndirizzo > 0 || senzaCoordinate.length > 0 ? (
               <div className="rounded-xl border border-white/15 bg-zinc-950/40 px-4 py-3 text-sm text-zinc-300 space-y-2">
-                {senzaCitta > 0 ? (
-                  <p>{senzaCitta} sedi senza città: non compaiono finché non la inserisci in gestione utenti.</p>
+                {senzaIndirizzo > 0 ? (
+                  <p>
+                    {senzaIndirizzo} sedi senza via, CAP o città: non compaiono finché non li inserisci in gestione utenti.
+                  </p>
                 ) : null}
                 {senzaCoordinate.length > 0 ? (
                   <div>
-                    <p>Città non trovata, quindi senza puntino:</p>
+                    <p>Indirizzo non trovato, quindi senza puntino:</p>
                     <ul className="mt-1 list-disc pl-5">
                       {senzaCoordinate.map((sede) => (
                         <li key={sede.id}>
-                          {sede.nome} — {sede.citta}
+                          {sede.nome} — {sede.dove}
                         </li>
                       ))}
                     </ul>

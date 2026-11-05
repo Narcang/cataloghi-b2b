@@ -70,6 +70,8 @@ export type ProfiloGestioneRow = {
   societa: string | null
   area_geografica: string | null
   citta?: string | null
+  indirizzo?: string | null
+  cap?: string | null
   ruolo: string
   invitato_da?: string | null
   registrazione_approvata: boolean | null
@@ -479,6 +481,8 @@ export default function AdminProfiliPanel({
     const societa = String(fd.get('societa') ?? '').trim() || null
     const area_geografica = String(fd.get('area_geografica') ?? '').trim() || null
     const cittaInserita = fd.has('citta') ? String(fd.get('citta') ?? '').trim() || null : undefined
+    const indirizzoInserito = fd.has('indirizzo') ? String(fd.get('indirizzo') ?? '').trim() || null : undefined
+    const capInserito = fd.has('cap') ? String(fd.get('cap') ?? '').trim() || null : undefined
     const ruolo = String(fd.get('ruolo') ?? '').trim()
     const rawApprovazione = fd.get('registrazione_approvata')
     const registrazione_approvata =
@@ -489,7 +493,7 @@ export default function AdminProfiliPanel({
       telefono,
       societa,
       area_geografica,
-      ...(cittaInserita !== undefined ? { citta: cittaInserita } : {}),
+      ...(cittaInserita !== undefined ? { citta: cittaInserita, indirizzo: indirizzoInserito ?? null, cap: capInserito ?? null } : {}),
       ruolo,
       registrazione_approvata,
     }
@@ -738,16 +742,38 @@ export default function AdminProfiliPanel({
                       />
                     </label>
                     {ruoloHaSede(p.ruolo) ? (
-                      <label className="block text-xs font-medium uppercase text-zinc-600">
-                        Città
-                        <input
-                          name="citta"
-                          type="text"
-                          placeholder="Es. Milano, Italia"
-                          defaultValue={p.citta ?? ''}
-                          className="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
-                        />
-                      </label>
+                      <>
+                        <label className="block text-xs font-medium uppercase text-zinc-600">
+                          Città
+                          <input
+                            name="citta"
+                            type="text"
+                            placeholder="Es. Milano, Italia"
+                            defaultValue={p.citta ?? ''}
+                            className="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
+                          />
+                        </label>
+                        <label className="block text-xs font-medium uppercase text-zinc-600 md:col-span-2">
+                          Via
+                          <input
+                            name="indirizzo"
+                            type="text"
+                            placeholder="Es. Via Roma 10"
+                            defaultValue={p.indirizzo ?? ''}
+                            className="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
+                          />
+                        </label>
+                        <label className="block text-xs font-medium uppercase text-zinc-600">
+                          CAP
+                          <input
+                            name="cap"
+                            type="text"
+                            placeholder="Es. 20121"
+                            defaultValue={p.cap ?? ''}
+                            className="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
+                          />
+                        </label>
+                      </>
                     ) : null}
                     <label className="block text-xs font-medium uppercase text-zinc-600">
                       {copy.campoRuolo}
@@ -1197,16 +1223,38 @@ export default function AdminProfiliPanel({
                             />
                           </label>
                           {ruoloHaSede(p.ruolo) ? (
-                            <label className="block text-xs font-medium uppercase text-zinc-600">
-                              Città
-                              <input
-                                name="citta"
-                                type="text"
-                                placeholder="Es. Milano, Italia"
-                                defaultValue={p.citta ?? ''}
-                                className="mt-1 w-full h-9 rounded-md border border-black bg-zinc-50 px-2 text-sm"
-                              />
-                            </label>
+                            <>
+                              <label className="block text-xs font-medium uppercase text-zinc-600">
+                                Città
+                                <input
+                                  name="citta"
+                                  type="text"
+                                  placeholder="Es. Milano, Italia"
+                                  defaultValue={p.citta ?? ''}
+                                  className="mt-1 w-full h-9 rounded-md border border-black bg-zinc-50 px-2 text-sm"
+                                />
+                              </label>
+                              <label className="block text-xs font-medium uppercase text-zinc-600 md:col-span-2">
+                                Via
+                                <input
+                                  name="indirizzo"
+                                  type="text"
+                                  placeholder="Es. Via Roma 10"
+                                  defaultValue={p.indirizzo ?? ''}
+                                  className="mt-1 w-full h-9 rounded-md border border-black bg-zinc-50 px-2 text-sm"
+                                />
+                              </label>
+                              <label className="block text-xs font-medium uppercase text-zinc-600">
+                                CAP
+                                <input
+                                  name="cap"
+                                  type="text"
+                                  placeholder="Es. 20121"
+                                  defaultValue={p.cap ?? ''}
+                                  className="mt-1 w-full h-9 rounded-md border border-black bg-zinc-50 px-2 text-sm"
+                                />
+                              </label>
+                            </>
                           ) : null}
                           <label className="block text-xs font-medium uppercase text-zinc-600">
                             {copy.campoRuolo}

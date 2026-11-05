@@ -1,7 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { MONDO_PATH } from '@/components/admin/mondoMappaPath'
+import { useEffect, useRef } from 'react'
 
 export type PuntoMappa = {
   id: string
@@ -9,6 +8,8 @@ export type PuntoMappa = {
   ruolo: string
   ruoloLabel: string
   citta: string
+  indirizzo: string
+  cap: string
   lat: number
   lng: number
 }
@@ -19,74 +20,124 @@ const COLORE_RUOLO: Record<string, string> = {
   studio: '#f97316',
 }
 
-function posizione(lng: number, lat: number) {
-  return { x: lng + 180, y: 90 - lat }
+type LeafletMap = { remove: () => void; fitBounds: (bounds: unknown, options: object) => void }
+
+type LeafletLib = {
+  map: (el: HTMLElement, options: object) => LeafletMap
+  tileLayer: (url: string, options: object) => { addTo: (map: LeafletMap) => void }
+  circleMarker: (
+    latlng: [number, number],
+    options: object,
+  ) => { addTo: (map: LeafletMap) => { bindPopup: (html: string) => void } }
+  latLngBounds: (latlngs: [number, number][]) => unknown
+}
+
+function caricaLeaflet(): Promise<void> {
+  if (typeof window === 'undefined') return Promise.resolve()
+  if ((window as unknown as { L?: unknown }).L) return Promise.resolve()
+  if (!document.getElementById('leaflet-css')) {
+    const link = document.createElement('link')
+    link.id = 'leaflet-css'
+    link.rel = 'stylesheet'
+    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
+    document.head.appendChild(link)
+  }
+  return new Promise((resolve, reject) => {
+    const esistente = document.getElementById('leaflet-js') as HTMLScriptElement | null
+    if (esistente) {
+      esistente.addEventListener('load', () => resolve(), { once: true })
+      esistente.addEventListener('error', () => reject(new Error('leaflet')), { once: true })
+      return
+    }
+    const script = document.createElement('script')
+    script.id = 'leaflet-js'
+    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
+    script.async = true
+    script.onload = () => resolve()
+    script.onerror = () => reject(new Error('leaflet'))
+    document.head.appendChild(script)
+  })
+}
+
+function testoSicuro(value: string): string {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+}
+
+function rigaPopup(etichetta: string, valore: string): string {
+  const testo = valore.trim()
+  if (!testo) return ''
+  return `<br>${etichetta}: ${testoSicuro(testo)}`
 }
 
 export default function MappaAziende({ punti }: { punti: PuntoMappa[] }) {
-  const [scelto, setScelto] = useState<string | null>(null)
-  const attivi = useMemo(() => {
-    const gruppi = new Map<string, PuntoMappa[]>()
-    for (const punto of punti) {
-      const chiave = `${punto.lat.toFixed(1)},${punto.lng.toFixed(1)}`
-      const lista = gruppi.get(chiave) ?? []
-      lista.push(punto)
-      gruppi.set(chiave, lista)
-    }
-    const messi: { punto: PuntoMappa; x: number; y: number }[] = []
-    for (const lista of gruppi.values()) {
-      lista.forEach((punto, indice) => {
-        const angolo = (indice / lista.length) * Math.PI * 2
-        const scarto = lista.length > 1 ? 1.4 : 0
-        const pos = posizione(punto.lng + Math.cos(angolo) * scarto, punto.lat + Math.sin(angolo) * scarto)
-        messi.push({ punto, x: pos.x, y: pos.y })
+  const nodo = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const el = nodo.current
+    if (!el) return
+    let annullato = false
+    let mappa: LeafletMap | null = null
+
+    void caricaLeaflet()
+      .then(() => {
+        if (annullato || !nodo.current) return
+        const L = (window as unknown as { L: LeafletLib }).L
+        const map = L.map(nodo.current, { worldCopyJump: true, scrollWheelZoom: true })
+        mappa = map
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap',
+          maxZoom: 19,
+        }).addTo(map)
+
+        for (const punto of punti) {
+          const colore = COLORE_RUOLO[punto.ruolo] ?? '#ef4444'
+          const marker = L.circleMarker([punto.lat, punto.lng], {
+            radius: 8,
+            color: '#111',
+            weight: 1,
+            fillColor: colore,
+            fillOpacity: 0.95,
+          }).addTo(map)
+          marker.bindPopup(
+            `<strong>${testoSicuro(punto.nome)}</strong><br>${testoSicuro(punto.ruoloLabel)}` +
+              rigaPopup('Via', punto.indirizzo) +
+              rigaPopup('CAP', punto.cap) +
+              rigaPopup('Città', punto.citta),
+          )
+        }
+
+        if (punti.length === 1) {
+          map.fitBounds(L.latLngBounds([[punti[0].lat, punti[0].lng]]), { maxZoom: 16, padding: [48, 48] })
+        } else if (punti.length > 1) {
+          map.fitBounds(
+            L.latLngBounds(punti.map((punto) => [punto.lat, punto.lng])),
+            { padding: [36, 36], maxZoom: 12 },
+          )
+        } else {
+          map.fitBounds(L.latLngBounds([[46, 10], [42, 14]]), { padding: [24, 24] })
+        }
       })
+      .catch(() => {
+        if (el) el.dataset.errore = '1'
+      })
+
+    return () => {
+      annullato = true
+      mappa?.remove()
     }
-    return messi
   }, [punti])
-  const dettaglio = attivi.find((item) => item.punto.id === scelto) ?? null
 
   return (
-    <div className="relative w-full">
-      <svg
-        viewBox="0 0 360 180"
-        role="img"
-        aria-label="Mappa mondiale delle sedi"
-        className="w-full h-auto rounded-xl border border-white/15 bg-[#0c1924]"
-        onClick={() => setScelto(null)}
-      >
-        <rect width="360" height="180" fill="#0c1924" />
-        {[30, 60, 90, 120, 150].map((y) => (
-          <line key={`y-${y}`} x1="0" y1={y} x2="360" y2={y} stroke="#ffffff" strokeOpacity="0.06" />
-        ))}
-        {[60, 120, 180, 240, 300].map((x) => (
-          <line key={`x-${x}`} x1={x} y1="0" x2={x} y2="180" stroke="#ffffff" strokeOpacity="0.06" />
-        ))}
-        <path d={MONDO_PATH} fill="#314556" stroke="#6d8798" strokeWidth="0.15" />
-        {attivi.map(({ punto, x, y }) => {
-          const colore = COLORE_RUOLO[punto.ruolo] ?? '#ef4444'
-          const aperto = scelto === punto.id
-          return (
-            <g key={punto.id} onClick={(event) => { event.stopPropagation(); setScelto(punto.id) }}>
-              <circle cx={x} cy={y} r={aperto ? 2.4 : 1.7} fill={colore} stroke="#111" strokeWidth="0.25" className="cursor-pointer" />
-            </g>
-          )
-        })}
-      </svg>
-      {dettaglio ? (
-        <div
-          className="absolute z-10 max-w-[220px] rounded-lg border border-white/20 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 shadow-lg"
-          style={{
-            left: `${(dettaglio.x / 360) * 100}%`,
-            top: `${(dettaglio.y / 180) * 100}%`,
-            transform: 'translate(-50%, -130%)',
-          }}
-        >
-          <p className="font-semibold">{dettaglio.punto.nome}</p>
-          <p className="text-zinc-400">{dettaglio.punto.ruoloLabel}</p>
-          <p>{dettaglio.punto.citta}</p>
-        </div>
-      ) : null}
-    </div>
+    <>
+      <style>{`
+        .leaflet-container img { max-width: none !important; }
+        .leaflet-container { background: #d7e3ef; font: inherit; }
+      `}</style>
+      <div ref={nodo} className="h-[70vh] min-h-[420px] w-full rounded-xl border border-white/15" />
+    </>
   )
 }
