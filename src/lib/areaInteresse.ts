@@ -1,25 +1,23 @@
-export const REGIONI_ITALIA = [
-  { id: '13', nome: 'Abruzzo' },
-  { id: '17', nome: 'Basilicata' },
-  { id: '18', nome: 'Calabria' },
-  { id: '15', nome: 'Campania' },
-  { id: '08', nome: 'Emilia-Romagna' },
-  { id: '06', nome: 'Friuli-Venezia Giulia' },
-  { id: '12', nome: 'Lazio' },
-  { id: '07', nome: 'Liguria' },
-  { id: '03', nome: 'Lombardia' },
-  { id: '11', nome: 'Marche' },
-  { id: '14', nome: 'Molise' },
-  { id: '01', nome: 'Piemonte' },
-  { id: '16', nome: 'Puglia' },
-  { id: '20', nome: 'Sardegna' },
-  { id: '19', nome: 'Sicilia' },
-  { id: '09', nome: 'Toscana' },
-  { id: '04', nome: 'Trentino-Alto Adige' },
-  { id: '10', nome: 'Umbria' },
-  { id: '02', nome: "Valle d'Aosta" },
-  { id: '05', nome: 'Veneto' },
-] as const
+import catalogo from '@/data/nazioniRegioni.json'
+
+export type NazioneVoce = { id: string; nome: string }
+export type RegioneVoce = { id: string; nazione: string; nome: string }
+
+export const NAZIONI = catalogo.nazioni as NazioneVoce[]
+export const REGIONI = catalogo.regioni as RegioneVoce[]
+
+const PER_ID = new Map(REGIONI.map((regione) => [regione.id, regione]))
+const ID_REGIONI = new Set(PER_ID.keys())
+
+const PER_NAZIONE = new Map<string, RegioneVoce[]>()
+for (const regione of REGIONI) {
+  const lista = PER_NAZIONE.get(regione.nazione) ?? []
+  lista.push(regione)
+  PER_NAZIONE.set(regione.nazione, lista)
+}
+for (const lista of PER_NAZIONE.values()) {
+  lista.sort((a, b) => a.nome.localeCompare(b.nome, 'it', { sensitivity: 'base' }))
+}
 
 export const COLORI_AREA = [
   { id: 'blu', hex: '#3b82f6', label: 'Blu' },
@@ -29,11 +27,26 @@ export const COLORI_AREA = [
   { id: 'azzurro', hex: '#38bdf8', label: 'Azzurro' },
 ] as const
 
-const ID_REGIONI = new Set<string>(REGIONI_ITALIA.map((regione) => regione.id))
 const ID_COLORI = new Set<string>(COLORI_AREA.map((colore) => colore.id))
 
+export function regioniDellaNazione(id: string): RegioneVoce[] {
+  return PER_NAZIONE.get(id) ?? []
+}
+
 export function nomeRegione(id: string): string | null {
-  return REGIONI_ITALIA.find((regione) => regione.id === id)?.nome ?? null
+  return PER_ID.get(id)?.nome ?? null
+}
+
+export function nazioneDi(id: string): string | null {
+  return PER_ID.get(id)?.nazione ?? null
+}
+
+export function nazioneIniziale(ids: string[]): string {
+  for (const id of ids) {
+    const nazione = PER_ID.get(id)?.nazione
+    if (nazione) return nazione
+  }
+  return 'IT'
 }
 
 export function colorePredefinitoRuolo(ruolo: string): string {

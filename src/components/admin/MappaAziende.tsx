@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import regioniItalia from '@/data/regioniItalia.json'
+import regioniMondo from '@/data/regioniMondo.json'
 import { nomeRegione } from '@/lib/areaInteresse'
 
 export type PuntoMappa = {
@@ -32,7 +32,7 @@ type FeatureRegione = {
 }
 
 const REGIONI_PER_ID = new Map(
-  (regioniItalia.features as FeatureRegione[]).map((feature) => [feature.properties.id, feature]),
+  (regioniMondo.features as FeatureRegione[]).map((feature) => [feature.properties.id, feature]),
 )
 
 const COLORE_RUOLO: Record<string, string> = {
