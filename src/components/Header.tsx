@@ -269,6 +269,17 @@ export default function Header() {
                       <Users size={16} aria-hidden />
                       {labels.gestioneUtenti}
                     </Link>
+                    {profiloRuolo === 'admin' && (
+                      <Link
+                        href="/dashboard/gestione-cataloghi"
+                        className="ladiva-dropdown-item"
+                        role="menuitem"
+                        onClick={() => setAccountMenuOpen(false)}
+                      >
+                        <BookOpen size={16} aria-hidden />
+                        {labels.gestioneCataloghi}
+                      </Link>
+                    )}
                     {profiloRuolo === 'admin' || profiloRuolo === 'manager' ? (
                       <Link
                         href="/dashboard/mappa"
@@ -281,17 +292,6 @@ export default function Header() {
                         {labels.mappa}
                       </Link>
                     ) : null}
-                    {profiloRuolo === 'admin' && (
-                      <Link
-                        href="/dashboard/gestione-cataloghi"
-                        className="ladiva-dropdown-item"
-                        role="menuitem"
-                        onClick={() => setAccountMenuOpen(false)}
-                      >
-                        <BookOpen size={16} aria-hidden />
-                        {labels.gestioneCataloghi}
-                      </Link>
-                    )}
                     <form action="/auth/signout" method="post" className="m-0 block w-full p-0">
                       <button type="submit" className="ladiva-dropdown-item w-full text-left text-[#060d41]" role="menuitem">
                         <LogOut size={16} aria-hidden />
