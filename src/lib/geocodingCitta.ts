@@ -16,8 +16,20 @@ export async function coordinateDaIndirizzo(parti: {
   return null
 }
 
+/** Olanda, Paesi Bassi e Netherlands sono lo stesso paese. "Netherland" da solo finisce in Nuova Zelanda. */
+function queryPaese(query: string): { testo: string; countrycodes?: string } {
+  const olanda = /\b(olanda|paesi\s+bassi|the\s+netherlands|netherlands|netherland|holland)\b/i
+  if (!olanda.test(query)) return { testo: query }
+  return {
+    testo: query.replace(new RegExp(olanda.source, 'gi'), 'Netherlands'),
+    countrycodes: 'nl',
+  }
+}
+
 async function cerca(query: string): Promise<{ lat: number; lng: number } | null> {
-  const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=${encodeURIComponent(query)}`
+  const paese = queryPaese(query)
+  const countrycodes = paese.countrycodes ? `&countrycodes=${paese.countrycodes}` : ''
+  const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=${encodeURIComponent(paese.testo)}${countrycodes}`
   try {
     const res = await fetch(url, {
       signal: AbortSignal.timeout(8000),

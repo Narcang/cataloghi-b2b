@@ -3,11 +3,12 @@
 import { useState } from 'react'
 import {
   COLORI_AREA,
-  NAZIONI,
+  NAZIONI_MENU,
   coloreAreaValido,
   colorePredefinitoRuolo,
   nazioneDi,
   nazioneIniziale,
+  nazioneNelFiltro,
   nomeRegione,
   regioniDellaNazione,
 } from '@/lib/areaInteresse'
@@ -23,7 +24,11 @@ export default function AreaInteresseCampi({
 }) {
   const attive = (aree ?? []).filter((id) => nomeRegione(id))
   const [nazione, setNazione] = useState(() => nazioneIniziale(attive))
+  const [filtroNazione, setFiltroNazione] = useState('')
   const [scelte, setScelte] = useState<string[]>(attive)
+  const nazioniVisibili = NAZIONI_MENU.filter(
+    (voce) => voce.id === nazione || nazioneNelFiltro(voce.id, voce.nome, filtroNazione),
+  )
   const regioni = regioniDellaNazione(nazione)
   const coloreAttivo = coloreAreaValido(colore) ?? colorePredefinitoRuolo(ruolo)
 
@@ -85,6 +90,15 @@ export default function AreaInteresseCampi({
         </p>
         <label className="mt-2 block text-xs font-medium uppercase text-zinc-600">
           Nazione
+          <input
+            type="search"
+            value={filtroNazione}
+            onChange={(event) => setFiltroNazione(event.target.value)}
+            onTouchStart={(event) => event.stopPropagation()}
+            onMouseDown={(event) => event.stopPropagation()}
+            placeholder="Es. Olanda, Paesi Bassi, Netherlands"
+            className="mt-1 h-9 w-full rounded-md border border-black bg-white px-2 text-sm normal-case"
+          />
           <select
             value={nazione}
             onChange={(event) => setNazione(event.target.value)}
@@ -92,7 +106,7 @@ export default function AreaInteresseCampi({
             onMouseDown={(event) => event.stopPropagation()}
             className="mt-1 h-9 w-full rounded-md border border-black bg-white px-2 text-sm normal-case"
           >
-            {NAZIONI.map((voce) => (
+            {nazioniVisibili.map((voce) => (
               <option key={voce.id} value={voce.id}>
                 {voce.nome}
               </option>

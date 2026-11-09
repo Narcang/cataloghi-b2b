@@ -6,6 +6,34 @@ export type RegioneVoce = { id: string; nazione: string; nome: string }
 export const NAZIONI = catalogo.nazioni as NazioneVoce[]
 export const REGIONI = catalogo.regioni as RegioneVoce[]
 
+/** Nomi con cui la stessa nazione viene cercata, oltre a quello in elenco. */
+const ALIAS_NAZIONE: Record<string, string[]> = {
+  NL: ['Olanda', 'Paesi Bassi', 'Netherlands', 'The Netherlands', 'Holland', 'Netherland'],
+}
+
+const ETICHETTA_NAZIONE: Record<string, string> = {
+  NL: 'Olanda (Paesi Bassi)',
+}
+
+export function etichettaNazione(id: string, nome: string): string {
+  return ETICHETTA_NAZIONE[id] ?? nome
+}
+
+export function nazioneNelFiltro(id: string, nome: string, filtro: string): boolean {
+  const cerca = filtro.trim().toLocaleLowerCase('it')
+  if (!cerca) return true
+  const testi = [nome, etichettaNazione(id, nome), id, ...(ALIAS_NAZIONE[id] ?? [])]
+  return testi.some((testo) => testo.toLocaleLowerCase('it').includes(cerca))
+}
+
+export const NAZIONI_MENU: NazioneVoce[] = (() => {
+  const italia = NAZIONI.find((nazione) => nazione.id === 'IT')
+  const altre = NAZIONI.filter((nazione) => nazione.id !== 'IT')
+    .map((nazione) => ({ id: nazione.id, nome: etichettaNazione(nazione.id, nazione.nome) }))
+    .sort((a, b) => a.nome.localeCompare(b.nome, 'it', { sensitivity: 'base' }))
+  return italia ? [{ id: italia.id, nome: etichettaNazione(italia.id, italia.nome) }, ...altre] : altre
+})()
+
 const PER_ID = new Map(REGIONI.map((regione) => [regione.id, regione]))
 const ID_REGIONI = new Set(PER_ID.keys())
 
