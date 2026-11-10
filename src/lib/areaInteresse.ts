@@ -102,3 +102,63 @@ export function areeInteresseValide(raw: unknown): string[] {
   }
   return [...visti]
 }
+
+const ID_NAZIONI = new Set(NAZIONI.map((nazione) => nazione.id))
+
+export function nazioniValide(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return []
+  const visti = new Set<string>()
+  for (const id of raw) {
+    const valore = String(id)
+    if (ID_NAZIONI.has(valore)) visti.add(valore)
+  }
+  return [...visti]
+}
+
+export function nomeNazione(id: string): string | null {
+  const voce = NAZIONI.find((nazione) => nazione.id === id)
+  if (!voce) return null
+  return etichettaNazione(id, voce.nome)
+}
+
+export function nomeNazioneGeocoding(id: string): string {
+  try {
+    return new Intl.DisplayNames(['en'], { type: 'region' }).of(id) ?? id
+  } catch {
+    return id
+  }
+}
+
+export function regioniDelleNazioni(ids: string[]): string[] {
+  const out: string[] = []
+  for (const id of ids) {
+    for (const regione of regioniDellaNazione(id)) out.push(regione.id)
+  }
+  return out
+}
+
+export function cittaCoperteDaTesto(testo: string): string[] {
+  const visti = new Set<string>()
+  for (const parte of testo.split(/[,;\n]/)) {
+    const nome = parte.replace(/\s+/g, ' ').trim()
+    if (nome) visti.add(nome)
+  }
+  return [...visti].slice(0, 40)
+}
+
+export type CittaCoperta = { nome: string; lat: number; lng: number }
+
+export function cittaCoperteGeoValide(raw: unknown): CittaCoperta[] {
+  if (!Array.isArray(raw)) return []
+  const out: CittaCoperta[] = []
+  for (const item of raw) {
+    if (!item || typeof item !== 'object') continue
+    const record = item as { nome?: unknown; lat?: unknown; lng?: unknown }
+    const nome = String(record.nome ?? '').trim()
+    const lat = Number(record.lat)
+    const lng = Number(record.lng)
+    if (!nome || !Number.isFinite(lat) || !Number.isFinite(lng)) continue
+    out.push({ nome, lat, lng })
+  }
+  return out
+}

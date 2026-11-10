@@ -74,6 +74,8 @@ export type ProfiloGestioneRow = {
   indirizzo?: string | null
   cap?: string | null
   aree_interesse?: string[] | null
+  nazioni_interesse?: string[] | null
+  citta_coperte?: string | null
   colore_area?: string | null
   ruolo: string
   invitato_da?: string | null
@@ -489,6 +491,10 @@ export default function AdminProfiliPanel({
     const areeInviate = fd.has('aree_interesse_invio')
       ? fd.getAll('area_interesse').map((valore) => String(valore))
       : undefined
+    const nazioniInviate = areeInviate !== undefined
+      ? fd.getAll('nazione_interesse').map((valore) => String(valore))
+      : undefined
+    const cittaCoperteInviate = areeInviate !== undefined ? String(fd.get('citta_coperte') ?? '') : undefined
     const coloreInviato = areeInviate !== undefined ? String(fd.get('colore_area') ?? '').trim() || null : undefined
     const ruolo = String(fd.get('ruolo') ?? '').trim()
     const rawApprovazione = fd.get('registrazione_approvata')
@@ -501,7 +507,14 @@ export default function AdminProfiliPanel({
       societa,
       area_geografica,
       ...(cittaInserita !== undefined ? { citta: cittaInserita, indirizzo: indirizzoInserito ?? null, cap: capInserito ?? null } : {}),
-      ...(areeInviate !== undefined ? { aree_interesse: areeInviate, colore_area: coloreInviato ?? null } : {}),
+      ...(areeInviate !== undefined
+        ? {
+            aree_interesse: areeInviate,
+            nazioni_interesse: nazioniInviate ?? [],
+            citta_coperte: cittaCoperteInviate ?? '',
+            colore_area: coloreInviato ?? null,
+          }
+        : {}),
       ruolo,
       registrazione_approvata,
     }
@@ -781,7 +794,13 @@ export default function AdminProfiliPanel({
                             className="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
                           />
                         </label>
-                        <AreaInteresseCampi aree={p.aree_interesse} colore={p.colore_area} ruolo={p.ruolo} />
+                        <AreaInteresseCampi
+                          aree={p.aree_interesse}
+                          nazioni={p.nazioni_interesse}
+                          cittaCoperte={p.citta_coperte}
+                          colore={p.colore_area}
+                          ruolo={p.ruolo}
+                        />
                       </>
                     ) : null}
                     <label className="block text-xs font-medium uppercase text-zinc-600">
@@ -1263,7 +1282,13 @@ export default function AdminProfiliPanel({
                                   className="mt-1 w-full h-9 rounded-md border border-black bg-zinc-50 px-2 text-sm"
                                 />
                               </label>
-                              <AreaInteresseCampi aree={p.aree_interesse} colore={p.colore_area} ruolo={p.ruolo} />
+                              <AreaInteresseCampi
+                                aree={p.aree_interesse}
+                                nazioni={p.nazioni_interesse}
+                                cittaCoperte={p.citta_coperte}
+                                colore={p.colore_area}
+                                ruolo={p.ruolo}
+                              />
                             </>
                           ) : null}
                           <label className="block text-xs font-medium uppercase text-zinc-600">

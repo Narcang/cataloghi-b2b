@@ -23,7 +23,7 @@ import { agenziaCanEditRivenditoreSpecializzazione, agenteCanEditRivenditoreSpec
 import { isAgenteLike } from '@/lib/catalogRoles'
 import { isEmailTecnica } from '@/lib/emailTecnica'
 import { coordinateDaIndirizzo } from '@/lib/geocodingCitta'
-import { areeInteresseValide, coloreAreaValido, colorePredefinitoRuolo } from '@/lib/areaInteresse'
+import { areeInteresseValide, cittaCoperteDaTesto, coloreAreaValido, colorePredefinitoRuolo, nazioneDi, nomeNazioneGeocoding, nazioniValide } from '@/lib/areaInteresse'
 
 const ESPOSITORI_FIELDS = [
   'espositore_1',
@@ -118,6 +118,8 @@ type Body = {
   indirizzo?: string | null
   cap?: string | null
   aree_interesse?: string[] | null
+  nazioni_interesse?: string[] | null
+  citta_coperte?: string | null
   colore_area?: string | null
   ruolo?: string | null
   registrazione_approvata?: boolean | null
@@ -330,9 +332,30 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  let cittaCoperteMancanti = false
   if ((isAdmin || isManager) && Array.isArray(body.aree_interesse)) {
-    patch.aree_interesse = areeInteresseValide(body.aree_interesse)
+    const aree = areeInteresseValide(body.aree_interesse)
+    const nazioni = nazioniValide(body.nazioni_interesse).filter(
+      (iso) => !aree.some((id) => nazioneDi(id) === iso),
+    )
+    const citta = cittaCoperteDaTesto(String(body.citta_coperte ?? ''))
+    patch.aree_interesse = aree
+    patch.nazioni_interesse = nazioni
+    patch.citta_coperte = citta.join(', ') || null
     patch.colore_area = coloreAreaValido(body.colore_area) ?? colorePredefinitoRuolo(ruoloEffettivo ?? '')
+    const paesi = new Set(nazioni)
+    for (const id of aree) {
+      const iso = nazioneDi(id)
+      if (iso) paesi.add(iso)
+    }
+    const paese = paesi.size === 1 ? nomeNazioneGeocoding([...paesi][0]) : ''
+    const geo: { nome: string; lat: number; lng: number }[] = []
+    for (const nome of citta) {
+      const punto = await coordinateDaIndirizzo({ citta: paese ? `${nome}, ${paese}` : nome })
+      if (punto) geo.push({ nome, lat: punto.lat, lng: punto.lng })
+    }
+    patch.citta_coperte_geo = geo
+    cittaCoperteMancanti = citta.length > 0 && geo.length < citta.length
   }
 
   if (
@@ -680,8 +703,12 @@ export async function POST(request: NextRequest) {
         : abilitato
           ? 'Utente abilitato: registrazione approvata e accesso ai cataloghi attivo.'
           : 'Profilo aggiornato.'
-  const message = cittaNonTrovata
-    ? `${messageBase} L’indirizzo non è stato trovato sulla mappa: controlla via, CAP e città.`
-    : messageBase
-  return jsonResponse(true, message, 200)
+  const message = [messageBase]
+  if (cittaNonTrovata) {
+    message.push('L’indirizzo non è stato trovato sulla mappa: controlla via, CAP e città.')
+  }
+  if (cittaCoperteMancanti) {
+    message.push('Alcune città coperte non sono state trovate sulla mappa.')
+  }
+  return jsonResponse(true, message.join(' '), 200)
 }

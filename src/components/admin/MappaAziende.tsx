@@ -23,6 +23,7 @@ export type ZonaMappa = {
   ruoloLabel: string
   colore: string
   regioni: string[]
+  citta: { nome: string; lat: number; lng: number }[]
 }
 
 type FeatureRegione = {
@@ -124,6 +125,34 @@ export default function MappaAziende({ punti, zone }: { punti: PuntoMappa[]; zon
 
         const riquadri: { extend: (bounds: unknown) => { extend: (bounds: unknown) => unknown } }[] = []
         for (const zona of zone) {
+          if (zona.citta.length > 0) {
+            for (const citta of zona.citta) {
+              const marker = L.circleMarker([citta.lat, citta.lng], {
+                pane: 'markerPane',
+                radius: 8,
+                color: '#ffffff',
+                weight: 2,
+                fillColor: zona.colore,
+                fillOpacity: 0.95,
+              }).addTo(map)
+              marker.bindPopup(
+                `<strong>${testoSicuro(zona.nome)}</strong><br>${testoSicuro(zona.ruoloLabel)}<br>${testoSicuro(citta.nome)}`,
+              )
+              marker.bindTooltip(`${testoSicuro(zona.nome)} · ${testoSicuro(citta.nome)}`, {
+                permanent: true,
+                direction: 'top',
+                offset: [0, -10],
+                className: 'ladiva-mappa-etichetta',
+                opacity: 1,
+              })
+              riquadri.push(
+                L.latLngBounds([[citta.lat, citta.lng]]) as {
+                  extend: (bounds: unknown) => { extend: (bounds: unknown) => unknown }
+                },
+              )
+            }
+            continue
+          }
           const features = zona.regioni
             .map((id) => REGIONI_PER_ID.get(id))
             .filter((feature): feature is FeatureRegione => Boolean(feature?.geometry))
@@ -188,9 +217,10 @@ export default function MappaAziende({ punti, zone }: { punti: PuntoMappa[]; zon
           let tutto = riquadri[0]
           for (const riquadro of riquadri.slice(1)) tutto = tutto.extend(riquadro) as typeof tutto
           const unaSede = punti.length === 1 && zone.length === 0
+          const soloCitta = zone.length > 0 && zone.every((zona) => zona.citta.length > 0)
           map.fitBounds(tutto, {
             padding: [36, 36],
-            maxZoom: unaSede ? 16 : zone.length > 0 ? 7 : 12,
+            maxZoom: unaSede ? 16 : soloCitta ? 11 : zone.length > 0 ? 7 : 12,
           })
         }
         requestAnimationFrame(() => {

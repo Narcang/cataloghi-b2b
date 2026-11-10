@@ -8,7 +8,7 @@ import Header from '@/components/Header'
 import MappaAziende, { type PuntoMappa, type ZonaMappa } from '@/components/admin/MappaAziende'
 import { getAppLocale } from '@/lib/localeServer'
 import { tRuolo } from '@/lib/i18nAdmin'
-import { areeInteresseValide, hexColoreArea, nomeRegione } from '@/lib/areaInteresse'
+import { areeInteresseValide, cittaCoperteGeoValide, hexColoreArea, nomeNazione, nomeRegione, nazioniValide, regioniDelleNazioni } from '@/lib/areaInteresse'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,6 +29,8 @@ type Riga = {
   latitudine: number | null
   longitudine: number | null
   aree_interesse: string[] | null
+  nazioni_interesse: string[] | null
+  citta_coperte_geo: unknown
   colore_area: string | null
   registrazione_approvata: boolean | null
 }
@@ -54,7 +56,7 @@ export default async function MappaPage() {
 
   const { data, error } = await db
     .from('profili')
-    .select('id, nome_completo, societa, ruolo, citta, indirizzo, cap, latitudine, longitudine, aree_interesse, colore_area, registrazione_approvata')
+    .select('id, nome_completo, societa, ruolo, citta, indirizzo, cap, latitudine, longitudine, aree_interesse, nazioni_interesse, citta_coperte_geo, colore_area, registrazione_approvata')
     .in('ruolo', [...RUOLI_MAPPA])
     .or('registrazione_approvata.eq.true,registrazione_approvata.is.null')
     .limit(2000)
@@ -70,14 +72,22 @@ export default async function MappaPage() {
     const indirizzo = row.indirizzo?.trim() ?? ''
     const cap = row.cap?.trim() ?? ''
     const aree = areeInteresseValide(row.aree_interesse)
-    const area = aree.map((id) => nomeRegione(id)).filter((nome): nome is string => Boolean(nome)).join(', ')
-    if (aree.length) {
+    const cittaGeo = cittaCoperteGeoValide(row.citta_coperte_geo)
+    const nazioniIntere = nazioniValide(row.nazioni_interesse)
+    const regioni = cittaGeo.length > 0 ? [] : aree.length > 0 ? aree : regioniDelleNazioni(nazioniIntere)
+    const area = cittaGeo.length > 0
+      ? cittaGeo.map((citta) => citta.nome).join(', ')
+      : aree.length > 0
+        ? aree.map((id) => nomeRegione(id)).filter((nome): nome is string => Boolean(nome)).join(', ')
+        : nazioniIntere.map((id) => nomeNazione(id)).filter((nome): nome is string => Boolean(nome)).join(', ')
+    if (cittaGeo.length > 0 || regioni.length > 0) {
       zone.push({
         id: row.id,
         nome: nomeSede(row),
         ruoloLabel: tRuolo(locale, row.ruolo),
         colore: hexColoreArea(row.colore_area, row.ruolo),
-        regioni: aree,
+        regioni,
+        citta: cittaGeo,
       })
     }
     if (!citta && !indirizzo && !cap) {
@@ -121,13 +131,13 @@ export default async function MappaPage() {
           </Link>
           <h1 className="text-3xl md:text-4xl font-semibold text-zinc-900 tracking-tight mt-3">Mappa</h1>
           <p className="text-sm text-zinc-600 mt-2 max-w-2xl">
-            Agenzie, rivenditori e sedi studio. Il puntino usa via, CAP e città. Il velo colorato è l’area di interesse, con il colore scelto sulla sede.
+            Agenzie, rivenditori e sedi studio. Il puntino è l’indirizzo. Il velo è la nazione o le regioni; se sono indicate delle città, in mappa restano solo quelle.
           </p>
         </div>
 
         {error ? (
           <p className="rounded-xl border border-red-700 bg-red-50 px-4 py-3 text-sm text-red-900">
-            Mappa non disponibile. Esegui su Supabase il file supabase_alter_profili_aree_interesse.sql e ricarica.
+            Mappa non disponibile. Esegui su Supabase il file supabase_alter_profili_copertura.sql e ricarica.
           </p>
         ) : (
           <>
