@@ -156,6 +156,7 @@ export default function MappaAziende({ punti, zone }: { punti: PuntoMappa[]; zon
             .map((id) => REGIONI_PER_ID.get(id))
             .filter((feature): feature is FeatureRegione => Boolean(feature?.geometry))
           if (!features.length) continue
+          const piccoli: { nome: string; lat: number; lng: number }[] = []
           const livello = L.geoJSON(
             { type: 'FeatureCollection', features },
             {
@@ -167,16 +168,52 @@ export default function MappaAziende({ punti, zone }: { punti: PuntoMappa[]; zon
               },
               onEachFeature: (
                 feature: { properties?: { id?: string } },
-                layer: { bindPopup: (html: string) => void },
+                layer: {
+                  bindPopup: (html: string) => void
+                  getBounds?: () => {
+                    getCenter: () => { lat: number; lng: number }
+                    getSouthWest: () => { lat: number; lng: number }
+                    getNorthEast: () => { lat: number; lng: number }
+                  }
+                },
               ) => {
                 const regione = nomeRegione(feature.properties?.id ?? '') ?? ''
                 layer.bindPopup(
                   `<strong>${testoSicuro(zona.nome)}</strong><br>${testoSicuro(zona.ruoloLabel)}<br>${testoSicuro(regione)}`,
                 )
+                const bounds = layer.getBounds?.()
+                if (!bounds) return
+                const sw = bounds.getSouthWest()
+                const ne = bounds.getNorthEast()
+                if (Math.abs(ne.lng - sw.lng) >= 0.12 || Math.abs(ne.lat - sw.lat) >= 0.12) return
+                const centro = bounds.getCenter()
+                piccoli.push({ nome: regione, lat: centro.lat, lng: centro.lng })
               },
             },
           ).addTo(map)
           riquadri.push(livello.getBounds() as { extend: (bounds: unknown) => { extend: (bounds: unknown) => unknown } })
+          if (piccoli.length > 0 && piccoli.length <= 12) {
+            for (const punto of piccoli) {
+              const marker = L.circleMarker([punto.lat, punto.lng], {
+                pane: 'markerPane',
+                radius: 7,
+                color: '#ffffff',
+                weight: 2,
+                fillColor: zona.colore,
+                fillOpacity: 0.95,
+              }).addTo(map)
+              marker.bindPopup(
+                `<strong>${testoSicuro(zona.nome)}</strong><br>${testoSicuro(zona.ruoloLabel)}<br>${testoSicuro(punto.nome)}`,
+              )
+              marker.bindTooltip(`${testoSicuro(zona.nome)} · ${testoSicuro(punto.nome)}`, {
+                permanent: true,
+                direction: 'top',
+                offset: [0, -8],
+                className: 'ladiva-mappa-etichetta',
+                opacity: 1,
+              })
+            }
+          }
         }
 
         for (const punto of punti) {
@@ -215,12 +252,26 @@ export default function MappaAziende({ punti, zone }: { punti: PuntoMappa[]; zon
         } else {
           let tutto = riquadri[0]
           for (const riquadro of riquadri.slice(1)) tutto = tutto.extend(riquadro) as typeof tutto
+          const limiti = tutto as typeof tutto & {
+            getEast?: () => number
+            getWest?: () => number
+            getNorth?: () => number
+            getSouth?: () => number
+          }
+          const zonaPiccola = Boolean(
+            limiti.getEast &&
+              limiti.getWest &&
+              limiti.getNorth &&
+              limiti.getSouth &&
+              Math.abs(limiti.getEast() - limiti.getWest()) < 3 &&
+              Math.abs(limiti.getNorth() - limiti.getSouth()) < 3,
+          )
           const unaSede = punti.length === 1 && zone.length === 0
           const soloCitta =
             zone.length > 0 && zone.every((zona) => zona.citta.length > 0 && zona.regioni.length === 0)
           map.fitBounds(tutto, {
             padding: [36, 36],
-            maxZoom: unaSede ? 16 : soloCitta ? 11 : zone.length > 0 ? 7 : 12,
+            maxZoom: unaSede ? 16 : soloCitta ? 11 : zone.length > 0 ? (zonaPiccola ? 12 : 7) : 12,
           })
         }
         requestAnimationFrame(() => {
