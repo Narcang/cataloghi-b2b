@@ -42,20 +42,46 @@ export default function AreaInteresseCampi({
   const [nazioniIntere, setNazioniIntere] = useState<string[]>(nazioniSalvate)
   const [filtroNazione, setFiltroNazione] = useState('')
   const [scelte, setScelte] = useState<string[]>(attive)
-  const nazioniVisibili = NAZIONI_MENU.filter(
-    (voce) => voce.id === nazione || nazioneNelFiltro(voce.id, voce.nome, filtroNazione),
-  )
+  const suggerimenti = filtroNazione.trim()
+    ? NAZIONI_MENU.filter((voce) => nazioneNelFiltro(voce.id, voce.nome, filtroNazione)).slice(0, 8)
+    : []
   const regioni = nazione ? regioniDellaNazione(nazione) : []
+  const nazioniAperte = (() => {
+    const viste = new Set<string>()
+    const lista: string[] = []
+    for (const id of nazioniIntere) {
+      if (viste.has(id)) continue
+      viste.add(id)
+      lista.push(id)
+    }
+    for (const id of scelte) {
+      const iso = nazioneDi(id)
+      if (!iso || viste.has(iso)) continue
+      viste.add(iso)
+      lista.push(iso)
+    }
+    return lista
+  })()
   const coloreAttivo = coloreAreaValido(colore) ?? colorePredefinitoRuolo(ruolo)
 
   function scegliNazione(iso: string) {
     setNazione(iso)
+    setFiltroNazione('')
     if (!iso) return
     const haRegioni = scelte.some((id) => nazioneDi(id) === iso)
     setNazioniIntere((correnti) => {
       if (haRegioni) return correnti.filter((id) => id !== iso)
       return correnti.includes(iso) ? correnti : [...correnti, iso]
     })
+  }
+
+  function confermaNazioneScritta() {
+    const testo = filtroNazione.trim().toLocaleLowerCase('it')
+    if (!testo) return
+    const esatta = NAZIONI_MENU.find((voce) => voce.nome.toLocaleLowerCase('it') === testo)
+    const unica = suggerimenti.length === 1 ? suggerimenti[0] : null
+    const scelta = esatta ?? unica
+    if (scelta) scegliNazione(scelta.id)
   }
 
   function alterna(id: string, acceso: boolean) {
@@ -139,34 +165,61 @@ export default function AreaInteresseCampi({
             'Nessuna zona selezionata'
           )}
         </p>
-        <label className="mt-2 block text-xs font-medium uppercase text-zinc-600">
-          Nazione
-          <input
-            type="search"
-            value={filtroNazione}
-            onChange={(event) => setFiltroNazione(event.target.value)}
-            onTouchStart={(event) => event.stopPropagation()}
-            onMouseDown={(event) => event.stopPropagation()}
-            placeholder="Es. Olanda, Paesi Bassi, Netherlands"
-            className="mt-1 h-9 w-full rounded-md border border-black bg-white px-2 text-sm normal-case"
-          />
-          <select
-            value={nazione}
-            onChange={(event) => scegliNazione(event.target.value)}
-            onTouchStart={(event) => event.stopPropagation()}
-            onMouseDown={(event) => event.stopPropagation()}
-            className="mt-1 h-9 w-full rounded-md border border-black bg-white px-2 text-sm normal-case"
-          >
-            <option value="">Scegli la nazione</option>
-            {nazioniVisibili.map((voce) => (
-              <option key={voce.id} value={voce.id}>
-                {voce.nome}
-              </option>
+        <div className="relative mt-2">
+          <label className="block text-xs font-medium uppercase text-zinc-600">
+            Nazioni
+            <input
+              type="text"
+              value={filtroNazione}
+              onChange={(event) => setFiltroNazione(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key !== 'Enter') return
+                event.preventDefault()
+                confermaNazioneScritta()
+              }}
+              onBlur={() => confermaNazioneScritta()}
+              onTouchStart={(event) => event.stopPropagation()}
+              onMouseDown={(event) => event.stopPropagation()}
+              placeholder="Scrivi e conferma: Francia, Olanda, Spagna"
+              className="mt-1 h-9 w-full rounded-md border border-black bg-white px-2 text-sm normal-case"
+            />
+          </label>
+          {suggerimenti.length > 0 ? (
+            <div className="absolute z-20 mt-1 max-h-48 w-full overflow-y-auto rounded-md border border-black bg-white">
+              {suggerimenti.map((voce) => (
+                <button
+                  key={voce.id}
+                  type="button"
+                  onMouseDown={(event) => {
+                    event.preventDefault()
+                    scegliNazione(voce.id)
+                  }}
+                  className="block w-full px-2 py-1.5 text-left text-sm normal-case text-zinc-800 hover:bg-zinc-100"
+                >
+                  {voce.nome}
+                </button>
+              ))}
+            </div>
+          ) : null}
+        </div>
+        {nazioniAperte.length > 0 ? (
+          <div className="mt-2 flex flex-wrap gap-2">
+            {nazioniAperte.map((id) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => setNazione(id)}
+                className={`rounded-full border px-2 py-1 text-sm normal-case ${id === nazione ? 'border-white bg-white/15' : 'border-black/20'}`}
+              >
+                {nomeNazione(id) ?? id}
+              </button>
             ))}
-          </select>
-        </label>
+          </div>
+        ) : null}
         {regioni.length > 0 ? (
-          <div className="mt-3 grid max-h-56 grid-cols-2 gap-2 overflow-y-auto md:grid-cols-3">
+          <>
+            <p className="mt-3 text-xs font-medium uppercase text-zinc-600">Regioni</p>
+            <div className="mt-2 grid max-h-56 grid-cols-2 gap-2 overflow-y-auto md:grid-cols-3">
             {regioni.map((regione) => (
               <label key={regione.id} className="inline-flex items-center gap-2 text-sm normal-case text-zinc-800">
                 <input
@@ -178,7 +231,8 @@ export default function AreaInteresseCampi({
                 {regione.nome}
               </label>
             ))}
-          </div>
+            </div>
+          </>
         ) : null}
         <label className="mt-3 block text-xs font-medium uppercase text-zinc-600">
           Città coperte
