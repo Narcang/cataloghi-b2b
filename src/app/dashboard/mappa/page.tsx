@@ -8,7 +8,8 @@ import Header from '@/components/Header'
 import MappaAziende, { type PuntoMappa, type ZonaMappa } from '@/components/admin/MappaAziende'
 import { getAppLocale } from '@/lib/localeServer'
 import { tRuolo } from '@/lib/i18nAdmin'
-import { areeInteresseValide, cittaCoperteGeoValide, hexColoreArea, nomeNazione, nomeRegione, nazioniValide, regioniDelleNazioni } from '@/lib/areaInteresse'
+import { areeInteresseValide, cittaCoperteGeoValide, hexColoreArea, nazioniValide } from '@/lib/areaInteresse'
+import { coperturaVisibile } from '@/lib/coperturaMappa'
 
 export const dynamic = 'force-dynamic'
 
@@ -74,12 +75,9 @@ export default async function MappaPage() {
     const aree = areeInteresseValide(row.aree_interesse)
     const cittaGeo = cittaCoperteGeoValide(row.citta_coperte_geo)
     const nazioniIntere = nazioniValide(row.nazioni_interesse)
-    const regioni = cittaGeo.length > 0 ? [] : aree.length > 0 ? aree : regioniDelleNazioni(nazioniIntere)
-    const area = cittaGeo.length > 0
-      ? cittaGeo.map((citta) => citta.nome).join(', ')
-      : aree.length > 0
-        ? aree.map((id) => nomeRegione(id)).filter((nome): nome is string => Boolean(nome)).join(', ')
-        : nazioniIntere.map((id) => nomeNazione(id)).filter((nome): nome is string => Boolean(nome)).join(', ')
+    const copertura = coperturaVisibile(aree, nazioniIntere, cittaGeo)
+    const regioni = copertura.regioni
+    const area = copertura.etichetta
     if (cittaGeo.length > 0 || regioni.length > 0) {
       zone.push({
         id: row.id,
@@ -131,7 +129,7 @@ export default async function MappaPage() {
           </Link>
           <h1 className="text-3xl md:text-4xl font-semibold text-zinc-900 tracking-tight mt-3">Mappa</h1>
           <p className="text-sm text-zinc-600 mt-2 max-w-2xl">
-            Agenzie, rivenditori e sedi studio. Il puntino è l’indirizzo. Il velo è la nazione o le regioni; se sono indicate delle città, in mappa restano solo quelle.
+            Agenzie, rivenditori e sedi studio. Il puntino è l’indirizzo. Ogni nazione resta intera o sulle sue regioni; le città sostituiscono solo la nazione in cui cadono.
           </p>
         </div>
 

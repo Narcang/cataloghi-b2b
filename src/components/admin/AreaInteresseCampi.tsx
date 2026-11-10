@@ -133,7 +133,7 @@ export default function AreaInteresseCampi({
       <div>
         <p className="text-xs font-medium uppercase text-zinc-600">Area di interesse</p>
         <p className="mt-1 text-sm normal-case text-zinc-500">
-          Senza regioni, la sede copre tutta la nazione. Con le regioni, solo quelle. Se indichi delle città, in mappa restano solo le città.
+          Senza regioni, la sede copre tutta la nazione. Con le regioni, solo quelle. Le città sostituiscono solo la nazione in cui cadono: le altre nazioni restano.
         </p>
         <p className="mt-1 text-sm text-zinc-700">
           {nazioniIntere.length > 0 || scelte.length > 0 ? (

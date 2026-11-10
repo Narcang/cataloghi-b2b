@@ -151,7 +151,6 @@ export default function MappaAziende({ punti, zone }: { punti: PuntoMappa[]; zon
                 },
               )
             }
-            continue
           }
           const features = zona.regioni
             .map((id) => REGIONI_PER_ID.get(id))
@@ -217,7 +216,8 @@ export default function MappaAziende({ punti, zone }: { punti: PuntoMappa[]; zon
           let tutto = riquadri[0]
           for (const riquadro of riquadri.slice(1)) tutto = tutto.extend(riquadro) as typeof tutto
           const unaSede = punti.length === 1 && zone.length === 0
-          const soloCitta = zone.length > 0 && zone.every((zona) => zona.citta.length > 0)
+          const soloCitta =
+            zone.length > 0 && zone.every((zona) => zona.citta.length > 0 && zona.regioni.length === 0)
           map.fitBounds(tutto, {
             padding: [36, 36],
             maxZoom: unaSede ? 16 : soloCitta ? 11 : zone.length > 0 ? 7 : 12,
