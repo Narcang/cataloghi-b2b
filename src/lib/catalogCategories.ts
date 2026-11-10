@@ -293,12 +293,17 @@ const VENDITORE_TILES: PortaleTile[] = [
   { categoria: 'Listini',  label: 'Listini Pubblici',  descrizione: 'Listini prezzi' },
 ]
 
+const RIVENDITORE_TILES: PortaleTile[] = [
+  ...VENDITORE_TILES,
+  { categoria: 'Power Point', label: 'Power Point', descrizione: 'Presentazioni PowerPoint' },
+]
+
 export const PORTALE_TILES_PER_RUOLO: Record<string, PortaleTile[]> = {
   studio: STUDIO_TILES,
   studio_associato: STUDIO_TILES,
   partner_dipendente: STUDIO_TILES,
   distributore: VENDITORE_TILES,
-  rivenditore: VENDITORE_TILES,
+  rivenditore: RIVENDITORE_TILES,
   agente: AGENTE_TILES,
   back_office: AGENTE_TILES,
   agenzia: AGENTE_TILES,
