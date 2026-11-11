@@ -13,6 +13,13 @@ import {
   nazioniValide,
   regioniDellaNazione,
 } from '@/lib/areaInteresse'
+import { REGIONI_COMUNI_ITALIA, suggerisciComuniItalia } from '@/lib/comuniItalia'
+
+function partiCitta(testo: string): { chiuse: string[]; bozza: string } {
+  const pezzi = testo.split(/[,;\n]/)
+  const bozza = (pezzi.pop() ?? '').trim()
+  return { chiuse: pezzi.map((parte) => parte.trim()).filter(Boolean), bozza }
+}
 
 function nazioneDiPartenza(regioni: string[], nazioniIntere: string[]): string {
   if (nazioniIntere[0]) return nazioniIntere[0]
@@ -42,6 +49,7 @@ export default function AreaInteresseCampi({
   const [nazioniIntere, setNazioniIntere] = useState<string[]>(nazioniSalvate)
   const [filtroNazione, setFiltroNazione] = useState('')
   const [scelte, setScelte] = useState<string[]>(attive)
+  const [cittaTesto, setCittaTesto] = useState(cittaCoperte ?? '')
   const suggerimenti = filtroNazione.trim()
     ? NAZIONI_MENU.filter((voce) => nazioneNelFiltro(voce.id, voce.nome, filtroNazione)).slice(0, 8)
     : []
@@ -63,6 +71,32 @@ export default function AreaInteresseCampi({
     return lista
   })()
   const coloreAttivo = coloreAreaValido(colore) ?? colorePredefinitoRuolo(ruolo)
+  const { chiuse: cittaChiuse, bozza: bozzaCitta } = partiCitta(cittaTesto)
+  const regioniCitta = (() => {
+    const scelteIt = scelte.filter((id) => nazioneDi(id) === 'IT')
+    if (scelteIt.length > 0) return scelteIt
+    if (nazioniIntere.includes('IT')) return REGIONI_COMUNI_ITALIA
+    return []
+  })()
+  const suggerimentiCitta = suggerisciComuniItalia(regioniCitta, bozzaCitta, cittaChiuse)
+
+  function inserisciComune(nome: string) {
+    setCittaTesto((corrente) => {
+      const { chiuse } = partiCitta(corrente)
+      const chiave = nome.toLocaleLowerCase('it')
+      const base = chiuse.filter((parte) => parte.toLocaleLowerCase('it') !== chiave)
+      return [...base, nome].join(', ') + ', '
+    })
+  }
+
+  function confermaCittaScritta() {
+    const { bozza } = partiCitta(cittaTesto)
+    if (!bozza) return
+    const esatta = suggerimentiCitta.find((nome) => nome.toLocaleLowerCase('it') === bozza.toLocaleLowerCase('it'))
+    const unica = suggerimentiCitta.length === 1 ? suggerimentiCitta[0] : null
+    const scelta = esatta ?? unica
+    if (scelta) inserisciComune(scelta)
+  }
 
   function scegliNazione(iso: string) {
     setNazione(iso)
@@ -234,18 +268,44 @@ export default function AreaInteresseCampi({
             </div>
           </>
         ) : null}
-        <label className="mt-3 block text-xs font-medium uppercase text-zinc-600">
-          Città coperte
-          <input
-            name="citta_coperte"
-            type="text"
-            defaultValue={cittaCoperte ?? ''}
-            placeholder="Es. Napoli, Salerno"
-            onTouchStart={(event) => event.stopPropagation()}
-            onMouseDown={(event) => event.stopPropagation()}
-            className="mt-1 h-9 w-full rounded-md border border-black bg-white px-2 text-sm normal-case"
-          />
-        </label>
+        <div className="relative mt-3">
+          <label className="block text-xs font-medium uppercase text-zinc-600">
+            Città coperte
+            <input
+              name="citta_coperte"
+              type="text"
+              value={cittaTesto}
+              onChange={(event) => setCittaTesto(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key !== 'Enter') return
+                event.preventDefault()
+                confermaCittaScritta()
+              }}
+              onBlur={() => confermaCittaScritta()}
+              onTouchStart={(event) => event.stopPropagation()}
+              onMouseDown={(event) => event.stopPropagation()}
+              placeholder={regioniCitta.length > 0 ? 'Es. Chiavari, Camogli' : 'Es. Napoli, Salerno'}
+              className="mt-1 h-9 w-full rounded-md border border-black bg-white px-2 text-sm normal-case"
+            />
+          </label>
+          {suggerimentiCitta.length > 0 ? (
+            <div className="absolute z-20 mt-1 max-h-48 w-full overflow-y-auto rounded-md border border-black bg-white">
+              {suggerimentiCitta.map((nome) => (
+                <button
+                  key={nome}
+                  type="button"
+                  onMouseDown={(event) => {
+                    event.preventDefault()
+                    inserisciComune(nome)
+                  }}
+                  className="block w-full px-2 py-1.5 text-left text-sm normal-case text-zinc-800 hover:bg-zinc-100"
+                >
+                  {nome}
+                </button>
+              ))}
+            </div>
+          ) : null}
+        </div>
       </div>
     </div>
   )
