@@ -85,14 +85,29 @@ export default async function GestioneUtentiPage(props: {
     .limit(500)
 
   if (nomeFilter.length === 0) {
-    listaQuery = listaQuery
-      .neq('ruolo', 'free')
-      .or('registrazione_approvata.eq.true,registrazione_approvata.is.null')
+    if (ruoloFilter === 'free') {
+      listaQuery = listaQuery.eq('ruolo', 'free')
+    } else {
+      listaQuery = listaQuery
+        .neq('ruolo', 'free')
+        .or('registrazione_approvata.eq.true,registrazione_approvata.is.null')
+      if (ruoloFilter !== 'all') listaQuery = listaQuery.eq('ruolo', ruoloFilter)
+    }
   } else {
     const q = `%${escapeIlikePattern(nomeFilter).replace(/"/g, '')}%`
     listaQuery = listaQuery.or(`nome_completo.ilike."${q}",societa.ilike."${q}",email.ilike."${q}"`)
+    if (ruoloFilter !== 'all') listaQuery = listaQuery.eq('ruolo', ruoloFilter)
   }
-  if (ruoloFilter !== 'all') listaQuery = listaQuery.eq('ruolo', ruoloFilter)
+
+  const privatiQuery =
+    nomeFilter.length === 0 && ruoloFilter === 'all'
+      ? dataSource
+          .from('profili')
+          .select(profiloSel)
+          .eq('ruolo', 'free')
+          .order('nome_completo', { ascending: true, nullsFirst: false })
+          .limit(500)
+      : null
 
   const pendQuery = dataSource
     .from('profili')
@@ -134,7 +149,7 @@ export default async function GestioneUtentiPage(props: {
     .select('utente_id, catalogo_id')
     .limit(5000)
 
-  const [pendRes, listaRes, linksRes, gerarchiaRes, associazioneRes, cataloghiRes, permessiRes] = await Promise.all([
+  const [pendRes, listaRes, linksRes, gerarchiaRes, associazioneRes, cataloghiRes, permessiRes, privatiRes] = await Promise.all([
     pendQuery,
     listaQuery,
     linksQuery,
@@ -142,10 +157,15 @@ export default async function GestioneUtentiPage(props: {
     associazioneQuery,
     cataloghiQuery,
     permessiQuery,
+    privatiQuery ?? Promise.resolve({ data: [] as ProfiloGestioneRow[] }),
   ])
 
   const profiliRegistrazionePendente = (pendRes.data ?? []) as ProfiloGestioneRow[]
   const profiliGestioneAdmin = (listaRes.data ?? []) as ProfiloGestioneRow[]
+  const presentiInLista = new Set(profiliGestioneAdmin.map((p) => p.id))
+  for (const row of (privatiRes.data ?? []) as ProfiloGestioneRow[]) {
+    if (!presentiInLista.has(row.id)) profiliGestioneAdmin.push(row)
+  }
   const connessioniUtenteOperatoreRows = (linksRes.data ?? []) as { utente_id: string; operatore_id: string }[]
   const profiliGerarchia = (gerarchiaRes.data ?? []) as ProfiloGerarchiaRow[]
   const profiliAssociazione = (associazioneRes.data ?? []) as ProfiloGerarchiaRow[]

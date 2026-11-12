@@ -509,7 +509,7 @@ export default async function Dashboard(props: {
                   </span>
                 ) : null}
                 {isFree && !isManager && !isVenditoreLikeRole && !isAgenzia && !isAgente && !isStudio && !isPartnerDipendente && profilo?.registrazione_approvata !== false ? (
-                  <span className="ml-3 inline-flex items-center rounded-full border border-black/20 px-2.5 py-0.5 text-xs font-semibold bg-zinc-100 text-zinc-800">Free</span>
+                  <span className="ml-3 inline-flex items-center rounded-full border border-black/20 px-2.5 py-0.5 text-xs font-semibold bg-zinc-100 text-zinc-800">{tRuolo(locale, 'free')}</span>
                 ) : null}
               </>
             ) : null}

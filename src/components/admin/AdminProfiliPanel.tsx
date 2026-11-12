@@ -155,6 +155,7 @@ const RUOLI_TAB: { id: RuoloTabId }[] = [
   { id: 'partner_dipendente' },
   { id: 'studio' },
   { id: 'studio_associato' },
+  { id: 'free' },
 ]
 
 function profiloSortKey(p: ProfiloGestioneRow): string {
@@ -258,9 +259,7 @@ export default function AdminProfiliPanel({
 
   const ruoliTab = agenziaRivenditoriMode
     ? RUOLI_TAB.filter((tab) => tab.id === 'rivenditore')
-    : cercaAttiva && profiliLista.some((p) => p.ruolo === 'free')
-      ? [...RUOLI_TAB, { id: 'free' as const }]
-      : RUOLI_TAB
+    : RUOLI_TAB
 
   const profiliPendentiOrdinati = useMemo(() => sortProfiliAlfabetico(profiliPendenti), [profiliPendenti])
 
@@ -286,21 +285,16 @@ export default function AdminProfiliPanel({
     }
   }, [])
 
-  const profiliListaGestione = useMemo(
-    () => (cercaAttiva ? profiliLista : profiliLista.filter((p) => p.ruolo !== 'free')),
-    [profiliLista, cercaAttiva],
-  )
-
   const profiliPerRuolo = useMemo(() => {
     const map = new Map<RuoloTabId, ProfiloGestioneRow[]>()
     for (const tab of ruoliTab) map.set(tab.id, [])
-    for (const profilo of sortProfiliAlfabetico(profiliListaGestione)) {
+    for (const profilo of sortProfiliAlfabetico(profiliLista)) {
       const ruolo = profilo.ruolo as RuoloTabId
       if (!map.has(ruolo)) continue
       map.get(ruolo)!.push(profilo)
     }
     return map
-  }, [profiliListaGestione, ruoliTab])
+  }, [profiliLista, ruoliTab])
 
   const profiliRuoloAttivo = profiliPerRuolo.get(ruoloAttivo) ?? []
 
@@ -502,7 +496,7 @@ export default function AdminProfiliPanel({
       rawApprovazione === 'on' || rawApprovazione === 'true' || rawApprovazione === '1'
     const body: Record<string, unknown> = {
       profilo_id: profiloId,
-      nome_completo: ruoloHaSede(ruolo) ? societa : nome_completo,
+      nome_completo: ruoloHaSede(ruolo) ? societa || nome_completo : nome_completo,
       telefono,
       societa,
       area_geografica,

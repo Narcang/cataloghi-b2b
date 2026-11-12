@@ -1293,7 +1293,7 @@ const dashboard = {
     welcomePublic:
       'Sfoglia i cataloghi pubblicati, consulta Dove siamo e i contatti diretti. Per aree riservate agenti/partner accedi al portale.',
     bentornato: 'Bentornato',
-    utenteFree: 'Utente Free',
+    utenteFree: 'Privato',
     inAttesa: 'In attesa di approvazione',
     gestione: 'Gestione',
     gestioneHelp: 'Seleziona la sezione che vuoi gestire.',
@@ -1358,7 +1358,7 @@ const dashboard = {
     welcomePublic:
       'Просматривайте опубликованные каталоги, раздел «Где мы» и прямые контакты. Для разделов агентов и партнёров войдите в портал.',
     bentornato: 'С возвращением',
-    utenteFree: 'Пользователь Free',
+    utenteFree: 'Частное лицо',
     inAttesa: 'Ожидает одобрения',
     gestione: 'Управление',
     gestioneHelp: 'Выберите раздел, которым хотите управлять.',
@@ -1423,7 +1423,7 @@ const dashboard = {
     welcomePublic:
       'Browse published catalogs, Where we are and direct contacts. Sign in to the portal for agent and partner areas.',
     bentornato: 'Welcome back',
-    utenteFree: 'Free user',
+    utenteFree: 'Private individual',
     inAttesa: 'Pending approval',
     gestione: 'Management',
     gestioneHelp: 'Select the section you want to manage.',
@@ -1488,7 +1488,7 @@ const dashboard = {
     welcomePublic:
       'Consulta los catálogos publicados, Dónde estamos y los contactos directos. Para las áreas reservadas de agentes y socios, entra en el portal.',
     bentornato: 'Bienvenido de nuevo',
-    utenteFree: 'Usuario Free',
+    utenteFree: 'Particular',
     inAttesa: 'Pendiente de aprobación',
     gestione: 'Gestión',
     gestioneHelp: 'Elige la sección que quieres gestionar.',
@@ -1553,7 +1553,7 @@ const dashboard = {
     welcomePublic:
       'Parcourez les catalogues publiés, Où nous sommes et les contacts directs. Connectez-vous pour les espaces agents et partenaires.',
     bentornato: 'Bon retour',
-    utenteFree: 'Utilisateur Free',
+    utenteFree: 'Particulier',
     inAttesa: 'En attente d’approbation',
     gestione: 'Gestion',
     gestioneHelp: 'Sélectionnez la section à gérer.',
@@ -1618,7 +1618,7 @@ const dashboard = {
     welcomePublic:
       'Sehen Sie veröffentlichte Kataloge, Wo wir sind und Direktkontakte. Für Agenten- und Partnerbereiche bitte anmelden.',
     bentornato: 'Willkommen zurück',
-    utenteFree: 'Free-Nutzer',
+    utenteFree: 'Privatkunde',
     inAttesa: 'Wartet auf Freigabe',
     gestione: 'Verwaltung',
     gestioneHelp: 'Wählen Sie den Bereich, den Sie verwalten möchten.',
@@ -1683,7 +1683,7 @@ const dashboard = {
     welcomePublic:
       'Bekijk de gepubliceerde catalogi, Waar we zijn en de directe contacten. Voor besloten gebieden van agenten en partners logt u in op het portaal.',
     bentornato: 'Welkom terug',
-    utenteFree: 'Free-gebruiker',
+    utenteFree: 'Particulier',
     inAttesa: 'In afwachting van goedkeuring',
     gestione: 'Beheer',
     gestioneHelp: 'Selecteer de sectie die u wilt beheren.',
@@ -1748,7 +1748,7 @@ const dashboard = {
     welcomePublic:
       'Δείτε δημοσιευμένους καταλόγους, Πού είμαστε και άμεσες επαφές. Για ενότητες πρακτόρων/συνεργατών συνδεθείτε.',
     bentornato: 'Καλώς ήρθατε ξανά',
-    utenteFree: 'Χρήστης Free',
+    utenteFree: 'Ιδιώτης',
     inAttesa: 'Σε αναμονή έγκρισης',
     gestione: 'Διαχείριση',
     gestioneHelp: 'Επιλέξτε την ενότητα που θέλετε να διαχειριστείτε.',
@@ -1813,7 +1813,7 @@ const dashboard = {
     welcomePublic:
       'Przeglądaj opublikowane katalogi, Gdzie jesteśmy i kontakty bezpośrednie. Zaloguj się, aby wejść w strefy agentów i partnerów.',
     bentornato: 'Witamy ponownie',
-    utenteFree: 'Użytkownik Free',
+    utenteFree: 'Osoba prywatna',
     inAttesa: 'Oczekuje na zatwierdzenie',
     gestione: 'Zarządzanie',
     gestioneHelp: 'Wybierz sekcję, którą chcesz obsługiwać.',
@@ -1878,7 +1878,7 @@ const dashboard = {
     welcomePublic:
       'Переглядайте опубліковані каталоги, «Де ми» та прямі контакти. Для розділів агентів і партнерів увійдіть у портал.',
     bentornato: 'З поверненням',
-    utenteFree: 'Користувач Free',
+    utenteFree: 'Приватна особа',
     inAttesa: 'Очікує схвалення',
     gestione: 'Керування',
     gestioneHelp: 'Оберіть розділ, яким хочете керувати.',

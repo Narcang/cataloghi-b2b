@@ -14,7 +14,7 @@ const ruolo: Record<AppLocale, Record<string, string>> = {
     partner_dipendente: 'Promoter',
     studio: 'Sede Studio',
     studio_associato: 'Studio',
-    free: 'Free',
+    free: 'Privati',
   },
   ru: {
     all: 'Все роли',
@@ -28,7 +28,7 @@ const ruolo: Record<AppLocale, Record<string, string>> = {
     partner_dipendente: 'Промоутер',
     studio: 'Студия (офис)',
     studio_associato: 'Студия',
-    free: 'Free',
+    free: 'Частные лица',
   },
   en: {
     all: 'All roles',
@@ -42,7 +42,7 @@ const ruolo: Record<AppLocale, Record<string, string>> = {
     partner_dipendente: 'Promoter',
     studio: 'Studio location',
     studio_associato: 'Studio',
-    free: 'Free',
+    free: 'Private individuals',
   },
   es: {
     all: 'Todos los roles',
@@ -56,7 +56,7 @@ const ruolo: Record<AppLocale, Record<string, string>> = {
     partner_dipendente: 'Promoter',
     studio: 'Sede estudio',
     studio_associato: 'Estudio',
-    free: 'Free',
+    free: 'Particulares',
   },
   fr: {
     all: 'Tous les rôles',
@@ -70,7 +70,7 @@ const ruolo: Record<AppLocale, Record<string, string>> = {
     partner_dipendente: 'Promoteur',
     studio: 'Siège studio',
     studio_associato: 'Studio',
-    free: 'Free',
+    free: 'Particuliers',
   },
   de: {
     all: 'Alle Rollen',
@@ -84,7 +84,7 @@ const ruolo: Record<AppLocale, Record<string, string>> = {
     partner_dipendente: 'Promoter',
     studio: 'Studio-Standort',
     studio_associato: 'Studio',
-    free: 'Free',
+    free: 'Privatkunden',
   },
   nl: {
     all: 'Alle rollen',
@@ -98,7 +98,7 @@ const ruolo: Record<AppLocale, Record<string, string>> = {
     partner_dipendente: 'Promoter',
     studio: 'Studiovestiging',
     studio_associato: 'Studio',
-    free: 'Free',
+    free: 'Particulieren',
   },
   el: {
     all: 'Όλοι οι ρόλοι',
@@ -112,7 +112,7 @@ const ruolo: Record<AppLocale, Record<string, string>> = {
     partner_dipendente: 'Promoter',
     studio: 'Έδρα στούντιο',
     studio_associato: 'Στούντιο',
-    free: 'Free',
+    free: 'Ιδιώτες',
   },
   pl: {
     all: 'Wszystkie role',
@@ -126,7 +126,7 @@ const ruolo: Record<AppLocale, Record<string, string>> = {
     partner_dipendente: 'Promoter',
     studio: 'Siedziba studia',
     studio_associato: 'Studio',
-    free: 'Free',
+    free: 'Osoby prywatne',
   },
   uk: {
     all: 'Усі ролі',
@@ -140,13 +140,13 @@ const ruolo: Record<AppLocale, Record<string, string>> = {
     partner_dipendente: 'Промоутер',
     studio: 'Студія (осередок)',
     studio_associato: 'Студія',
-    free: 'Free',
+    free: 'Приватні особи',
   },
 }
 
 const catalogRole: Record<AppLocale, Record<string, string>> = {
   it: {
-    free: 'Pubblico (ospiti / Free)',
+    free: 'Pubblico (ospiti / Privati)',
     studio: 'Sede Studio',
     studio_associato: 'Studio',
     partner_dipendente: 'Promoter',
@@ -158,7 +158,7 @@ const catalogRole: Record<AppLocale, Record<string, string>> = {
     manager: 'Manager',
   },
   ru: {
-    free: 'Публичный (гости / Free)',
+    free: 'Публичный (гости / Частные лица)',
     studio: 'Студия (офис)',
     studio_associato: 'Студия',
     partner_dipendente: 'Промоутер',
@@ -170,7 +170,7 @@ const catalogRole: Record<AppLocale, Record<string, string>> = {
     manager: 'Менеджер',
   },
   en: {
-    free: 'Public (guests / Free)',
+    free: 'Public (guests / Private individuals)',
     studio: 'Studio location',
     studio_associato: 'Studio',
     partner_dipendente: 'Promoter',
@@ -182,7 +182,7 @@ const catalogRole: Record<AppLocale, Record<string, string>> = {
     manager: 'Manager',
   },
   es: {
-    free: 'Público (invitados / Free)',
+    free: 'Público (invitados / Particulares)',
     studio: 'Sede estudio',
     studio_associato: 'Estudio',
     partner_dipendente: 'Promoter',
@@ -194,7 +194,7 @@ const catalogRole: Record<AppLocale, Record<string, string>> = {
     manager: 'Manager',
   },
   fr: {
-    free: 'Public (invités / Free)',
+    free: 'Public (invités / Particuliers)',
     studio: 'Siège studio',
     studio_associato: 'Studio',
     partner_dipendente: 'Promoteur',
@@ -206,7 +206,7 @@ const catalogRole: Record<AppLocale, Record<string, string>> = {
     manager: 'Manager',
   },
   de: {
-    free: 'Öffentlich (Gäste / Free)',
+    free: 'Öffentlich (Gäste / Privatkunden)',
     studio: 'Studio-Standort',
     studio_associato: 'Studio',
     partner_dipendente: 'Promoter',
@@ -218,7 +218,7 @@ const catalogRole: Record<AppLocale, Record<string, string>> = {
     manager: 'Manager',
   },
   nl: {
-    free: 'Openbaar (gasten / Free)',
+    free: 'Openbaar (gasten / Particulieren)',
     studio: 'Studiovestiging',
     studio_associato: 'Studio',
     partner_dipendente: 'Promoter',
@@ -230,7 +230,7 @@ const catalogRole: Record<AppLocale, Record<string, string>> = {
     manager: 'Manager',
   },
   el: {
-    free: 'Δημόσιο (επισκέπτες / Free)',
+    free: 'Δημόσιο (επισκέπτες / Ιδιώτες)',
     studio: 'Έδρα στούντιο',
     studio_associato: 'Στούντιο',
     partner_dipendente: 'Promoter',
@@ -242,7 +242,7 @@ const catalogRole: Record<AppLocale, Record<string, string>> = {
     manager: 'Manager',
   },
   pl: {
-    free: 'Publiczny (goście / Free)',
+    free: 'Publiczny (goście / Osoby prywatne)',
     studio: 'Siedziba studia',
     studio_associato: 'Studio',
     partner_dipendente: 'Promoter',
@@ -254,7 +254,7 @@ const catalogRole: Record<AppLocale, Record<string, string>> = {
     manager: 'Manager',
   },
   uk: {
-    free: 'Публічний (гості / Free)',
+    free: 'Публічний (гості / Приватні особи)',
     studio: 'Студія (осередок)',
     studio_associato: 'Студія',
     partner_dipendente: 'Промоутер',
