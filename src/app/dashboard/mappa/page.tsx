@@ -10,7 +10,7 @@ import { getAppLocale } from '@/lib/localeServer'
 import { tRuolo } from '@/lib/i18nAdmin'
 import { areeInteresseValide, cittaCoperteGeoValide, hexColoreArea, nazioniValide } from '@/lib/areaInteresse'
 import { coperturaVisibile } from '@/lib/coperturaMappa'
-import { areaComuneItalia } from '@/lib/comuniConfini'
+import { posizioneComuneItalia } from '@/lib/comuniConfini'
 
 export const dynamic = 'force-dynamic'
 
@@ -86,10 +86,15 @@ export default async function MappaPage() {
         ruoloLabel: tRuolo(locale, row.ruolo),
         colore: hexColoreArea(row.colore_area, row.ruolo),
         regioni,
-        citta: cittaGeo.map((citta) => ({
-          ...citta,
-          area: areaComuneItalia(citta.nome, citta.lat, citta.lng) ?? citta.area ?? null,
-        })),
+        citta: cittaGeo.map((citta) => {
+          const nelComune = posizioneComuneItalia(citta.nome, citta.lat, citta.lng)
+          return {
+            ...citta,
+            lat: nelComune?.lat ?? citta.lat,
+            lng: nelComune?.lng ?? citta.lng,
+            area: nelComune?.area ?? citta.area ?? null,
+          }
+        }),
       })
     }
     if (!citta && !indirizzo && !cap) {
@@ -97,6 +102,7 @@ export default async function MappaPage() {
       continue
     }
     if (typeof row.latitudine === 'number' && typeof row.longitudine === 'number') {
+      const nelComune = citta ? posizioneComuneItalia(citta, row.latitudine, row.longitudine) : null
       punti.push({
         id: row.id,
         nome: nomeSede(row),
@@ -106,8 +112,8 @@ export default async function MappaPage() {
         indirizzo,
         cap,
         area,
-        lat: row.latitudine,
-        lng: row.longitudine,
+        lat: nelComune?.lat ?? row.latitudine,
+        lng: nelComune?.lng ?? row.longitudine,
       })
     } else {
       senzaCoordinate.push({

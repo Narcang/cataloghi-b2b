@@ -24,7 +24,7 @@ import { isAgenteLike } from '@/lib/catalogRoles'
 import { isEmailTecnica } from '@/lib/emailTecnica'
 import { coordinateCittaCoperta, coordinateDaIndirizzo } from '@/lib/geocodingCitta'
 import { areeInteresseValide, cittaCoperteDaTesto, coloreAreaValido, colorePredefinitoRuolo, nazioneDi, nomeNazioneGeocoding, nazioniValide } from '@/lib/areaInteresse'
-import { areaComuneItalia } from '@/lib/comuniConfini'
+import { posizioneComuneItalia } from '@/lib/comuniConfini'
 
 const ESPOSITORI_FIELDS = [
   'espositore_1',
@@ -323,8 +323,9 @@ export async function POST(request: NextRequest) {
     ) {
       const punto = await coordinateDaIndirizzo({ indirizzo, cap, citta })
       if (punto) {
-        patch.latitudine = punto.lat
-        patch.longitudine = punto.lng
+        const nelComune = citta ? posizioneComuneItalia(citta, punto.lat, punto.lng) : null
+        patch.latitudine = nelComune?.lat ?? punto.lat
+        patch.longitudine = nelComune?.lng ?? punto.lng
       } else {
         patch.latitudine = null
         patch.longitudine = null
@@ -354,11 +355,11 @@ export async function POST(request: NextRequest) {
     for (const nome of citta) {
       const punto = await coordinateCittaCoperta(paese ? `${nome}, ${paese}` : nome)
       if (!punto) continue
-      const italiano = areaComuneItalia(nome, punto.lat, punto.lng)
+      const italiano = posizioneComuneItalia(nome, punto.lat, punto.lng)
       geo.push({
         nome,
-        lat: punto.lat,
-        lng: punto.lng,
+        lat: italiano?.lat ?? punto.lat,
+        lng: italiano?.lng ?? punto.lng,
         ...(italiano || !punto.area ? {} : { area: punto.area }),
       })
     }

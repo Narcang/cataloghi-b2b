@@ -45,16 +45,12 @@ function comeArea(comune: Comune): AreaCitta | null {
   return null
 }
 
-/**
- * Territorio del comune italiano con questo nome.
- * Confini ISTAT (geojson-italy), semplificati. Se il nome esiste in più regioni, si tiene il comune che contiene il punto.
- */
-export function areaComuneItalia(nome: string, lat: number, lng: number): AreaCitta | null {
+function trovaComune(nome: string, lat: number, lng: number): Comune | null {
   const lista = PER_NOME[piega(nome)]
   if (!lista?.length) return null
   const interno = lista.find((comune) => contiene(comune, lat, lng))
-  if (interno) return comeArea(interno)
-  if (lista.length === 1) return comeArea(lista[0])
+  if (interno) return interno
+  if (lista.length === 1) return lista[0]
   let scelto: Comune | null = null
   let distanza = 0.35 * 0.35
   for (const comune of lista) {
@@ -68,5 +64,81 @@ export function areaComuneItalia(nome: string, lat: number, lng: number): AreaCi
       scelto = comune
     }
   }
-  return scelto ? comeArea(scelto) : null
+  return scelto
+}
+
+/** Circa 4 km: un punto appena fuori dal confine semplificato resta dov’è. */
+const VICINO = 0.04 * 0.04
+
+function vicinoAlConfine(comune: Comune, lat: number, lng: number): boolean {
+  for (const anello of comune) {
+    for (const punto of anello) {
+      const dx = punto[0] - lng
+      const dy = punto[1] - lat
+      if (dx * dx + dy * dy <= VICINO) return true
+    }
+  }
+  return false
+}
+
+function puntoInterno(comune: Comune): { lat: number; lng: number } | null {
+  const anelli = [...comune].sort((a, b) => b.length - a.length)
+  for (const anello of anelli) {
+    const medio = media(anello)
+    if (medio && dentroAnello(medio.lng, medio.lat, anello)) return medio
+    let minLng = Infinity
+    let minLat = Infinity
+    let maxLng = -Infinity
+    let maxLat = -Infinity
+    for (const [x, y] of anello) {
+      if (x < minLng) minLng = x
+      if (y < minLat) minLat = y
+      if (x > maxLng) maxLng = x
+      if (y > maxLat) maxLat = y
+    }
+    const passi = 7
+    for (let iy = 1; iy < passi; iy++) {
+      for (let ix = 1; ix < passi; ix++) {
+        const lat = minLat + ((maxLat - minLat) * iy) / passi
+        const lng = minLng + ((maxLng - minLng) * ix) / passi
+        if (contiene(comune, lat, lng)) return { lat, lng }
+      }
+    }
+  }
+  return centro(comune)
+}
+
+function media(anello: Anello): { lat: number; lng: number } | null {
+  if (!anello.length) return null
+  let lat = 0
+  let lng = 0
+  for (const punto of anello) {
+    lng += punto[0]
+    lat += punto[1]
+  }
+  return { lat: lat / anello.length, lng: lng / anello.length }
+}
+
+/**
+ * Territorio del comune italiano e un punto dentro quel territorio.
+ * Se le coordinate salvate cadono fuori (geocoding su un altro paese), il pallino torna nel comune.
+ */
+export function posizioneComuneItalia(
+  nome: string,
+  lat: number,
+  lng: number,
+): { lat: number; lng: number; area: AreaCitta } | null {
+  const comune = trovaComune(nome, lat, lng)
+  if (!comune) return null
+  const area = comeArea(comune)
+  if (!area) return null
+  if (contiene(comune, lat, lng) || vicinoAlConfine(comune, lat, lng)) return { lat, lng, area }
+  const interno = puntoInterno(comune)
+  if (!interno) return { lat, lng, area }
+  return { lat: interno.lat, lng: interno.lng, area }
+}
+
+/** Territorio del comune italiano con questo nome. Confini ISTAT (geojson-italy), semplificati. */
+export function areaComuneItalia(nome: string, lat: number, lng: number): AreaCitta | null {
+  return posizioneComuneItalia(nome, lat, lng)?.area ?? null
 }
