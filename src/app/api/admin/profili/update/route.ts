@@ -22,8 +22,9 @@ import {
 import { agenziaCanEditRivenditoreSpecializzazione, agenteCanEditRivenditoreSpecializzazione } from '@/lib/agenziaRivenditoreAccess'
 import { isAgenteLike } from '@/lib/catalogRoles'
 import { isEmailTecnica } from '@/lib/emailTecnica'
-import { coordinateDaIndirizzo } from '@/lib/geocodingCitta'
+import { coordinateCittaCoperta, coordinateDaIndirizzo } from '@/lib/geocodingCitta'
 import { areeInteresseValide, cittaCoperteDaTesto, coloreAreaValido, colorePredefinitoRuolo, nazioneDi, nomeNazioneGeocoding, nazioniValide } from '@/lib/areaInteresse'
+import { areaComuneItalia } from '@/lib/comuniConfini'
 
 const ESPOSITORI_FIELDS = [
   'espositore_1',
@@ -349,10 +350,17 @@ export async function POST(request: NextRequest) {
       if (iso) paesi.add(iso)
     }
     const paese = paesi.size === 1 ? nomeNazioneGeocoding([...paesi][0]) : ''
-    const geo: { nome: string; lat: number; lng: number }[] = []
+    const geo: { nome: string; lat: number; lng: number; area?: unknown }[] = []
     for (const nome of citta) {
-      const punto = await coordinateDaIndirizzo({ citta: paese ? `${nome}, ${paese}` : nome })
-      if (punto) geo.push({ nome, lat: punto.lat, lng: punto.lng })
+      const punto = await coordinateCittaCoperta(paese ? `${nome}, ${paese}` : nome)
+      if (!punto) continue
+      const italiano = areaComuneItalia(nome, punto.lat, punto.lng)
+      geo.push({
+        nome,
+        lat: punto.lat,
+        lng: punto.lng,
+        ...(italiano || !punto.area ? {} : { area: punto.area }),
+      })
     }
     patch.citta_coperte_geo = geo
     cittaCoperteMancanti = citta.length > 0 && geo.length < citta.length

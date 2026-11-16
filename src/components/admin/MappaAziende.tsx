@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import regioniMondo from '@/data/regioniMondo.json'
-import { nomeRegione } from '@/lib/areaInteresse'
+import { nomeRegione, type AreaCitta } from '@/lib/areaInteresse'
 
 export type PuntoMappa = {
   id: string
@@ -23,7 +23,7 @@ export type ZonaMappa = {
   ruoloLabel: string
   colore: string
   regioni: string[]
-  citta: { nome: string; lat: number; lng: number }[]
+  citta: { nome: string; lat: number; lng: number; area?: AreaCitta | null }[]
 }
 
 type FeatureRegione = {
@@ -127,6 +127,20 @@ export default function MappaAziende({ punti, zone }: { punti: PuntoMappa[]; zon
         for (const zona of zone) {
           if (zona.citta.length > 0) {
             for (const citta of zona.citta) {
+              if (citta.area) {
+                const area = L.geoJSON(
+                  { type: 'Feature', properties: {}, geometry: citta.area },
+                  {
+                    style: {
+                      color: zona.colore,
+                      weight: 1.5,
+                      fillColor: zona.colore,
+                      fillOpacity: 0.35,
+                    },
+                  },
+                ).addTo(map)
+                riquadri.push(area.getBounds() as { extend: (bounds: unknown) => { extend: (bounds: unknown) => unknown } })
+              }
               const marker = L.circleMarker([citta.lat, citta.lng], {
                 pane: 'markerPane',
                 radius: 8,

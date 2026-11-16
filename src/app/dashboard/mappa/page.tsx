@@ -10,6 +10,7 @@ import { getAppLocale } from '@/lib/localeServer'
 import { tRuolo } from '@/lib/i18nAdmin'
 import { areeInteresseValide, cittaCoperteGeoValide, hexColoreArea, nazioniValide } from '@/lib/areaInteresse'
 import { coperturaVisibile } from '@/lib/coperturaMappa'
+import { areaComuneItalia } from '@/lib/comuniConfini'
 
 export const dynamic = 'force-dynamic'
 
@@ -85,7 +86,10 @@ export default async function MappaPage() {
         ruoloLabel: tRuolo(locale, row.ruolo),
         colore: hexColoreArea(row.colore_area, row.ruolo),
         regioni,
-        citta: cittaGeo,
+        citta: cittaGeo.map((citta) => ({
+          ...citta,
+          area: areaComuneItalia(citta.nome, citta.lat, citta.lng) ?? citta.area ?? null,
+        })),
       })
     }
     if (!citta && !indirizzo && !cap) {
@@ -129,7 +133,7 @@ export default async function MappaPage() {
           </Link>
           <h1 className="text-3xl md:text-4xl font-semibold text-zinc-900 tracking-tight mt-3">Mappa</h1>
           <p className="text-sm text-zinc-600 mt-2 max-w-2xl">
-            Agenzie, rivenditori e sedi studio. Il puntino è l’indirizzo. Ogni nazione resta intera o sulle sue regioni; le città sostituiscono solo la nazione in cui cadono.
+            Agenzie, rivenditori e sedi studio. Il puntino è l’indirizzo. Ogni nazione resta intera o sulle sue regioni; una città sostituisce solo la sua nazione e ne colora il territorio, insieme al puntino.
           </p>
         </div>
 

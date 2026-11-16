@@ -146,19 +146,63 @@ export function cittaCoperteDaTesto(testo: string): string[] {
   return [...visti].slice(0, 40)
 }
 
-export type CittaCoperta = { nome: string; lat: number; lng: number }
+export type AreaCitta = {
+  type: 'Polygon' | 'MultiPolygon'
+  coordinates: number[][][] | number[][][][]
+}
+
+export type CittaCoperta = { nome: string; lat: number; lng: number; area?: AreaCitta | null }
+
+function anelloValido(raw: unknown, budget: { n: number }): number[][] | null {
+  if (!Array.isArray(raw) || raw.length < 4 || budget.n > 240) return null
+  const anello: number[][] = []
+  for (const punto of raw) {
+    if (!Array.isArray(punto) || punto.length < 2) return null
+    const lng = Number(punto[0])
+    const lat = Number(punto[1])
+    if (!Number.isFinite(lng) || !Number.isFinite(lat)) return null
+    anello.push([lng, lat])
+    budget.n += 1
+    if (budget.n > 240) return null
+  }
+  return anello
+}
+
+/** Poligono già salvato (città fuori dall’Italia). I comuni italiani si disegnano dai confini ISTAT. */
+export function areaCittaValida(raw: unknown): AreaCitta | null {
+  if (!raw || typeof raw !== 'object') return null
+  const record = raw as { type?: unknown; coordinates?: unknown }
+  const budget = { n: 0 }
+  if (record.type === 'Polygon' && Array.isArray(record.coordinates)) {
+    const anello = anelloValido(record.coordinates[0], budget)
+    if (!anello) return null
+    return { type: 'Polygon', coordinates: [anello] }
+  }
+  if (record.type === 'MultiPolygon' && Array.isArray(record.coordinates)) {
+    const poligoni: number[][][][] = []
+    for (const poligono of record.coordinates) {
+      if (!Array.isArray(poligono)) return null
+      const anello = anelloValido(poligono[0], budget)
+      if (!anello) return null
+      poligoni.push([anello])
+    }
+    if (!poligoni.length) return null
+    return { type: 'MultiPolygon', coordinates: poligoni }
+  }
+  return null
+}
 
 export function cittaCoperteGeoValide(raw: unknown): CittaCoperta[] {
   if (!Array.isArray(raw)) return []
   const out: CittaCoperta[] = []
   for (const item of raw) {
     if (!item || typeof item !== 'object') continue
-    const record = item as { nome?: unknown; lat?: unknown; lng?: unknown }
+    const record = item as { nome?: unknown; lat?: unknown; lng?: unknown; area?: unknown }
     const nome = String(record.nome ?? '').trim()
     const lat = Number(record.lat)
     const lng = Number(record.lng)
     if (!nome || !Number.isFinite(lat) || !Number.isFinite(lng)) continue
-    out.push({ nome, lat, lng })
+    out.push({ nome, lat, lng, area: areaCittaValida(record.area) })
   }
   return out
 }
