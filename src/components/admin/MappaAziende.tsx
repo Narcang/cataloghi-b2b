@@ -127,50 +127,33 @@ export default function MappaAziende({ punti, zone }: { punti: PuntoMappa[]; zon
         for (const zona of zone) {
           if (zona.citta.length > 0) {
             for (const citta of zona.citta) {
-              if (citta.area) {
-                const area = L.geoJSON(
-                  { type: 'Feature', properties: {}, geometry: citta.area },
-                  {
-                    style: {
-                      color: zona.colore,
-                      weight: 1.5,
-                      fillColor: zona.colore,
-                      fillOpacity: 0.35,
-                    },
+              if (!citta.area) continue
+              const area = L.geoJSON(
+                { type: 'Feature', properties: {}, geometry: citta.area },
+                {
+                  style: {
+                    color: zona.colore,
+                    weight: 1.5,
+                    fillColor: zona.colore,
+                    fillOpacity: 0.35,
                   },
-                ).addTo(map)
-                riquadri.push(area.getBounds() as { extend: (bounds: unknown) => { extend: (bounds: unknown) => unknown } })
-              }
-              const marker = L.circleMarker([citta.lat, citta.lng], {
-                pane: 'markerPane',
-                radius: 8,
-                color: '#ffffff',
-                weight: 2,
-                fillColor: zona.colore,
-                fillOpacity: 0.95,
-              }).addTo(map)
-              marker.bindPopup(
-                `<strong>${testoSicuro(zona.nome)}</strong><br>${testoSicuro(zona.ruoloLabel)}<br>${testoSicuro(citta.nome)}`,
-              )
-              marker.bindTooltip(`${testoSicuro(zona.nome)} · ${testoSicuro(citta.nome)}`, {
-                permanent: true,
-                direction: 'top',
-                offset: [0, -10],
-                className: 'ladiva-mappa-etichetta',
-                opacity: 1,
-              })
-              riquadri.push(
-                L.latLngBounds([[citta.lat, citta.lng]]) as {
-                  extend: (bounds: unknown) => { extend: (bounds: unknown) => unknown }
+                  onEachFeature: (
+                    _feature: unknown,
+                    layer: { bindPopup: (html: string) => void },
+                  ) => {
+                    layer.bindPopup(
+                      `<strong>${testoSicuro(zona.nome)}</strong><br>${testoSicuro(zona.ruoloLabel)}<br>${testoSicuro(citta.nome)}`,
+                    )
+                  },
                 },
-              )
+              ).addTo(map)
+              riquadri.push(area.getBounds() as { extend: (bounds: unknown) => { extend: (bounds: unknown) => unknown } })
             }
           }
           const features = zona.regioni
             .map((id) => REGIONI_PER_ID.get(id))
             .filter((feature): feature is FeatureRegione => Boolean(feature?.geometry))
           if (!features.length) continue
-          const piccoli: { nome: string; lat: number; lng: number }[] = []
           const livello = L.geoJSON(
             { type: 'FeatureCollection', features },
             {
@@ -182,52 +165,16 @@ export default function MappaAziende({ punti, zone }: { punti: PuntoMappa[]; zon
               },
               onEachFeature: (
                 feature: { properties?: { id?: string } },
-                layer: {
-                  bindPopup: (html: string) => void
-                  getBounds?: () => {
-                    getCenter: () => { lat: number; lng: number }
-                    getSouthWest: () => { lat: number; lng: number }
-                    getNorthEast: () => { lat: number; lng: number }
-                  }
-                },
+                layer: { bindPopup: (html: string) => void },
               ) => {
                 const regione = nomeRegione(feature.properties?.id ?? '') ?? ''
                 layer.bindPopup(
                   `<strong>${testoSicuro(zona.nome)}</strong><br>${testoSicuro(zona.ruoloLabel)}<br>${testoSicuro(regione)}`,
                 )
-                const bounds = layer.getBounds?.()
-                if (!bounds) return
-                const sw = bounds.getSouthWest()
-                const ne = bounds.getNorthEast()
-                if (Math.abs(ne.lng - sw.lng) >= 0.12 || Math.abs(ne.lat - sw.lat) >= 0.12) return
-                const centro = bounds.getCenter()
-                piccoli.push({ nome: regione, lat: centro.lat, lng: centro.lng })
               },
             },
           ).addTo(map)
           riquadri.push(livello.getBounds() as { extend: (bounds: unknown) => { extend: (bounds: unknown) => unknown } })
-          if (piccoli.length > 0 && piccoli.length <= 12) {
-            for (const punto of piccoli) {
-              const marker = L.circleMarker([punto.lat, punto.lng], {
-                pane: 'markerPane',
-                radius: 7,
-                color: '#ffffff',
-                weight: 2,
-                fillColor: zona.colore,
-                fillOpacity: 0.95,
-              }).addTo(map)
-              marker.bindPopup(
-                `<strong>${testoSicuro(zona.nome)}</strong><br>${testoSicuro(zona.ruoloLabel)}<br>${testoSicuro(punto.nome)}`,
-              )
-              marker.bindTooltip(`${testoSicuro(zona.nome)} · ${testoSicuro(punto.nome)}`, {
-                permanent: true,
-                direction: 'top',
-                offset: [0, -8],
-                className: 'ladiva-mappa-etichetta',
-                opacity: 1,
-              })
-            }
-          }
         }
 
         for (const punto of punti) {

@@ -139,7 +139,7 @@ export default async function MappaPage() {
           </Link>
           <h1 className="text-3xl md:text-4xl font-semibold text-zinc-900 tracking-tight mt-3">Mappa</h1>
           <p className="text-sm text-zinc-600 mt-2 max-w-2xl">
-            Agenzie, rivenditori e sedi studio. Il puntino è l’indirizzo. Ogni nazione resta intera o sulle sue regioni; una città sostituisce solo la sua nazione e ne colora il territorio, insieme al puntino.
+            Agenzie, rivenditori e sedi studio. Il puntino è solo la sede fisica. Le zone colorate sono la copertura: un click sull’area mostra chi la copre. Una città sostituisce solo la nazione in cui si trova.
           </p>
         </div>
 
