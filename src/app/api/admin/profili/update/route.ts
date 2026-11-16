@@ -355,7 +355,7 @@ export async function POST(request: NextRequest) {
     for (const nome of citta) {
       const punto = await coordinateCittaCoperta(paese ? `${nome}, ${paese}` : nome)
       if (!punto) continue
-      const italiano = posizioneComuneItalia(nome, punto.lat, punto.lng)
+      const italiano = posizioneComuneItalia(nome, punto.lat, punto.lng, true)
       geo.push({
         nome,
         lat: italiano?.lat ?? punto.lat,

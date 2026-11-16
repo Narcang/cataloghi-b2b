@@ -121,18 +121,20 @@ function media(anello: Anello): { lat: number; lng: number } | null {
 
 /**
  * Territorio del comune italiano e un punto dentro quel territorio.
- * Se le coordinate salvate cadono fuori (geocoding su un altro paese), il pallino torna nel comune.
+ * Con `centro` il pallino va al centro del comune: le città coperte si segnano sulla città, non sul bordo.
+ * Senza `centro` si tiene l’indirizzo, e lo si sposta solo se è finito fuori dal comune.
  */
 export function posizioneComuneItalia(
   nome: string,
   lat: number,
   lng: number,
+  centro = false,
 ): { lat: number; lng: number; area: AreaCitta } | null {
   const comune = trovaComune(nome, lat, lng)
   if (!comune) return null
   const area = comeArea(comune)
   if (!area) return null
-  if (contiene(comune, lat, lng) || vicinoAlConfine(comune, lat, lng)) return { lat, lng, area }
+  if (!centro && (contiene(comune, lat, lng) || vicinoAlConfine(comune, lat, lng))) return { lat, lng, area }
   const interno = puntoInterno(comune)
   if (!interno) return { lat, lng, area }
   return { lat: interno.lat, lng: interno.lng, area }

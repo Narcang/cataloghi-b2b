@@ -87,7 +87,7 @@ export default async function MappaPage() {
         colore: hexColoreArea(row.colore_area, row.ruolo),
         regioni,
         citta: cittaGeo.map((citta) => {
-          const nelComune = posizioneComuneItalia(citta.nome, citta.lat, citta.lng)
+          const nelComune = posizioneComuneItalia(citta.nome, citta.lat, citta.lng, true)
           return {
             ...citta,
             lat: nelComune?.lat ?? citta.lat,
