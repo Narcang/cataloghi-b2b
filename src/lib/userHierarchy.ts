@@ -1100,6 +1100,21 @@ function managerShouldShowAgenzia(
   )
 }
 
+/** Lo studio è già figlio di una sede: in albero non va ripetuto sotto l'agente che la segue. */
+function appartieneASedeStudio(
+  child: ProfiloGerarchiaRow,
+  profili: ProfiloGerarchiaRow[],
+  links: OperatoreLink[],
+): boolean {
+  if (child.ruolo !== 'studio_associato') return false
+  return profili.some(
+    (sede) =>
+      sede.ruolo === 'studio' &&
+      sede.id !== child.id &&
+      isDirectChild(sede.id, sede, child, links, profili),
+  )
+}
+
 function isDirectChild(
   parentId: string,
   parentProfile: ProfiloGerarchiaRow,
@@ -1109,6 +1124,13 @@ function isDirectChild(
 ): boolean {
   const expectedRoles = CHILD_ROLES_BY_PARENT[parentProfile.ruolo] ?? []
   if (!expectedRoles.includes(child.ruolo)) return false
+  if (
+    child.ruolo === 'studio_associato' &&
+    parentProfile.ruolo !== 'studio' &&
+    appartieneASedeStudio(child, profili, links)
+  ) {
+    return false
+  }
   if (parentProfile.ruolo === 'back_office' && (child.ruolo === 'rivenditore' || child.ruolo === 'studio')) {
     return false
   }
