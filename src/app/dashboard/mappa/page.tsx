@@ -11,6 +11,7 @@ import { tRuolo } from '@/lib/i18nAdmin'
 import { areeInteresseValide, cittaCoperteGeoValide, hexColoreArea, nazioniValide } from '@/lib/areaInteresse'
 import { coperturaVisibile } from '@/lib/coperturaMappa'
 import { posizioneComuneItalia } from '@/lib/comuniConfini'
+import { areaProvinciaCapoluogo } from '@/lib/provinceItalia'
 
 export const dynamic = 'force-dynamic'
 
@@ -88,11 +89,13 @@ export default async function MappaPage() {
         regioni,
         citta: cittaGeo.map((citta) => {
           const nelComune = posizioneComuneItalia(citta.nome, citta.lat, citta.lng, true)
+          const provincia = areaProvinciaCapoluogo(citta.nome)
           return {
             ...citta,
+            nome: provincia ? `Provincia di ${citta.nome}` : citta.nome,
             lat: nelComune?.lat ?? citta.lat,
             lng: nelComune?.lng ?? citta.lng,
-            area: nelComune?.area ?? citta.area ?? null,
+            area: provincia ?? nelComune?.area ?? citta.area ?? null,
           }
         }),
       })
@@ -139,7 +142,7 @@ export default async function MappaPage() {
           </Link>
           <h1 className="text-3xl md:text-4xl font-semibold text-zinc-900 tracking-tight mt-3">Mappa</h1>
           <p className="text-sm text-zinc-600 mt-2 max-w-2xl">
-            Agenzie, rivenditori e sedi studio. Il puntino è solo la sede fisica. Le zone colorate sono la copertura: un click sull’area mostra chi la copre. Una città sostituisce solo la nazione in cui si trova.
+            Agenzie, rivenditori e sedi studio. Il puntino è solo la sede fisica. Le zone colorate sono la copertura: un click sull’area mostra chi la copre. Una città sostituisce solo la nazione in cui si trova. Se la città è un capoluogo, si colora tutta la provincia; un altro comune colora solo il proprio territorio.
           </p>
         </div>
 

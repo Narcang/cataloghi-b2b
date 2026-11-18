@@ -306,6 +306,9 @@ export default function AreaInteresseCampi({
             </div>
           ) : null}
         </div>
+        <p className="mt-1 text-xs normal-case text-zinc-500">
+          Un capoluogo italiano colora tutta la provincia. Gli altri comuni colorano solo il proprio territorio, frazioni comprese.
+        </p>
       </div>
     </div>
   )
