@@ -788,13 +788,15 @@ export default function AdminProfiliPanel({
                             className="mt-1 w-full h-9 rounded-md border border-black bg-white px-2 text-sm"
                           />
                         </label>
-                        <AreaInteresseCampi
-                          aree={p.aree_interesse}
-                          nazioni={p.nazioni_interesse}
-                          cittaCoperte={p.citta_coperte}
-                          colore={p.colore_area}
-                          ruolo={p.ruolo}
-                        />
+                        {p.ruolo === 'agenzia' ? (
+                          <AreaInteresseCampi
+                            aree={p.aree_interesse}
+                            nazioni={p.nazioni_interesse}
+                            cittaCoperte={p.citta_coperte}
+                            colore={p.colore_area}
+                            ruolo={p.ruolo}
+                          />
+                        ) : null}
                       </>
                     ) : null}
                     <label className="block text-xs font-medium uppercase text-zinc-600">
@@ -1276,13 +1278,15 @@ export default function AdminProfiliPanel({
                                   className="mt-1 w-full h-9 rounded-md border border-black bg-zinc-50 px-2 text-sm"
                                 />
                               </label>
-                              <AreaInteresseCampi
-                                aree={p.aree_interesse}
-                                nazioni={p.nazioni_interesse}
-                                cittaCoperte={p.citta_coperte}
-                                colore={p.colore_area}
-                                ruolo={p.ruolo}
-                              />
+                              {p.ruolo === 'agenzia' ? (
+                                <AreaInteresseCampi
+                                  aree={p.aree_interesse}
+                                  nazioni={p.nazioni_interesse}
+                                  cittaCoperte={p.citta_coperte}
+                                  colore={p.colore_area}
+                                  ruolo={p.ruolo}
+                                />
+                              ) : null}
                             </>
                           ) : null}
                           <label className="block text-xs font-medium uppercase text-zinc-600">

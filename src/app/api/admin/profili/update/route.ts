@@ -335,7 +335,7 @@ export async function POST(request: NextRequest) {
   }
 
   let cittaCoperteMancanti = false
-  if ((isAdmin || isManager) && Array.isArray(body.aree_interesse)) {
+  if ((isAdmin || isManager) && ruoloEffettivo === 'agenzia' && Array.isArray(body.aree_interesse)) {
     const aree = areeInteresseValide(body.aree_interesse)
     const nazioni = nazioniValide(body.nazioni_interesse).filter(
       (iso) => !aree.some((id) => nazioneDi(id) === iso),

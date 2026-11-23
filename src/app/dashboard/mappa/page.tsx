@@ -77,10 +77,11 @@ export default async function MappaPage() {
     const aree = areeInteresseValide(row.aree_interesse)
     const cittaGeo = cittaCoperteGeoValide(row.citta_coperte_geo)
     const nazioniIntere = nazioniValide(row.nazioni_interesse)
-    const copertura = coperturaVisibile(aree, nazioniIntere, cittaGeo)
-    const regioni = copertura.regioni
-    const area = copertura.etichetta
-    if (cittaGeo.length > 0 || regioni.length > 0) {
+    const eAgenzia = row.ruolo === 'agenzia'
+    const copertura = eAgenzia ? coperturaVisibile(aree, nazioniIntere, cittaGeo) : null
+    const regioni = copertura?.regioni ?? []
+    const area = copertura?.etichetta ?? ''
+    if (eAgenzia && (cittaGeo.length > 0 || regioni.length > 0)) {
       zone.push({
         id: row.id,
         nome: nomeSede(row),
@@ -142,7 +143,7 @@ export default async function MappaPage() {
           </Link>
           <h1 className="text-3xl md:text-4xl font-semibold text-zinc-900 tracking-tight mt-3">Mappa</h1>
           <p className="text-sm text-zinc-600 mt-2 max-w-2xl">
-            Agenzie, rivenditori e sedi studio. Il puntino è solo la sede fisica. Le zone colorate sono la copertura: un click sull’area mostra chi la copre. Una città sostituisce solo la nazione in cui si trova. Se la città è un capoluogo, si colora tutta la provincia; un altro comune colora solo il proprio territorio.
+            Agenzie, rivenditori e sedi studio. Il puntino è solo la sede fisica. Le zone colorate sono la copertura delle agenzie: un click sull’area mostra chi la copre. Una città sostituisce solo la nazione in cui si trova. Se la città è un capoluogo, si colora tutta la provincia; un altro comune colora solo il proprio territorio.
           </p>
         </div>
 
