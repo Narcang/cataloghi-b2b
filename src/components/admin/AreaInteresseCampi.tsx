@@ -98,6 +98,19 @@ export default function AreaInteresseCampi({
     if (scelta) inserisciComune(scelta)
   }
 
+  function togliNazione(iso: string) {
+    const prossimeNazioni = nazioniIntere.filter((id) => id !== iso)
+    const prossimeScelte = scelte.filter((id) => nazioneDi(id) !== iso)
+    setNazioniIntere(prossimeNazioni)
+    setScelte(prossimeScelte)
+    if (nazione !== iso) return
+    const altra =
+      prossimeNazioni[0] ??
+      prossimeScelte.map((id) => nazioneDi(id)).find((id): id is string => Boolean(id)) ??
+      ''
+    setNazione(altra)
+  }
+
   function scegliNazione(iso: string) {
     setNazione(iso)
     setFiltroNazione('')
@@ -238,16 +251,27 @@ export default function AreaInteresseCampi({
         </div>
         {nazioniAperte.length > 0 ? (
           <div className="mt-2 flex flex-wrap gap-2">
-            {nazioniAperte.map((id) => (
-              <button
-                key={id}
-                type="button"
-                onClick={() => setNazione(id)}
-                className={`rounded-full border px-2 py-1 text-sm normal-case ${id === nazione ? 'border-white bg-white/15' : 'border-black/20'}`}
-              >
-                {nomeNazione(id) ?? id}
-              </button>
-            ))}
+            {nazioniAperte.map((id) => {
+              const nome = nomeNazione(id) ?? id
+              return (
+                <span
+                  key={id}
+                  className={`inline-flex items-center gap-1 rounded-full border py-1 pl-2 pr-1 text-sm normal-case ${id === nazione ? 'border-white bg-white/15' : 'border-black/20'}`}
+                >
+                  <button type="button" onClick={() => setNazione(id)} className="normal-case">
+                    {nome}
+                  </button>
+                  <button
+                    type="button"
+                    aria-label={`Rimuovi ${nome}`}
+                    onClick={() => togliNazione(id)}
+                    className="inline-flex h-5 w-5 items-center justify-center rounded-full leading-none opacity-70 hover:bg-white/10 hover:opacity-100"
+                  >
+                    ×
+                  </button>
+                </span>
+              )
+            })}
           </div>
         ) : null}
         {regioni.length > 0 ? (
