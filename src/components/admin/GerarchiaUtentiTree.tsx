@@ -556,11 +556,6 @@ export default function GerarchiaUtentiTree({
   )
 
   useEffect(() => {
-    setExpandedIds(new Set())
-    setListaAperta(false)
-  }, [rootRole])
-
-  useEffect(() => {
     if (agentViewsAgenzia && ownerProfile) {
       setExpandedIds(new Set([ownerProfile.id]))
     }
@@ -701,7 +696,12 @@ export default function GerarchiaUtentiTree({
               type="button"
               role="tab"
               aria-selected={active}
-              onClick={() => setRootRole(option.id)}
+              onClick={() => {
+                if (option.id === rootRole) return
+                setRootRole(option.id)
+                setExpandedIds(new Set())
+                setListaAperta(false)
+              }}
               className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
                 active
                   ? 'border-[#060d41] bg-[#060d41] text-white'

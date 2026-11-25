@@ -58,6 +58,97 @@ export type ProfiloGerarchiaRow = {
 
 type OperatoreLink = { utente_id: string; operatore_id: string }
 
+type HierarchyLookup = {
+  byId: Map<string, ProfiloGerarchiaRow>
+  byRole: Map<string, ProfiloGerarchiaRow[]>
+  /** Primo profilo con quel nome, nell’ordine dell’elenco. */
+  firstAgenteByNome: Map<string, ProfiloGerarchiaRow>
+  firstAgenteLikeByNome: Map<string, ProfiloGerarchiaRow>
+  neighbors: Map<string, string[]>
+  directed: Set<string>
+  agenziaPerAgente: Map<string, ProfiloGerarchiaRow | null>
+  agenziaPerRivenditore: Map<string, ProfiloGerarchiaRow | null>
+  agentePerRivenditore: Map<string, ProfiloGerarchiaRow | null>
+  agentePerStudio: Map<string, ProfiloGerarchiaRow | null>
+  appartieneSede: Map<string, boolean>
+  childrenByParent: Map<string, ProfiloGerarchiaRow[]>
+}
+
+const hierarchyLookupCache = new WeakMap<
+  ProfiloGerarchiaRow[],
+  { links: OperatoreLink[]; lookup: HierarchyLookup }
+>()
+
+function linkPair(utenteId: string, operatoreId: string): string {
+  return `${utenteId}\0${operatoreId}`
+}
+
+function createHierarchyLookup(
+  profili: ProfiloGerarchiaRow[],
+  links: OperatoreLink[],
+): HierarchyLookup {
+  const byId = new Map<string, ProfiloGerarchiaRow>()
+  const byRole = new Map<string, ProfiloGerarchiaRow[]>()
+  const firstAgenteByNome = new Map<string, ProfiloGerarchiaRow>()
+  const firstAgenteLikeByNome = new Map<string, ProfiloGerarchiaRow>()
+  for (const profilo of profili) {
+    byId.set(profilo.id, profilo)
+    const delloStessoRuolo = byRole.get(profilo.ruolo)
+    if (delloStessoRuolo) delloStessoRuolo.push(profilo)
+    else byRole.set(profilo.ruolo, [profilo])
+
+    const nome = (profilo.nome_completo ?? '').trim().toLocaleLowerCase('it')
+    if (!nome) continue
+    if (profilo.ruolo === 'agente' && !firstAgenteByNome.has(nome)) {
+      firstAgenteByNome.set(nome, profilo)
+    }
+    if (isAgenteLike(profilo.ruolo) && !firstAgenteLikeByNome.has(nome)) {
+      firstAgenteLikeByNome.set(nome, profilo)
+    }
+  }
+
+  const neighbors = new Map<string, string[]>()
+  const directed = new Set<string>()
+  const pushNeighbor = (id: string, otherId: string) => {
+    const lista = neighbors.get(id)
+    if (lista) lista.push(otherId)
+    else neighbors.set(id, [otherId])
+  }
+  for (const link of links) {
+    directed.add(linkPair(link.utente_id, link.operatore_id))
+    if (link.utente_id === link.operatore_id) {
+      pushNeighbor(link.utente_id, link.operatore_id)
+      continue
+    }
+    pushNeighbor(link.utente_id, link.operatore_id)
+    pushNeighbor(link.operatore_id, link.utente_id)
+  }
+
+  return {
+    byId,
+    byRole,
+    firstAgenteByNome,
+    firstAgenteLikeByNome,
+    neighbors,
+    directed,
+    agenziaPerAgente: new Map(),
+    agenziaPerRivenditore: new Map(),
+    agentePerRivenditore: new Map(),
+    agentePerStudio: new Map(),
+    appartieneSede: new Map(),
+    childrenByParent: new Map(),
+  }
+}
+
+/** Indici e risultati già calcolati per lo stesso elenco profili/collegamenti. */
+function lookupOf(profili: ProfiloGerarchiaRow[], links: OperatoreLink[]): HierarchyLookup {
+  const cached = hierarchyLookupCache.get(profili)
+  if (cached && cached.links === links) return cached.lookup
+  const lookup = createHierarchyLookup(profili, links)
+  hierarchyLookupCache.set(profili, { links, lookup })
+  return lookup
+}
+
 const OPERATOR_ROLES = new Set(['agenzia', 'agente', 'back_office', 'rivenditore', 'distributore', 'studio', 'studio_associato', 'partner_dipendente'])
 
 export const CHILD_ROLES_BY_PARENT: Record<string, string[]> = {
@@ -323,45 +414,54 @@ export function canHaveHierarchyChildren(ruolo: string): boolean {
   return (CHILD_ROLES_BY_PARENT[ruolo]?.length ?? 0) > 0
 }
 
+function agenziaFromId(
+  lookup: HierarchyLookup,
+  id: string | null | undefined,
+): ProfiloGerarchiaRow | null {
+  if (!id) return null
+  const profilo = lookup.byId.get(id)
+  return profilo?.ruolo === 'agenzia' ? profilo : null
+}
+
+function resolveAgenziaParentForAgentWalk(
+  agentProfile: ProfiloGerarchiaRow,
+  lookup: HierarchyLookup,
+  visited: Set<string>,
+): ProfiloGerarchiaRow | null {
+  if (visited.has(agentProfile.id)) return null
+  visited.add(agentProfile.id)
+
+  const fromInvito = agenziaFromId(lookup, agentProfile.invitato_da)
+  if (fromInvito) return fromInvito
+
+  for (const otherId of lookup.neighbors.get(agentProfile.id) ?? []) {
+    const hit = agenziaFromId(lookup, otherId)
+    if (hit) return hit
+  }
+
+  const inviter = lookup.byId.get(agentProfile.invitato_da ?? '')
+  if (inviter && isAgenteLike(inviter.ruolo)) {
+    return resolveAgenziaParentForAgentWalk(inviter, lookup, visited)
+  }
+
+  return null
+}
+
 export function resolveAgenziaParentForAgent(
   agentProfile: ProfiloGerarchiaRow,
   profili: ProfiloGerarchiaRow[],
   links: OperatoreLink[],
   seen?: Set<string>,
 ): ProfiloGerarchiaRow | null {
-  const visited = seen ?? new Set<string>()
-  if (visited.has(agentProfile.id)) return null
-  visited.add(agentProfile.id)
-
-  const byId = new Map(profili.map((p) => [p.id, p]))
-
-  const agenziaFromId = (id: string | null | undefined): ProfiloGerarchiaRow | null => {
-    if (!id) return null
-    const p = byId.get(id)
-    return p?.ruolo === 'agenzia' ? p : null
+  const lookup = lookupOf(profili, links)
+  if (!seen) {
+    const cached = lookup.agenziaPerAgente.get(agentProfile.id)
+    if (cached !== undefined) return cached
   }
 
-  const fromInvito = agenziaFromId(agentProfile.invitato_da)
-  if (fromInvito) return fromInvito
-
-  for (const link of links) {
-    const otherId =
-      link.utente_id === agentProfile.id
-        ? link.operatore_id
-        : link.operatore_id === agentProfile.id
-          ? link.utente_id
-          : null
-    if (!otherId) continue
-    const hit = agenziaFromId(otherId)
-    if (hit) return hit
-  }
-
-  const inviter = byId.get(agentProfile.invitato_da ?? '')
-  if (inviter && isAgenteLike(inviter.ruolo)) {
-    return resolveAgenziaParentForAgent(inviter, profili, links, visited)
-  }
-
-  return null
+  const result = resolveAgenziaParentForAgentWalk(agentProfile, lookup, seen ?? new Set())
+  if (!seen) lookup.agenziaPerAgente.set(agentProfile.id, result)
+  return result
 }
 
 export type FlatListViewerRole = 'agenzia' | 'agente' | 'back_office' | 'rivenditore' | 'distributore' | 'studio'
@@ -466,37 +566,31 @@ export function resolveAgenziaParentForRivenditore(
   profili: ProfiloGerarchiaRow[],
   links: OperatoreLink[],
 ): ProfiloGerarchiaRow | null {
-  const byId = new Map(profili.map((p) => [p.id, p]))
+  const lookup = lookupOf(profili, links)
+  const cached = lookup.agenziaPerRivenditore.get(rivenditoreProfile.id)
+  if (cached !== undefined) return cached
 
-  const agenziaFromId = (id: string | null | undefined): ProfiloGerarchiaRow | null => {
-    if (!id) return null
-    const p = byId.get(id)
-    return p?.ruolo === 'agenzia' ? p : null
+  const fromInvito = agenziaFromId(lookup, rivenditoreProfile.invitato_da)
+  let result: ProfiloGerarchiaRow | null = fromInvito
+  if (!result) {
+    const inviter = lookup.byId.get(rivenditoreProfile.invitato_da ?? '')
+    if (inviter && isAgenteLike(inviter.ruolo)) {
+      const agenziaViaAgente = agenziaFromId(lookup, inviter.invitato_da)
+      result = agenziaViaAgente ?? resolveAgenziaParentForAgent(inviter, profili, links)
+    }
+  }
+  if (!result) {
+    for (const otherId of lookup.neighbors.get(rivenditoreProfile.id) ?? []) {
+      const hit = agenziaFromId(lookup, otherId)
+      if (hit) {
+        result = hit
+        break
+      }
+    }
   }
 
-  const fromInvito = agenziaFromId(rivenditoreProfile.invitato_da)
-  if (fromInvito) return fromInvito
-
-  const inviter = byId.get(rivenditoreProfile.invitato_da ?? '')
-  if (inviter && isAgenteLike(inviter.ruolo)) {
-    const agenziaViaAgente = agenziaFromId(inviter.invitato_da)
-    if (agenziaViaAgente) return agenziaViaAgente
-    return resolveAgenziaParentForAgent(inviter, profili, links)
-  }
-
-  for (const link of links) {
-    const otherId =
-      link.utente_id === rivenditoreProfile.id
-        ? link.operatore_id
-        : link.operatore_id === rivenditoreProfile.id
-          ? link.utente_id
-          : null
-    if (!otherId) continue
-    const hit = agenziaFromId(otherId)
-    if (hit) return hit
-  }
-
-  return null
+  lookup.agenziaPerRivenditore.set(rivenditoreProfile.id, result)
+  return result
 }
 
 function etichettaPersona(p: ProfiloGerarchiaRow): string {
@@ -689,12 +783,8 @@ function ruoloPuoEssereGenitore(parentRuolo: string, childRuolo: string): boolea
   return (CHILD_ROLES_BY_PARENT[parentRuolo] ?? []).includes(childRuolo)
 }
 
-function profiliCollegati(idA: string, idB: string, links: OperatoreLink[]): boolean {
-  return links.some(
-    (link) =>
-      (link.utente_id === idA && link.operatore_id === idB) ||
-      (link.utente_id === idB && link.operatore_id === idA),
-  )
+function profiliCollegati(idA: string, idB: string, lookup: HierarchyLookup): boolean {
+  return lookup.directed.has(linkPair(idA, idB)) || lookup.directed.has(linkPair(idB, idA))
 }
 
 /** Chi segue questo profilo: persona e società a cui è collegato, staccabili con una dissociazione. */
@@ -703,29 +793,19 @@ export function chiSegueQuestoProfilo(
   profili: ProfiloGerarchiaRow[],
   links: OperatoreLink[],
 ): ProfiloGerarchiaRow[] {
-  const byId = new Map(profili.map((p) => [p.id, p]))
+  const lookup = lookupOf(profili, links)
   const candidates = new Map<string, ProfiloGerarchiaRow>()
-  const inviter = byId.get(profile.invitato_da ?? '')
+  const inviter = lookup.byId.get(profile.invitato_da ?? '')
   if (inviter) candidates.set(inviter.id, inviter)
 
-  for (const link of links) {
-    const otherId =
-      link.utente_id === profile.id
-        ? link.operatore_id
-        : link.operatore_id === profile.id
-          ? link.utente_id
-          : null
-    const other = otherId ? byId.get(otherId) : null
+  for (const otherId of lookup.neighbors.get(profile.id) ?? []) {
+    const other = lookup.byId.get(otherId)
     if (other) candidates.set(other.id, other)
   }
 
   const seguito = profile.seguito_da?.trim().toLocaleLowerCase('it') ?? ''
   if (seguito) {
-    const agente = profili.find(
-      (p) =>
-        isAgenteLike(p.ruolo) &&
-        (p.nome_completo ?? '').trim().toLocaleLowerCase('it') === seguito,
-    )
+    const agente = lookup.firstAgenteLikeByNome.get(seguito)
     if (agente) candidates.set(agente.id, agente)
   }
 
@@ -741,7 +821,7 @@ export function chiSegueQuestoProfilo(
     const nome = (other.nome_completo ?? '').trim().toLocaleLowerCase('it')
     const seguitoMatch = Boolean(seguito && nome && seguito === nome && isAgenteLike(other.ruolo))
     const invito = profile.invitato_da === other.id
-    const linked = profiliCollegati(profile.id, other.id, links)
+    const linked = profiliCollegati(profile.id, other.id, lookup)
     const otherParent = ruoloPuoEssereGenitore(other.ruolo, profile.ruolo)
     const thisParent = ruoloPuoEssereGenitore(profile.ruolo, other.ruolo)
     const superiore = linked && otherParent && !thisParent
@@ -767,32 +847,30 @@ export function agenteAssegnatoASedeStudio(
   links: OperatoreLink[] = [],
 ): ProfiloGerarchiaRow | null {
   if (studio.ruolo !== 'studio') return null
-  const byId = new Map(profili.map((p) => [p.id, p]))
-  const inviter = byId.get(studio.invitato_da ?? '')
-  if (inviter?.ruolo === 'agente') return inviter
+  const lookup = lookupOf(profili, links)
+  const cached = lookup.agentePerStudio.get(studio.id)
+  if (cached !== undefined) return cached
 
-  const seguito = studio.seguito_da?.trim().toLocaleLowerCase('it')
-  if (seguito) {
-    const agente = profili.find(
-      (p) =>
-        p.ruolo === 'agente' &&
-        (p.nome_completo ?? '').trim().toLocaleLowerCase('it') === seguito,
-    )
-    if (agente) return agente
+  const inviter = lookup.byId.get(studio.invitato_da ?? '')
+  let result: ProfiloGerarchiaRow | null = inviter?.ruolo === 'agente' ? inviter : null
+
+  if (!result) {
+    const seguito = studio.seguito_da?.trim().toLocaleLowerCase('it')
+    if (seguito) result = lookup.firstAgenteByNome.get(seguito) ?? null
   }
 
-  for (const link of links) {
-    const otherId =
-      link.utente_id === studio.id
-        ? link.operatore_id
-        : link.operatore_id === studio.id
-          ? link.utente_id
-          : null
-    const agente = otherId ? byId.get(otherId) : null
-    if (agente?.ruolo === 'agente') return agente
+  if (!result) {
+    for (const otherId of lookup.neighbors.get(studio.id) ?? []) {
+      const agente = lookup.byId.get(otherId)
+      if (agente?.ruolo === 'agente') {
+        result = agente
+        break
+      }
+    }
   }
 
-  return null
+  lookup.agentePerStudio.set(studio.id, result)
+  return result
 }
 
 /** Agente a cui il rivenditore è collegato: invito diretto oppure nome in «Seguito da». */
@@ -802,29 +880,28 @@ export function agenteCheSegueRivenditore(
   links: OperatoreLink[] = [],
 ): ProfiloGerarchiaRow | null {
   if (rivenditore.ruolo !== 'rivenditore') return null
-  const byId = new Map(profili.map((p) => [p.id, p]))
-  const inviter = byId.get(rivenditore.invitato_da ?? '')
-  if (inviter?.ruolo === 'agente') return inviter
-  const seguito = rivenditore.seguito_da?.trim().toLocaleLowerCase('it')
-  if (seguito) {
-    const agente = profili.find(
-      (p) => p.ruolo === 'agente' && (p.nome_completo ?? '').trim().toLocaleLowerCase('it') === seguito,
-    )
-    if (agente) return agente
+  const lookup = lookupOf(profili, links)
+  const cached = lookup.agentePerRivenditore.get(rivenditore.id)
+  if (cached !== undefined) return cached
+
+  const inviter = lookup.byId.get(rivenditore.invitato_da ?? '')
+  let result: ProfiloGerarchiaRow | null = inviter?.ruolo === 'agente' ? inviter : null
+  if (!result) {
+    const seguito = rivenditore.seguito_da?.trim().toLocaleLowerCase('it')
+    if (seguito) result = lookup.firstAgenteByNome.get(seguito) ?? null
+  }
+  if (!result) {
+    for (const otherId of lookup.neighbors.get(rivenditore.id) ?? []) {
+      const agente = lookup.byId.get(otherId)
+      if (agente?.ruolo === 'agente') {
+        result = agente
+        break
+      }
+    }
   }
 
-  for (const link of links) {
-    const otherId =
-      link.utente_id === rivenditore.id
-        ? link.operatore_id
-        : link.operatore_id === rivenditore.id
-          ? link.utente_id
-          : null
-    const agente = otherId ? byId.get(otherId) : null
-    if (agente?.ruolo === 'agente') return agente
-  }
-
-  return null
+  lookup.agentePerRivenditore.set(rivenditore.id, result)
+  return result
 }
 
 /** True se il rivenditore appartiene alla gerarchia dell'agenzia (invito diretto, agente o rubrica). */
@@ -1065,10 +1142,16 @@ function hasDirectedParentChildLink(
   parentRole: string,
   childRole: string,
   links: OperatoreLink[],
+  lookup?: HierarchyLookup,
 ): boolean {
-  if (links.some((l) => l.utente_id === parentId && l.operatore_id === childId)) return true
+  const directed = lookup?.directed
+  const has = (utenteId: string, operatoreId: string) =>
+    directed
+      ? directed.has(linkPair(utenteId, operatoreId))
+      : links.some((l) => l.utente_id === utenteId && l.operatore_id === operatoreId)
+  if (has(parentId, childId)) return true
   if (OPERATOR_ROLES.has(parentRole) && OPERATOR_ROLES.has(childRole)) {
-    if (links.some((l) => l.utente_id === childId && l.operatore_id === parentId)) return true
+    if (has(childId, parentId)) return true
   }
   return false
 }
@@ -1079,24 +1162,24 @@ function isLinkedByInviteOrRubrica(
   parentRole: string,
   child: ProfiloGerarchiaRow,
   links: OperatoreLink[],
+  lookup: HierarchyLookup,
 ): boolean {
   if (child.invitato_da === parentId) return true
-  if (hasDirectedParentChildLink(parentId, child.id, parentRole, child.ruolo, links)) return true
-  if (links.some((l) => l.utente_id === child.id && l.operatore_id === parentId)) return true
+  if (hasDirectedParentChildLink(parentId, child.id, parentRole, child.ruolo, links, lookup)) return true
+  if (lookup.directed.has(linkPair(child.id, parentId))) return true
   return false
 }
 
 function managerShouldShowAgenzia(
   managerId: string,
   agenzia: ProfiloGerarchiaRow,
-  links: OperatoreLink[],
+  lookup: HierarchyLookup,
 ): boolean {
   // Nel pannello admin la spunta rappresenta la connessione esplicita.
   // Un vecchio `invitato_da` non deve far ricomparire l'agenzia dopo la dissociazione.
-  return links.some(
-    (link) =>
-      (link.utente_id === managerId && link.operatore_id === agenzia.id) ||
-      (link.utente_id === agenzia.id && link.operatore_id === managerId),
+  return (
+    lookup.directed.has(linkPair(managerId, agenzia.id)) ||
+    lookup.directed.has(linkPair(agenzia.id, managerId))
   )
 }
 
@@ -1105,14 +1188,16 @@ function appartieneASedeStudio(
   child: ProfiloGerarchiaRow,
   profili: ProfiloGerarchiaRow[],
   links: OperatoreLink[],
+  lookup: HierarchyLookup,
 ): boolean {
   if (child.ruolo !== 'studio_associato') return false
-  return profili.some(
-    (sede) =>
-      sede.ruolo === 'studio' &&
-      sede.id !== child.id &&
-      isDirectChild(sede.id, sede, child, links, profili),
+  const cached = lookup.appartieneSede.get(child.id)
+  if (cached !== undefined) return cached
+  const result = (lookup.byRole.get('studio') ?? []).some(
+    (sede) => sede.id !== child.id && isDirectChild(sede.id, sede, child, links, profili),
   )
+  lookup.appartieneSede.set(child.id, result)
+  return result
 }
 
 function isDirectChild(
@@ -1122,12 +1207,13 @@ function isDirectChild(
   links: OperatoreLink[],
   profili: ProfiloGerarchiaRow[],
 ): boolean {
+  const lookup = lookupOf(profili, links)
   const expectedRoles = CHILD_ROLES_BY_PARENT[parentProfile.ruolo] ?? []
   if (!expectedRoles.includes(child.ruolo)) return false
   if (
     child.ruolo === 'studio_associato' &&
     parentProfile.ruolo !== 'studio' &&
-    appartieneASedeStudio(child, profili, links)
+    appartieneASedeStudio(child, profili, links, lookup)
   ) {
     return false
   }
@@ -1135,19 +1221,19 @@ function isDirectChild(
     return false
   }
   if (parentProfile.ruolo === 'agente' && child.ruolo === 'rivenditore') {
-    if (hasDirectedParentChildLink(parentId, child.id, parentProfile.ruolo, child.ruolo, links)) {
+    if (hasDirectedParentChildLink(parentId, child.id, parentProfile.ruolo, child.ruolo, links, lookup)) {
       return true
     }
     return agenteCheSegueRivenditore(child, profili, links)?.id === parentId
   }
   if (parentProfile.ruolo === 'agente' && child.ruolo === 'studio') {
-    if (hasDirectedParentChildLink(parentId, child.id, parentProfile.ruolo, child.ruolo, links)) {
+    if (hasDirectedParentChildLink(parentId, child.id, parentProfile.ruolo, child.ruolo, links, lookup)) {
       return true
     }
     return agenteAssegnatoASedeStudio(child, profili, links)?.id === parentId
   }
   if (parentProfile.ruolo === 'agente' && child.ruolo === 'partner_dipendente') {
-    return isLinkedByInviteOrRubrica(parentId, parentProfile.ruolo, child, links)
+    return isLinkedByInviteOrRubrica(parentId, parentProfile.ruolo, child, links, lookup)
   }
   if (
     isAgenteLike(parentProfile.ruolo) &&
@@ -1156,36 +1242,35 @@ function isDirectChild(
       child.ruolo === 'distributore' ||
       child.ruolo === 'studio_associato')
   ) {
-    return isLinkedByInviteOrRubrica(parentId, parentProfile.ruolo, child, links)
+    return isLinkedByInviteOrRubrica(parentId, parentProfile.ruolo, child, links, lookup)
   }
   if (parentProfile.ruolo === 'distributore' && child.ruolo === 'distributore') {
-    return isLinkedByInviteOrRubrica(parentId, parentProfile.ruolo, child, links)
+    return isLinkedByInviteOrRubrica(parentId, parentProfile.ruolo, child, links, lookup)
   }
   if (
     parentProfile.ruolo === 'distributore' &&
     (child.ruolo === 'studio' || child.ruolo === 'studio_associato')
   ) {
-    return isLinkedByInviteOrRubrica(parentId, parentProfile.ruolo, child, links)
+    return isLinkedByInviteOrRubrica(parentId, parentProfile.ruolo, child, links, lookup)
   }
   // Manager: se l'agente ha un'agenzia, mostra l'agenzia (non l'agente sciolto).
   if (parentProfile.ruolo === 'manager' && isAgenteLike(child.ruolo)) {
     if (resolveAgenziaParentForAgent(child, profili, links)) return false
   }
   if (parentProfile.ruolo === 'manager' && child.ruolo === 'agenzia') {
-    return managerShouldShowAgenzia(parentId, child, links)
+    return managerShouldShowAgenzia(parentId, child, lookup)
   }
   if (parentProfile.ruolo === 'agenzia' && isAgenteLike(child.ruolo)) {
-    const inviter = profili.find((p) => p.id === child.invitato_da)
+    const inviter = lookup.byId.get(child.invitato_da ?? '')
     if (!(inviter && isAgenteLike(inviter.ruolo))) {
       const agenzia = resolveAgenziaParentForAgent(child, profili, links)
       if (agenzia?.id === parentId) return true
     }
   }
   if (parentProfile.ruolo === 'agenzia' && child.ruolo === 'rivenditore') {
-    const agenteCollegato = profili.find(
+    const agenteCollegato = (lookup.byRole.get('agente') ?? []).find(
       (p) =>
-        p.ruolo === 'agente' &&
-        hasDirectedParentChildLink(p.id, child.id, p.ruolo, child.ruolo, links) &&
+        hasDirectedParentChildLink(p.id, child.id, p.ruolo, child.ruolo, links, lookup) &&
         resolveAgenziaParentForAgent(p, profili, links)?.id === parentId,
     )
     if (agenteCollegato) return false
@@ -1196,10 +1281,9 @@ function isDirectChild(
     if (agenzia?.id === parentId) return true
   }
   if (parentProfile.ruolo === 'agenzia' && child.ruolo === 'studio') {
-    const agenteCollegato = profili.find(
+    const agenteCollegato = (lookup.byRole.get('agente') ?? []).find(
       (p) =>
-        p.ruolo === 'agente' &&
-        hasDirectedParentChildLink(p.id, child.id, p.ruolo, child.ruolo, links) &&
+        hasDirectedParentChildLink(p.id, child.id, p.ruolo, child.ruolo, links, lookup) &&
         resolveAgenziaParentForAgent(p, profili, links)?.id === parentId,
     )
     if (agenteCollegato) return false
@@ -1211,20 +1295,20 @@ function isDirectChild(
     parentProfile.ruolo === 'agenzia' &&
     (child.ruolo === 'distributore' || child.ruolo === 'partner_dipendente' || child.ruolo === 'studio_associato')
   ) {
-    const inviter = profili.find((p) => p.id === child.invitato_da)
+    const inviter = lookup.byId.get(child.invitato_da ?? '')
     if (inviter?.ruolo === 'agente' && resolveAgenziaParentForAgent(inviter, profili, links)?.id === parentId) {
       return false
     }
   }
   if (parentProfile.ruolo === 'rivenditore' && child.ruolo === 'distributore') {
-    const inviter = profili.find((p) => p.id === child.invitato_da)
+    const inviter = lookup.byId.get(child.invitato_da ?? '')
     if (inviter?.ruolo === 'distributore') return false
   }
   if (
     parentProfile.ruolo === 'rivenditore' &&
     (child.ruolo === 'studio' || child.ruolo === 'studio_associato')
   ) {
-    const inviter = profili.find((p) => p.id === child.invitato_da)
+    const inviter = lookup.byId.get(child.invitato_da ?? '')
     if (inviter?.ruolo === 'distributore') return false
   }
   if (child.invitato_da === parentId) return true
@@ -1234,11 +1318,12 @@ function isDirectChild(
     parentProfile.ruolo,
     child.ruolo,
     links,
+    lookup,
   )) {
     return true
   }
   // Link inverso: il figlio ha il parent in rubrica (es. agente vede il manager che l'ha invitato)
-  if (links.some((l) => l.utente_id === child.id && l.operatore_id === parentId)) return true
+  if (lookup.directed.has(linkPair(child.id, parentId))) return true
   return false
 }
 
@@ -1392,6 +1477,11 @@ export function getChildrenProfiles(
   profili: ProfiloGerarchiaRow[],
   links: OperatoreLink[],
 ): ProfiloGerarchiaRow[] {
+  const lookup = lookupOf(profili, links)
+  if (parentId && parentProfile && lookup.childrenByParent.has(parentId)) {
+    return lookup.childrenByParent.get(parentId) ?? []
+  }
+
   const expectedRoles = getExpectedChildRoles(parentProfile, viewerRole)
 
   const candidates = profili.filter((p) => {
@@ -1416,7 +1506,9 @@ export function getChildrenProfiles(
   })
 
   const unique = new Map(candidates.map((p) => [p.id, p]))
-  return sortProfilesByRoleThenName([...unique.values()], parentProfile)
+  const result = sortProfilesByRoleThenName([...unique.values()], parentProfile)
+  if (parentId && parentProfile) lookup.childrenByParent.set(parentId, result)
+  return result
 }
 
 export function countChildrenProfiles(
