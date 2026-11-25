@@ -8,6 +8,8 @@ import {
   defaultHierarchyRootRole,
   getChildrenProfiles,
   getHierarchyRootProfiles,
+  conteggiIniziali,
+  inizialeElencoProfilo,
   HIERARCHY_ROOT_ROLE_OPTIONS,
   ruoloGerarchiaDotClass,
   ruoloBreakdownDotClass,
@@ -47,6 +49,7 @@ import {
   tNestedAssociati,
   tRuolo,
 } from '@/lib/i18nAdmin'
+import FiltroIniziale from '@/components/admin/FiltroIniziale'
 
 type Props = {
   currentUserId: string
@@ -526,6 +529,7 @@ export default function GerarchiaUtentiTree({
     defaultHierarchyRootRole(viewerRole),
   )
   const [listaAperta, setListaAperta] = useState(false)
+  const [iniziale, setIniziale] = useState<string | null>(null)
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set())
   const [ultimoAccessoByProfiloId, setUltimoAccessoByProfiloId] = useState(ultimoAccessoIniziale)
   const [ultimoAccessoPronto, setUltimoAccessoPronto] = useState(false)
@@ -578,6 +582,13 @@ export default function GerarchiaUtentiTree({
   const rootNodes = useMemo(
     () => (ownerProfile ? null : getHierarchyRootProfiles(rootRole, profili)),
     [ownerProfile, rootRole, profili],
+  )
+
+  const nodiRadice = rootNodes ?? []
+  const conteggiRadice = useMemo(() => conteggiIniziali(nodiRadice), [nodiRadice])
+  const nodiFiltrati = useMemo(
+    () => (iniziale ? nodiRadice.filter((nodo) => inizialeElencoProfilo(nodo) === iniziale) : nodiRadice),
+    [nodiRadice, iniziale],
   )
 
   const rootCounts = useMemo(() => {
@@ -701,6 +712,7 @@ export default function GerarchiaUtentiTree({
                 setRootRole(option.id)
                 setExpandedIds(new Set())
                 setListaAperta(false)
+                setIniziale(null)
               }}
               className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
                 active
@@ -725,7 +737,20 @@ export default function GerarchiaUtentiTree({
         })}
       </div>
 
-      <div>
+      <div className="space-y-3">
+        {nodiRadice.length > 0 ? (
+          <FiltroIniziale
+            counts={conteggiRadice}
+            valore={iniziale}
+            onChange={(lettera) => {
+              setIniziale(lettera)
+              if (lettera) setListaAperta(true)
+            }}
+            etichetta={copy.filtraPerIniziale}
+            tutte={copy.tutteIniziali}
+            altre={copy.altreIniziali}
+          />
+        ) : null}
         <button
           type="button"
           aria-expanded={listaAperta}
@@ -743,14 +768,14 @@ export default function GerarchiaUtentiTree({
         </button>
 
         {listaAperta ? (
-          <div id="elenco-struttura-ruolo" className="mt-3">
-            {(rootNodes ?? []).length === 0 ? (
+          <div id="elenco-struttura-ruolo">
+            {nodiFiltrati.length === 0 ? (
               <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-6 text-center text-sm text-zinc-600">
                 {copy.nessunUtenteRuolo} {tHierarchyRootHeading(locale, rootRole).toLowerCase()} {copy.nelFiltroCorrente}
               </div>
             ) : (
               <ul className="m-0 p-0 space-y-1">
-                {(rootNodes ?? []).map((node) => (
+                {nodiFiltrati.map((node) => (
                   <HierarchyNode
                     key={node.id}
                     profile={node}

@@ -17,6 +17,8 @@ import {
 import {
   isRivenditoreManagedByAgenzia,
   isRivenditoreManagedByAgente,
+  conteggiIniziali,
+  inizialeElencoProfilo,
   profiloGerarchiaDisplayLabel,
   profiloToGerarchiaRow,
   resolveAgenziaParentForAgent,
@@ -32,6 +34,7 @@ import { fasceAssociazione, regolaAssociazioneMonte, selezioneFascia } from '@/l
 import { useAppLocale } from '@/lib/useAppLocale'
 import { tDashboard } from '@/lib/i18n'
 import { tAdmin, tRuolo, tRivenditoriCount } from '@/lib/i18nAdmin'
+import FiltroIniziale from '@/components/admin/FiltroIniziale'
 
 function ruoloHaSede(ruolo: string) {
   return ruolo === 'agenzia' || ruolo === 'rivenditore' || ruolo === 'studio'
@@ -247,6 +250,7 @@ export default function AdminProfiliPanel({
   )
   const [soloAssociati, setSoloAssociati] = useState(!cercaAttiva)
   const [listaAperta, setListaAperta] = useState(false)
+  const [iniziale, setIniziale] = useState<string | null>(null)
   const [schedeAperte, setSchedeAperte] = useState<Set<string>>(() => new Set())
 
   const specializzazioneOpzioniFormProps = {
@@ -357,6 +361,9 @@ export default function AdminProfiliPanel({
         ? profiliAssociati
         : profiliNonAssociati
       : profiliRuoloAttivo
+  const profiliElenco = iniziale
+    ? profiliVisibili.filter((p) => inizialeElencoProfilo(p) === iniziale)
+    : profiliVisibili
 
   useEffect(() => {
     const firstConUtenti = ruoliTab.find((tab) => (profiliPerRuolo.get(tab.id)?.length ?? 0) > 0)
@@ -366,6 +373,7 @@ export default function AdminProfiliPanel({
 
   useEffect(() => {
     setListaAperta(false)
+    setIniziale(null)
   }, [ruoloAttivo, soloAssociati])
 
   async function postUpdate(body: Record<string, unknown>, refresh = true) {
@@ -978,6 +986,20 @@ export default function AdminProfiliPanel({
           </div>
         ) : null}
 
+        {profiliVisibili.length > 0 ? (
+          <FiltroIniziale
+            counts={conteggiIniziali(profiliVisibili)}
+            valore={iniziale}
+            onChange={(lettera) => {
+              setIniziale(lettera)
+              if (lettera) setListaAperta(true)
+            }}
+            etichetta={copy.filtraPerIniziale}
+            tutte={copy.tutteIniziali}
+            altre={copy.altreIniziali}
+          />
+        ) : null}
+
         <button
           type="button"
           aria-expanded={listaAperta}
@@ -996,7 +1018,7 @@ export default function AdminProfiliPanel({
 
         {listaAperta ? (
         <ul id="elenco-utenti-ruolo" className="space-y-3 list-none p-0 m-0" role="tabpanel" aria-label={`Utenti ${ruoloAttivo}`}>
-          {profiliVisibili.length === 0 ? (
+          {profiliElenco.length === 0 ? (
             <li className="rounded-xl border border-dashed border-black/30 bg-zinc-50 px-4 py-6 text-center text-sm text-zinc-600">
               {agenziaRivenditoriMode
                 ? copy.nessunRivenditoreAgenzia
@@ -1007,7 +1029,7 @@ export default function AdminProfiliPanel({
                   : copy.nessunUtenteRuoloFiltro}
             </li>
           ) : null}
-          {profiliVisibili.map((p) => {
+          {profiliElenco.map((p) => {
             const profiloGerarchia = profiloToGerarchiaRow(
               p,
               p.invitato_da ?? invitatoDaById.get(p.id) ?? null,

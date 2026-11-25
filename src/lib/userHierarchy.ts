@@ -1414,6 +1414,32 @@ function profiloSortKey(p: ProfiloGerarchiaRow): string {
   return (p.societa || p.nome_completo || p.email || p.id).trim().toLocaleLowerCase('it')
 }
 
+/** Iniziale del nome in elenco: società, altrimenti persona, altrimenti email. */
+export function inizialeElencoProfilo(p: {
+  societa?: string | null
+  nome_completo?: string | null
+  email?: string | null
+}): string {
+  const testo = (p.societa || p.nome_completo || p.email || '').trim()
+  if (!testo) return '#'
+  const base = testo.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  const lettera = base.charAt(0).toLocaleUpperCase('it')
+  return lettera >= 'A' && lettera <= 'Z' ? lettera : '#'
+}
+
+export function conteggiIniziali<T extends {
+  societa?: string | null
+  nome_completo?: string | null
+  email?: string | null
+}>(items: T[]): Map<string, number> {
+  const counts = new Map<string, number>()
+  for (const item of items) {
+    const iniziale = inizialeElencoProfilo(item)
+    counts.set(iniziale, (counts.get(iniziale) ?? 0) + 1)
+  }
+  return counts
+}
+
 function childRoleSortIndex(parentRuolo: string | undefined, childRuolo: string): number {
   if (!parentRuolo) return 0
   const order = CHILD_ROLES_BY_PARENT[parentRuolo]
