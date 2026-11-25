@@ -347,6 +347,7 @@ export const LANGUAGE_SHARED_CATEGORIES = [
   'Capsule Collection Fotografico',
   'Family Gres Fotografico',
   'Bricks Fotografico',
+  'Listini',
 ] as const satisfies readonly CatalogCategory[]
 
 const LANGUAGE_SHARED_SET = new Set<string>(LANGUAGE_SHARED_CATEGORIES)
@@ -358,7 +359,6 @@ export function isLanguageSharedCategory(categoria: string | null | undefined): 
 
 /** Categorie testuali: un PDF dedicato per ogni lingua disponibile, incluso l’ucraino. */
 export const LANGUAGE_SPECIFIC_CATEGORIES = [
-  'Listini',
   'Agenti',
   'Scontistiche',
   'Power Point',

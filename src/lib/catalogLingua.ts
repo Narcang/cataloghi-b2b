@@ -12,7 +12,8 @@ function rowCategory(row: { categoria?: unknown }): string | null {
 /**
  * Quali `lingua` in tabella servono per questa UI.
  * File dedicato della lingua + PDF italiani delle categorie condivise (Family, fotografici, File 2D/3D).
- * Listini / Agenti / Merchandising / Power Point: esclusivamente file della lingua scelta.
+ * Agenti / Merchandising / Power Point: esclusivamente file della lingua scelta.
+ * Listini pubblici: sempre il PDF italiano, in ogni lingua.
  */
 export function catalogLingueForLocale(locale: AppLocale): CatalogLocale[] {
   if (locale === 'it') return ['it']
@@ -30,16 +31,19 @@ function catalogMatchKey(row: CatalogLinguaRow): string {
   return `${String(row.categoria ?? '').trim()}|${String(row.titolo ?? '').trim()}`
 }
 
-/** File della lingua; PDF italiani solo per le categorie condivise. */
+/** File della lingua; PDF italiani solo per le categorie condivise. I listini pubblici restano sempre quello italiano. */
 export function preferCatalogLingua<T extends CatalogLinguaRow>(rows: T[], locale: AppLocale): T[] {
+  const visibili = rows.filter(
+    (row) => rowCategory(row) !== 'Listini' || parseCatalogLingua(row.lingua) === 'it',
+  )
   if (locale === 'it') {
-    return rows.filter((row) => parseCatalogLingua(row.lingua) === 'it')
+    return visibili.filter((row) => parseCatalogLingua(row.lingua) === 'it')
   }
 
   const dedicatedKeys = new Set(
-    rows.filter((row) => parseCatalogLingua(row.lingua) === locale).map(catalogMatchKey),
+    visibili.filter((row) => parseCatalogLingua(row.lingua) === locale).map(catalogMatchKey),
   )
-  return rows.filter((row) => {
+  return visibili.filter((row) => {
     const lang = parseCatalogLingua(row.lingua)
     const key = catalogMatchKey(row)
     if (lang === locale) return true
@@ -53,6 +57,9 @@ export function pickCatalogForLocale<T extends { lingua?: unknown; categoria?: u
   candidates: T[],
   locale: AppLocale,
 ): T | undefined {
+  if (candidates.length > 0 && candidates.every((row) => rowCategory(row) === 'Listini')) {
+    return candidates.find((row) => parseCatalogLingua(row.lingua) === 'it')
+  }
   if (locale === 'it') {
     return candidates.find((row) => parseCatalogLingua(row.lingua) === 'it')
   }
